@@ -2,7 +2,7 @@ import './pictures.css';
 
 import { useEffect, useState } from 'react';
 
-import { CULTURES, markKey, pictureKey } from '@villages/world';
+import { CULTURES, RUIN_PIECES, markKey, pictureKey, ruinFrameKey } from '@villages/world';
 
 import { Cut, useAtlas } from '../frame/Atlas';
 import type { Atlas } from '../frame/Atlas';
@@ -17,7 +17,8 @@ const PINS = 'structures/';
 
 /**
  * Every picture the world is drawn with, for reading: the scenery and the structures as the tools cut them into their
- * atlases, a structure a culture to a column beside its type's pin; the critters, a kind's frames in a row and playing
+ * atlases, a structure a culture to a column beside its type's pin; the pieces of the ruins of the towns of 1790, cut
+ * into the scenery's atlas, a piece to a row and a culture to a column; the critters, a kind's frames in a row and playing
  * beside them; the marks' pictures; the portraits; the scenes. Each says whether it is
  * still the placeholder the tools drew or a picture painted over it, how big it is, and the file it came from; the
  * portraits and the scenes keep no record of which are placeholders. Nothing here is changed: Adam paints the files,
@@ -39,7 +40,19 @@ export function Pictures() {
         {scenery === 'missing' ? (
           <Missing what="world:art" />
         ) : (
-          scenery !== null && <AtlasGrid name="scenery" atlas={scenery} />
+          scenery !== null && (
+            <AtlasGrid name="scenery" atlas={scenery} keep={(key) => !key.startsWith('ruin:')} />
+          )
+        )}
+      </Section>
+      <Section
+        title="ruins"
+        source="world/sprites/ruins/, cut into public/art/scenery.webp beside the scenery"
+      >
+        {scenery === 'missing' ? (
+          <Missing what="world:art" />
+        ) : (
+          scenery !== null && <RuinsTable atlas={scenery} />
         )}
       </Section>
       <Section title="structures" source="world/sprites/structures/, cut to public/art/structures.webp">
@@ -149,8 +162,16 @@ function Picture({
   );
 }
 
-function AtlasGrid({ name, atlas }: { name: string; atlas: Atlas }) {
-  const frames = Object.entries(atlas.frames);
+function AtlasGrid({
+  name,
+  atlas,
+  keep = () => true,
+}: {
+  name: string;
+  atlas: Atlas;
+  keep?: (key: string) => boolean;
+}) {
+  const frames = Object.entries(atlas.frames).filter(([key]) => keep(key));
   const painted = frames.filter(([, frame]) => !frame.placeholder).length;
   return (
     <>
@@ -217,6 +238,59 @@ function StructuresTable({ atlas }: { atlas: Atlas }) {
                             tall={TALL}
                           />
                           <span className="inspect-key">{frame.placeholder ? 'placeholder' : 'painted'}</span>
+                        </>
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
+/**
+ * The pieces of the ruins a piece to a row and a culture to a column, as the scenery's atlas names them,
+ * `ruin:hall-islamic`, each with the height it is cut at, which is the height to paint it at or above.
+ */
+function RuinsTable({ atlas }: { atlas: Atlas }) {
+  const keys = RUIN_PIECES.flatMap((piece) => CULTURES.map((culture) => ruinFrameKey(piece, culture)));
+  const painted = keys.filter((key) => atlas.frames[key]?.placeholder === false).length;
+  return (
+    <>
+      <p className="inspect-note">
+        {keys.length} pieces, {painted} painted, {keys.length - painted} placeholders
+      </p>
+      <div className="inspect-scroll">
+        <table className="inspect-table pictures-table">
+          <thead>
+            <tr>
+              <th>piece</th>
+              {CULTURES.map((culture) => (
+                <th key={culture}>{culture}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {RUIN_PIECES.map((piece) => (
+              <tr key={piece}>
+                <th scope="row">{piece}</th>
+                {CULTURES.map((culture) => {
+                  const key = ruinFrameKey(piece, culture);
+                  const frame = atlas.frames[key];
+                  return (
+                    <td key={key}>
+                      {frame === undefined ? (
+                        <span className="inspect-quiet">none</span>
+                      ) : (
+                        <>
+                          <Cut name={key} atlas={atlas} image="/art/scenery.webp" frame={frame} tall={TALL} />
+                          <span className="inspect-key">
+                            {frame.placeholder ? 'placeholder' : 'painted'} · cut {frame.height} tall
+                          </span>
                         </>
                       )}
                     </td>

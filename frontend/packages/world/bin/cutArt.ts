@@ -11,7 +11,8 @@
  *     npm run world:art --prefix frontend -- --placeholders
  *
  * `--placeholders` first draws a placeholder for every sprite that has no picture, and **never draws over
- * a file that is there**: delete one to have its placeholder back. The dev server runs this by itself
+ * a file that is there**: delete one to have its placeholder back. A piece of the ruins with no picture in `ruins/`
+ * has its placeholder drawn every time, as a structure's does. The dev server runs this by itself
  * whenever something in the folder is saved and every time it starts, and so does the quick start, so a
  * cut that finds nothing new writes nothing. See decision record 0059.
  */
@@ -44,7 +45,11 @@ import type { ArtAtlasFile, ArtFrame, Rgba } from '../src/art.ts';
 import type { BiomeFile } from '../src/biome.ts';
 import { findPlinth, liftOffPlinth } from '../src/lift.ts';
 import { MARK_NAMES, markPlaceholderSvg, sceneryPlaceholderSvg } from '../src/placeholderArt.ts';
-import { ART_CACHE_DIR, ART_DIR, BIOMES, PAINTERLY_DIR, RENDER, SPRITES_DIR } from './lib/paths.ts';
+import { CULTURES } from '../src/structures.ts';
+import { ruinFrameKey, ruinPictureName, ruinPlaceholderSvg } from '../src/ruinLooks.ts';
+import { RUIN_PIECES, parseRuins } from '../src/ruins.ts';
+import { contactSheet } from './lib/artSheet.ts';
+import { ART_CACHE_DIR, ART_DIR, BIOMES, REPO, SPRITES_DIR } from './lib/paths.ts';
 
 /**
  * How tall every scenery sprite is cut, in pixels.
@@ -70,6 +75,18 @@ const PLACEHOLDERS = resolve(SPRITES_DIR, 'placeholders.json');
 const drawPlaceholders = process.argv.includes('--placeholders');
 
 const kinds = (JSON.parse(readFileSync(BIOMES, 'utf8')) as BiomeFile).kinds.map((kind) => kind.name);
+
+/**
+ * The pieces of the ruins of the towns of 1790, a picture each in each culture in `ruins/`, cut into the same atlas
+ * as the scenery, because they stand among the trees and one particle layer draws both. Each is cut only as tall as
+ * it is ever drawn - twice its tallest at sixteen pixels a unit, never under 64 - so a heap of rubble does not take a
+ * hall's room. See docs/plans/ruined-cities.md.
+ */
+const RUIN_LOOK = parseRuins(readFileSync(resolve(REPO, 'world', 'ruins.json'), 'utf8')).look;
+const ruinHeight = (at: number): number => {
+  const piece = RUIN_LOOK.pieces[at]!;
+  return Math.min(SCENERY_HEIGHT, Math.max(64, Math.ceil(32 * piece.height * (1 + piece.vary))));
+};
 
 const hashOf = (bytes: Uint8Array): string => createHash('sha256').update(bytes).digest('hex');
 
@@ -99,6 +116,31 @@ function picturesIn(group: string): Map<string, string> {
     found.set(name, file);
   }
   return found;
+}
+
+/** A placeholder for every piece of the ruins in every culture that has no picture, never over one that is there. */
+async function ruinPlaceholders(): Promise<void> {
+  const known = readPlaceholders();
+  mkdirSync(resolve(SPRITES_DIR, 'ruins'), { recursive: true });
+  const there = picturesIn('ruins');
+  let drawn = 0;
+  for (const piece of RUIN_PIECES) {
+    for (const culture of CULTURES) {
+      const name = ruinPictureName(piece, culture);
+      if (there.has(name)) continue;
+      const bytes = await sharp(Buffer.from(ruinPlaceholderSvg(piece, culture, 400)))
+        .png({ compressionLevel: 9 })
+        .toBuffer();
+      writeFileSync(resolve(SPRITES_DIR, 'ruins', `${name}.png`), bytes);
+      known[`ruins/${name}.png`] = hashOf(bytes);
+      drawn += 1;
+    }
+  }
+  if (drawn > 0) {
+    const sorted = Object.fromEntries(Object.entries(known).sort(([a], [b]) => a.localeCompare(b)));
+    writeFileSync(PLACEHOLDERS, `${JSON.stringify(sorted, null, 2)}\n`);
+    console.log(`drew ${drawn} placeholders of the ruins' pieces in ${resolve(SPRITES_DIR, 'ruins')}`);
+  }
 }
 
 async function placeholders(): Promise<void> {
@@ -174,6 +216,7 @@ async function cutOne(
   name: string,
   file: string,
   known: Record<string, string>,
+  tallest = SCENERY_HEIGHT,
 ): Promise<Cut> {
   const path = resolve(SPRITES_DIR, group, file);
   const bytes = readFileSync(path);
@@ -183,7 +226,7 @@ async function cutOne(
     `${cut.source} -> trimmed ${cut.trimmed} -> ${cut.width}x${cut.height}, ${cut.how}, ` +
     `foot ${((cut.footX / cut.width) * 100).toFixed(0)}% across${from}`;
 
-  const key = `${hashOf(bytes).slice(0, 24)}-${RULES}`;
+  const key = `${hashOf(bytes).slice(0, 24)}-${RULES}${tallest === SCENERY_HEIGHT ? '' : `-${tallest}`}`;
   kept.add(key);
   const cachedPixels = resolve(ART_CACHE_DIR, `${key}.raw`);
   const cachedCut = resolve(ART_CACHE_DIR, `${key}.json`);
@@ -231,7 +274,7 @@ async function cutOne(
   }
   const trimmed = crop(keyed.image, box);
   const foot = footOf(trimmed);
-  const scale = Math.min(1, SCENERY_HEIGHT / trimmed.height);
+  const scale = Math.min(1, tallest / trimmed.height);
   const height = Math.max(1, Math.round(trimmed.height * scale));
   const width = Math.max(1, Math.round(trimmed.width * scale));
   const pixels = await sharp(Buffer.from(trimmed.data), {
@@ -269,93 +312,6 @@ function alreadyThere(file: ArtAtlasFile, atlas: Buffer): boolean {
     // Not there, or not readable: either way, not this one.
     return false;
   }
-}
-
-/** A colour from `world/render.json`, for the ground the contact sheet stands the sprites on. */
-function groundColour(name: string, fallback: string): string {
-  const render = JSON.parse(readFileSync(RENDER, 'utf8')) as { colours?: Record<string, string> };
-  return render.colours?.[name] ?? fallback;
-}
-
-/**
- * Every sprite at the three sizes it is actually drawn at, on the ground it is drawn over.
- *
- * Shrunk by sharp rather than by a graphics card, which is close to what mipmaps do and not identical to
- * it. What it is for is the question a picture cannot answer at full size: whether the thing still reads
- * at twenty pixels, and whether it disappears into the forest it stands in.
- */
-async function contactSheet(cuts: readonly Cut[]): Promise<string> {
-  const sizes = [20, 40, 80];
-  const grounds = [
-    ['broadleaf-forest', groundColour('broadleaf-forest', '#9dbc7e')],
-    ['taiga', groundColour('taiga', '#6e9078')],
-    ['meadow', groundColour('meadow', '#c4ce8d')],
-  ] as const;
-  const cellWidth = 96;
-  const cellHeight = 100;
-  const labelWidth = 210;
-  const width = labelWidth + sizes.length * grounds.length * cellWidth;
-  const height = 30 + cuts.length * cellHeight;
-  const bands = grounds
-    .map(([, colour], index) =>
-      sizes
-        .map(
-          (_, at) =>
-            `<rect x="${labelWidth + (index * sizes.length + at) * cellWidth}" y="0" width="${cellWidth}" ` +
-            `height="${height}" fill="${colour}"/>`,
-        )
-        .join(''),
-    )
-    .join('');
-  const headings = grounds
-    .map(([ground], index) =>
-      sizes
-        .map(
-          (size, at) =>
-            `<text x="${labelWidth + (index * sizes.length + at) * cellWidth + 6}" y="18" font-size="12" ` +
-            `font-family="sans-serif" fill="#222">${ground.slice(0, 8)} ${size}px</text>`,
-        )
-        .join(''),
-    )
-    .join('');
-  const labels = cuts
-    .map(
-      (cut, row) =>
-        `<text x="8" y="${30 + row * cellHeight + cellHeight / 2}" font-size="14" font-family="sans-serif" ` +
-        `fill="${cut.placeholder ? '#666' : '#000'}">${cut.name}${cut.placeholder ? ' (placeholder)' : ''}</text>`,
-    )
-    .join('');
-  const base = sharp(
-    Buffer.from(
-      `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
-        `<rect width="100%" height="100%" fill="#f4f1e8"/>${bands}${headings}${labels}</svg>`,
-    ),
-  );
-  const layers: sharp.OverlayOptions[] = [];
-  for (const [row, cut] of cuts.entries()) {
-    for (let ground = 0; ground < grounds.length; ground += 1) {
-      for (const [at, size] of sizes.entries()) {
-        const tall = Math.min(size, cut.height);
-        const wide = Math.max(1, Math.round((cut.width * tall) / cut.height));
-        const small = await sharp(cut.pixels, { raw: { width: cut.width, height: cut.height, channels: 4 } })
-          .resize(wide, tall, { kernel: 'lanczos3', fit: 'fill' })
-          .png()
-          .toBuffer();
-        const column = ground * sizes.length + at;
-        const footX = labelWidth + column * cellWidth + cellWidth / 2;
-        const footY = 30 + row * cellHeight + cellHeight - 8;
-        layers.push({
-          input: small,
-          left: Math.round(footX - (cut.footX / cut.width) * wide),
-          top: Math.round(footY - tall),
-        });
-      }
-    }
-  }
-  mkdirSync(PAINTERLY_DIR, { recursive: true });
-  const out = resolve(PAINTERLY_DIR, 'art-sheet.png');
-  await base.composite(layers).png().toFile(out);
-  return out;
 }
 
 /**
@@ -400,6 +356,21 @@ async function cutScenery(): Promise<void> {
     cuts.push(cut);
     console.log(cut.said);
   }
+  const ruins = picturesIn('ruins');
+  for (const [at, piece] of RUIN_PIECES.entries()) {
+    for (const culture of CULTURES) {
+      const file = ruins.get(ruinPictureName(piece, culture));
+      if (file === undefined) {
+        throw new Error(`world/sprites/ruins has no picture of ${ruinPictureName(piece, culture)}`);
+      }
+      cuts.push(await cutOne('ruins', ruinFrameKey(piece, culture), file, known, ruinHeight(at)));
+    }
+  }
+  const ruinCuts = cuts.filter((cut) => cut.name.startsWith('ruin:'));
+  console.log(
+    `ruins: ${ruinCuts.length} pieces, ${ruinCuts.filter((cut) => !cut.placeholder).length} drawn by Adam, ` +
+      `${ruinCuts.filter((cut) => cut.fresh).length} newly cut`,
+  );
 
   // Every sprite's shadow too, from the cut sprite itself, into the same atlas: a particle layer draws
   // from one texture, and the shadows are a particle layer of their own. See experiment 0013.
@@ -480,7 +451,8 @@ async function cutScenery(): Promise<void> {
     writeFileSync(resolve(ART_DIR, 'scenery.json'), `${JSON.stringify(file, null, 2)}\n`);
   }
 
-  const pictures = cuts.filter((cut) => !cut.placeholder).map((cut) => cut.name);
+  const sceneryCuts = cuts.filter((cut) => !cut.name.startsWith('ruin:'));
+  const pictures = sceneryCuts.filter((cut) => !cut.placeholder).map((cut) => cut.name);
   const fresh = cuts.filter((cut) => cut.fresh).map((cut) => cut.name);
   // Last on the line, after a dash, because the quick start shows only this part of what was said.
   const news = same
@@ -492,7 +464,7 @@ async function cutScenery(): Promise<void> {
         : 'written again from the cuts kept';
   console.log(
     `\nscenery: ${pictures.length === 0 ? 'no pictures yet' : `${pictures.join(', ')} drawn by Adam`}, ` +
-      `${cuts.length - pictures.length} placeholders; atlas ${packed.width}x${packed.height}, ` +
+      `${sceneryCuts.length - pictures.length} placeholders; atlas ${packed.width}x${packed.height}, ` +
       `${(atlas.length / 1024).toFixed(0)} kB, version ${file.version} - ${news}`,
   );
   if (extra.length > 0) {
@@ -511,7 +483,12 @@ async function cutScenery(): Promise<void> {
       `${markPictures.length > 0 ? `, ${markPictures.join(', ')} drawn by Adam` : ''}; not drawn from files yet`,
   );
   console.log(`contact sheet: ${await contactSheet(cuts)}`);
-  const newest = Math.max(...cuts.map((cut) => statSync(resolve(SPRITES_DIR, 'scenery', cut.file)).mtimeMs));
+  const newest = Math.max(
+    ...cuts.map(
+      (cut) =>
+        statSync(resolve(SPRITES_DIR, cut.name.startsWith('ruin:') ? 'ruins' : 'scenery', cut.file)).mtimeMs,
+    ),
+  );
   console.log(`newest picture saved ${new Date(newest).toLocaleString()}`);
   // The cache keeps the cuts of the pictures that are there under the rules that are there, and no more:
   // a picture saved over, or a rule changed, leaves its old cut behind otherwise, every time.
@@ -526,6 +503,7 @@ try {
   if (drawPlaceholders) {
     await placeholders();
   }
+  await ruinPlaceholders();
   await cutScenery();
 } catch (cause) {
   console.error(`world:art failed: ${(cause as Error).message}`);

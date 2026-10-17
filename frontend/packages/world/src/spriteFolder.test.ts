@@ -9,6 +9,9 @@ import { critterKindsOf } from './critterArt.ts';
 import type { CritterFile } from './critterArt.ts';
 import { critterPlaceholderKinds } from './critterPlaceholders.ts';
 import { MARK_NAMES, placeholderKinds } from './placeholderArt.ts';
+import { ruinFrameKey, ruinPictureName } from './ruinLooks.ts';
+import { RUIN_PIECES } from './ruins.ts';
+import { CULTURES } from './structures.ts';
 
 /**
  * The rules `world/sprites/` is held to, by reading the folder itself. It is Adam's: he saves pictures
@@ -39,9 +42,21 @@ describe("the sprites folder, which is Adam's", () => {
       'critters',
       'marks',
       'placeholders.json',
+      'ruins',
       'scenery',
       'structures',
     ]);
+  });
+
+  it('holds exactly one picture of every piece of the ruins in every culture, and no other', () => {
+    const names = namesIn('ruins');
+    const wanted = RUIN_PIECES.flatMap((piece) => CULTURES.map((culture) => ruinPictureName(piece, culture)));
+    expect([...names].sort()).toEqual([...wanted].sort());
+  });
+
+  it("names the ruins' frames so that no kind of scenery shares a frame with one", () => {
+    const frames = RUIN_PIECES.flatMap((piece) => CULTURES.map((culture) => ruinFrameKey(piece, culture)));
+    expect(frames.filter((frame) => kinds.includes(frame))).toEqual([]);
   });
 
   it('holds exactly one picture for every kind in world/biomes.json', () => {
@@ -76,7 +91,7 @@ describe("the sprites folder, which is Adam's", () => {
       string
     >;
     const there = new Set(
-      ['scenery', 'marks'].flatMap((group) =>
+      ['scenery', 'marks', 'ruins'].flatMap((group) =>
         readdirSync(fileURLToPath(new URL(`${group}/`, SPRITES))).map((file) => `${group}/${file}`),
       ),
     );

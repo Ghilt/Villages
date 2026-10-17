@@ -21,6 +21,15 @@
   ruin a culture. Cut by a tool of their own, and painted to rules of their own: see below.
 - `world/sprites/critters/<kind>.png`, one for every kind of critter in `world/critters.json`: songbird,
   squirrel, hare, fish, hawk. A strip of frames, cut by a tool of its own: see below.
+- `world/sprites/ruins/<piece>-<culture>.png`, the pieces the ruins of the towns of 1790 are laid out in, eight in
+  each of the four cultures: a `shell` (a house open to the sky), a `row` of them, a `tower` stump, a `hall` (the
+  culture's great building, roofless), an `arch`, a stretch of `wall`, a `gate`, and `rubble`. Cut by `world:art`
+  into the scenery's atlas, because they stand among the trees, and painted as the scenery is: a front elevation
+  standing on the bottom of the picture, on a flat background or a transparent one. Each is cut only as tall as it
+  is ever drawn - a hall 192 pixels, a shell 104, a heap of rubble 64 - so paint each at least that tall; the
+  Pictures page says each one's height under it. A missing picture has its placeholder drawn every time the art is
+  cut, and the record of which are placeholders is the scenery's. How tall each stands on the map is
+  `world/ruins.json`'s. See `docs/plans/ruined-cities.md`.
 
 **Save your picture over the placeholder**, as `oak.webp` or `oak.png` or `oak.jpg`. Delete the placeholder if
 the extension differs, because two files that are both `oak` are refused; the placeholder's record goes with

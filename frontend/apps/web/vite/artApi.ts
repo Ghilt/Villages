@@ -60,7 +60,7 @@ function cut(server: ViteDevServer, why: string): Promise<boolean> {
     child.on('close', (code) => {
       // The summary and anything that went wrong, rather than a line a sprite.
       for (const line of said.split(/\r?\n/)) {
-        if (/^(scenery|marks|world:art failed|not a kind)/.test(line)) {
+        if (/^(scenery|marks|ruins|world:art failed|not a kind)/.test(line)) {
           (code === 0 ? log.info : log.error)(`[art] ${line}`);
         }
       }
