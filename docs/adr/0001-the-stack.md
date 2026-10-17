@@ -2,6 +2,8 @@
 
 - Status: accepted
 - Date: 2026-09-01
+- Amended 2026-10-17: **Java 25**, the long-term release after 21, so that a virtual thread blocked in a monitor gives
+  its carrier back (JEP 491), which the gateway's sends need (experiment 0023). Occurrent needs 21 or later.
 
 ## Context
 

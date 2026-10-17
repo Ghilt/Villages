@@ -19,7 +19,7 @@ tasks.register<JavaExec>("bot") {
     description = "Plays one simulated player against a running game server."
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "villages.bots.OneBotKt"
-    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(libs.versions.java.get().toInt()) }
 }
 
 // The swarm: starts one game server from the app's own jar and ramps bots at it until it bends.
@@ -30,7 +30,7 @@ tasks.register<JavaExec>("swarm") {
     dependsOn(":app:bootJar")
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = "villages.bots.SwarmMainKt"
-    val launcher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    val launcher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(libs.versions.java.get().toInt()) }
     javaLauncher = launcher
     // Ten thousand sockets and their buffers, which 2 GB was not enough for; the server measured has its own heap.
     maxHeapSize = "6g"

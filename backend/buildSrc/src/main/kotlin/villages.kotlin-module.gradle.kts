@@ -2,7 +2,7 @@
  * What every backend module has in common, so that a module's own build file says only what makes it
  * different: which other modules it may depend on, and which files outside it its tests read.
  *
- * Kotlin on a Java 21 toolchain, tests on Kotest over the JUnit platform. The toolchain is pinned rather
+ * Kotlin on a Java 25 toolchain, tests on Kotest over the JUnit platform. The toolchain is pinned rather
  * than inherited from whatever JDK runs Gradle, so a wrong JDK is a loud failure and not a subtle one;
  * Gradle fetches the right one if the machine has not got it.
  */

@@ -279,7 +279,7 @@ and ESLint restricted imports on the frontend.
 ## How to run
 
 Prerequisites: Node 24, and a JDK on the path for the server. Any recent one will do, because the
-Gradle toolchain fetches the 21 it compiles with; the machine's `JAVA_HOME` is on Temurin 17 and that
+Gradle toolchain fetches the 25 it compiles with; the machine's `JAVA_HOME` is on Temurin 17 and that
 is fine. Docker Desktop, on WSL2, runs MongoDB and RabbitMQ from `infra/`. With it running the game
 server keeps its world in MongoDB, in a database of this tree's own, and a restart forgets nothing;
 without it the world is in memory and gone when the server stops. With it RabbitMQ carries every event
@@ -372,7 +372,7 @@ Commands are added here as the increments land:
   `--villages.instruments=false` closes Adam's instruments: every lever
   of the debug panel and the events log, seeing everything, the fog's switch and the wipe are refused
   `instrumentsClosed`, and the player's own commands go on. See decision record 0076.
-- Backend, checks: `cd backend` then `./gradlew check`. Gradle fetches the JDK 21 the toolchain asks for, so
+- Backend, checks: `cd backend` then `./gradlew check`. Gradle fetches the JDK 25 the toolchain asks for, so
   `JAVA_HOME` may stay on the Temurin 17 that is installed; the first run downloads it. Every module's
   `build.gradle.kts` declares only its allowed dependency edges and, with `testsRead`, the files outside
   it that its tests read, and `check` fails when one is missing; `buildSrc` holds the one convention they
