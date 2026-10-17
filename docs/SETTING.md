@@ -8,7 +8,8 @@ It records what Adam has described so that it is not lost between conversations,
 and what is not. Where it speaks in his terms — house-spirit, key figure, power state — those are the words,
 and they are in the glossary.
 
-Reviewed 2026-10-16, when the story was told in order for the first time, in `STORY.md`, and settled who broke the
+Reviewed 2026-10-17, when the house was found to be one of the energies itself, the gods alien, and the guides
+described. Reviewed 2026-10-16, when the story was told in order for the first time, in `STORY.md`, and settled who broke the
 gods' plan. Reviewed 2026-09-20, when the age and the gods were written down for the first time. Reviewed 2026-09-19. Three things this document used to assert are gone, and the rest of the repository has
 been corrected to match: play is chronological, so a session is no longer a visit to a chosen century; there
 are no pins, so nothing obliges the past to have been a particular way; and the roll engine, renamed the
@@ -47,10 +48,13 @@ or somebody's fault, or the weather. Every explanation the world offers is wrong
 
 **This section is the truth, and no player begins knowing any of it.**
 
-The gods are **aspects of what people are** - not a pantheon that a culture invented and can un-invent, but
-the things themselves, wearing whatever shape an age hands them. The Greek gods were one such shape: a set
-of masks worn for a few centuries and then set down. They are not attached to those forms, they do not
-answer to those names now, and a player who recognises one by its Greek face is recognising a costume.
+The gods are **energies, and they are not from here.** They came out of the far dark, from a nebula past any star
+anyone has named, so long ago that they have forgotten it, and they have clung to what people are and do for so
+long that they believe that is what they are: **aspects of what people are**, the things themselves rather than a
+pantheon a culture invented and can un-invent. They wear whatever shape an age hands them. The Greek gods were one
+such shape: a set of masks worn for a few centuries and then set down. They are not attached to those forms, they
+do not answer to those names now, and a player who recognises one by its Greek face is recognising a costume. In
+1790 the shape the age hands them is a human face.
 
 **They took fright at the enlightenment, and they did something about it.** They feared reason would part
 people from the soil, the seasons and the wild, and in 1785 they worked a ritual to turn every mind back toward
@@ -68,13 +72,61 @@ it. They are not a single will executing a design. They are a divided party half
 already going wrong, improvising, and working against each other while they do it. The story of it, in order and
 in its own voice, is `STORY.md`.
 
+Oriel's energy flies outward still. One day it passes the place the gods came from, and what is there takes notice
+and comes to see: a storyline of its own, for a server event far ahead, and not to be worked out yet.
+
+### The houses are energies too
+
+**The deepest secret is the player's own.** Not every energy that withered in 1785 was one of the council. Many
+were too thin to hold to anything great, and to keep from fading they clung to a family - any family, it seems,
+chosen by nothing - and have clung to it since, through births and deaths. **A house is one of them.** What the
+player plays, the thing that outlives every key figure and never falls, is a withered energy holding on to a
+bloodline, and it does not know what it is either.
+
+That is what the house-spirit is, under what it does: why it never falls, why someone always rises when every key
+figure dies - the energy clings to the next of them - and why a house's past is carried in it rather than in any of
+its people. `VISION.md`'s *a house, not an avatar* is true inside the world.
+
+### The guides
+
+**The withered gods meet the houses in human form**, and that is how the story the player plays is told. A figure
+comes into a house's life - a stranger at the gate, a guest who stays - and is a god wearing the face this age
+hands it. **The player is never told.** They may see that the figure is not quite a person, and the game lets them:
+an age that never moves while everyone else's counts, the same face in another house's hall under another name,
+knowledge nobody living could have, a ruin that does not touch them.
+
+**A guide wants something**, and acts on the shared world to get it by its own decision, as the NPCs do. At heart
+every withered god wants to be strong again, and the ruins of the great cities, where the ritual's weight sank into
+the streets, are the richest food there is. Houses are founded all over the globe and most will have a ruin within
+reach, so the ruin nearby is part of their guide's story.
+
+Proposed on 2026-10-16 and not decided: **one guide to each great ruin, shared by every house founded within reach
+of it, and every meeting with it the house's own.** Each meeting is offered to one house and walked on its own
+history, so no house waits on another. What is shared is the guide itself, one face and one want, which every house
+it guides feeds or starves, and its next move is chosen from all of them together, never from one player. A house
+that has gone quiet costs nothing: the guide turns to whoever answers, and may say so, so a player's absence is the
+guide's favour moving rather than a stalled story. Alone near a ruin, a shared guide is a personal one. Two players
+who compare notes find the same face in both their halls, so the binding is a discovery and not a feature. Four
+temperaments were proposed, each a storyline on the same want:
+
+- **The Hungry**, a council god feeding on its ruin through the houses: the ruin grows cleaner and the houses
+  richer, and the guide stronger and less kind.
+- **The Hunter**, a council god looking for whoever broke the ritual, with the houses as its eyes, and slowly
+  suspicious of them.
+- **The Hidden**, Veyra or Merrin in disguise, who wants the ruins left alone and wills left free, and never
+  pushes; Merrin's guidance travels as letters between houses.
+- **The Lost**, a god that has forgotten what it is and asks the house to help it remember: the player's own
+  secret, mirrored.
+
 ### What the player knows, and when
 
 A player begins knowing none of the above. What they meet is a world that has stopped working and a set of
 explanations that are all wrong. That the calamity has an author at all is a **discovery**, arrived at
-through storylines over a long time, and it is the discovery the whole setting is arranged around.
+through storylines over a long time, and it is the discovery the whole setting is arranged around. Behind it
+stand two more: that the figure guiding the house is one of those authors, and that the house itself is the same
+kind of thing. And past those, for a server event far ahead, where the gods came from.
 
-**So nothing in the interface may state it.** Piety is piety as the age understands it - observance, standing
+**So nothing in the interface may state any of it.** Piety is piety as the age understands it - observance, standing
 with the church, what a house owes and is owed - and never a wire to a god. A resource, a mechanic or a line
 of dialogue that gives the game away early spends the only card the setting is holding. Where something must
 gesture at it, it gestures the way the world would: as a coincidence, a bad omen, or a man who will not
@@ -121,6 +173,9 @@ an evil route and it earns a permanent sacrificial knife — a spirit item, not 
 applied to a decision to sacrifice a key figure at great cost. An item can be a spirit item or a physical
 possession in the world; spiritness is an attribute of the item.
 
+What the house-spirit is, under all of that, is the house itself: a withered energy holding on to a family, as
+*The houses are energies too* says. Nothing in the interface may say so.
+
 ## Things that come to be, and cease to be
 
 A cathedral, a person, a stretch of territory: each exists between the moment it comes to be and the
@@ -142,7 +197,7 @@ than a figure in it. An NPC house is a house; the difference is who issues its c
 
 - **Whether one person can serve two houses.** The engine lets a character be a key figure of several
   houses at once (decision 0055), and nothing in the fiction yet says what that would mean: a shared
-  bishop, a double agent, a marriage that binds two lines.
+  bishop, a double agent, a marriage that binds two lines, or a guide in several houses' corners at once.
 - **What the chrono-engine is for**, now that it is no longer the thing that chooses the day.
 - **Why the gods took fright**, beyond the fear `STORY.md` gives them, that reason would part people from the
   green world: what each of them feared in particular, which is the question every storyline about them
@@ -154,5 +209,11 @@ than a figure in it. An NPC house is a house; the difference is who issues its c
   wanting what they never wanted - and whether a ruin can ever be made clean.
 - **Whether the apocalypse can be stopped**, survived, or only lived through. The house has no lose state;
   the world might.
+- **Whether a house has a guide of its own or shares one** with the houses near its ruin, as *The guides*
+  proposes, and how a guide chooses its next move.
+- **Which temperament of guide comes first**, and how many there are.
+- **What a house's energy was before it clung**: one of the council, a lesser thing, or something nobody
+  remembers; whether a house can ever learn it, and what it does then.
+- **What comes from the nebula** when Oriel's energy passes it, and what it wants.
 - **How far into the enlightenment the world opens**, and how much of the interruption has already happened
   when a player founds their first seat.

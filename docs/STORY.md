@@ -89,7 +89,8 @@ sapling grows through a broken wall.
 
 The gods are no pantheon that some people dreamed and might as easily forget. They are energies, and they cling to
 what people are and what people do - to courage and to grief, to the furrow and the hearth, to the hunger to know -
-as frost clings to a branch. No altar made them, and no doubt can unmake them.
+as frost clings to a branch, so long that they believe themselves born of it. They were not: they came out of the
+far dark, so long ago that they have forgotten it.
 
 ### Lore · The faces they wear
 
@@ -178,7 +179,8 @@ with no crowd to think them, hanging in the air like smoke that will not clear.
 
 Oriel did not survive it. Caught at the heart of the working as it twisted, the god of the lifted face was torn
 apart, and what it had been was flung out past the sky and scattered in the dark between the stars, beyond any
-calling back. Those who look up at night still wonder; but they wonder alone.
+calling back. It flies outward still, toward the place the gods have forgotten they came from. Those who look up at
+night still wonder; but they wonder alone.
 
 ### 1785–1790 · The withered gods
 
@@ -199,6 +201,18 @@ People have learnt to shun the ruins of the great cities of old. Riches lie in t
 plate and coin, libraries, strongrooms no one came back for - and there are always some who go to fetch them. Not all
 return; and of those who do, some come home wanting things they never wanted, and are no longer sure which of their
 thoughts are their own.
+
+### 1785–1790 · What clung to the families
+
+Not every energy that withered was one of the council. Many were too thin to hold to anything great, and to keep
+from fading they seized upon a family - any family, it seemed, chosen by nothing - and clung to it as a drowning
+thing clings to a spar. The families never knew. They only found that they had become, somehow, a house.
+
+### Lore · Strangers at the gate
+
+The withered gods walk among people now, in the faces this age hands them: a stranger at the gate, a guest who
+stays. Each of them wants something, and their hunger leads to the ruins. Beware the guest who never grows older,
+whose face is known in another hall under another name.
 
 ### 1 January 1790 · Now
 

@@ -221,6 +221,14 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
   instruments reaching across servers; the read models saved with a checkpoint, so a start does not fold the
   whole history; a gateway that keeps no read models of its own and binds only its sessions' cells, which the
   routing key already carries. Left out of 1.6 on purpose, 2026-10-12.
+- **The ruins of the great cities**: the greatest towns of 1790 fallen to ruins that people shun, riches in them
+  at a risk, so that most houses are founded with one within reach. What the story says of them is `STORY.md`, and
+  what they do to those who go in is not decided. The first thing the guides need. Adam's own, 2026-10-16.
+- **The guides**: the story the player plays, told by the withered gods meeting the houses in human form, each
+  wanting something and acting on the world by its own decision, with the ruin nearby as part of it; the player is
+  never told, and may see that the figure is not quite a person. Proposed: one guide to each great ruin, shared by
+  the houses within reach of it and every meeting a house's own, so nobody waits on anybody, and four temperaments
+  to begin from. The shape is *The guides* in `SETTING.md`. Adam's own, 2026-10-16.
 - **Aliveness and scale**: past ten thousand connections, which one server now carries (experiments 0021 and
   0022): the gateway's thread a send and what a command costs, then more than one server; aggregation of sprites at
   low zoom, a custom stylised map style checked in, hardened reconnection and clock correction.
@@ -228,6 +236,10 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
 ## Future ideas
 
 Not commitments. Nobody is waiting on any of these.
+
+- **The visitors from the nebula**: a server event far ahead. Oriel's scattered energy passes the place the gods
+  came from, and what is there comes to see: the reveal that the gods, and the houses with them, are not from here.
+  A whole storyline of its own; the secret is in `SETTING.md`. Adam's own, 2026-10-16.
 
 - **The banner drawn** from its own tinctures and charges instead of a plain shield. A luxury feature: it
   would look good and no part of the game is waiting for it.
