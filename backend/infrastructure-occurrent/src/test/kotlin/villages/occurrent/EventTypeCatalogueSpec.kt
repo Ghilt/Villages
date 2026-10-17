@@ -31,7 +31,8 @@ class EventTypeCatalogueSpec : StringSpec({
     }
 
     "every type in the table is in docs/EVENTS.md, and nothing in the catalogue is missing from the table" {
-        EventTypes.rows.values.toSet() shouldBe catalogued
+        // A retired type stays in the catalogue for ever and is read through its upcasters, not the table (0100).
+        EventTypes.rows.values.toSet() + Upcasters.ALL.steps.map { it.from } shouldBe catalogued
     }
 
     "the mapping runs both ways, for the world's events and the player's alike" {

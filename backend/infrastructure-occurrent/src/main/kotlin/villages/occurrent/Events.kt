@@ -77,12 +77,15 @@ object Events {
         .addMixIn(Where::class.java, WhereJson::class.java)
         .build()
 
-    fun converter(): JacksonCloudEventConverter<Event> =
+    /** The one converter every reader and writer of the store uses: today's types written, older ones upcast as read. */
+    fun converter(upcasters: Upcasters = Upcasters.ALL): CloudEventConverter<Event> = UpcastingConverter(
         JacksonCloudEventConverter.Builder<Event>(json, SOURCE)
             .typeMapper(EventTypes)
             .subjectMapper(::subjectOf)
             .timeMapper { event -> event.recordedAt.atOffset(ZoneOffset.UTC) }
-            .build()
+            .build(),
+        upcasters,
+    )
 
     /** The id of the thing whose stream an event is on, which is what a CloudEvent's subject is. */
     private fun subjectOf(event: Event): String = when (event) {

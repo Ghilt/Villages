@@ -47,8 +47,11 @@ and how far out it stays drawn is worked out from the significance. See decision
   added after a founding is read as an empty stock the house never had, and a stat added after an appearance as
   the middle of the scale, 10, until somebody decides otherwise when the stat arrives. So growing an enum the
   events carry a map of is not a change to those events. See decision record 0074.
-- Any other change creates the next version. The old type stays in this catalogue forever, and stays handled when
-  folding a stream.
+- Any other change creates the next version. The old type stays in this catalogue forever, marked retired, and stays
+  handled: an **upcaster** carries an event stored as it to the new type as it is read, one step a version, so the store
+  is never rewritten and the code reads one type. The step goes in `Upcasters.ALL`, the old type's stored fixture into
+  `contracts/fixtures/events/retired/`, and `UpcastersSpec` holds the two to each other. None is retired yet. See
+  decision record 0100.
 - Pre-alpha exception, in force until the world-persistence milestone in the roadmap: the event store may be wiped
   rather than migrated. Every wipe is recorded in the experiment journal. See decision record 0011. The debug
   panel's `wipe` button is not that wipe and is not journalled: it empties an in-memory development world that
