@@ -248,7 +248,7 @@ long file goes into a file of its own.
 | Part | Where | Held by |
 |---|---|---|
 | The class, in its mechanic's family (a new mechanic adds one beside `ResourceEvent`), and its command in the family beside it, `ResourceCommand` and the rest; the `decide` and `evolve` branches in the mechanic's part of the house, `Treasury.kt`, `Dialogues.kt` and the others, where a new mechanic adds a part to `House.Founded` and a line to each of `HouseDecider`'s two routes. What it does to another mechanic is an `Effect`, asked of the house through `Follow` | `backend/domain` | the house spec of its mechanic, `House<Mechanic>Spec` over `HouseFixtures.kt`: given, when, then over events |
-| The type row | `EventTypes` in `backend/infrastructure-occurrent` | `EventTypeCatalogueSpec` |
+| The type, added to the record of every type ever written: its name is worked out from the class by `EventNames`, at version 1, and needs no row anywhere else | `contracts/event-types.txt` | `EventTypeCatalogueSpec`, which fails for a type written and not recorded, and for a recorded one nothing reads any more |
 | The catalogue row: type, payload in constructor order, meaning, producer, consumers | `docs/EVENTS.md` | `EventCatalogueSpec`, in both directions |
 | The stored form | `contracts/fixtures/events/<type>.json` | `EventFormatSpec` |
 | Each case of a sealed field - an effect, what follows a line, a requirement, an option's reveal impact - named by its `kind`, and written by some fixture | `EffectJson.kt` or `DialogueJson.kt` in `backend/infrastructure-occurrent`, and a fixture; an effect also has its view, and a `yourChoice` fixture carrying it | `EventFormatSpec` and `FramesContractSpec`, which want every case named and written |

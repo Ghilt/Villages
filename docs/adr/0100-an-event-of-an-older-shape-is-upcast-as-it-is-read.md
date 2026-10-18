@@ -35,6 +35,12 @@ every reader of the store uses.** The code writes only today's types and reads o
   wrote fails the checks until it brings its upcaster. The first, of 2026-10-17, holds ten events: two houses, a grant
   and a spend, a person brought in, moved and grown more pious, a mill raised, filled and handed on.
 
+*Amended 2026-10-18:* `EventTypes` is no longer a table written by hand. A type is worked out from its class by
+`EventNames`, the rule `docs/EVENTS.md` states, at version 1 unless the class is in `EventTypes.VERSIONS`; so retiring a
+type is putting its class there at the next version, beside the step from the old one. Every type ever written is kept
+in `contracts/event-types.txt`, and `EventTypeCatalogueSpec` fails for one nothing reads any more: what guards a stored
+type against a class being renamed, which the table used to. `docs/plans/mechanic-modules.md`, step 2.
+
 ## Consequences
 
 - Changing an event's shape after the world-persistence milestone is a new type, a step, a fixture moved and a line in

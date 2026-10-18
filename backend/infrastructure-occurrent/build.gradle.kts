@@ -38,8 +38,8 @@ dependencies {
     testImplementation(libs.testcontainers.mongodb)
 }
 
-// One stored event for every catalogued type, and the catalogue that lists the types.
-testsRead("contracts/fixtures/events", "contracts/fixtures/stores", "docs/EVENTS.md")
+// One stored event for every catalogued type, the catalogue that lists the types, and every type ever written.
+testsRead("contracts/fixtures/events", "contracts/fixtures/stores", "contracts/event-types.txt", "docs/EVENTS.md")
 
 tasks.test {
     // Recording today's store is a deliberate act, and the switch has to reach the test's own JVM to do it (0100).

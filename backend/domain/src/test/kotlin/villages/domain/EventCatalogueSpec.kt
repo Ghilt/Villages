@@ -53,18 +53,8 @@ class EventCatalogueSpec : StringSpec({
 
     fun streamOf(event: KClass<out Event>): KClass<out Event> = streams.keys.single { event.isSubclassOf(it) }
 
-    /**
-     * `HouseFounded` is catalogued as `villages.house.founded`, `PlayerGivenChoice` as
-     * `villages.player.givenChoice`: whose event it is, then the verb, camelCase because not every fact
-     * is one word. A world event is the history of the thing whose stream it is on, so it is named for
-     * that stream; a player's is the player's wherever it is kept. The version is the catalogue's to say,
-     * so it is not derived here.
-     */
-    fun catalogueNameOf(event: KClass<out Event>): String {
-        val whose = if (event.isSubclassOf(PlayerEvent::class)) "player" else streams.getValue(streamOf(event))
-        val verb = event.simpleName!!.removePrefix(whose.capitalised()).replaceFirstChar { it.lowercase() }
-        return "villages.$whose.$verb"
-    }
+    /** The rule the code names events by, which this test holds the catalogue to. See [EventNames]. */
+    fun catalogueNameOf(event: KClass<out Event>): String = EventNames.nameOf(event)
 
     "every event in the code has a row in the catalogue, and every row has an event" {
         val inCode = leaves(Event::class).map(::catalogueNameOf).sorted()

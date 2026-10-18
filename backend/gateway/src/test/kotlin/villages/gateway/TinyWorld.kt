@@ -16,96 +16,23 @@ import villages.domain.HouseCommand
 import villages.domain.HouseDecider
 import villages.domain.HouseEvent
 import villages.domain.HouseFounded
-import villages.domain.HouseGainedKeyFigure
-import villages.domain.HouseGainedVision
-import villages.domain.HouseLostKeyFigure
-import villages.domain.HouseLostVision
-import villages.domain.HouseResourceGranted
-import villages.domain.HouseResourcePledged
-import villages.domain.HouseResourceReleased
-import villages.domain.HouseIncomeChanged
-import villages.domain.HouseResourceSpent
-import villages.domain.PlayerCompletedDialogue
-import villages.domain.PlayerCompletedDialogueStep
-import villages.domain.PlayerGivenChoice
-import villages.domain.HouseLostSeat
-import villages.domain.HouseNamedSeat
-import villages.domain.PlayerLostDialogue
-import villages.domain.PlayerOfferedDialogue
-import villages.domain.PlayerOfferedQuest
-import villages.domain.PlayerMetQuestObjective
-import villages.domain.PlayerCompletedQuestNode
-import villages.domain.PlayerCompletedQuest
-import villages.domain.PlayerLostQuestNode
-import villages.domain.PlayerLostQuest
-import villages.domain.PlayerRolled
-import villages.domain.PlayerTookAction
 import villages.domain.StructureCommand
 import villages.domain.StructureDecider
 import villages.domain.StructureEvent
+import villages.domain.EventNames
 import java.util.UUID
 
-/** The catalogued type of an event, as the store would name it. */
-internal fun typeOf(event: HouseEvent): String = when (event) {
-    is HouseFounded -> "villages.house.founded.v1"
-    is HouseGainedKeyFigure -> "villages.house.gainedKeyFigure.v1"
-    is HouseLostKeyFigure -> "villages.house.lostKeyFigure.v1"
-    is HouseGainedVision -> "villages.house.gainedVision.v1"
-    is HouseLostVision -> "villages.house.lostVision.v1"
-    is HouseNamedSeat -> "villages.house.namedSeat.v1"
-    is HouseLostSeat -> "villages.house.lostSeat.v1"
-    is HouseResourceGranted -> "villages.house.resourceGranted.v1"
-    is HouseResourcePledged -> "villages.house.resourcePledged.v1"
-    is HouseResourceReleased -> "villages.house.resourceReleased.v1"
-    is HouseIncomeChanged -> "villages.house.incomeChanged.v1"
-    is HouseResourceSpent -> "villages.house.resourceSpent.v1"
-    is PlayerGivenChoice -> "villages.player.givenChoice.v1"
-    is PlayerOfferedDialogue -> "villages.player.offeredDialogue.v1"
-    is PlayerCompletedDialogueStep -> "villages.player.completedDialogueStep.v1"
-    is PlayerCompletedDialogue -> "villages.player.completedDialogue.v1"
-    is PlayerLostDialogue -> "villages.player.lostDialogue.v1"
-    is PlayerOfferedQuest -> "villages.player.offeredQuest.v1"
-    is PlayerMetQuestObjective -> "villages.player.metQuestObjective.v1"
-    is PlayerCompletedQuestNode -> "villages.player.completedQuestNode.v1"
-    is PlayerCompletedQuest -> "villages.player.completedQuest.v1"
-    is PlayerLostQuestNode -> "villages.player.lostQuestNode.v1"
-    is PlayerLostQuest -> "villages.player.lostQuest.v1"
-    is PlayerRolled -> "villages.player.rolled.v1"
-    is PlayerTookAction -> "villages.player.tookAction.v1"
-}
+/** The catalogued type of an event, as the store would name it: by the rule the store names it by. */
+internal fun typeOf(event: Event): String = EventNames.typeOf(event::class)
 
-/** Enough of the data for the panel's sake. The stored form proper is pinned by its own fixture. */
+/**
+ * Enough of the data for the gateway's tests: the founding's, which the events log's test reads. The stored form proper
+ * is pinned by each event's own fixture, so no other event's is copied here.
+ */
 internal fun dataOf(event: HouseEvent): String = when (event) {
     is HouseFounded -> """{"name":"${event.name.value}","significance":${event.significance.value}}"""
-    is HouseGainedKeyFigure -> """{"characterId":"${event.characterId.value}"}"""
-    is HouseLostKeyFigure -> """{"characterId":"${event.characterId.value}"}"""
-    is HouseGainedVision -> """{"visionId":"${event.visionId.value}"}"""
-    is HouseLostVision -> """{"visionId":"${event.visionId.value}"}"""
-    is HouseNamedSeat -> """{"structureId":"${event.structureId.value}"}"""
-    is HouseLostSeat -> """{"structureId":"${event.structureId.value}"}"""
-    is HouseResourceGranted -> """{"resource":"${event.resource}","amount":${event.amount}}"""
-    is HouseResourcePledged -> """{"resource":"${event.resource}","amount":${event.amount}}"""
-    is HouseResourceReleased -> """{"pledgeId":"${event.pledgeId.value}"}"""
-    is HouseIncomeChanged -> """{"source":"${event.source}"}"""
-    is HouseResourceSpent -> """{"resource":"${event.resource}","amount":${event.amount}}"""
-    is PlayerGivenChoice -> """{"prompt":"${event.choice.prompt}","options":${event.choice.options.size}}"""
-    is PlayerOfferedDialogue -> """{"title":"${event.dialogue.title}","lines":${event.dialogue.lines.size}}"""
-    is PlayerCompletedDialogueStep -> """{"lineId":"${event.lineId.value}"}"""
-    is PlayerCompletedDialogue -> """{"dialogueId":"${event.dialogueId.value}"}"""
-    is PlayerLostDialogue -> """{"dialogueId":"${event.dialogueId.value}"}"""
-    is PlayerOfferedQuest -> """{"title":"${event.quest.title}","nodes":${event.quest.nodes.size}}"""
-    is PlayerMetQuestObjective -> """{"objectiveId":"${event.objectiveId.value}"}"""
-    is PlayerCompletedQuestNode -> """{"nodeId":"${event.nodeId.value}","onto":"${event.onto?.value}"}"""
-    is PlayerCompletedQuest -> """{"questId":"${event.questId.value}"}"""
-    is PlayerLostQuestNode -> """{"nodeId":"${event.nodeId.value}"}"""
-    is PlayerLostQuest -> """{"questId":"${event.questId.value}"}"""
-    is PlayerRolled -> """{"rarity":"${event.rarity}","omens":${event.omens.size}}"""
-    is PlayerTookAction -> """{"optionId":"${event.optionId.value}"}"""
+    else -> "{}"
 }
-
-/** A character's events, catalogued the same way; the panel's copy of their data is not what is tested here. */
-internal fun typeOf(event: CharacterEvent): String =
-    "villages.character.${event::class.simpleName!!.removePrefix("Character").replaceFirstChar { it.lowercase() }}.v1"
 
 /**
  * A world small enough to hold in a test: one list of events, folded per stream, and a feed that delivers

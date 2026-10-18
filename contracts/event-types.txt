@@ -1,0 +1,45 @@
+# Every CloudEvent type the store has ever been given to write, one a line. A line is never taken out: an event stored
+# under it is history, so every type here is still written or carried by an upcaster to one that is (0100), and
+# EventTypeCatalogueSpec fails otherwise. A new event's type is added here in the commit that adds it, and the same test
+# fails until it is. What guards a stored type now that a type is worked out from its class's name: rename a class, and
+# its old type is still here, read by nothing. See docs/plans/mechanic-modules.md, step 2.
+villages.character.aged.v1
+villages.character.appeared.v1
+villages.character.died.v1
+villages.character.leftTheMap.v1
+villages.character.moved.v1
+villages.character.portraitChanged.v1
+villages.character.statChanged.v1
+villages.house.founded.v1
+villages.house.gainedKeyFigure.v1
+villages.house.gainedVision.v1
+villages.house.incomeChanged.v1
+villages.house.lostKeyFigure.v1
+villages.house.lostSeat.v1
+villages.house.lostVision.v1
+villages.house.namedSeat.v1
+villages.house.resourceGranted.v1
+villages.house.resourcePledged.v1
+villages.house.resourceReleased.v1
+villages.house.resourceSpent.v1
+villages.player.completedDialogue.v1
+villages.player.completedDialogueStep.v1
+villages.player.completedQuest.v1
+villages.player.completedQuestNode.v1
+villages.player.givenChoice.v1
+villages.player.lostDialogue.v1
+villages.player.lostQuest.v1
+villages.player.lostQuestNode.v1
+villages.player.metQuestObjective.v1
+villages.player.offeredDialogue.v1
+villages.player.offeredQuest.v1
+villages.player.rolled.v1
+villages.player.tookAction.v1
+villages.structure.changedHands.v1
+villages.structure.levelChanged.v1
+villages.structure.raised.v1
+villages.structure.rebuilt.v1
+villages.structure.ruined.v1
+villages.structure.slotEmptied.v1
+villages.structure.slotFilled.v1
+villages.world.catalogueChanged.v1

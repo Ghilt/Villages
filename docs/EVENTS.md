@@ -49,8 +49,9 @@ and how far out it stays drawn is worked out from the significance. See decision
   events carry a map of is not a change to those events. See decision record 0074.
 - Any other change creates the next version. The old type stays in this catalogue forever, marked retired, and stays
   handled: an **upcaster** carries an event stored as it to the new type as it is read, one step a version, so the store
-  is never rewritten and the code reads one type. The step goes in `Upcasters.ALL`, the old type's stored fixture into
-  `contracts/fixtures/events/retired/`, and `UpcastersSpec` holds the two to each other. None is retired yet. See
+  is never rewritten and the code reads one type. The step goes in `Upcasters.ALL`, the class into `EventTypes.VERSIONS` at the new version, the old
+  type's stored fixture into `contracts/fixtures/events/retired/`, and `UpcastersSpec` holds the two to each other.
+  Every type ever written is kept in `contracts/event-types.txt`, and a test fails for one nothing reads any more. None is retired yet. See
   decision record 0100.
 - Pre-alpha exception, in force until the world-persistence milestone in the roadmap: the event store may be wiped
   rather than migrated. Every wipe is recorded in the experiment journal. See decision record 0011. The debug
