@@ -9,12 +9,24 @@ import { CRITTERS_LOOK } from './look';
 const open = (land: string) => wood({ coverIn: () => [] }, 'oak', land);
 
 describe('the soar', () => {
-  it('circles a hawk high over open ground, rock and desert, and never over a wood or the water', () => {
-    for (const land of ['meadow', 'steppe', 'farmland', 'bare-rock', 'desert-sand']) {
-      // The larks and the partridges bursting up off the same open ground are the flush's.
-      const hawks = [...anHour(1, open(land), 600).values()].filter((event) => event.behaviour === 'soar');
-      expect(hawks.length).toBeGreaterThan(0);
-      expect(hawks.every((event) => event.kind === 'hawk')).toBe(true);
+  it('circles a hawk high over open ground, an eagle over the rock and vultures over the desert, never over a wood or the water', () => {
+    const circling = [
+      ['meadow', 'hawk'],
+      ['steppe', 'hawk'],
+      ['farmland', 'hawk'],
+      ['bare-rock', 'eagle'],
+      ['alpine-meadow', 'eagle'],
+      ['desert-sand', 'vulture'],
+      ['desert-stone', 'vulture'],
+      ['salt-flat', 'vulture'],
+    ];
+    for (const [land, kind] of circling) {
+      // The larks, the partridges and the lizards of the same open ground are the flush's and the hop's.
+      const soaring = [...anHour(1, open(land!), 1200).values()].filter(
+        (event) => event.behaviour === 'soar',
+      );
+      expect(soaring.length, land).toBeGreaterThan(0);
+      expect(soaring.every((event) => event.kind === kind)).toBe(true);
     }
     expect(anHour(1, open('mixed-forest'), 600).size).toBe(0);
     expect([...anHour(1, open('lake'), 600).values()].every((event) => event.kind === 'fish')).toBe(true);

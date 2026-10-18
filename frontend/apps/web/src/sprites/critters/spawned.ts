@@ -44,7 +44,8 @@ export function spawnedAt(ask: SpawnAsk, seconds: number, ground: Ground): Critt
           : `a ${ask.kind} comes only out of the open ground it lives on`;
     }
     const from = { x: ask.x, y: ask.y, kind: open, height: 0 };
-    return { ...event, from, animals: openAnimals(member, from, draw) };
+    const animals = openAnimals(member, from, draw, anywhere);
+    return animals.length === 0 ? 'nowhere near on the same ground to run to' : { ...event, from, animals };
   }
   const reach = 4;
   const around = ground.coverIn(ask.x - reach, ask.y - reach, ask.x + reach, ask.y + reach);

@@ -51,6 +51,11 @@ export const CRITTERS_LOOK = {
     gull: { size: 0.8, together: [2, 4] },
     dolphin: { size: 1.2 },
     whale: { size: 2.4 },
+    lizard: { size: 0.35 },
+    marmot: { size: 0.5 },
+    'arctic-hare': { size: 0.55 },
+    vulture: { size: 1.4, together: [1, 3] },
+    eagle: { size: 1.5 },
   } as Record<string, KindLook | undefined>,
   /**
    * A flock bursting out of cover together, fanning out, climbing, flapping and gliding away, fading as it goes; or a
@@ -159,8 +164,43 @@ export const CRITTERS_LOOK = {
       frames: { gathered: 0, air: 1, landing: 2, still: 0 },
       water: [0.75, 1.75],
     },
+    /**
+     * A lizard of the desert: a quick flat dash or two from one stone, cactus or bush to the next, or over the open
+     * sand where nothing stands, and a long stop between, still in the sun.
+     */
+    lizard: {
+      reach: [1, 2.5],
+      bound: 0.6,
+      high: 0.02,
+      boundsPerSecond: 6,
+      pause: 1.1,
+      frames: { gathered: 0, air: 1, landing: 2, still: 0 },
+      fade: 0.35,
+    },
+    /** A marmot of the high ground: a lope from one boulder to another, sitting up on the way to look about it. */
+    marmot: {
+      reach: [1.5, 4],
+      bound: 0.55,
+      high: 0.15,
+      boundsPerSecond: 3.2,
+      pause: 1.4,
+      frames: { gathered: 1, air: 1, landing: 2, still: 0 },
+    },
+    /** An arctic hare, as the hare bounds, out of the tundra's heather, or over the open snow where nothing stands. */
+    'arctic-hare': {
+      reach: [2.5, 8],
+      bound: 1.1,
+      high: 0.45,
+      boundsPerSecond: 2.2,
+      pause: 0.9,
+      frames: { gathered: 2, air: 1, landing: 2, still: 0 },
+      fade: 0.45,
+    },
   } as Record<string, HopLook | undefined>,
-  /** How long a hopping animal takes to come out from behind its cover, and to go behind the next. */
+  /**
+   * How long a hopping animal takes to come out from behind its cover, and to go behind the next; a kind that runs
+   * over the open ground as well may take longer, its own `fade`, so it comes and goes softly where nothing hides it.
+   */
   hopFade: 0.25,
   /**
    * A fish jumping clear of the water and falling back, a ring spreading where it left and one where it fell. It
@@ -252,6 +292,25 @@ export const CRITTERS_LOOK = {
         flapping: 0.35,
         flapsPerSecond: 6,
       },
+      /** Vultures over the deserts and the salt flats, one to three, on wide slow circles, hardly beating at all. */
+      vulture: {
+        high: [7, 10],
+        radius: [3, 5],
+        circleSeconds: 15,
+        seconds: [16, 26],
+        fade: 2.5,
+        flapping: 0.05,
+        flapsPerSecond: 3,
+      },
+      /** An eagle over the bare rock and the alpine meadows, alone, higher and wider than a hawk. */
+      eagle: {
+        high: [8, 11],
+        radius: [3.5, 5],
+        circleSeconds: 13,
+        seconds: [16, 24],
+        flapping: 0.08,
+        flapsPerSecond: 3,
+      },
     } as Record<string, Partial<SoarLook> | undefined>,
   },
 } as const;
@@ -304,4 +363,6 @@ export interface HopLook {
   frames: { gathered: number; air: number; landing: number; still: number };
   /** How near and how far the water may be for it to hop into: a frog's, and no other's. */
   water?: readonly [number, number];
+  /** How long it takes to come and to go, where not the hop's own: one that runs over the open ground too. */
+  fade?: number;
 }

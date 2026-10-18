@@ -145,3 +145,21 @@ the cast says: every slot of the ocean would have brought a whale. So the share 
 less than that, and a ground with a light cast is that much quieter (`openOf`): a whale weighing 0.15 blows in about
 one slot in seven. The same rule makes a hawk over the bare rock and the desert, whose casts were a hawk alone, as
 rare as a hawk over the meadow, where before it came into every slot.
+
+## Amendment, 2026-10-18: the dry and the high ground, and every ground its cast
+
+The last of step 14's three: a lizard dashing from stone to stone of the stony desert, and over the open sand and
+the salt; a marmot loping from boulder to boulder of the bare rock and the alpine meadows; an arctic hare bounding out
+of the tundra's heather, and over the open ice and polar desert; vultures over the deserts, the salt flats and the
+savanna, one to three together; and an eagle over the bare rock and the alpine meadows. The eagles and the vultures
+take the hawk's place there, where the plan said they would; the hawk keeps the grassland and the farmland.
+
+A hop over the open ground has nothing to run to, so it runs to a place a bound or two off, a way its draw picks, on
+the same ground and where the house sees (`openHopper`); where that is not so, nothing comes, so a lizard on a beach
+never runs into the sea. It comes and goes over its kind's own `fade`, longer than the hop's, as nothing hides it.
+The ptarmigan of the ice and the polar desert, which came into every slot there, weigh less now, so the ice is
+quieter, as the ocean is.
+
+With these every kind of ground in `world/palette.json` has a cast. `NO_CAST` names those that have none on purpose,
+and a test fails for a kind that is in neither, so a kind added to the palette is given its critters or none, as it is
+given its motion: there are none in it now.

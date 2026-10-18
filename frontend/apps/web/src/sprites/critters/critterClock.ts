@@ -1,7 +1,7 @@
 import { FROGS, memberFrom, memberOf, openOf } from './casts';
 import type { CastMember } from './casts';
 import { FLUSH_LONGEST, flockOf, flushPose } from './flush';
-import { HOP_LONGEST, hopPose, hopRings, hopper, waterNear } from './hop';
+import { HOP_LONGEST, hopPose, hopRings, hopper, openHopper, waterNear } from './hop';
 import { LEAP_LONGEST, leapPose, leapRings, leapersOf } from './leap';
 import { CRITTERS_LOOK } from './look';
 import { SLITHER_LONGEST, slitherPose, slitherer } from './slither';
@@ -109,7 +109,7 @@ export function eventIn(
   if (free !== null) {
     if (!ground.sees(at.x, at.y)) return null;
     const from = { ...at, kind: open!, height: 0 };
-    const animals = openAnimals(free, from, draw);
+    const animals = openAnimals(free, from, draw, ground);
     return animals.length === 0
       ? null
       : { key, kind: free.kind, behaviour: free.behaviour, startsAt, from, animals };
@@ -160,12 +160,22 @@ export function eventIn(
 
 /**
  * The animals of a critter that comes out of the open ground or the water at a place, rather than out of cover: a fish
- * leaping, a bird circling, a flock bursting up off the ground with no tree near to take shelter in.
+ * leaping, a bird circling, a flock bursting up off the ground with no tree near to take shelter in, a lizard dashing
+ * over the open sand; none where there is nowhere for it to go.
  */
-export function openAnimals(member: CastMember, from: Cover, draw: (salt: number) => number): Animal[] {
+export function openAnimals(
+  member: CastMember,
+  from: Cover,
+  draw: (salt: number) => number,
+  ground: Ground,
+): Animal[] {
   if (member.behaviour === 'leap') return leapersOf(member.kind, draw);
   if (member.behaviour === 'soar') return soarersOf(member.kind, draw);
   if (member.behaviour === 'flush') return flockOf(from, [], false, draw, L.kinds[member.kind]?.together);
+  if (member.behaviour === 'hop') {
+    const animal = openHopper(member.kind, from, draw, ground);
+    return animal === null ? [] : [animal];
+  }
   return [];
 }
 

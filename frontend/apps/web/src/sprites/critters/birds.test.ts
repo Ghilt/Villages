@@ -61,14 +61,15 @@ describe('the birds of the open ground', () => {
   });
 
   it('bursts ptarmigan off the open ice and the polar desert, and out of the heather of the tundra', () => {
+    // The arctic hares bounding over the same snow and out of the same heather are the hop's: see dry.test.ts.
     for (const land of ['ice', 'polar-desert']) {
-      const events = [...anHour(1, open(land), 600).values()];
-      expect(events.length).toBeGreaterThan(5);
-      expect(events.every((event) => event.kind === 'ptarmigan' && event.from.kind === land)).toBe(true);
+      const birds = [...anHour(1, open(land), 900).values()].filter((event) => event.behaviour === 'flush');
+      expect(birds.length).toBeGreaterThan(5);
+      expect(birds.every((event) => event.kind === 'ptarmigan' && event.from.kind === land)).toBe(true);
     }
-    const tundra = [...anHour(1, wood({}, 'heather', 'tundra', 2), 600).values()];
+    const tundra = ofKind(anHour(1, wood({}, 'heather', 'tundra', 2), 600).values(), 'ptarmigan');
     expect(tundra.length).toBeGreaterThan(5);
-    expect(tundra.every((event) => event.kind === 'ptarmigan' && event.from.kind === 'heather')).toBe(true);
+    expect(tundra.every((event) => event.from.kind === 'heather')).toBe(true);
     // And on the open tundra, where none of its heather stands, none.
     expect(anHour(1, open('tundra'), 600).size).toBe(0);
   });

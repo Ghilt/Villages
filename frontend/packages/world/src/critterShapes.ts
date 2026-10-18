@@ -1,6 +1,7 @@
 /**
  * The simple shapes the critters' placeholders are drawn from, as SVG, in a frame `CRITTER_DRAWN` square: shared by the
- * first casts' drawings (`critterPlaceholders.ts`) and the rest of them (`critterPlaceholdersWild.ts`).
+ * first casts' drawings (`critterPlaceholders.ts`) and the rest of them (`critterPlaceholdersBirds.ts`,
+ * `critterPlaceholdersWild.ts`).
  */
 
 /** One frame of a kind's strip, the frame's number in it to the SVG drawn there. */

@@ -18,6 +18,11 @@
     { "name": "ptarmigan", "frames": 3 },
     { "name": "gull", "frames": 2 },
     { "name": "dolphin", "frames": 2 },
-    { "name": "whale", "frames": 3 }
+    { "name": "whale", "frames": 3 },
+    { "name": "lizard", "frames": 3 },
+    { "name": "marmot", "frames": 3 },
+    { "name": "arctic-hare", "frames": 3 },
+    { "name": "vulture", "frames": 2 },
+    { "name": "eagle", "frames": 2 }
   ]
 }

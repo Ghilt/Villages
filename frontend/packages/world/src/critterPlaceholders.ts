@@ -7,6 +7,7 @@
 
 import { circle, ellipse, leg, path } from './critterShapes.ts';
 import type { CritterFrame as Frame } from './critterShapes.ts';
+import { BIRD_DRAWINGS } from './critterPlaceholdersBirds.ts';
 import { WILD_DRAWINGS } from './critterPlaceholdersWild.ts';
 
 /** How big a frame of a placeholder is drawn, before the cut crops and scales it. */
@@ -307,6 +308,7 @@ const DRAWINGS: Record<string, Frame> = {
   rat,
   frog,
   snake,
+  ...BIRD_DRAWINGS,
   ...WILD_DRAWINGS,
 };
 

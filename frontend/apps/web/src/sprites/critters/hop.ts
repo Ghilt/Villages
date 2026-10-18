@@ -7,7 +7,9 @@ import type { Animal, Cover, Ground, Pose, Ring } from './types';
 /**
  * The hop: a small animal bounding a few times from one piece of cover to another near it, and gone behind it - a
  * squirrel from tree to tree in the woods, a hare out from behind a bush or a tuft on grassland, a frog from one tuft of
- * the reeds to the next - or a frog into the water beside it, leaving a ring where it went in. It runs on the ground,
+ * the reeds to the next, a marmot from boulder to boulder, a lizard from stone to stone or over the open sand, an arctic
+ * hare out of the tundra's heather or over the open snow - or a frog into the water beside it, leaving a ring where it
+ * went in. It runs on the ground,
  * so it is drawn under the scenery and a tree in front of it hides it, and it fades as it comes out from behind its
  * cover and as it goes behind the next, or into the water, so it never appears or vanishes in the open. Part of the
  * critters' clock, `critterClock.ts`: a pure function of the draws its cell and slot give it, the same in every browser.
@@ -85,6 +87,31 @@ export function hopper(
   };
 }
 
+/**
+ * The one animal of a hop over the open ground, where nothing stands to run to - a lizard on the sand, an arctic hare
+ * on the snow: to a place as near and as far as its kind bounds, a way the draw picks, on the same ground and where the
+ * house sees; null where that is not so.
+ */
+export function openHopper(
+  kind: string,
+  from: Cover,
+  draw: (salt: number) => number,
+  ground: Ground,
+): Animal | null {
+  const look = L.hop[kind];
+  if (look === undefined) return null;
+  const away = look.reach[0] + (look.reach[1] - look.reach[0]) * draw(31);
+  const way = draw(32) * Math.PI * 2;
+  const to = {
+    x: from.x + Math.cos(way) * away,
+    y: from.y + Math.sin(way) * away,
+    kind: from.kind,
+    height: 0,
+  };
+  if (ground.classAt(to.x, to.y) !== from.kind || !ground.sees(to.x, to.y)) return null;
+  return hopper(kind, from, [to], draw);
+}
+
 const ramp = (from: number, to: number, value: number): number =>
   Math.min(1, Math.max(0, (value - from) / (to - from)));
 
@@ -117,7 +144,10 @@ export function hopPose(kind: string, from: Cover, animal: Animal, flown: number
     y: from.y + dy * along + dx * side,
     height: look.high * 4 * through * (1 - through),
     frame: Math.min(frames - 1, role),
-    alpha: Math.min(ramp(0, L.hopFade, flown), ramp(hopping, hopping - L.hopFade, flown)),
+    alpha: Math.min(
+      ramp(0, look.fade ?? L.hopFade, flown),
+      ramp(hopping, hopping - (look.fade ?? L.hopFade), flown),
+    ),
   };
 }
 

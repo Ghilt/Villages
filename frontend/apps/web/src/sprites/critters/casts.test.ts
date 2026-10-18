@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-import { CASTS, memberOf } from './casts';
+import { CASTS, NO_CAST, memberOf } from './casts';
 import { CRITTERS_LOOK } from './look';
 
 const world = (file: string) =>
@@ -21,6 +21,12 @@ describe('the casts', () => {
     const members = Object.values(CASTS).flat();
     expect(members.filter((member) => !CRITTERS.includes(member.kind)).map((m) => m.kind)).toEqual([]);
     expect(members.flatMap((member) => member.from).filter((kind) => !SCENERY.includes(kind))).toEqual([]);
+  });
+
+  it('give every kind of ground a cast, or none on purpose', () => {
+    // A kind added to world/palette.json fails this until it is given its critters, or none.
+    expect(CLASSES.filter((land) => (CASTS[land]?.length ?? 0) === 0 && !NO_CAST.includes(land))).toEqual([]);
+    expect(NO_CAST.filter((land) => CASTS[land] !== undefined || !CLASSES.includes(land))).toEqual([]);
   });
 
   it('give every critter they name a size to be drawn at', () => {

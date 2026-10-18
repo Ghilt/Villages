@@ -21,8 +21,9 @@
   ruin a culture. Cut by a tool of their own, and painted to rules of their own: see below.
 - `world/sprites/critters/<kind>.png`, one for every kind of critter in `world/critters.json`: songbird, squirrel,
   hare, fish, hawk, the frog and the snake of the wet land, the partridge, the lark, the grouse, the duck and the
-  ptarmigan, the gull, the dolphin and the whale of the sea, and the crow, the crow aloft and the rat of the ruins. A
-  strip of frames, cut by a tool of its own: see below.
+  ptarmigan, the gull, the dolphin and the whale of the sea, the lizard, the marmot, the arctic hare, the vulture and
+  the eagle of the dry and the high ground, and the crow, the crow aloft and the rat of the ruins. A strip of frames,
+  cut by a tool of its own: see below.
 - `world/sprites/ruins/<piece>-<culture>.png`, the pieces the ruins of the towns of 1790 are laid out in, eight in
   each of the four cultures: a `shell` (a house open to the sky), a `row` of them, a `tower` stump, a `hall` (the
   culture's great building, roofless), an `arch`, a stretch of `wall`, a `gate`, and `rubble`. Cut by `world:art`
@@ -81,7 +82,10 @@ gathered, stretched again. The partridge, the lark, the grouse, the duck and the
 does, seen from behind, a wing up, level and down. A gull is seen from above as the hawk is; a dolphin faces right
 as a fish does, its flukes up and then down, which the map tips along its leap; a whale's three frames are its blow,
 played once where it is, standing on the bottom edge where its back breaks the sea: its back coming up with a puff
-of spray, the spout standing tall, its back going under as the spray falls. A frog faces right too, sitting
+of spray, the spout standing tall, its back going under as the spray falls. A lizard faces right, low and flat, its
+legs and tail one way and the other; a marmot faces right, its first frame sitting up on its haunches, the one it
+sits still on, then loping and landing; an arctic hare is the hare's three frames in white; the vulture and the
+eagle are seen from above as the hawk is, their broad wings fingered at the ends. A frog faces right too, sitting
 gathered, in the air, landing; a snake is seen from above, as the hawk is, its head to the top of the frame and its
 body waving, the wave running down it from one frame to the next. Which frame is which is in
 `apps/web/src/sprites/critters/look.ts`. On a transparent background or a flat one, as any sprite, with no plinth;

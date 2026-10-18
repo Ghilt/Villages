@@ -5,8 +5,8 @@ import type { RuinPieceName } from '@villages/world';
  * Who lives where: the cast of each kind of ground, by its name in `world/palette.json`. Each member is a kind of
  * critter, `world/critters.json`, the way it moves, how common it is there against the rest of the cast, and the
  * scenery it comes out of, by the kinds' names in `world/biomes.json`, or none for a critter that comes out of the open
- * ground or the water at a place of its cell. Ground with no cast has no critters yet; the rest of the casts come with
- * step 14 of docs/plans/living-world.md. The ruined towns of 1790 have a cast of their own,
+ * ground or the water at a place of its cell. Every kind of ground has a cast, step 14 of docs/plans/living-world.md,
+ * or is in `NO_CAST`, and a test holds that. The ruined towns of 1790 have a cast of their own,
  * which comes out of the pieces of the ruins wherever they stand, whatever the ground: see `RUINS_CAST`.
  */
 
@@ -101,11 +101,45 @@ const GROUSE: CastMember = { kind: 'grouse', behaviour: 'flush', weight: 0.6, fr
 /** Ducks lifting off the wet land's open water and mud between the reeds, climbing away. */
 const DUCKS: CastMember = { kind: 'duck', behaviour: 'flush', weight: 0.7, from: [] };
 
-/** Ptarmigan, white on the white, bursting up off the open ice and the polar desert, where nothing stands. */
-const PTARMIGAN: CastMember = { kind: 'ptarmigan', behaviour: 'flush', weight: 1, from: [] };
+/**
+ * Ptarmigan, white on the white, bursting up off the open ice and the polar desert, where nothing stands: now and
+ * then, for the ice's cast weighs less than one (`openOf`).
+ */
+const PTARMIGAN: CastMember = { kind: 'ptarmigan', behaviour: 'flush', weight: 0.4, from: [] };
 
 /** Ptarmigan bursting out of the tundra's heather and scrub. */
-const TUNDRA_PTARMIGAN: CastMember = { ...PTARMIGAN, from: ['heather', 'scrub'] };
+const TUNDRA_PTARMIGAN: CastMember = { ...PTARMIGAN, weight: 1, from: ['heather', 'scrub'] };
+
+/** An arctic hare bounding out of the tundra's heather, scrub or boulders to the next. */
+const ARCTIC_HARES: CastMember = {
+  kind: 'arctic-hare',
+  behaviour: 'hop',
+  weight: 0.5,
+  from: ['heather', 'scrub', 'boulder'],
+};
+
+/** An arctic hare bounding over the open ice and the polar desert, where nothing stands. */
+const OPEN_ARCTIC_HARES: CastMember = { ...ARCTIC_HARES, weight: 0.2, from: [] };
+
+/** A lizard dashing from a boulder, a cactus or a bush of the stony desert to the next, and still between. */
+const LIZARDS: CastMember = {
+  kind: 'lizard',
+  behaviour: 'hop',
+  weight: 0.8,
+  from: ['boulder', 'cactus', 'scrub'],
+};
+
+/** A lizard dashing over the open sand or salt, where nothing stands. */
+const OPEN_LIZARDS: CastMember = { ...LIZARDS, weight: 0.4, from: [] };
+
+/** Vultures circling high and slow over the deserts, the salt flats and the savanna, one to three together. */
+const VULTURES: CastMember = { kind: 'vulture', behaviour: 'soar', weight: 0.12, from: [] };
+
+/** An eagle circling high over the bare rock and the alpine meadows, where the hawk circles over the lower ground. */
+const EAGLES: CastMember = { kind: 'eagle', behaviour: 'soar', weight: 0.12, from: [] };
+
+/** A marmot loping from one boulder of the high ground to another, sitting up on the way to look about it. */
+const MARMOTS: CastMember = { kind: 'marmot', behaviour: 'hop', weight: 0.7, from: ['boulder'] };
 
 /** Gulls wheeling low and quick over the shallow sea, two to four together. */
 const GULLS: CastMember = { kind: 'gull', behaviour: 'soar', weight: 0.35, from: [] };
@@ -127,9 +161,9 @@ export const CASTS: Readonly<Record<string, readonly CastMember[]>> = {
   river: [FISH],
   ocean: [WHALES],
   'shallow-sea': [FISH, DOLPHINS, GULLS],
-  ice: [PTARMIGAN],
-  'polar-desert': [PTARMIGAN],
-  tundra: [TUNDRA_PTARMIGAN],
+  ice: [PTARMIGAN, OPEN_ARCTIC_HARES],
+  'polar-desert': [PTARMIGAN, OPEN_ARCTIC_HARES],
+  tundra: [TUNDRA_PTARMIGAN, ARCTIC_HARES],
   taiga: [SONGBIRDS, SQUIRRELS],
   'taiga-open': [SONGBIRDS, SQUIRRELS],
   'conifer-forest': [SONGBIRDS, SQUIRRELS],
@@ -148,13 +182,23 @@ export const CASTS: Readonly<Record<string, readonly CastMember[]>> = {
   'farmland-with-woods': [SONGBIRDS, PARTRIDGES],
   meadow: [SONGBIRDS, HARES, HAWKS, LARKS],
   steppe: [SONGBIRDS, HARES, HAWKS, LARKS],
-  savanna: [SONGBIRDS, HARES, HAWKS, LARKS],
-  'alpine-meadow': [SONGBIRDS, HAWKS],
+  savanna: [SONGBIRDS, HARES, HAWKS, LARKS, { ...VULTURES, weight: 0.08 }],
+  'alpine-meadow': [SONGBIRDS, EAGLES, MARMOTS],
   farmland: [SONGBIRDS, HAWKS, PARTRIDGES, LARKS],
-  'bare-rock': [HAWKS],
-  'desert-sand': [HAWKS],
-  'desert-stone': [HAWKS],
+  'bare-rock': [EAGLES, MARMOTS],
+  'desert-sand': [VULTURES, OPEN_LIZARDS],
+  'desert-stone': [VULTURES, LIZARDS],
+  'salt-flat': [
+    { ...VULTURES, weight: 0.08 },
+    { ...OPEN_LIZARDS, weight: 0.25 },
+  ],
 };
+
+/**
+ * The kinds of ground that have no critters, on purpose: none, now that every kind has a cast. A kind added to
+ * `world/palette.json` fails a test until it is given a cast or listed here.
+ */
+export const NO_CAST: readonly string[] = [];
 
 /** The pieces of the ruins, in every culture, by their names as scenery: `ruin:hall-european` and the rest. */
 const ruinsOf = (pieces: readonly RuinPieceName[]): string[] =>
