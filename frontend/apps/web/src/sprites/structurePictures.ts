@@ -25,10 +25,14 @@ type Rasterise = (shape: Graphics) => Texture;
 /** Laid out this many pixels to the box's unit: a hundred-unit box is drawn 160 tall, as the castle is. */
 const LAYOUT = 1.6;
 
-/** A picture rasterised, and where on it the pennant stands, as fractions of its width from the left and its height from the top. */
+/**
+ * A picture rasterised, where on it the pennant stands, as fractions of its width from the left and its height from the
+ * top, and where across its bottom it stands on the ground, as a fraction of its width.
+ */
 export interface StructurePicture {
   texture: Texture;
   flag: { across: number; down: number };
+  foot: number;
 }
 
 function draw(picture: Picture, rasterise: Rasterise): StructurePicture {
@@ -63,7 +67,8 @@ function draw(picture: Picture, rasterise: Rasterise): StructurePicture {
   };
   const texture = rasterise(shape);
   shape.destroy();
-  return { texture, flag };
+  // Drawn front-on rather than turned onto the diamonds, so it stands on its middle.
+  return { texture, flag, foot: 0.5 };
 }
 
 /**
@@ -106,6 +111,8 @@ export function buildStructurePictures(rasterise: Rasterise): StructurePictures 
         painted.set(key, {
           texture: new Texture({ source, frame: new Rectangle(frame.x, frame.y, frame.width, frame.height) }),
           flag: { across: frame.flagX, down: frame.flagY },
+          // An atlas cut before the foot was measured stands every picture on its middle, as all of them stood then.
+          foot: frame.footX ?? 0.5,
         });
       }
     },

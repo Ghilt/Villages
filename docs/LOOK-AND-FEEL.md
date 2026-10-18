@@ -146,9 +146,10 @@ ground in hard cells, `plate`, it can come in the same cells, in a few hard tone
 to agree with the others on three things, or it looks pasted on. **The light comes from the upper right**,
 because the first picture has it there. **The eye looks north and down at 45 degrees** at the closest zoom,
 where the sprites are seen - the player's camera tips up to that from straight down at zoom 7 - so a
-building is drawn front-on from that height and not as an isometric diamond, while a round tree
-hides the difference. **The picture stands on its foot**, the lowest thing in it and the anchor both of a
-thing's forms share. It carries its own colour and is never tinted. A sprite is between twenty and about
+building is drawn seen from that height and turned twenty-six degrees, as the ground's diamonds are, so its
+base is one of them, while a round tree hides the difference. **The picture stands on its foot**, the lowest
+thing in it and the anchor both of a thing's forms share: a building's is the front corner of its base, a
+little right of its middle, drawn on a corner of the diamonds. It carries its own colour and is never tinted. A sprite is between twenty and about
 ninety pixels tall wherever it is drawn, so **its outline is what reads**: what tells one kind from another has to
 be its shape. No picture has an outline, and **no sprite carries a shadow**: a picture drawn standing on a
 plinth brings one, and it goes with the plinth, because a shadow drawn into a sprite darkens whatever it is

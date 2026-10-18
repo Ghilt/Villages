@@ -107,8 +107,8 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
     if (look.ground !== null) {
       const sprite = new Sprite(look.ground);
       // The castle stands on the seat, a person on their place and a structure on its own, so the sprite
-      // hangs from its own bottom edge.
-      sprite.anchor.set(0.5, 1);
+      // hangs from its own bottom edge, at its foot.
+      sprite.anchor.set(look.groundAnchor, 1);
       sprite.tint = spec.tint;
       sprite.visible = false;
       (overTheFog('ground', entry.inVision) ? overIt : underTheFog).addChild(sprite);
@@ -291,6 +291,8 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
           existing.look = lookOf(spec, textures);
           if (existing.ground !== null && existing.look.ground !== null) {
             existing.ground.texture = existing.look.ground;
+            // The atlas read after it sprouted measures a foot the picture drawn in code had not.
+            existing.ground.anchor.set(existing.look.groundAnchor, 1);
             existing.ground.tint = spec.tint;
           }
           dressIcon(existing, overIt);

@@ -8,6 +8,8 @@ export interface Frame {
   readonly height: number;
   readonly placeholder: boolean;
   readonly source: string;
+  /** Where a building stands across its picture, as a fraction of its width: the structures' atlas alone says. */
+  readonly footX?: number;
 }
 
 /** An atlas the tools cut, `public/art/<name>.json` beside its `.webp`, as much of it as the pages read. */
@@ -36,7 +38,10 @@ export function useAtlas<A extends Atlas = Atlas>(
   return useJson<A>(`/art/${name}.json`, CUT[name]);
 }
 
-/** One frame of an atlas, cut out of it where the atlas says, scaled to [tall] pixels at most, and [wide] if given. */
+/**
+ * One frame of an atlas, cut out of it where the atlas says, scaled to [tall] pixels at most, and [wide] if given; with
+ * [foot], a tick under it where it stands on the ground, as a fraction of its width.
+ */
 export function Cut({
   name,
   atlas,
@@ -44,6 +49,7 @@ export function Cut({
   frame,
   tall,
   wide = Infinity,
+  foot,
 }: {
   name: string;
   atlas: Atlas;
@@ -51,6 +57,7 @@ export function Cut({
   frame: Frame;
   tall: number;
   wide?: number;
+  foot?: number | undefined;
 }) {
   const scale = Math.min(1, tall / frame.height, wide / frame.width);
   return (
@@ -66,6 +73,8 @@ export function Cut({
         backgroundSize: `${atlas.width * scale}px ${atlas.height * scale}px`,
         backgroundPosition: `${-frame.x * scale}px ${-frame.y * scale}px`,
       }}
-    />
+    >
+      {foot !== undefined && <span className="inspect-foot" style={{ left: `${foot * 100}%` }} />}
+    </div>
   );
 }

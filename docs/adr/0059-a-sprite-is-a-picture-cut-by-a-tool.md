@@ -195,3 +195,19 @@ that three rules about where things stand handle.
 
 A kind no longer arrives when it stands twenty pixels tall: every kind arrives at 7.5, where the whole map changes over
 from marks to the world (0096), so a heather is a few pixels when it arrives. `READABLE` is gone.
+
+## Amendment, 2026-10-18: a building stands on the front corner of its base, on a corner of the diamonds
+
+The pictures of buildings are painted turned as the ground's diamonds are, so a building's base is a diamond, and the
+corner of it nearest the eye is the lowest thing drawn and is not the middle: the turn of twenty-six degrees puts it
+about a sixth of the base's width right of it, and the painted pictures have it at 0.55 to 0.7 of their width. Hung
+from the middle of its bottom edge, as everything was, a building stood with its base beside its place.
+
+`world:structures` now finds each picture's foot as a tree's is found, but from its lowest two rows alone, read before
+the picture is scaled down: a wider band takes in the long front edge running off to the left and walks the foot
+with it. It is `footX` in the atlas, a fraction of the width, and both of a structure's forms hang from it; the
+pennant flies where the picture says, measured from there. The picture is drawn with its foot on the corner of the
+ground's diamonds nearest its place (`geometry/footing.ts`), less than a world unit away, so the base meets the
+diamonds a yard will be laid on (`docs/plans/worked-ground.md`). Only the drawing moves: the place the server holds is
+untouched. The Pictures page ticks each building's foot in gold. A thing painted lower than the base's front corner -
+a cart, a stack of crates, a ship's cradle - takes the foot with it, which is the painter's to fix in the picture.

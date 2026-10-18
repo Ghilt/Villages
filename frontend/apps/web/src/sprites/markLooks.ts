@@ -38,6 +38,11 @@ export interface Look {
   forms: TwoForms;
   /** The thing itself, standing on its ground, or null for a kind that has no ground form. */
   ground: Texture | null;
+  /**
+   * Where the thing hangs from across its width, its foot: the front corner of a building's base, which stands on its
+   * place, and the middle of anything else.
+   */
+  groundAnchor: number;
   /** The sign for it, or null for a kind that is only ever itself. */
   icon: Texture | null;
   /**
@@ -69,12 +74,13 @@ export function pennantOn(
 ): { x: number; y: number; height: number } | null {
   const picture = form === 'ground' ? look.ground : look.icon;
   const flag = form === 'ground' ? look.flag : look.iconFlag;
+  const anchor = form === 'ground' ? look.groundAnchor : look.iconAnchor;
   if (flag === null || picture === null || tall <= 0) {
     return null;
   }
   const wide = (tall * picture.width) / picture.height;
   return {
-    x: at.x + (flag.across - 0.5) * wide,
+    x: at.x + (flag.across - anchor) * wide,
     y: at.y - (1 - flag.down) * tall,
     height: Math.max(tall * 0.5, PENNANT_LEAST),
   };
@@ -92,8 +98,10 @@ export function lookOf(spec: MapSprite, textures: Textures): Look {
     return {
       forms: { groundHeight, marked },
       ground: picture.texture,
+      groundAnchor: picture.foot,
       icon: marked ? (mark ?? picture.texture) : null,
-      iconAnchor: 0.5,
+      // A pin's point is its middle; the picture standing in for one stands where it stands.
+      iconAnchor: mark === null ? picture.foot : 0.5,
       flag: picture.flag,
       iconFlag: mark === null ? picture.flag : PIN_TOP,
     };
@@ -103,6 +111,7 @@ export function lookOf(spec: MapSprite, textures: Textures): Look {
   return {
     forms,
     ground: forms.groundHeight === undefined ? null : textures.figure,
+    groundAnchor: 0.5,
     icon: !forms.marked ? null : person ? textures.bust : textures.candidate,
     iconAnchor: spec.kind === 'candidate' ? 0 : 0.5,
     flag: null,

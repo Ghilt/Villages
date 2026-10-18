@@ -205,7 +205,8 @@ function StructuresTable({ atlas }: { atlas: Atlas }) {
   return (
     <>
       <p className="inspect-note">
-        {frames.length} pictures, {painted} painted, {frames.length - painted} placeholders
+        {frames.length} pictures, {painted} painted, {frames.length - painted} placeholders; the gold tick
+        under each building is where it stands on the ground, the front corner of its base
       </p>
       <div className="inspect-scroll">
         <table className="inspect-table pictures-table">
@@ -236,6 +237,7 @@ function StructuresTable({ atlas }: { atlas: Atlas }) {
                             image="/art/structures.webp"
                             frame={frame}
                             tall={TALL}
+                            foot={key.includes('@') ? frame.footX : undefined}
                           />
                           <span className="inspect-key">{frame.placeholder ? 'placeholder' : 'painted'}</span>
                         </>

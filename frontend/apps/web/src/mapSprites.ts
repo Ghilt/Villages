@@ -2,6 +2,7 @@ import type { CharacterOnMapView, ChoiceView, StructureView } from '@villages/pr
 import { RUIN_PICTURE, pictureKey } from '@villages/world';
 import type { Culture, StructureCatalogue } from '@villages/world';
 
+import { onACorner } from './geometry/footing';
 import type { MapSprite } from './sprites/SpriteRenderer';
 import { tinctureColour } from './sprites/tinctures';
 
@@ -45,7 +46,8 @@ const UNTINTED = 0xffffff;
  * A structure as the renderer draws it: its type's picture, as tall on the ground as the catalogue says for its
  * level, and its holder's pennant over it, or none for one nobody holds. Its own id space, so a structure and a person
  * can never be one mark. Without the catalogue, before it is read, the renderer stands it at a height of its own.
- * `yours` is one of the player's own holdings, which far out is its pin, drawn at every zoom (0096).
+ * `yours` is one of the player's own holdings, which far out is its pin, drawn at every zoom (0096). It stands on the
+ * corner of the ground's diamonds nearest its place, its foot where its yard's diamonds meet.
  */
 export function toStructureSprite(
   structure: StructureView,
@@ -57,7 +59,7 @@ export function toStructureSprite(
   const groundHeight = heights[Math.min(Math.max(structure.level, 1), heights.length) - 1];
   return {
     id: `structure:${structure.id}`,
-    at: { lng: structure.place.lon, lat: structure.place.lat },
+    at: onACorner({ lng: structure.place.lon, lat: structure.place.lat }),
     tint: UNTINTED,
     kind: 'structure',
     ...(yours ? { yours } : {}),

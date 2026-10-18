@@ -559,7 +559,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
 - A structure on the map: its type's placeholder picture, drawn in code (`sprites/structurePictures.ts`) in its
   own colours and in the look of the culture under it, read off the master's culture map: European as drawn,
   Islamic in plaster, sandstone and green tile under a dome, East Asian in dark tile under a flared roof, African
-  in mud under a cone of thatch (`sprites/cultureStyles.ts`), a ruin too; as tall on the ground as `groundHeight` in the catalogue says at its level, and, when your house
+  in mud under a cone of thatch (`sprites/cultureStyles.ts`), a ruin too; as tall on the ground as `groundHeight` in the catalogue says at its level, standing on the front corner of its base on the corner of the ground's diamonds nearest its place, and, when your house
   controls it, far out its type's pin from `world/sprites/marks/structures/`, at the size of a word, from 7.5, where
   your house's people become their busts too; its own picture stands in for the pin until the atlas is read. **A mark
   never fades**: your holdings and key figures reach the page at every zoom, and out to the whole world they are only
@@ -871,7 +871,8 @@ and `-- --drop` takes them off; by hand only.
   the story is written in the document, by the rules its "How it is kept" sets out.
 - **`/admin/inspect-pictures`** is every picture the world is drawn with, and needs nothing else running: the
   scenery and the structures as their atlases were cut, a structure a culture to a column beside its type's pin, each
-  painted or still a placeholder, its size and the file it came from; the marks' pictures in `world/sprites/marks/`,
+  painted or still a placeholder, its size and the file it came from, and a gold tick under each building where it
+  stands on the ground, the front corner of its base; the marks' pictures in `world/sprites/marks/`,
   the dev server saying of each whether its bytes are still the placeholder the tools drew, the structures' pins
   left to the structures' table; the critters, each kind's frames in a row as its strip holds them and the strip
   played beside them, frame after frame; the pieces of the ruins of the towns of 1790, cut into the scenery's atlas, a

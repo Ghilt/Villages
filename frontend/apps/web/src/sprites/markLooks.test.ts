@@ -18,7 +18,11 @@ const TEXTURES = {
   ring: picture(128, 64),
   pennant: picture(49, 64),
   structures: {
-    of: (type: string) => ({ texture: MILL, flag: { across: type === 'mill' ? 0.5 : 0.25, down: 0 } }),
+    of: (type: string) => ({
+      texture: MILL,
+      flag: { across: type === 'mill' ? 0.5 : 0.25, down: 0 },
+      foot: type === 'mill' ? 0.6 : 0.5,
+    }),
     markOf: (type: string) => (type === 'castle' ? PIN : null),
     paint: () => {},
   },
@@ -66,6 +70,14 @@ describe("a structure's look", () => {
     expect(look.flag).toEqual({ across: 0.5, down: 0 });
   });
 
+  it('hangs from its foot, and its pennant flies where the picture says measured from there', () => {
+    const look = lookOf(structure(2.4), TEXTURES);
+
+    expect(look.groundAnchor).toBe(0.6);
+    // Drawn 160 tall the mill is 120 wide; its staff stands in its middle, a tenth of that left of its foot.
+    expect(pennantOn(look, 160, { x: 200, y: 300 })).toEqual({ x: 188, y: 140, height: 80 });
+  });
+
   it("is its type's pin far out once the marks are cut, and its pennant flies from the top of the pin", () => {
     const castle = lookOf({ ...structure(8), structure: { picture: 'castle', groundHeight: 8 } }, TEXTURES);
     expect(castle.ground).toBe(MILL);
@@ -107,8 +119,8 @@ describe('where a pennant flies', () => {
   const look = lookOf(structure(2.4), TEXTURES);
 
   it('from the point the picture names, half as tall as the mark', () => {
-    // A mill drawn 80 tall is 60 wide; its flag stands at the middle of its top.
-    expect(pennantOn(look, 80, { x: 200, y: 300 })).toEqual({ x: 200, y: 220, height: 40 });
+    // A mill drawn 80 tall is 60 wide; its flag stands at the middle of its top, a tenth of that left of its foot.
+    expect(pennantOn(look, 80, { x: 200, y: 300 })).toEqual({ x: 194, y: 220, height: 40 });
 
     const offCentre = lookOf(
       { ...structure(2.4), structure: { picture: 'castle', groundHeight: 4 } },

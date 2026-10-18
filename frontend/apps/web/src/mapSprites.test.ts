@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { StructureView } from '@villages/protocol';
 import type { StructureCatalogue, StructureTypeSpec } from '@villages/world';
 
+import { onACorner } from './geometry/footing';
 import { toStructureSprite } from './mapSprites';
 import { tinctureColour } from './sprites/tinctures';
 
@@ -43,12 +44,12 @@ function structure(structureType: string, level: number, holder?: typeof RAVENSC
 }
 
 describe('a structure as the map draws it', () => {
-  it('is drawn by its type, as tall as the catalogue says at its level, at its place', () => {
+  it('is drawn by its type, as tall as the catalogue says at its level, on the corner of the diamonds nearest its place', () => {
     const drawn = toStructureSprite(structure('castle', 2), CATALOGUE);
 
     expect(drawn).toMatchObject({
       id: 'structure:a',
-      at: { lng: -77.4, lat: -78.4 },
+      at: onACorner({ lng: -77.4, lat: -78.4 }),
       kind: 'structure',
       structure: { picture: 'castle@european', groundHeight: 4.5 },
     });
