@@ -20,7 +20,8 @@
 - `world/sprites/structures/<type>-<culture>.png`, one for every type of structure in every culture, and a
   ruin a culture. Cut by a tool of their own, and painted to rules of their own: see below.
 - `world/sprites/critters/<kind>.png`, one for every kind of critter in `world/critters.json`: songbird,
-  squirrel, hare, fish, hawk. A strip of frames, cut by a tool of its own: see below.
+  squirrel, hare, fish, hawk, and the crow, the crow aloft and the rat of the ruins. A strip of frames, cut by a tool
+  of its own: see below.
 - `world/sprites/ruins/<piece>-<culture>.png`, the pieces the ruins of the towns of 1790 are laid out in, eight in
   each of the four cultures: a `shell` (a house open to the sky), a `row` of them, a `tower` stump, a `hall` (the
   culture's great building, roofless), an `arch`, a stretch of `wall`, a `gate`, and `rubble`. Cut by `world:art`
@@ -73,7 +74,9 @@ register and only what moves moves. An animal of the ground or the water faces r
 the way it goes: a squirrel gathered, in the air, landing; a hare sitting up, in the air, gathered; a fish level, its
 tail one way and then the other, which the map tips along its leap. A hawk is seen from above, as the map is, its
 nose to the top of the frame, wings spread to glide and then a beat, because the map turns it to the way it flies
-round its circle. Which frame is which is in
+round its circle. A crow is the songbird's flight in black and ragged, seen from behind as it bursts out of a
+ruin; the crow aloft is the hawk's view of it, circling over the ruins; a rat faces right and scurries, stretched,
+gathered, stretched again. Which frame is which is in
 `apps/web/src/sprites/critters/look.ts`. On a transparent background or a flat one, as any sprite, with no plinth;
 where the animal stands on anything, it stands on the bottom edge. A frame is cut 64 pixels tall and a critter is
 drawn small - eight to thirty pixels at the closest zoom - so paint it 256 tall or more, keep the shape bold, and

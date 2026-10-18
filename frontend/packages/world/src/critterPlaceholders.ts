@@ -168,7 +168,88 @@ const hawk: Frame = (at) => {
   );
 };
 
-const DRAWINGS: Record<string, Frame> = { songbird, squirrel, hare, fish, hawk };
+/**
+ * A crow seen from behind and above as it bursts out of a ruin, wings up, level and down, as the songbird is drawn but
+ * black, bigger in the body and ragged at the wing's end: the ruins' bird.
+ */
+const crow: Frame = (at) => {
+  const tips = [
+    [14, 24, 114, 24],
+    [4, 64, 124, 64],
+    [18, 104, 110, 104],
+  ][at]!;
+  const [lx, ly, rx, ry] = tips as [number, number, number, number];
+  const wing = (tx: number, ty: number, side: number) =>
+    path(
+      `M ${64 - 8 * side} 68 Q ${(64 + tx) / 2} ${(68 + ty) / 2 - 12} ${tx} ${ty} ` +
+        `L ${tx + 6 * side} ${ty + 6} L ${tx + 2 * side} ${ty + 10} ` +
+        `Q ${(64 + tx) / 2 + 4 * side} ${(68 + ty) / 2 + 10} ${64 - 2 * side} 84 Z`,
+      side < 0 ? '#16141a' : '#262329',
+    );
+  return (
+    wing(lx, ly, 1) +
+    wing(rx, ry, -1) +
+    path('M 56 94 L 64 116 L 72 94 Z', '#121015') +
+    ellipse(64, 80, 13, 19, '#1d1b20') +
+    ellipse(67, 75, 5, 10, '#3a3640') +
+    circle(64, 58, 9, '#1a181d')
+  );
+};
+
+/** A crow seen from above, circling over a ruin: its wings spread to glide, then swept back in a beat, black. */
+const crowAloft: Frame = (at) => {
+  const [tip, sweep] = at === 0 ? [58, 0] : [48, 12];
+  const wing = (side: number) =>
+    path(
+      `M ${64 + 6 * side} 58 C ${64 + 26 * side} ${50 + sweep} ${64 + tip * side} ${52 + sweep} ` +
+        `${64 + tip * side} ${60 + sweep} L ${64 + (tip - 6) * side} ${64 + sweep} ` +
+        `C ${64 + 34 * side} ${70 + sweep} ${64 + 18 * side} 72 ${64 + 6 * side} 70 Z`,
+      side > 0 ? '#2a272d' : '#18161b',
+    );
+  return (
+    wing(1) +
+    wing(-1) +
+    path('M 58 84 L 70 84 L 76 104 L 52 104 Z', '#1c1a1f') +
+    ellipse(64, 68, 8, 20, '#1d1b20') +
+    circle(64, 46, 7, '#141216') +
+    path('M 62 40 L 64 32 L 66 40 Z', '#3a3640')
+  );
+};
+
+/** A rat scurrying to the right, low to the ground: stretched, gathered, stretched again, its long tail behind. */
+const rat: Frame = (at) => {
+  const body = [
+    { x: 64, y: 106, rx: 24, ry: 9, tail: 'M 42 106 C 26 108 14 102 4 108' },
+    { x: 66, y: 104, rx: 18, ry: 11, tail: 'M 50 104 C 34 98 20 112 6 104' },
+    { x: 62, y: 106, rx: 25, ry: 8, tail: 'M 38 106 C 24 104 14 112 4 106' },
+  ][at]!;
+  const legs = [
+    leg(52, 112, 46, 118, '#4a3f38', 3) + leg(78, 112, 84, 118, '#4a3f38', 3),
+    leg(58, 112, 56, 118, '#4a3f38', 3) + leg(74, 112, 76, 118, '#4a3f38', 3),
+    leg(48, 112, 40, 118, '#4a3f38', 3) + leg(80, 112, 88, 118, '#4a3f38', 3),
+  ][at]!;
+  const head = body.x + body.rx;
+  return (
+    `<path d="${body.tail}" stroke="#8a6f66" stroke-width="3" fill="none" stroke-linecap="round"/>` +
+    legs +
+    ellipse(body.x, body.y, body.rx, body.ry, '#5d5049') +
+    ellipse(body.x + 3, body.y - 3, body.rx * 0.6, body.ry * 0.45, '#776860') +
+    ellipse(head, body.y - 2, 9, 6, '#5d5049', -10) +
+    circle(head - 4, body.y - 8, 3, '#a48a80') +
+    circle(head + 3, body.y - 4, 1.5, '#0e0b0a')
+  );
+};
+
+const DRAWINGS: Record<string, Frame> = {
+  songbird,
+  squirrel,
+  hare,
+  fish,
+  hawk,
+  crow,
+  'crow-aloft': crowAloft,
+  rat,
+};
 
 /** The kinds a placeholder can be drawn for. A kind listed in `world/critters.json` and not here is drawn as a blot. */
 export function critterPlaceholderKinds(): string[] {
