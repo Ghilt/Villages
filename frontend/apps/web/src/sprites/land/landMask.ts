@@ -7,17 +7,27 @@ import type { LandMotion } from './look';
 /**
  * What moves on the land under the view, as the land shader reads it: the flat tiles of the deepest zoom under the
  * view, pieced into one texture, four bytes a world unit, a channel for each land motion drawn, 255 where the
- * ground there has it and nought elsewhere; and beside it a byte a world unit saying which of its motion's looks the
- * land there has - heath, scrub or tundra, say - read as it is, unblended. The shader softens the edges itself, so
+ * ground there has it and nought elsewhere, and a texture of a byte a world unit for the fifth; and beside them a byte
+ * a world unit saying which of its motion's looks the land there has - heath, scrub or tundra, say - read as it is,
+ * unblended. The shader softens the edges itself, so
  * nothing here is worked out but a lookup a texel.
  */
 
 /**
- * The land motions the land layer draws so far, in the order of the mask's channels: red the grass, green the crops,
- * blue the heath, alpha the wet land. The others in `LAND_LOOK.lands` stand still until the steps that draw them, and
- * a fifth would need a texture of its own.
+ * The land motions the land layer draws, every one there is, in the order of the mask's channels: red the grass, green
+ * the crops, blue the heath, alpha the wet land, and the fifth, the ice, the salt and the sand, in a texture of its own.
+ * Every other kind of land in `LAND_LOOK.lands` stands still on purpose.
  */
-export const DRAWN = ['grass', 'crops', 'heath', 'wet'] as const satisfies readonly LandMotion[];
+export const DRAWN = [
+  'grass',
+  'crops',
+  'heath',
+  'wet',
+  'ice-salt-sand',
+] as const satisfies readonly LandMotion[];
+
+/** How many channels the first texture of the mask holds; a motion past them is in the second's red. */
+export const CHANNELS_IN_FIRST = 4;
 
 export type DrawnMotion = (typeof DRAWN)[number];
 
@@ -92,12 +102,20 @@ export function landMaskOf(
   tiles: readonly (Uint8Array | null)[],
   channels: readonly (number | null)[],
   looks: readonly number[],
-): { width: number; height: number; texels: Uint8Array; looks: Uint8Array; counts: number[] } {
+): {
+  width: number;
+  height: number;
+  texels: Uint8Array;
+  more: Uint8Array;
+  looks: Uint8Array;
+  counts: number[];
+} {
   const columns = range.toX - range.fromX + 1;
   const rows = range.toY - range.fromY + 1;
   const width = columns * TILE;
   const height = rows * TILE;
   const texels = new Uint8Array(width * height * 4);
+  const more = new Uint8Array(width * height);
   const looked = new Uint8Array(width * height);
   const lookOf = new Uint8Array(256);
   looks.forEach((look, id) => {
@@ -106,8 +124,11 @@ export function landMaskOf(
   // A texel's four bytes at once, red the lowest: little-endian, as every browser's typed arrays are.
   const words = new Uint32Array(texels.buffer);
   const packed = new Uint32Array(256);
+  const inMore = new Uint8Array(256);
   channels.forEach((channel, id) => {
-    if (channel !== null && id < 256) packed[id] = (0xff << (channel * 8)) >>> 0;
+    if (channel === null || id >= 256) return;
+    if (channel < CHANNELS_IN_FIRST) packed[id] = (0xff << (channel * 8)) >>> 0;
+    else inMore[id] = 255;
   });
   const perClass = new Float64Array(256);
   for (let row = 0; row < rows; row += 1) {
@@ -120,15 +141,16 @@ export function landMaskOf(
         for (let x = 0; x < TILE; x += 1) {
           const id = classes[from + x]!;
           words[into + x] = packed[id]!;
+          more[into + x] = inMore[id]!;
           looked[into + x] = lookOf[id]!;
           perClass[id] = perClass[id]! + 1;
         }
       }
     }
   }
-  const counts = [0, 0, 0, 0];
+  const counts = [0, 0, 0, 0, 0];
   channels.forEach((channel, id) => {
     if (channel !== null && id < 256) counts[channel] = counts[channel]! + perClass[id]!;
   });
-  return { width, height, texels, looks: looked, counts };
+  return { width, height, texels, more, looks: looked, counts };
 }

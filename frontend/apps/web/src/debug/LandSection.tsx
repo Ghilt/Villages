@@ -7,6 +7,8 @@ import { grassTuningStore, resetGrassTuning, setGrassTuning } from '../sprites/l
 import type { GrassTuning } from '../sprites/land/grassTuning';
 import { heathTuningStore, resetHeathTuning, setHeathTuning } from '../sprites/land/heathTuning';
 import type { HeathTuning } from '../sprites/land/heathTuning';
+import { iceTuningStore, resetIceTuning, setIceTuning } from '../sprites/land/iceTuning';
+import type { IceTuning } from '../sprites/land/iceTuning';
 import { resetWetTuning, setWetTuning, wetTuningStore } from '../sprites/land/wetTuning';
 import type { WetTuning } from '../sprites/land/wetTuning';
 import type { DrawnMotion } from '../sprites/land/landMask';
@@ -20,7 +22,7 @@ import type { SliderDef } from './Sliders';
 /**
  * The land, a part of the Shaders section: its level in the bar, and inside it a fold for each motion of the land,
  * each with its box, whether it is drawn, and its sliders. What moves on each kind of land is the table in
- * `sprites/land/look.ts`, and what each slider means is in `sprites/land/grassTuning.ts`, `cropsTuning.ts`, `heathTuning.ts` and `wetTuning.ts`.
+ * `sprites/land/look.ts`, and what each slider means is in `sprites/land/grassTuning.ts`, `cropsTuning.ts`, `heathTuning.ts`, `wetTuning.ts` and `iceTuning.ts`.
  */
 
 const share = (value: number) => `${Math.round(value * 100)}%`;
@@ -85,9 +87,15 @@ const WET_SLIDERS: readonly SliderDef<keyof WetTuning>[] = [
   { key: 'stems', label: 'How tall the reeds and shoots stand', min: 0, max: 1.5, step: 0.05, say: times },
 ];
 
+const ICE_SLIDERS: readonly SliderDef<keyof IceTuning>[] = [
+  { key: 'glints', label: 'How many glints flash', min: 0, max: 3, step: 0.05, say: times },
+  { key: 'snow', label: 'How strongly the snow streams', min: 0, max: 2, step: 0.05, say: times },
+  { key: 'sand', label: 'How strongly the sand blows', min: 0, max: 2, step: 0.05, say: times },
+];
+
 /** What the part is, behind the question mark in its bar. */
 const ABOUT =
-  'The land moving in the wind and the light, one layer for every kind of land, from zoom 8.5 in: so far the grass, the crops, the heath, the scrub and the tundra, and the wet land. Each kind of land has its own motion or stands still on purpose, and the rest come a fold at a time. What a level costs the graphics card is said once in the log, the first time the land is drawn at it.';
+  'The land moving in the wind and the light, one layer for every kind of land, from zoom 8.5 in: the grass, the crops, the heath, the scrub and the tundra, the wet land, and the ice, the salt and the sand. Every other kind of land stands still on purpose: the water moves by a shader of its own, a wood by its trees, and bare stone not at all. What a level costs the graphics card is said once in the log, the first time the land is drawn at it.';
 
 const GRASS_ABOUT =
   'Gusts, tufts, tall grass and brush on steppe, meadow, savanna and alpine meadow, bending in the one wind the trees bend in.';
@@ -97,6 +105,9 @@ const HEATH_ABOUT =
 
 const WET_ABOUT =
   'Marsh, bog, paddy, floodplain, mangrove and swamp forest: open water among the growth catching the light, a ring spreading on it now and then, reeds in the marsh and shoots in rows in the paddy bending with the gusts, and mist lying low over the marsh and the bog, drifting down the wind.';
+
+const ICE_ABOUT =
+  'Points of light flashing for a moment and gone on the ice, the polar desert and the salt flats; snow streaming along the wind over the ice and the polar desert, and sand blowing off the crests of the dunes, in faint pale streamers that run faster than the gusts.';
 
 const CROPS_ABOUT =
   'Farmland and farmland with woods cut into fields, each fallow, ripe or green, its crops standing in rows its own way, with long slow waves rolling through them down the wind, the same in every browser.';
@@ -108,6 +119,7 @@ export function LandSection() {
   const crops = useStore(cropsTuningStore);
   const heath = useStore(heathTuningStore);
   const wet = useStore(wetTuningStore);
+  const ice = useStore(iceTuningStore);
   return (
     <Section
       name="Land"
@@ -149,6 +161,15 @@ export function LandSection() {
         resetTitle="put every wet land slider back where it started"
       >
         <Sliders idPrefix="wet" sliders={WET_SLIDERS} values={wet} onChange={setWetTuning} />
+      </LandFold>
+      <LandFold
+        name="Ice, salt and sand"
+        motion="ice-salt-sand"
+        about={ICE_ABOUT}
+        reset={resetIceTuning}
+        resetTitle="put every ice, salt and sand slider back where it started"
+      >
+        <Sliders idPrefix="ice" sliders={ICE_SLIDERS} values={ice} onChange={setIceTuning} />
       </LandFold>
     </Section>
   );

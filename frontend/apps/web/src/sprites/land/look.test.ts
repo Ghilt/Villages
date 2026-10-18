@@ -55,6 +55,24 @@ describe('the land', () => {
     expect(DRAWN).toContain('wet');
   });
 
+  it('glints on the ice and the salt and drifts over the ice and the sand, each kind in a look of its own', () => {
+    const icy = KINDS.filter((kind) => motionOf(kind) === 'ice-salt-sand').sort();
+    expect(icy).toEqual(['desert-sand', 'ice', 'polar-desert', 'salt-flat']);
+    expect(Object.keys(LAND_LOOK.ice.kinds).sort()).toEqual(icy);
+    expect(new Set(icy.map(lookOf)).size).toBe(icy.length);
+    expect(LAND_LOOK.ice.kinds['salt-flat'].glints).toBeGreaterThan(0);
+    expect(LAND_LOOK.ice.kinds['desert-sand'].crests).toBe(1);
+  });
+
+  it('draws every kind of land that moves, so every kind has its motion or stands still on purpose', () => {
+    const moving = KINDS.map(motionOf).filter(
+      (motion) => !['water', 'trees', 'still'].includes(motion ?? ''),
+    );
+    expect(
+      [...new Set(moving)].filter((motion) => !(DRAWN as readonly (string | null)[]).includes(motion)),
+    ).toEqual([]);
+  });
+
   it('leaves the water to the water shader, the woods to their trees and bare stone still', () => {
     expect(KINDS.filter((kind) => motionOf(kind) === 'water').sort()).toEqual([
       'lake',

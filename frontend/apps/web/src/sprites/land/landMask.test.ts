@@ -4,7 +4,18 @@ import { fromMercator } from '../../geometry/cameraMath';
 import type { CameraView } from '../../geometry/cameraMath';
 import { TILE, WORLD_MASTER_WIDTH } from '../../geometry/world';
 
-import { DRAWN, MOST_TILES, channelOf, groundAt, landMaskOf, sameRange, tilesUnder } from './landMask';
+import {
+  CHANNELS_IN_FIRST,
+  DRAWN,
+  MOST_TILES,
+  channelOf,
+  groundAt,
+  landMaskOf,
+  sameRange,
+  tilesUnder,
+} from './landMask';
+
+const texelOf = (mask: { texels: Uint8Array }, x: number) => [...mask.texels.subarray(x * 4, x * 4 + 4)];
 
 /** A view centred on a point of world space, in world units. */
 function viewAt(x: number, y: number, zoom: number, extra: Partial<CameraView> = {}): CameraView {
@@ -59,23 +70,30 @@ describe('the land mask', () => {
     const mask = landMaskOf(range, [west, east], channels, looks);
     expect(mask.width).toBe(2 * TILE);
     expect(mask.height).toBe(TILE);
-    const texel = (x: number) => [...mask.texels.subarray(x * 4, x * 4 + 4)];
+    const texel = (x: number) => texelOf(mask, x);
     expect(texel(0)).toEqual([255, 0, 0, 0]);
     expect(texel(TILE)).toEqual([255, 0, 0, 0]);
     expect(texel(TILE + 1)).toEqual([0, 0, 0, 255]);
     expect(texel(TILE + 2)).toEqual([0, 0, 0, 0]);
-    expect(mask.counts).toEqual([TILE * TILE + 1, 0, 0, 1]);
+    expect(mask.counts).toEqual([TILE * TILE + 1, 0, 0, 1, 0]);
     expect([...mask.looks.subarray(TILE, TILE + 3)]).toEqual([0, 1, 0]);
     // A tile that is not there moves nothing.
-    expect(landMaskOf(range, [null, null], channels, looks).counts).toEqual([0, 0, 0, 0]);
+    expect(landMaskOf(range, [null, null], channels, looks).counts).toEqual([0, 0, 0, 0, 0]);
+    // A fifth motion's class is in the second texture, and in none of the first's channels.
+    channels[2] = 4;
+    const fifth = landMaskOf(range, [east, west], channels, looks);
+    expect(fifth.more[2]).toBe(255);
+    expect(texelOf(fifth, 2)).toEqual([0, 0, 0, 0]);
+    expect(fifth.counts[4]).toBe(TILE * TILE - 2);
   });
 
-  it('draws each motion drawn from a channel of its own, four at the most: the grass, the crops, the heath, the wet land', () => {
-    expect(DRAWN.length).toBeLessThanOrEqual(4);
+  it('draws each motion drawn from a channel of its own, the four of the first texture and one past them: the grass, the crops, the heath, the wet land, the ice', () => {
+    expect(DRAWN.length).toBeLessThanOrEqual(CHANNELS_IN_FIRST + 1);
     expect(channelOf('grass')).toBe(0);
     expect(channelOf('crops')).toBe(1);
     expect(channelOf('heath')).toBe(2);
     expect(channelOf('wet')).toBe(3);
+    expect(channelOf('ice-salt-sand')).toBe(4);
     expect(new Set(DRAWN.map(channelOf)).size).toBe(DRAWN.length);
     expect(channelOf('still')).toBeNull();
     expect(channelOf(null)).toBeNull();

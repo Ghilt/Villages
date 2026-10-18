@@ -5,12 +5,13 @@ import { carried, latticeNear } from '../clouds/cloudClock';
 import { cropsTuningStore } from './cropsTuning';
 import { grassTuningStore } from './grassTuning';
 import { heathTuningStore } from './heathTuning';
+import { iceTuningStore } from './iceTuning';
 import { LAND_LOOK } from './look';
 import { wetTuningStore } from './wetTuning';
 
 /**
  * Each land motion's own uniforms, the ones its part of the land shader reads beside the land's: its sliders, and for
- * the crops' waves and the wet land's mist where the wall clock has carried them, on lattices that come round with the
+ * the crops' waves, the wet land's mist and the drift where the wall clock has carried them, on lattices that come round with the
  * world's width as the gusts' does. Handed to the shader as resources of their own, set every frame by `tune`; a
  * slider moved asks for a frame through `watch`, so it shows even where nothing else moves the map.
  */
@@ -59,9 +60,22 @@ export function createMotionUniforms(): MotionUniforms {
     uMistLattice: vec2(14, 1),
     uMistCarried: f32(0),
   });
+  const ice = new UniformGroup({
+    uGlints: f32(1),
+    uSnow: f32(1),
+    uSand: f32(1),
+    uDriftLattice: vec2(3, 1),
+    uDriftCarried: f32(0),
+  });
 
   return {
-    groups: { grassUniforms: grass, cropsUniforms: crops, heathUniforms: heath, wetUniforms: wet },
+    groups: {
+      grassUniforms: grass,
+      cropsUniforms: crops,
+      heathUniforms: heath,
+      wetUniforms: wet,
+      iceUniforms: ice,
+    },
 
     tune(wall, still) {
       const grassly = grassTuningStore.get();
@@ -110,12 +124,27 @@ export function createMotionUniforms(): MotionUniforms {
       w.uMistLattice[1] = banks.around;
       w.uMistCarried = still ? 0 : carried(wall, LAND_LOOK.wet.mist.speed);
       wet.update();
+
+      const icy = iceTuningStore.get();
+      const i = ice.uniforms;
+      i.uGlints = icy.glints;
+      i.uSnow = icy.snow;
+      i.uSand = icy.sand;
+      const streamers = latticeNear(LAND_LOOK.ice.drift.long);
+      i.uDriftLattice[0] = streamers.cell;
+      i.uDriftLattice[1] = streamers.around;
+      i.uDriftCarried = still ? 0 : carried(wall, LAND_LOOK.ice.drift.speed);
+      ice.update();
     },
 
     watch(repaint) {
-      const stops = [grassTuningStore, cropsTuningStore, heathTuningStore, wetTuningStore].map((store) =>
-        store.watch(repaint),
-      );
+      const stops = [
+        grassTuningStore,
+        cropsTuningStore,
+        heathTuningStore,
+        wetTuningStore,
+        iceTuningStore,
+      ].map((store) => store.watch(repaint));
       return () => stops.forEach((stop) => stop());
     },
   };

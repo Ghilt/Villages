@@ -158,8 +158,9 @@ planned and not started.
   like a shotgun's blast, and step 13, a hawk overhead. Steps 6 and 7, the land layer the grass becomes and
   crops, are built, verified and on main; in the run Adam picked on 2026-10-17, step 8, heath, scrub and tundra, is
   built and verified, with an inspect page of a square of every kind of land and every critter,
-  `/admin/inspect-renders`, asked for by Adam that day to verify them on; and step 9, wet land, is built and waits on
-  his eye. Asked for by Adam on 2026-10-16.
+  `/admin/inspect-renders`, asked for by Adam that day to verify them on, step 9, wet land, and step 10, ice, salt and
+  sand, with which every kind of land has its motion or stands still on purpose; all of them are verified and on
+  main. Asked for by Adam on 2026-10-16.
 - **Ruined cities**: every town of 1790 a ruin on the map at the world's start, the bigger the town the more ground
   its ruins cover - ruin pieces in each place's culture laid out by the browser as a ruined city, the same for every
   player, sent as the scenery is, only near revealed ground, with crows and rats in them. The ground and the roads

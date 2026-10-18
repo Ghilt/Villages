@@ -21,7 +21,7 @@ import type { ShaderLevel } from '../../shaders/levels';
 import type { Layer } from '../layer';
 import { gustsCarried, windTime } from '../wind';
 
-import { DRAWN, channelOf, landMaskOf, sameRange, tilesUnder } from './landMask';
+import { CHANNELS_IN_FIRST, DRAWN, channelOf, landMaskOf, sameRange, tilesUnder } from './landMask';
 import type { TileRange } from './landMask';
 import { landStore } from './landMode';
 import { LAND_FRAGMENT, LAND_VERTEX } from './landShader';
@@ -70,6 +70,8 @@ interface Mask {
   range: TileRange;
   root: string;
   source: BufferImageSource;
+  /** The fifth motion's channel, a byte a world unit. */
+  more: BufferImageSource;
   /** Which look of its motion each world unit's land has. */
   looks: BufferImageSource;
   /** How many world units of the mask have each channel's motion. */
@@ -94,6 +96,7 @@ export function createLandLayer(
     uMaskOrigin: { value: new Float32Array(2), type: 'vec2<f32>' },
     uMaskSize: { value: new Float32Array([1, 1]), type: 'vec2<f32>' },
     uShown: { value: new Float32Array(4), type: 'vec4<f32>' },
+    uShownMore: { value: 0, type: 'f32' },
   });
   const motions = createMotionUniforms();
   const empty = new BufferImageSource({
@@ -103,6 +106,13 @@ export function createLandLayer(
     format: 'rgba8unorm',
   });
   const noLooks = new BufferImageSource({
+    resource: new Uint8Array(1),
+    width: 1,
+    height: 1,
+    format: 'r8unorm',
+  });
+  // A placeholder of its own: one shared by two samplers is bound to only one of them.
+  const noMore = new BufferImageSource({
     resource: new Uint8Array(1),
     width: 1,
     height: 1,
@@ -120,6 +130,7 @@ export function createLandLayer(
       landUniforms: uniforms,
       ...motions.groups,
       uMask: empty,
+      uMaskMore: noMore,
       uLooks: noLooks,
     },
   });
@@ -182,6 +193,15 @@ export function createLandLayer(
       addressMode: 'clamp-to-edge',
       autoGenerateMipmaps: false,
     });
+    const moreSource = new BufferImageSource({
+      resource: built.more,
+      width: built.width,
+      height: built.height,
+      format: 'r8unorm',
+      scaleMode: 'linear',
+      addressMode: 'clamp-to-edge',
+      autoGenerateMipmaps: false,
+    });
     // Read as they are, a look a texel, never blended between two.
     const lookSource = new BufferImageSource({
       resource: built.looks,
@@ -193,10 +213,12 @@ export function createLandLayer(
       autoGenerateMipmaps: false,
     });
     const previous = mask;
-    mask = { range, root, source, looks: lookSource, counts: built.counts };
+    mask = { range, root, source, more: moreSource, looks: lookSource, counts: built.counts };
     shader.resources.uMask = source;
+    shader.resources.uMaskMore = moreSource;
     shader.resources.uLooks = lookSource;
     previous?.source.destroy();
+    previous?.more.destroy();
     previous?.looks.destroy();
     uniforms.uniforms.uMaskOrigin[0] = range.fromX * TILE;
     uniforms.uniforms.uMaskOrigin[1] = range.fromY * TILE;
@@ -270,7 +292,9 @@ export function createLandLayer(
       u.uCarried = still ? 0 : gustsCarried(wall);
       u.uFade = fade;
       u.uPixel = 1 / (levelLook.resolution * resolution);
-      for (let channel = 0; channel < 4; channel += 1) u.uShown[channel] = moving[channel] === true ? 1 : 0;
+      for (let channel = 0; channel < CHANNELS_IN_FIRST; channel += 1)
+        u.uShown[channel] = moving[channel] === true ? 1 : 0;
+      u.uShownMore = moving[CHANNELS_IN_FIRST] === true ? 1 : 0;
       uniforms.update();
       motions.tune(wall, still);
 
@@ -298,9 +322,11 @@ export function createLandLayer(
       mesh.destroy();
       shader.destroy();
       mask?.source.destroy();
+      mask?.more.destroy();
       mask?.looks.destroy();
       empty.destroy();
       noLooks.destroy();
+      noMore.destroy();
     },
   };
 }

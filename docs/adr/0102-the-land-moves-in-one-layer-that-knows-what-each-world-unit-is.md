@@ -55,3 +55,11 @@ which of its motion's looks the land there has, by the kind's place among the lo
 and reads it as it is, never blended, so a clump on the edge between heath and scrub is one or the other and never
 something between. The channels say how strongly a motion is there and are softened; the look says only which, at the
 place a clump or a stalk is rooted.
+
+## Amendment, 2026-10-18: the fifth motion has a texture of its own
+
+The ice, the salt and the sand are the fifth motion and the last, so with them every kind of land has its motion or
+stands still on purpose, which the land's table test now holds. Their channel is a texture of a byte a world unit
+beside the mask's four, softened as the others are. Every one of the shader's textures is given a placeholder of
+its own until the first mask comes: two samplers handed the same placeholder were bound to only one of them, and the
+fifth motion read nothing until it had its own.
