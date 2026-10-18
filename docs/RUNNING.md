@@ -140,17 +140,17 @@ stage alone, with none of the debug panel in it (decision record 0079).
   held. The dial thins them with the trees. See `docs/plans/ruined-cities.md`.
 - The scenery bends in the wind, from zoom 7.5 in, wherever it is drawn: every tree, bush, reed and tuft leans down
   the wind as a gust passes, its foot where it stands and its shadow leaning with it, and its crown turns a little
-  paler, as the grass's field does; with no gust it sways a little on its own. How far each kind bends is its own -
-  a birch, a palm or a reed a lot, an oak or a spruce a little, a boulder or a cactus not at all - in
-  `apps/web/src/sprites/trees/look.ts`, and a kind it does not name stands still. The gusts are the grass's, one
-  wind blowing the sea's way (`apps/web/src/sprites/wind.ts`), and come from the wall clock, so every browser bends
-  the same tree with the same gust; a player who has asked for less motion gets them standing still. They are the
-  **Trees** part of the Shaders section: `off`, `low` or `high` in its bar, high at every load, low fifteen frames
-  a second and high thirty, asked for only while some of the scenery is on the screen; a frame is the whole sprite
-  canvas drawn again, and the first time the trees move at a level the log says once what a frame costs. Inside
-  it, two sliders: how far a whole gust bends the bendiest kind, as a share of its height, and how much the palest
-  crown pales. They change the trees on the next frame, are remembered in the browser that moved them, and once
-  one stops the log says both under `trees` as `trees tuned: …`, the line to hand over when a setting should
+  paler, as the grass's field does; with no gust it sways a little on its own. How far each kind bends is its own - a
+  birch, a palm or a reed a lot, a fern under the forests' trees a fair way, an oak or a spruce a little, a boulder or
+  a cactus not at all - in `apps/web/src/sprites/trees/look.ts`, and a kind it does not name stands still. The gusts
+  are the grass's, one wind blowing the sea's way (`apps/web/src/sprites/wind.ts`), and come from the wall clock, so
+  every browser bends the same tree with the same gust; a player who has asked for less motion gets them standing
+  still. They are the **Trees** part of the Shaders section: `off`, `low` or `high` in its bar, high at every load,
+  low fifteen frames a second and high thirty, asked for only while some of the scenery is on the screen; a frame is
+  the whole sprite canvas drawn again, and the first time the trees move at a level the log says once what a frame
+  costs. Inside it, two sliders: how far a whole gust bends the bendiest kind, as a share of its height, and how much
+  the palest crown pales. They change the trees on the next frame, are remembered in the browser that moved them, and
+  once one stops the log says both under `trees` as `trees tuned: …`, the line to hand over when a setting should
   become the default; `reset` puts them back. See the amendment to `docs/adr/0052`.
 - Critters, from zoom 9 in, only where your house sees now, or everywhere with the fog lifted: every so often a few
   small birds burst out of a tree or a bush the scenery drew - in the woods, the scrub and the heath, and out of a

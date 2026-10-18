@@ -11,7 +11,7 @@
 `world/sprites/` is yours, and it is committed: every picture drawn on the map, a folder a group.
 
 - `world/sprites/scenery/<kind>.png`, one for every kind in `world/biomes.json`: pine, spruce, birch,
-  oak, beech, palm, jungle, acacia, mangrove, snag, scrub, heather, grass, reed, boulder, cactus.
+  oak, beech, palm, jungle, acacia, mangrove, snag, scrub, heather, grass, reed, boulder, cactus, fern.
 - `world/sprites/marks/<name>.png`, one for every mark the map places: castle, castle-icon, candidate,
   figure, figure-icon, selection-ring. These are placeholders only for now: the map still draws the marks
   in code, because they take a house's colours. See 0059.

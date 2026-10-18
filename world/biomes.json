@@ -42,7 +42,8 @@
     { "name": "grass", "groundHeight": 1.4, "vary": 0.3, "order": 2, "gather": 0.25, "apart": 0.3, "underCanopy": true },
     { "name": "reed", "groundHeight": 1.4, "vary": 0.25, "order": 2, "gather": 0.8, "apart": 0.3, "underCanopy": true },
     { "name": "boulder", "groundHeight": 1.6, "vary": 0.4, "order": 5, "gather": 0.3, "apart": 0.8, "underCanopy": true },
-    { "name": "cactus", "groundHeight": 1.8, "vary": 0.3, "order": 4, "gather": 0.3, "apart": 1.0, "underCanopy": false }
+    { "name": "cactus", "groundHeight": 1.8, "vary": 0.3, "order": 4, "gather": 0.3, "apart": 1.0, "underCanopy": false },
+    { "name": "fern", "groundHeight": 1.3, "vary": 0.3, "order": 1, "gather": 0.7, "apart": 0.35, "underCanopy": true }
   ],
   "biomes": [
     {
@@ -54,7 +55,7 @@
       "stands": {
         "per1000": 5.0,
         "reach": [3.0, 8.0],
-        "inside": 0.1575,
+        "inside": 0.1811,
         "outside": 0.01
       },
       "grows": {
@@ -69,17 +70,20 @@
         "conifer-forest": {
           "spruce": 10,
           "pine": 6,
-          "boulder": 2
+          "boulder": 2,
+          "fern": 0.5
         },
         "taiga": {
           "spruce": 10,
           "pine": 5,
-          "boulder": 2
+          "boulder": 2,
+          "fern": 0.5
         },
         "mixed-forest": {
           "spruce": 6,
           "birch": 6,
-          "pine": 4
+          "pine": 4,
+          "fern": 0.75
         },
         "meadow": {
           "grass": 10,
@@ -152,7 +156,7 @@
       "stands": {
         "per1000": 6.0,
         "reach": [3.0, 9.0],
-        "inside": 0.245,
+        "inside": 0.2818,
         "outside": 0.02
       },
       "grows": {
@@ -160,12 +164,14 @@
           "spruce": 10,
           "pine": 9,
           "birch": 2,
-          "snag": 0.4
+          "snag": 0.4,
+          "fern": 0.75
         },
         "conifer-forest": {
           "pine": 10,
           "spruce": 7,
-          "birch": 2
+          "birch": 2,
+          "fern": 0.75
         },
         "taiga-open": {
           "pine": 5,
@@ -176,7 +182,8 @@
         "mixed-forest": {
           "spruce": 6,
           "pine": 5,
-          "birch": 5
+          "birch": 5,
+          "fern": 1
         },
         "bog": {
           "heather": 8,
@@ -223,7 +230,7 @@
       "stands": {
         "per1000": 5.0,
         "reach": [3.0, 8.0],
-        "inside": 0.187,
+        "inside": 0.215,
         "outside": 0.0175
       },
       "grows": {
@@ -231,7 +238,8 @@
           "pine": 10,
           "spruce": 4,
           "birch": 4,
-          "snag": 0.8
+          "snag": 0.8,
+          "fern": 0.5
         },
         "taiga-open": {
           "pine": 4,
@@ -241,11 +249,13 @@
         },
         "conifer-forest": {
           "pine": 10,
-          "birch": 3
+          "birch": 3,
+          "fern": 0.75
         },
         "mixed-forest": {
           "pine": 5,
-          "birch": 7
+          "birch": 7,
+          "fern": 0.75
         },
         "bog": {
           "heather": 9,
@@ -286,7 +296,7 @@
       "stands": {
         "per1000": 6.0,
         "reach": [3.0, 9.0],
-        "inside": 0.2655,
+        "inside": 0.3053,
         "outside": 0.0225
       },
       "grows": {
@@ -294,22 +304,26 @@
           "oak": 7,
           "pine": 7,
           "birch": 5,
-          "spruce": 3
+          "spruce": 3,
+          "fern": 1.25
         },
         "broadleaf-forest": {
           "oak": 10,
           "beech": 6,
-          "birch": 3
+          "birch": 3,
+          "fern": 1.25
         },
         "conifer-forest": {
           "pine": 10,
           "spruce": 5,
-          "birch": 2
+          "birch": 2,
+          "fern": 0.75
         },
         "taiga": {
           "spruce": 9,
           "pine": 7,
-          "birch": 3
+          "birch": 3,
+          "fern": 0.5
         },
         "taiga-open": {
           "pine": 4,
@@ -350,7 +364,8 @@
         "swamp-forest": {
           "oak": 5,
           "reed": 6,
-          "snag": 1.5
+          "snag": 1.5,
+          "fern": 1
         },
         "alpine-meadow": {
           "grass": 9,
@@ -371,7 +386,7 @@
       "stands": {
         "per1000": 5.0,
         "reach": [3.0, 8.0],
-        "inside": 0.177,
+        "inside": 0.2035,
         "outside": 0.025
       },
       "grows": {
@@ -383,15 +398,18 @@
         "mixed-forest": {
           "pine": 6,
           "birch": 6,
-          "oak": 3
+          "oak": 3,
+          "fern": 1
         },
         "broadleaf-forest": {
           "oak": 8,
-          "birch": 5
+          "birch": 5,
+          "fern": 1
         },
         "conifer-forest": {
           "pine": 10,
-          "birch": 3
+          "birch": 3,
+          "fern": 0.75
         },
         "meadow": {
           "grass": 10,
@@ -439,20 +457,22 @@
       "stands": {
         "per1000": 6.0,
         "reach": [3.0, 9.0],
-        "inside": 0.1905,
+        "inside": 0.2191,
         "outside": 0.03
       },
       "grows": {
         "broadleaf-forest": {
           "oak": 10,
           "beech": 8,
-          "birch": 3
+          "birch": 3,
+          "fern": 1.5
         },
         "mixed-forest": {
           "oak": 8,
           "beech": 4,
           "pine": 4,
-          "birch": 3
+          "birch": 3,
+          "fern": 1.25
         },
         "farmland-with-woods": {
           "oak": 6,
@@ -483,7 +503,8 @@
         "swamp-forest": {
           "oak": 5,
           "reed": 6,
-          "snag": 1.5
+          "snag": 1.5,
+          "fern": 1.25
         },
         "bog": {
           "heather": 8,
@@ -492,7 +513,8 @@
         },
         "conifer-forest": {
           "pine": 10,
-          "spruce": 4
+          "spruce": 4,
+          "fern": 1
         },
         "alpine-meadow": {
           "grass": 9,
@@ -512,24 +534,27 @@
       "stands": {
         "per1000": 6.0,
         "reach": [3.0, 9.0],
-        "inside": 0.238,
+        "inside": 0.2737,
         "outside": 0.0225
       },
       "grows": {
         "broadleaf-forest": {
           "oak": 10,
           "beech": 7,
-          "birch": 2
+          "birch": 2,
+          "fern": 1.25
         },
         "mixed-forest": {
           "oak": 7,
           "pine": 6,
           "beech": 4,
-          "birch": 3
+          "birch": 3,
+          "fern": 1.25
         },
         "conifer-forest": {
           "pine": 10,
-          "spruce": 4
+          "spruce": 4,
+          "fern": 0.75
         },
         "farmland-with-woods": {
           "oak": 6,
@@ -563,7 +588,8 @@
         "swamp-forest": {
           "oak": 5,
           "reed": 6,
-          "snag": 1.5
+          "snag": 1.5,
+          "fern": 1
         },
         "alpine-meadow": {
           "grass": 9,
@@ -584,7 +610,7 @@
       "stands": {
         "per1000": 5.0,
         "reach": [3.0, 8.0],
-        "inside": 0.197,
+        "inside": 0.2266,
         "outside": 0.025
       },
       "grows": {
@@ -601,16 +627,19 @@
         "broadleaf-forest": {
           "oak": 10,
           "beech": 3,
-          "scrub": 3
+          "scrub": 3,
+          "fern": 0.5
         },
         "conifer-forest": {
           "pine": 10,
-          "scrub": 4
+          "scrub": 4,
+          "fern": 0.5
         },
         "mixed-forest": {
           "oak": 7,
           "pine": 6,
-          "scrub": 3
+          "scrub": 3,
+          "fern": 0.5
         },
         "farmland-with-woods": {
           "oak": 4,
@@ -753,7 +782,7 @@
       "stands": {
         "per1000": 5.0,
         "reach": [3.0, 8.0],
-        "inside": 0.1575,
+        "inside": 0.1811,
         "outside": 0.025
       },
       "grows": {
@@ -790,7 +819,8 @@
         },
         "rainforest": {
           "jungle": 8,
-          "palm": 4
+          "palm": 4,
+          "fern": 1
         },
         "desert-stone": {
           "scrub": 4,
@@ -812,7 +842,7 @@
       "stands": {
         "per1000": 6.0,
         "reach": [3.0, 9.0],
-        "inside": 0.204,
+        "inside": 0.2346,
         "outside": 0.025
       },
       "grows": {
@@ -823,7 +853,8 @@
         },
         "rainforest": {
           "jungle": 9,
-          "palm": 5
+          "palm": 5,
+          "fern": 1.25
         },
         "paddy": {
           "reed": 8,
@@ -837,7 +868,8 @@
         "swamp-forest": {
           "palm": 5,
           "reed": 7,
-          "snag": 1.5
+          "snag": 1.5,
+          "fern": 1
         },
         "marsh": {
           "reed": 10,
@@ -872,20 +904,22 @@
       "stands": {
         "per1000": 6.0,
         "reach": [3.0, 9.0],
-        "inside": 0.272,
+        "inside": 0.31,
         "outside": 0.03
       },
       "grows": {
         "rainforest": {
           "jungle": 10,
           "palm": 5,
-          "scrub": 2
+          "scrub": 2,
+          "fern": 1.5
         },
         "swamp-forest": {
           "jungle": 5,
           "palm": 4,
           "reed": 6,
-          "snag": 1.5
+          "snag": 1.5,
+          "fern": 1.25
         },
         "mangrove": {
           "mangrove": 10,

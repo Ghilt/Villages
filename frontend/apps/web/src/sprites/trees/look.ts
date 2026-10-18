@@ -54,6 +54,7 @@ export const TREES_LOOK = {
     reed: { bend: 1, pale: 0.6 },
     boulder: { bend: 0, pale: 0 },
     cactus: { bend: 0, pale: 0 },
+    fern: { bend: 0.7, pale: 0.4 },
   } as Record<string, { bend: number; pale: number } | undefined>,
 } as const;
 
