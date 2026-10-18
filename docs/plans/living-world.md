@@ -167,6 +167,7 @@ the same sky. What a slot brings is worked out once when the slot comes round, n
 | ice, polar desert, tundra | ptarmigan (flush), an arctic hare (hop) |
 | sand and stony desert, salt flat | a lizard darting (hop), a vulture circling (soar) |
 | bare rock, alpine meadow | an eagle circling (soar), a marmot (hop) |
+| the ruins of the towns of 1790, whatever the ground | crows out of what stands high (flush), crows circling two or three together (soar), a rat from heap to heap (hop): built, `docs/plans/ruined-cities.md` |
 
 **How big, and from where.** At the scenery's scale, each kind's size in world units in `critters/look.ts`, with a
 size slider over all of them. From zoom 9 in, whole by 9.5.

@@ -25,14 +25,21 @@ export const CRITTERS_LOOK = {
   chance: 0.05,
   /** How many critters there are, from nought, none, to one, the most: the Critters part's slider. */
   density: 0.4,
-  /** How big each kind is drawn: how tall its frames stand, in world units. */
+  /**
+   * How big each kind is drawn: how tall its frames stand, in world units. And how many come together, the fewest and
+   * the most, where a kind's own number is not the flush's flock or a single bird circling: the crows of the ruins,
+   * bursting out in a bigger flock than the songbirds', and circling over a ruin two or three together.
+   */
   kinds: {
     songbird: { size: 0.55 },
     squirrel: { size: 0.45 },
     hare: { size: 0.55 },
     fish: { size: 0.6 },
     hawk: { size: 1.1 },
-  } as Record<string, { size: number } | undefined>,
+    crow: { size: 0.7, together: [4, 9] },
+    'crow-aloft': { size: 0.9, together: [2, 3] },
+    rat: { size: 0.35 },
+  } as Record<string, KindLook | undefined>,
   /**
    * A flock bursting out of cover together, fanning out, climbing, flapping and gliding away, fading as it goes; or a
    * bird or two flitting from one tree into another near it, seeking shelter. A burst's birds may drop into a tree
@@ -117,6 +124,15 @@ export const CRITTERS_LOOK = {
       pause: 0.9,
       frames: { gathered: 2, air: 1, landing: 2, still: 0 },
     },
+    /** A rat of the ruins: low and quick, in many short scurries, from one heap of rubble or broken house to the next. */
+    rat: {
+      reach: [1.5, 5],
+      bound: 0.4,
+      high: 0.06,
+      boundsPerSecond: 5,
+      pause: 0.35,
+      frames: { gathered: 1, air: 0, landing: 2, still: 1 },
+    },
   } as Record<string, HopLook | undefined>,
   /** How long a hopping animal takes to come out from behind its cover, and to go behind the next. */
   hopFade: 0.25,
@@ -164,6 +180,12 @@ export const CRITTERS_LOOK = {
     shadow: 0.8,
   },
 } as const;
+
+/** A kind's own numbers: see `CRITTERS_LOOK.kinds`. */
+export interface KindLook {
+  size: number;
+  together?: readonly [number, number];
+}
 
 /** A hopping kind's numbers: see `CRITTERS_LOOK.hop`. */
 export interface HopLook {

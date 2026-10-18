@@ -156,7 +156,7 @@ export const PIECES: readonly Piece[] = [
     runs: 'browser',
     group: 'page',
     cluster: 'shaders',
-    what: 'Birds, squirrels, hares, fish and hawks where the house sees now, made up from the place and the wall clock. Each is worked out from a cell of the world and a twelve-second slot, so every browser makes up the same ones and the server holds none of them. They come out of the scenery the sprites stand, the water or the open sky, only where the fog says the house sees now, drawn from the critter atlas with their shadows under the scenery; a button a kind in the debug panel puts one where you click (decision record 0099).',
+    what: 'Small animals where the house sees now, made up from the place and the wall clock. Birds, squirrels, hares, fish and hawks, and crows and rats in the ruins. Each is worked out from a cell of the world and a twelve-second slot, so every browser makes up the same ones and the server holds none of them. They come out of the scenery the sprites stand, the water or the open sky, only where the fog says the house sees now, drawn from the critter atlas with their shadows under the scenery; a button a kind in the debug panel puts one where you click (decision record 0099).',
   },
   {
     id: 'fog',

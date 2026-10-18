@@ -84,3 +84,16 @@ as a fish does, from a place of the cell over ground whose cast has it. It is dr
 nose up in its picture, and the layer turns it on the screen to the way it flies; its shadow is its own shape, dark,
 turned with it and laid on the ground, and keeps a strength of its own rather than fading with height, so it can be
 seen sweeping the ground under the trees.
+
+## Amendment, 2026-10-18: the ruins' own cast
+
+The ruined towns of 1790 (decision records 0103 and 0104) have critters of their own, and a piece of the ruins is the
+only thing that brings them out. The clock picks a member by the cover it drew rather than only by the ground: out of
+a piece of the ruins, one of the ruins' cast that comes out of that piece (`RUINS_CAST`, `memberFrom` in
+`sprites/critters/casts.ts`), whatever the ground under it; out of anything else, the ground's cast, by its terrain
+class, as before. So the critters need no idea of a place: crows live in ruins because they come out of ruins. Crows
+flush out of what still stands high, in a bigger flock than the songbirds' (a kind may say how many come together,
+`together` in `look.ts`); rats hop between what has fallen; and crows soar over any piece two or three together, the
+first soar out of cover rather than out of a place of the cell. A hawk is still the one bird it was: the first bird of
+a soar is drawn as a lone one always was. Outside the ruins nothing changed, which was checked once by comparing over
+a million critters from the code before and after, and is held by tests that no ground's cast names a crow or a rat.

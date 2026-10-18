@@ -40,6 +40,16 @@ export function soarer(draw: (salt: number) => number): Animal {
 }
 
 /**
+ * The birds of a soar, as many as its kind circles together: one hawk, or two or three crows over a ruin, each on a
+ * circle of its own over the same place. The first is drawn as a lone bird is, so a hawk is the hawk it always was.
+ */
+export function soarersOf(kind: string, draw: (salt: number) => number): Animal[] {
+  const [fewest, most] = CRITTERS_LOOK.kinds[kind]?.together ?? [1, 1];
+  const count = fewest + Math.floor(draw(27) * (most - fewest + 1));
+  return Array.from({ length: count }, (_, at) => soarer(at === 0 ? draw : (salt) => draw(salt + 30 * at)));
+}
+
+/**
  * Where a soaring bird is, `flown` seconds after it came into sight above `from`, for a strip of so many frames: round
  * its circle, which drifts down the wind, high above the ground and rising and falling a little as it goes, gliding but
  * for a beat now and then, and fading as it comes and goes.

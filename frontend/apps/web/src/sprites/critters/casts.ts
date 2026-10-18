@@ -1,8 +1,12 @@
+import { CULTURES, RUIN_PIECES, ruinFrameKey } from '@villages/world';
+import type { RuinPieceName } from '@villages/world';
+
 /**
  * Who lives where: the cast of each kind of ground, by its name in `world/palette.json`. Each member is a kind of
  * critter, `world/critters.json`, the way it moves, how common it is there against the rest of the cast, and the
  * scenery it comes out of, by the kinds' names in `world/biomes.json`. Ground with no cast has no critters yet; the
- * rest of the casts come with step 14 of docs/plans/living-world.md.
+ * rest of the casts come with step 14 of docs/plans/living-world.md. The ruined towns of 1790 have a cast of their own,
+ * which comes out of the pieces of the ruins wherever they stand, whatever the ground: see `RUINS_CAST`.
  */
 
 /**
@@ -86,6 +90,58 @@ export const CASTS: Readonly<Record<string, readonly CastMember[]>> = {
   'desert-sand': [HAWKS],
   'desert-stone': [HAWKS],
 };
+
+/** The pieces of the ruins, in every culture, by their names as scenery: `ruin:hall-european` and the rest. */
+const ruinsOf = (pieces: readonly RuinPieceName[]): string[] =>
+  pieces.flatMap((piece) => CULTURES.map((culture) => ruinFrameKey(piece, culture)));
+
+/** Crows, bursting out of a hall, a tower, an arch, a gate or a wall in a ragged black flock, or flapping to the next. */
+const CROWS: CastMember = {
+  kind: 'crow',
+  behaviour: 'flush',
+  weight: 1,
+  from: ruinsOf(['hall', 'tower', 'arch', 'gate', 'wall']),
+};
+
+/** A rat, out of a heap of rubble or a broken house, scurrying to the next, and gone into it. */
+const RATS: CastMember = {
+  kind: 'rat',
+  behaviour: 'hop',
+  weight: 0.8,
+  from: ruinsOf(['rubble', 'shell', 'row']),
+};
+
+/** A few crows circling together over any piece of the ruins, slow and long in sight. */
+const CROWS_ALOFT: CastMember = {
+  kind: 'crow-aloft',
+  behaviour: 'soar',
+  weight: 0.25,
+  from: ruinsOf(RUIN_PIECES),
+};
+
+/**
+ * The ruins' own cast, which comes out of the pieces of the ruined towns of 1790 and of nothing else: crows out of
+ * what still stands high, rats out of what has fallen, and crows circling over all of it. A piece of the ruins brings
+ * out only these, on whatever ground it stands; nothing else brings them out at all. See docs/plans/ruined-cities.md.
+ */
+export const RUINS_CAST: readonly CastMember[] = [CROWS, RATS, CROWS_ALOFT];
+
+/** Whether a piece of scenery, by its kind's name, is a piece of the ruins. */
+export const isRuin = (kind: string): boolean => kind.startsWith('ruin:');
+
+/**
+ * The member a piece of cover brings out that a draw from nought to one picks: out of a piece of the ruins, one of the
+ * ruins' cast that comes out of that piece, by weight; out of anything else, one of the cast of the ground it stands on,
+ * by weight, or null for ground with no cast or none known yet.
+ */
+export function memberFrom(cover: string, land: string | null, draw: number): CastMember | null {
+  if (isRuin(cover))
+    return memberOf(
+      RUINS_CAST.filter((member) => member.from.includes(cover)),
+      draw,
+    );
+  return memberOf(land === null ? undefined : CASTS[land], draw);
+}
 
 /** The member of a cast a draw from nought to one picks, by weight, or null for ground with no cast. */
 export function memberOf(cast: readonly CastMember[] | undefined, draw: number): CastMember | null {

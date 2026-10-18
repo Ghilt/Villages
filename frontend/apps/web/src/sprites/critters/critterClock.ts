@@ -1,8 +1,8 @@
-import { CASTS, memberOf } from './casts';
+import { CASTS, memberFrom, memberOf } from './casts';
 import { HOP_LONGEST, hopPose, hopper } from './hop';
 import { LEAP_LONGEST, leapPose, leapRings, leaper } from './leap';
 import { CRITTERS_LOOK } from './look';
-import { SOAR_LONGEST, soarPose, soarer } from './soar';
+import { SOAR_LONGEST, soarPose, soarersOf } from './soar';
 import type { Animal, Cover, CritterEvent, Ground, Pose, Ring } from './types';
 
 export type { Animal, Cover, CritterEvent, Ground, Pose, Ring } from './types';
@@ -15,7 +15,8 @@ export type { Animal, Cover, CritterEvent, Ground, Pose, Ring } from './types';
  * and everything about how it goes: a flock bursting out of cover, here, a small animal hopping to the next piece of
  * cover, `hop.ts`, a fish jumping out of the water, `leap.ts`, or a hawk circling over open ground, `soar.ts`, the
  * last two out of no scenery but the water or the ground at a place of the cell drawn for them. After that it is a function of the seconds since it began. See
- * docs/plans/living-world.md.
+ * docs/plans/living-world.md. A piece of the ruins of a town of 1790 brings out the ruins' own cast, whatever the
+ * ground it stands on: crows bursting out of it or circling over it, a rat scurrying from it (`RUINS_CAST`).
  *
  * Whether a cell's slot brings anything is decided by one draw against the density before anything else, so turning
  * the density down only ever takes critters away: fewer is a subset of more. The density may be more than one, which
@@ -107,16 +108,26 @@ export function eventIn(
   if (free?.behaviour === 'leap' || free?.behaviour === 'soar') {
     if (!ground.sees(at.x, at.y)) return null;
     const from = { ...at, kind: open!, height: 0 };
-    const animal = free.behaviour === 'leap' ? leaper(draw) : soarer(draw);
-    return { key, kind: free.kind, behaviour: free.behaviour, startsAt, from, animals: [animal] };
+    const animals = free.behaviour === 'leap' ? [leaper(draw)] : soarersOf(free.kind, draw);
+    return { key, kind: free.kind, behaviour: free.behaviour, startsAt, from, animals };
   }
   const cover = ground.coverIn(fromX, fromY, fromX + L.cell, fromY + L.cell);
   if (cover === null || cover.length === 0) return null;
   const sorted = [...cover].sort((one, other) => one.y - other.y || one.x - other.x);
   const from = sorted[Math.floor(critterHash(cellX, cellY, slot, 1) * sorted.length)]!;
-  const land = ground.classAt(from.x, from.y);
-  const member = memberOf(land === null ? undefined : CASTS[land], critterHash(cellX, cellY, slot, 2));
+  const member = memberFrom(from.kind, ground.classAt(from.x, from.y), critterHash(cellX, cellY, slot, 2));
   if (member === null || !member.from.includes(from.kind) || !ground.sees(from.x, from.y)) return null;
+  if (member.behaviour === 'soar') {
+    // Crows circling over the piece of the ruins they came to, a few together.
+    return {
+      key,
+      kind: member.kind,
+      behaviour: 'soar',
+      startsAt,
+      from,
+      animals: soarersOf(member.kind, draw),
+    };
+  }
   if (member.behaviour === 'hop') {
     // One animal bounding to cover near by; with none near enough, nothing comes.
     const near = coverNear(from, member.from, ground, L.hop[member.kind]?.reach ?? [0, 0]);
@@ -136,26 +147,23 @@ export function eventIn(
     behaviour: member.behaviour,
     startsAt,
     from,
-    animals: flockOf(from, near, flit, draw),
+    animals: flockOf(from, near, flit, draw, L.kinds[member.kind]?.together),
   };
 }
 
 /**
  * The birds of a flush out of `from`, given the trees near it they could take shelter in: a bird or two flitting into
- * one of them, or a flock bursting out and fanning, some of it dropping into one. Every bird flying off bends the same
- * way, by much the same, so the flock turns together.
+ * one of them, or a flock bursting out and fanning, some of it dropping into one, as many as the flush's flock or as
+ * the kind's own number says. Every bird flying off bends the same way, by much the same, so the flock turns together.
  */
 export function flockOf(
   from: Cover,
   near: readonly Cover[],
   flit: boolean,
   draw: (salt: number) => number,
+  [fewest, most]: readonly [number, number] = F.flock,
 ): Animal[] {
-  const count = flit
-    ? draw(3) < 0.3
-      ? 2
-      : 1
-    : F.flock[0] + Math.floor(draw(3) * (F.flock[1] - F.flock[0] + 1));
+  const count = flit ? (draw(3) < 0.3 ? 2 : 1) : fewest + Math.floor(draw(3) * (most - fewest + 1));
   const heading = draw(4) * Math.PI * 2;
   const spread = (F.spread * Math.PI) / 180;
   const [quickest, slowest] = F.shelterSeconds;

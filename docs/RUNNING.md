@@ -156,15 +156,18 @@ stage alone, with none of the debug panel in it (decision record 0079).
   way, and is gone behind it; on grassland a hare comes out from behind a bush or a tuft of grass, a few bounds and
   a stop, and is gone behind another, each facing the way it goes; over a lake, a river or the shallow sea a fish
   jumps clear and falls back, a ring spreading where it left and one where it fell; high over open ground, rock and
-  desert a hawk circles slowly, turned the way it flies, its shadow sweeping the ground below. Each has a soft shadow
-  below it. The same
+  desert a hawk circles slowly, turned the way it flies, its shadow sweeping the ground below; in the ruins of the
+  towns of 1790, and nowhere else, crows burst out of the halls, towers and walls or circle two or three together over
+  them, and rats scurry from one heap of rubble to the next. Each has a soft shadow below it. The same
   critters leave the same bush at the same moment in every browser; one first seen on its way fades up; a player who asked for less motion sees none. They are drawn from the critters' atlas (`world:critters`,
   below). They are the **Critters** part of the Shaders section: `off`, `low` or `high` in its bar, low at every
   load, low moving them at fifteen frames a second and high at thirty. Inside it, first what is about now, `3
   songbirds, 1 hare`, or why there are none, `from zoom 9 in`, `off`; then **spawn** and a button a kind,
-  `songbird`, `squirrel`, `hare`, `fish` and `hawk`: press one and every click on the map puts one of that kind there, now,
-  seen or not - a flock out of the tree or bush nearest the click, a squirrel or a hare from the cover nearest it to
-  more near it, a fish out of the water clicked, a hawk over the open ground clicked - this window's own and nobody
+  `songbird`, `squirrel`, `hare`, `fish`, `hawk`, `crow`, `crow-aloft` and `rat`: press one and every click on the map
+  puts one of that kind there, now, seen or not - a flock out of the tree or bush nearest the click, a squirrel or a
+  hare from the cover nearest it to more near it, a fish out of the water clicked, a hawk over the open ground clicked,
+  crows bursting out of or circling over the piece of a ruin nearest the click, a rat from it to the next - this
+  window's own and nobody
   else's, with the log saying why when
   nothing of the kind could come there; the cursor is a cross while one is armed, and the button again or escape
   stops. Then three sliders: **how many**, from none to all

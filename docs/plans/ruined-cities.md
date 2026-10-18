@@ -96,9 +96,12 @@ containers cannot sort in depth with each other, and a ruin's overgrown edge is 
 ## The crows and the rats
 
 They come out of a ruin's pieces as their cover, so they live only in ruins without the critters needing any idea of a
-place: **crows** flush out of halls, towers and walls, in flocks larger and darker than the songbirds'; **rats** hop
-between rubble and shells. Circling crows wait for the soar, `living-world.md`'s step 13. These steps come last: the
-critters are being worked on in another session.
+place: **crows** flush out of halls, towers, arches, gates and walls, in black flocks of four to nine, bigger than the
+songbirds'; **crows aloft** circle two or three together over any piece, the soar the hawk flies; **rats** hop low and
+quick between rubble, shells and rows. A piece of the ruins brings out the ruins' own cast, `RUINS_CAST` in
+`sprites/critters/casts.ts`, whatever ground it stands on, and nothing else brings any of them out, so nothing about
+the critters outside the ruins changed: a test compared over a million of them, before and after, and found them all
+the same.
 
 ## The rules that must hold
 
