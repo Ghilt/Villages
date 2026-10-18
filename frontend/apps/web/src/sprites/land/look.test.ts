@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
+import { CLUMP_ACROSS, CLUMP_ALONG, CLUMP_ROOM } from './duneShader';
 import { DRAWN } from './landMask';
 import { LAND_LOOK, lookOf, motionOf } from './look';
 
@@ -85,6 +86,17 @@ describe('the land', () => {
     const flow = LAND_LOOK.ice.sandFlow;
     expect(Number.isInteger((flow.speed * 3600) / flow.cell)).toBe(true);
     expect(3600 % flow.curl).toBe(0);
+  });
+
+  it('fits every clump of dunes inside its own cell, its third dune further off than the other two, and none more than three', () => {
+    const D = LAND_LOOK.ice.dunes;
+    // A point asks only its own cell, so a clump reaching past it would be cut off, and two clumps could touch.
+    expect(CLUMP_ALONG).toBeLessThanOrEqual(CLUMP_ROOM[0]);
+    expect(CLUMP_ACROSS).toBeLessThanOrEqual(CLUMP_ROOM[1]);
+    expect(D.near[0]).toBeGreaterThan(0);
+    expect(D.far[0]).toBeGreaterThan(D.near[1]);
+    expect(D.clumps.together).toHaveLength(3);
+    expect(D.clumps.together.reduce((sum, one) => sum + one, 0)).toBeCloseTo(1);
   });
 
   it('leaves the water to the water shader, the woods to their trees and bare stone still', () => {

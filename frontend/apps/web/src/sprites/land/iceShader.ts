@@ -1,5 +1,4 @@
-import { LIGHT, towardsTheLight } from '../../map/light';
-
+import { DUNE_GLSL } from './duneShader';
 import { ICE_LOOK } from './iceLook';
 
 /**
@@ -12,11 +11,8 @@ import { ICE_LOOK } from './iceLook';
  * streams along the wind in faint streamers, faster than the gusts and strongest where one blows, and now and then a
  * little swirl of it spins and drifts down the wind, at a place and a moment a cell and a slot of the clock draw.
  *
- * The sand lies in dunes: ridges across the wind, a long gentle slope up to the crest and a short steep slip face down
- * the lee, wandering along their length. They stand up the screen as the trees and the tufts do: a pixel sees the
- * frontmost dune whose face reaches up to it, found by walking down the screen from as high as a dune stands to the
- * ground under the pixel, and its face is lit or shaded by the map's one light (`map/light.ts`), its windward slope
- * rippled; and sand blows off the crests in pale streamers. A kind's look is blended between the world units about a
+ * The sand lies in clumps of dunes here and there, still sand between them, standing up the screen as the trees do,
+ * with sand streaming over their crests: `duneShader.ts`. A kind's look is blended between the world units about a
  * pixel, so it never steps at a texel's edge. Every number is in `iceLook.ts`, and the sliders' in `iceTuning.ts`.
  */
 
@@ -27,15 +23,6 @@ const KINDS = Object.values(ICE_LOOK.kinds);
 const G = ICE_LOOK.glints;
 const D = ICE_LOOK.drift;
 const S = ICE_LOOK.swirls;
-const U = ICE_LOOK.dunes;
-const F = ICE_LOOK.sandFlow;
-/** How many of its cells the sand's flow comes round after: an hour's flow, so it never jumps. */
-const SAND_AROUND = Math.round((F.speed * 3600) / F.cell);
-
-/** The one light as a step towards it, east, south and up, so a dune's face is lit as the hills are. */
-const towards = towardsTheLight();
-const up = (LIGHT.altitude * Math.PI) / 180;
-const LIGHT_TOWARDS = [towards.east * Math.cos(up), towards.south * Math.cos(up), Math.sin(up)];
 
 const floats = (pick: (kind: (typeof KINDS)[number]) => number): string =>
   `float[${KINDS.length}](${KINDS.map((kind) => float(pick(kind))).join(', ')})`;
@@ -48,7 +35,6 @@ uniform float uGlints;
 uniform float uSnow;
 uniform float uSwirls;
 uniform float uSand;
-uniform float uDunes;
 // The drift's lattice, its cell along the wind and how many cells it comes round after, and how far it has run.
 uniform vec2 uDriftLattice;
 uniform float uDriftCarried;
@@ -78,27 +64,6 @@ const float SWIRL_TURNS = ${float(S.turns)};
 const float SWIRL_SPIN = ${float(S.spin)};
 const vec3 SWIRL_COLOUR = ${colour(S.colour)};
 const float SWIRL_ALPHA = ${float(S.opacity)};
-const float DUNE_APART = ${float(U.apart)};
-const float DUNE_LENGTH = ${float(U.length)};
-const float DUNE_SHARE = ${float(U.share)};
-const float DUNE_HEIGHT = ${float(U.height)};
-const float DUNE_CREST = ${float(U.crest)};
-const float DUNE_HORNS = ${float(U.horns)};
-const vec3 DUNE_LIT = ${colour(U.lit)};
-const float DUNE_LIT_ALPHA = ${float(U.litOpacity)};
-const vec3 DUNE_SHADE = ${colour(U.shade)};
-const float DUNE_SHADE_ALPHA = ${float(U.shadeOpacity)};
-const float DUNE_CREST_LIGHT = ${float(U.crestLight)};
-const float DUNE_CREST_WIDTH = ${float(U.crestWidth)};
-const float DUNE_RIPPLES = ${float(U.ripples)};
-const float DUNE_RIPPLE_STRENGTH = ${float(U.rippleStrength)};
-const int DUNE_STEPS = ${U.steps};
-const float SAND_CELL = ${float(F.cell)};
-const float SAND_THIN = ${float(F.thin)};
-const float SAND_FLOW = ${float(F.speed)};
-const float SAND_CURL = ${float(F.curl)};
-const float SAND_AROUND = ${float(SAND_AROUND)};
-const vec3 LIGHT_TOWARDS = ${colour(LIGHT_TOWARDS)};
 
 // What the kinds' looks give at a point - how strongly it drifts and in what, how often it swirls, whether it lies in
 // dunes - blended between the four world units about it, of those that are this motion's land.
@@ -177,84 +142,7 @@ float swirlsAt(vec2 world) {
   return best;
 }
 
-// A dune at a point of the ground: how high it stands there, in world units, and how far through the dune the point is
-// down the wind, nought at the foot of its windward slope, the crest at DUNE_CREST, one where its slip face ends; and
-// minus one on the flat sand about the dunes. A row across the wind holds one dune at the most to a stretch of it, the
-// rows staggered; each a crescent, highest in its middle, its horns reaching further down the wind towards its ends.
-vec2 duneAt(vec2 world) {
-  float along = dot(world, WIND);
-  float row = floor(along / DUNE_APART);
-  float stagger = (row * 0.5 + hash(ivec2(int(row), 7), 171)) * DUNE_LENGTH;
-  float shifted = dot(world, WIND_ACROSS) + stagger;
-  float stretch = floor(shifted / DUNE_LENGTH);
-  ivec2 key = ivec2(int(row), int(stretch));
-  if (hash(key, 172) > DUNE_SHARE) return vec2(0.0, -1.0);
-  float size = mix(0.6, 1.0, hash(key, 173));
-  float middle = (stretch + 0.5 + (hash(key, 174) - 0.5) * 0.3) * DUNE_LENGTH;
-  float x = (shifted - middle) / (DUNE_LENGTH * 0.5 * size);
-  if (abs(x) >= 1.0) return vec2(0.0, -1.0);
-  float foot = (row + 0.05 + hash(key, 175) * 0.15) * DUNE_APART;
-  float depth = DUNE_APART * 0.55 * size;
-  float phase = (along - foot) / depth - DUNE_HORNS * x * x;
-  if (phase <= 0.0 || phase >= 1.0) return vec2(0.0, -1.0);
-  float profile = phase < DUNE_CREST
-    ? smoothstep(0.0, DUNE_CREST, phase)
-    : 1.0 - smoothstep(DUNE_CREST, 1.0, phase);
-  return vec2(DUNE_HEIGHT * uDunes * size * (1.0 - x * x) * profile, phase);
-}
-
-// The sand blowing over the dunes: thin streaks along the screen's horizontal, flowing along it the way the wind leans
-// and curling as they go, strongest where a gust blows; every motion of it comes round with the hour.
-float sandFlowAt(vec2 world) {
-  vec2 across = vec2(uTilt.x, uTilt.y);
-  vec2 up = vec2(-uTilt.y, uTilt.x);
-  float s = dot(world, across);
-  float t = dot(world, up);
-  float way = dot(WIND, across) < 0.0 ? -1.0 : 1.0;
-  float phase = TAU * uTime / SAND_CURL;
-  float curl = sin(s / 1.3 - way * 2.0 * phase) * 0.18 + sin(s / 0.55 + way * 3.0 * phase) * 0.07;
-  float flow = s - way * SAND_FLOW * uTime;
-  float streak = windNoise(vec2(flow / SAND_CELL, (t + curl) / SAND_THIN), SAND_AROUND, 181);
-  return smoothstep(0.58, 0.85, streak) * (0.4 + 0.6 * gustAt(world, uCarried));
-}
-
-// The ground a pixel sees among the dunes: the frontmost whose face reaches up to it, walking down the screen from as
-// high as a dune stands to the ground under the pixel, as the trees are seen standing up the screen.
-vec2 duneSeen(vec2 world, float weight) {
-  float top = DUNE_HEIGHT * uDunes * weight * uScale;
-  float step = top / float(DUNE_STEPS);
-  for (int i = DUNE_STEPS; i > 0; i--) {
-    float rise = step * float(i);
-    vec2 ground = groundUnder(vScreen + vec2(0.0, rise));
-    if (duneAt(ground).x * weight * uScale >= rise) {
-      // Between this step and the one in front of it, which missed, a few halvings find the dune's face to within a
-      // fraction of a pixel, so its outline is smooth rather than in steps.
-      float hit = rise;
-      float miss = rise + step;
-      for (int k = 0; k < 4; k++) {
-        float middle = 0.5 * (hit + miss);
-        if (duneAt(groundUnder(vScreen + vec2(0.0, middle))).x * weight * uScale >= middle) hit = middle;
-        else miss = middle;
-      }
-      return groundUnder(vScreen + vec2(0.0, hit));
-    }
-  }
-  return world;
-}
-
-// How a dune's face at a point is lit against the flat sand, from minus one, turned from the light, to one, towards it.
-float duneLight(vec2 world, float phase) {
-  float e = 0.06;
-  float east = duneAt(world + vec2(e, 0.0)).x - duneAt(world - vec2(e, 0.0)).x;
-  float south = duneAt(world + vec2(0.0, e)).x - duneAt(world - vec2(0.0, e)).x;
-  vec3 normal = normalize(vec3(-east / (2.0 * e), -south / (2.0 * e), 1.0));
-  float lit = (dot(normal, LIGHT_TOWARDS) - LIGHT_TOWARDS.z) * 2.5;
-  // The wind's ripples across the windward slopes and the flat sand, shading them finely.
-  float windward = phase < 0.0 ? 0.6 : 1.0 - smoothstep(DUNE_CREST - 0.1, DUNE_CREST, phase);
-  float along = dot(world, WIND) / DUNE_RIPPLES + noise(world / 1.3) * 2.0;
-  lit += sin(TAU * along) * DUNE_RIPPLE_STRENGTH * windward;
-  return clamp(lit, -1.0, 1.0);
-}
+${DUNE_GLSL}
 
 // A point of light flashing now and again, a small star: one at the most to a small cell of the ground, at its own
 // place and moments.
@@ -302,8 +190,9 @@ vec4 iceHere(vec2 world) {
   IceLooks looks = iceLooksAt(world);
   vec4 drawn = vec4(0.0);
   vec2 ground = world;
-  // Off the crests only, where the sand lies in dunes; everywhere the snow lies.
-  float drifting = 1.0;
+  // The frontmost dune the pixel sees, lit and shaded, whole wherever one stands. The sand streams most over the crests
+  // and the slip faces just past them, and a little everywhere on the sand; the snow streams everywhere it lies.
+  float crest = 0.0;
   if (looks.dunes > 0.0 && uDunes > 0.0) {
     ground = duneSeen(world, looks.dunes);
     vec2 dune = duneAt(ground);
@@ -311,10 +200,9 @@ vec4 iceHere(vec2 world) {
     drawn = lit > 0.0 ? over(DUNE_LIT, lit * DUNE_LIT_ALPHA, drawn) : over(DUNE_SHADE, -lit * DUNE_SHADE_ALPHA, drawn);
     float ridge = dune.y < 0.0 ? 0.0 : 1.0 - smoothstep(0.0, DUNE_CREST_WIDTH, abs(dune.y - DUNE_CREST));
     drawn = over(DUNE_LIT, ridge * DUNE_CREST_LIGHT * looks.dunes, drawn);
-    // Most over the crests and the slip faces just past them, a little everywhere on the sand.
-    float crest = dune.y < 0.0 ? 0.0 : smoothstep(DUNE_CREST - 0.1, DUNE_CREST, dune.y) * (1.0 - smoothstep(DUNE_CREST + 0.05, 1.0, dune.y));
-    drifting = mix(1.0, 0.3 + crest * 1.5, looks.dunes);
+    crest = dune.y < 0.0 ? 0.0 : smoothstep(DUNE_CREST - 0.1, DUNE_CREST, dune.y) * (1.0 - smoothstep(DUNE_CREST + 0.05, 1.0, dune.y));
   }
+  float drifting = mix(1.0, 0.3 + crest * 1.5, looks.dunes);
   float strength = looks.drift * mix(uSnow, uSand, looks.dunes) * drifting;
   if (strength > 0.0) {
     float streaks = mix(driftAt(ground), sandFlowAt(ground), looks.dunes);

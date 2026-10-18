@@ -24,7 +24,11 @@ export interface MotionUniforms {
 const f32 = (value: number) => ({ value, type: 'f32' as const });
 const vec2 = (x: number, y: number) => ({ value: new Float32Array([x, y]), type: 'vec2<f32>' as const });
 
-export function createMotionUniforms(): MotionUniforms {
+/**
+ * `duneShown` says where a page that shows one dune asks for it, in world units, every frame: the renders page's, so a
+ * dune is there to see on its sand whatever the clumps make of it (`duneShader.ts`).
+ */
+export function createMotionUniforms(duneShown?: () => { x: number; y: number } | null): MotionUniforms {
   const grass = new UniformGroup({
     uPatch: f32(7),
     uRagged: f32(0),
@@ -65,6 +69,8 @@ export function createMotionUniforms(): MotionUniforms {
     uSwirls: f32(1),
     uSand: f32(1),
     uDunes: f32(1),
+    uDuneClumps: f32(1),
+    uDuneShown: { value: new Float32Array(3), type: 'vec3<f32>' as const },
     uDriftLattice: vec2(3, 1),
     uDriftCarried: f32(0),
   });
@@ -130,6 +136,11 @@ export function createMotionUniforms(): MotionUniforms {
       i.uSwirls = icy.swirls;
       i.uSand = icy.sand;
       i.uDunes = icy.dunes;
+      i.uDuneClumps = icy.clumps;
+      const shown = duneShown?.() ?? null;
+      i.uDuneShown[0] = shown?.x ?? 0;
+      i.uDuneShown[1] = shown?.y ?? 0;
+      i.uDuneShown[2] = shown === null ? 0 : 1;
       const streamers = latticeNear(LAND_LOOK.ice.drift.long);
       i.uDriftLattice[0] = streamers.cell;
       i.uDriftLattice[1] = streamers.around;

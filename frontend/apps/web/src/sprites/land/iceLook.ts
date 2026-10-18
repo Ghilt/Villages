@@ -63,19 +63,47 @@ export const ICE_LOOK = {
   },
   dunes: {
     /**
-     * The dunes stand in rows across the wind, this many world units apart down it, and along a row one at the most to a
-     * stretch this long, the rows staggered so they lie in a scatter; this share of the stretches has one. Each is a
-     * crescent: highest in its middle and lower to its ends, its horns reaching further down the wind, a long gentle
-     * slope up to its crest from the windward side and a short steep slip face down the lee, and flat sand about it.
-     * Twice the size they first were, and more curved, Adam's word of 2026-10-18.
+     * The dunes lie in clumps of one, two or three over the sand desert, still sand between them, far fewer than they
+     * were, Adam's word of the evening of 2026-10-18. The sand is cut into cells this many world units down the wind
+     * and across it; this share of them holds a clump, wholly inside the cell and at least `margin` world units from
+     * its edges, so no two clumps ever touch, more of them in some places and fewer in others by a slow pattern over
+     * the cells this many of them across; and a clump is one dune, two or three, by these shares.
      */
-    apart: 6,
-    length: 6,
-    share: 0.7,
-    height: 1.4,
-    crest: 0.68,
-    /** How far its horns reach down the wind at its ends, as a share of its depth. */
+    clumps: { cell: [62, 70], margin: 3, share: 1, patternSize: 5, together: [0.4, 0.35, 0.25] },
+    /**
+     * No dune of a clump ever touches another, Adam's word of the same evening. Two stand corner to corner, the second
+     * behind the first down the wind and to one side of it across, with this many world units of sand between them
+     * each way, the least and the most; a third stands straight behind one of them or straight beside it, end to end,
+     * further off, by `far`, beside in this share of the clumps where it fits in the cell and behind where it does not.
+     */
+    near: [2, 4],
+    far: [6, 10],
+    beside: 0.5,
+    /**
+     * A dune is as deep down the wind as this at its biggest, in world units, twice what it was, Adam's word of that
+     * evening. How big the smallest is against the biggest, how high the biggest stands, and how far through it its
+     * crest lies, down the wind: a long gentle slope up to it from the windward side and a short steep slip face down
+     * the lee.
+     */
+    depth: 8,
+    smallest: 0.75,
+    height: 2.4,
+    crest: 0.78,
+    /**
+     * This share of the dunes are long ridges over two or three stretches this long; the rest crescents as long as
+     * `length` at their biggest, highest in the middle and lower to their ends, their horns reaching down the wind by
+     * `horns` of their depth. A long ridge's ends bend so too.
+     */
+    long: 0.65,
+    stretch: 10,
+    length: 10,
     horns: 0.45,
+    /**
+     * Some of the long ridges bend as an S, one end up the wind and the other down it, Adam's word of the evening of
+     * 2026-10-18: this share of them, bent to either side by this share of their half-length, and by this many world
+     * units at the most.
+     */
+    bends: { share: 0.45, by: 0.24, most: 3 },
     /** The lit faces and the shaded ones, against the flat sand, and how strongly a face is lit or shaded. */
     lit: [1, 0.95, 0.82],
     litOpacity: 0.5,
@@ -85,7 +113,7 @@ export const ICE_LOOK = {
     crestLight: 0.5,
     crestWidth: 0.02,
     /** The ripples the wind lays across the windward slopes and the flat sand: how far apart, and how strongly they shade. */
-    ripples: 0.28,
+    ripples: 0.5,
     rippleStrength: 0.12,
     /** How many steps the walk down the screen takes to find the dune a pixel sees. */
     steps: 16,

@@ -78,11 +78,13 @@ interface Mask {
   counts: readonly number[];
 }
 
+/** `duneShown` says where a page that shows one dune asks for it, in world units: the renders page's. */
 export function createLandLayer(
   renderer: Renderer,
   tilesRoot: () => string,
   repaint: () => void,
   tilesOf: ClassTiles = servedTiles,
+  duneShown?: () => { x: number; y: number } | null,
 ): LandLayer {
   const uniforms = new UniformGroup({
     uSize: { value: new Float32Array(2), type: 'vec2<f32>' },
@@ -98,7 +100,7 @@ export function createLandLayer(
     uShown: { value: new Float32Array(4), type: 'vec4<f32>' },
     uShownMore: { value: 0, type: 'f32' },
   });
-  const motions = createMotionUniforms();
+  const motions = createMotionUniforms(duneShown);
   const empty = new BufferImageSource({
     resource: new Uint8Array(4),
     width: 1,

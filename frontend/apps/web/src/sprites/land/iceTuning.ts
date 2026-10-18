@@ -16,6 +16,8 @@ export interface IceTuning {
   sand: number;
   /** How high the dunes stand, as so many times their own. */
   dunes: number;
+  /** How many clumps of dunes lie on the sand desert, as so many times their own share. */
+  clumps: number;
 }
 
 export const ICE_DEFAULTS: IceTuning = {
@@ -24,6 +26,7 @@ export const ICE_DEFAULTS: IceTuning = {
   swirls: 1,
   sand: 1,
   dunes: 1,
+  clumps: 1,
 };
 
 const ice = createTuning('villages.ice.tuning', ICE_DEFAULTS, 'ice');

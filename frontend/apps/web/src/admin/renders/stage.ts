@@ -100,7 +100,16 @@ export async function startRenders(
     }
     return Promise.resolve(tile);
   };
-  const land = createLandLayer(app.renderer, () => 'renders', repaint, tilesOf);
+  // A dune in the middle of its desert square, so there is always one to look at, whatever the clumps make of the sand.
+  const desert = layout.lands.find((square) => square.land === 'desert-sand');
+  const dune = desert === undefined ? null : { x: desert.x + SQUARE / 2, y: desert.y + SQUARE / 2 };
+  const land = createLandLayer(
+    app.renderer,
+    () => 'renders',
+    repaint,
+    tilesOf,
+    () => dune,
+  );
   const trees = createTreesLayer(app.renderer, repaint);
   const scenery = await rendersScenery(tilesRoot, layout, trees.shaders);
   const ground: Ground = {
