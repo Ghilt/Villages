@@ -1,6 +1,7 @@
 import { CASTS, RUINS_CAST } from './casts';
 import type { CastMember } from './casts';
-import { coverNear, critterHash, flockOf } from './critterClock';
+import { coverNear, critterHash } from './critterClock';
+import { flockOf } from './flush';
 import { hopper, waterNear } from './hop';
 import { leaper } from './leap';
 import { CRITTERS_LOOK } from './look';

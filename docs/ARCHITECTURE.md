@@ -442,12 +442,12 @@ and the critters' layer the ground they come out of, so the page hands them its 
 **The critters are made up by the page** (0099): `sprites/critters/critterClock.ts` is a pure function of the place
 and the wall clock - a hash of a cell and a slot says whether a critter comes, out of which tree or bush of the
 scenery's own cells (`currentPointsOf`), which of the cast of the class under it (`casts.ts`), and how each bird
-flies, away or into another tree near it, or which piece of cover near it a squirrel, a hare or a frog bounds to
-(`hop.ts`) or a snake glides to (`slither.ts`), and beside a lake or a river a frog may hop into the water whatever
-the ground's cast (`waterNear`); a fish and a hawk need no cover, and leap from or circle over a place of the cell
-drawn for them, where the water or the open ground there has one (`leap.ts`, `soar.ts`) - so nothing is stored or
-sent and every browser has the same ones. `CritterLayer.ts` asks it every frame for what is in flight over the view,
-where the fog's field says the house sees now (`visionAt`, read with the scenery and the class tiles in
+flies, away or into another tree near it (`flush.ts`), or which piece of cover near it a squirrel, a hare or a frog
+bounds to (`hop.ts`) or a snake glides to (`slither.ts`), and beside a lake or a river a frog may hop into the water
+whatever the ground's cast (`waterNear`); a fish and a hawk need no cover, and leap from or circle over a place of
+the cell drawn for them, where the water or the open ground there has one (`leap.ts`, `soar.ts`) - so nothing is
+stored or sent and every browser has the same ones. `CritterLayer.ts` asks it every frame for what is in flight over
+the view, where the fog's field says the house sees now (`visionAt`, read with the scenery and the class tiles in
 `critterGround.ts`), with any a click in the Critters part asked for (`critterSpawn.ts`, `spawned.ts`, this window's
 own and outside the shared world), and places a sprite a critter from the atlas `world:critters` cuts, and a shadow,
 in two containers inside the one the fog uncolours: the shadows, a fish's rings on the water, drawn in code, and what
