@@ -250,7 +250,27 @@ try {
       failed.add(state.name);
       continue;
     }
-    borrow(entry, step, master, REPO);
+    let heldSince: number | undefined;
+    try {
+      borrow(entry, step, master, REPO, (path, waited) => {
+        heldSince = performance.now() - waited;
+        say(
+          `  ${state.name}: waiting up to three minutes for a virus scanner to let go of the new files in ${path}`,
+        );
+      });
+      if (heldSince !== undefined) {
+        say(
+          `  ${state.name}: the virus scanner let go after ${Math.round((performance.now() - heldSince) / 1000)} s`,
+        );
+      }
+    } catch (error) {
+      say(
+        `  ${state.name}: not borrowed: ${(error as Error).message}. The next world:ready clears what it left and tries again`,
+      );
+      tally.failed += 1;
+      failed.add(state.name);
+      continue;
+    }
     noteBorrowed(REPO, step.perMaster ? master : '*', state.name, key);
     if (madeNow) {
       tally.made += 1;

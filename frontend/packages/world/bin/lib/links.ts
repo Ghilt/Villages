@@ -90,23 +90,41 @@ export function refuseLinked(path: string, root: string, what: string): void {
 
 const sleeper = new Int32Array(new SharedArrayBuffer(4));
 
+const BUSY = new Set(['EBUSY', 'EPERM', 'ENOTEMPTY', 'EACCES']);
+
 /**
- * Runs `act` and tries again a few times when Windows says a file is busy: a virus scanner holds a file it has just
- * seen written for a moment, and a remove or rename in that moment fails with EBUSY or EPERM.
+ * How long a folder's rename waits for Windows to let go of the files in it. A folder cannot be renamed while any
+ * file in it is open, and a virus scanner opens every file it sees made: on 2026-10-18 it held a tree's twenty
+ * thousand freshly linked tiles for fifteen seconds, and for forty-five the next time they were borrowed.
  */
-export function patiently<T>(act: () => T): T {
+export const FOLDER_PATIENCE = 180_000;
+
+/**
+ * Runs `act` and tries again, for up to `within` milliseconds, while Windows says a file is busy: a virus scanner
+ * holds a file it has just seen written for a moment, and a remove or rename in that moment fails with EBUSY or
+ * EPERM. A file is let go of in a few seconds, the default; a folder of new files wants `FOLDER_PATIENCE`.
+ * `waiting` is told once, when a second has gone by, how long it has waited, so that a long wait is not taken for a
+ * hang.
+ */
+export function patiently<T>(
+  act: () => T,
+  { within = 3_000, waiting }: { within?: number; waiting?: (waited: number) => void } = {},
+): T {
+  const began = performance.now();
+  let told = false;
   for (let attempt = 0; ; attempt++) {
     try {
       return act();
     } catch (error) {
-      const code = (error as NodeJS.ErrnoException).code;
-      if (
-        attempt >= 6 ||
-        (code !== 'EBUSY' && code !== 'EPERM' && code !== 'ENOTEMPTY' && code !== 'EACCES')
-      ) {
+      const waited = performance.now() - began;
+      if (waited >= within || !BUSY.has((error as NodeJS.ErrnoException).code ?? '')) {
         throw error;
       }
-      Atomics.wait(sleeper, 0, 0, 50 * 2 ** attempt);
+      if (!told && waited >= 1_000) {
+        told = true;
+        waiting?.(waited);
+      }
+      Atomics.wait(sleeper, 0, 0, Math.min(50 * 2 ** attempt, 2_000, within - waited));
     }
   }
 }

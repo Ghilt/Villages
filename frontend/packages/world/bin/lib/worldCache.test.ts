@@ -3,6 +3,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  readdirSync,
   statSync,
   symlinkSync,
   utimesSync,
@@ -153,6 +154,18 @@ describe('borrowing an entry', () => {
     expect(readFileSync(tile, 'utf8')).toBe('a tile');
     expect(isShared(tile)).toBe(true);
     expect(isBorrowed(entry!, shelf.has('tile', 'k1')!, TILE, 'terrain', tree)).toBe(true);
+  });
+
+  it('clears what a borrow that failed left beside the folder, and nothing else beside it', () => {
+    const tiles = join(tree, W, 'masters', 'terrain', 'tiles');
+    put(join(`${tiles}.borrowing-99999`, '0', '0', '0.png'), 'a run that failed');
+    put(join(`${tiles}.borrowing-${process.pid}`, 'cut.json'), '{}');
+    put(join(`${tiles}-by-hand`, 'cut.json'), 'a folder of its own');
+    const { entry } = fileTiles();
+    borrow(entry!, TILE, 'terrain', tree);
+
+    expect(readdirSync(join(tree, W, 'masters', 'terrain')).sort()).toEqual(['tiles', 'tiles-by-hand']);
+    expect(readFileSync(join(tiles, '0', '0', '0.png'), 'utf8')).toBe('a tile');
   });
 
   it('knows when the tree has made its own since', () => {

@@ -99,3 +99,20 @@ it was made from, and a tree borrows it by hard link.** The shape, the steps and
   reaches main, and the size check, which lists untracked files, would walk it.
 - **Make the world faster instead**, running the master's steps side by side. Six of them read only the master,
   and each wants 8 GB. Worth doing one day; with the shelf it is a cost paid once a change, not once a tree.
+
+## Amendment, 2026-10-18: a borrowed folder waits for the virus scanner
+
+A fresh tree's `world:ready` could not borrow its tiles. The folder of 21,846 new hard links, made beside `tiles`, was
+refused its rename into place with `EPERM`, and the same rename went through by hand fifteen seconds later. Windows will
+not rename a folder while any file in it is open, and Windows Defender, the machine's only virus scanner, opens every
+file it sees made. The rename had been given the same three seconds as a single file's. The same evening the tiles were
+borrowed again into another fresh tree and held for forty-five seconds; its height, as many files, was held once and
+then not at all.
+
+A folder's rename now waits up to three minutes, `FOLDER_PATIENCE` in `bin/lib/links.ts`, and `world:ready` says so
+once it has waited a second, and how long it waited when the scanner lets go; a single file keeps its three seconds. Filing an entry on the shelf waits the same way, because a
+tool's last files are as new. A borrow that still fails says so on its step's line and leaves its `.borrowing-<pid>`
+folder behind, and the tree's next borrow clears every such folder before it links: one run borrows into a tree at a
+time, under the tree's lock, so none is a live run's. An exclusion for `E:\Code\Villages` in Windows Security would
+spare the wait, at the price of the scanner no longer reading what npm installs there; that is a setting of the machine,
+not of the repository.

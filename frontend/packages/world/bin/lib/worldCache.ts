@@ -10,7 +10,15 @@ import {
 import { basename, dirname, join, relative } from 'node:path';
 
 import { isMainCheckout } from './checkouts.ts';
-import { linkFiles, linkOnTheWay, linkTarget, patiently, placeFile, removeHere } from './links.ts';
+import {
+  FOLDER_PATIENCE,
+  linkFiles,
+  linkOnTheWay,
+  linkTarget,
+  patiently,
+  placeFile,
+  removeHere,
+} from './links.ts';
 import type { Parts } from './worldKeys.ts';
 import { forMaster } from './worldSteps.ts';
 import type { StepName, WorldStep } from './worldSteps.ts';
@@ -137,12 +145,15 @@ export class Shelf {
     };
     writeFileSync(join(making, 'key.json'), `${JSON.stringify(keyFile, null, 1)}\n`);
     const entry = this.entryOf(step.name, key);
-    try {
-      renameSync(making, entry);
-    } catch (error) {
-      if (this.has(step.name, key) === undefined) {
-        throw error;
-      }
+    const filedFirst = patiently(
+      () => {
+        if (this.has(step.name, key) !== undefined) return true;
+        renameSync(making, entry);
+        return false;
+      },
+      { within: FOLDER_PATIENCE },
+    );
+    if (filedFirst) {
       removeHere(making);
     }
     return { entry };
@@ -223,12 +234,36 @@ export function splitJunctionsAbove(path: string, root: string): string[] {
 }
 
 /**
- * Lends the entry at `entry` to the tree at `root`: each folder it makes is made again in the tree, beside where it
- * goes and moved into place, as hard links to the entry's files; each loose file is copied with the entry's date, in
- * the order the step lists them, data before manifest. A file the step makes only sometimes, missing from the entry,
- * goes from the tree too.
+ * Takes away what a borrow that failed left beside `to`: a folder `<to>.borrowing-<pid>` of another run. Only one run
+ * borrows into a tree at a time, under the tree's lock, so whatever is there is no live run's.
  */
-export function borrow(entry: string, step: WorldStep, master: string, root: string): void {
+function clearBorrowings(to: string): void {
+  const stale = `${basename(to)}.borrowing-`;
+  let names: string[];
+  try {
+    names = readdirSync(dirname(to));
+  } catch {
+    return;
+  }
+  for (const name of names.filter((one) => one.startsWith(stale))) {
+    removeHere(join(dirname(to), name));
+  }
+}
+
+/**
+ * Lends the entry at `entry` to the tree at `root`, whose lock the caller holds: each folder it makes is made again in
+ * the tree, beside where it goes and moved into place, as hard links to the entry's files; each loose file is copied
+ * with the entry's date, in the order the step lists them, data before manifest. A file the step makes only
+ * sometimes, missing from the entry, goes from the tree too. A folder Windows will not let be moved yet, because a
+ * virus scanner is reading its new files, is waited for up to `FOLDER_PATIENCE`, and `waiting` is told of it.
+ */
+export function borrow(
+  entry: string,
+  step: WorldStep,
+  master: string,
+  root: string,
+  waiting?: (path: string, waited: number) => void,
+): void {
   for (const made of step.makes) {
     const path = forMaster(made.path, master);
     const from = join(entry, path);
@@ -240,10 +275,13 @@ export function borrow(entry: string, step: WorldStep, master: string, root: str
     }
     if (made.folder === true) {
       const beside = `${to}.borrowing-${process.pid}`;
-      removeHere(beside);
+      clearBorrowings(to);
       linkFiles(from, beside);
       removeHere(to);
-      patiently(() => renameSync(beside, to));
+      patiently(() => renameSync(beside, to), {
+        within: FOLDER_PATIENCE,
+        waiting: (waited) => waiting?.(path, waited),
+      });
     } else {
       placeFile(from, to);
     }
