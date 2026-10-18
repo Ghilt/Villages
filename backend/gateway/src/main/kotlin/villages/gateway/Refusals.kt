@@ -1,71 +1,18 @@
 package villages.gateway
 
-import villages.domain.CharacterError
 import villages.domain.DomainError
-import villages.domain.HouseError
-import villages.domain.StructureError
-import villages.domain.WorldError
+import kotlin.reflect.KClass
 
-/** A domain refusal as the short code the protocol carries, which the interface turns into words. */
-internal fun DomainError.reasonCode(): String = when (this) {
-    HouseError.AlreadyFounded -> "alreadyFounded"
-    is HouseError.InvalidName -> "invalidName"
-    is DomainError.InvalidLocation -> "invalidLocation"
-    is HouseError.InvalidBanner -> "invalidBanner"
-    is HouseError.InvalidChoice -> "invalidChoice"
-    is HouseError.InvalidDialogue -> "invalidDialogue"
-    HouseError.DialogueAlreadyOffered -> "dialogueAlreadyOffered"
-    HouseError.NoSuchDialogue -> "noSuchDialogue"
-    HouseError.DialogueOver -> "dialogueOver"
-    HouseError.NotTheNextStep -> "notTheNextStep"
-    is HouseError.InvalidQuest -> "invalidQuest"
-    HouseError.QuestAlreadyOffered -> "questAlreadyOffered"
-    HouseError.NoSuchQuest -> "noSuchQuest"
-    HouseError.QuestOver -> "questOver"
-    HouseError.NotTheCurrentNode -> "notTheCurrentNode"
-    HouseError.NoSuchObjective -> "noSuchObjective"
-    HouseError.ObjectiveAlreadyMet -> "objectiveAlreadyMet"
-    HouseError.NotThePlayersToMeet -> "notThePlayersToMeet"
-    HouseError.NotTheWorldsToMeet -> "notTheWorldsToMeet"
-    HouseError.NotAReward -> "notAReward"
-    HouseError.ChoicePending -> "choicePending"
-    HouseError.NoChoicePending -> "noChoicePending"
-    HouseError.NoSuchChoice -> "noSuchChoice"
-    HouseError.NoSuchOption -> "noSuchOption"
-    HouseError.NoSuchHouse -> "noSuchHouse"
-    HouseError.NoSuchPledge -> "noSuchPledge"
-    HouseError.TooManyKeyFigures -> "tooManyKeyFigures"
-    HouseError.AlreadyAKeyFigure -> "alreadyAKeyFigure"
-    HouseError.NoSuchKeyFigure -> "noSuchKeyFigure"
-    HouseError.NoSuchVision -> "noSuchVision"
-    is HouseError.InvalidVision -> "invalidVision"
-    HouseError.SeatNamedBefore -> "seatNamedBefore"
-    HouseError.NoSeat -> "noSeat"
-    is HouseError.InvalidAmount -> "invalidAmount"
-    is HouseError.InvalidPledge -> "invalidPledge"
-    is HouseError.NotEnoughFree -> "notEnoughFree"
-    CharacterError.AlreadyAppeared -> "alreadyAppeared"
-    CharacterError.NoSuchCharacter -> "noSuchCharacter"
-    CharacterError.AlreadyDead -> "alreadyDead"
-    // The same words as a house's refusal of the same rule, because the interface says them the same way.
-    is CharacterError.InvalidName -> "invalidName"
-    is CharacterError.InvalidStat -> "invalidStat"
-    is CharacterError.InvalidAge -> "invalidAge"
-    is CharacterError.InvalidPortrait -> "invalidPortrait"
-    is CharacterError.InvalidCause -> "invalidCause"
-    CharacterError.NotOnTheMap -> "notOnTheMap"
-    StructureError.AlreadyRaised -> "alreadyRaised"
-    is StructureError.NoSuchType -> "noSuchType"
-    is StructureError.InvalidLevel -> "invalidLevel"
-    is StructureError.InvalidName -> "invalidName"
-    StructureError.NoSuchStructure -> "noSuchStructure"
-    StructureError.SameHolder -> "sameHolder"
-    StructureError.IsARuin -> "isARuin"
-    StructureError.NotARuin -> "notARuin"
-    is StructureError.NoSuchSlot -> "noSuchSlot"
-    is StructureError.SlotFull -> "slotFull"
-    StructureError.AlreadyInSlot -> "alreadyInSlot"
-    StructureError.NotInSlot -> "notInSlot"
-    is StructureError.InvalidContent -> "invalidContent"
-    is WorldError.InvalidCatalogue -> "invalidCatalogue"
-}
+/**
+ * A domain refusal as the short code the protocol carries, which the interface turns into words: the error's own name,
+ * `HouseError.NotEnoughFree` as `notEnoughFree`. A house's and a character's refusal of the same rule share a name,
+ * `InvalidName`, and so a code, because the interface says them the same way. A new refusal needs nothing here.
+ *
+ * Every code the wire has carried is kept in `contracts/refusal-codes.txt`, and `RefusalCodesSpec` fails for one no
+ * error gives any more, and for one given and not kept: a class renamed would otherwise change a word the page reads.
+ * See `docs/plans/mechanic-modules.md`, step 3.
+ */
+internal fun DomainError.reasonCode(): String = codeOf(this::class)
+
+/** The code of every refusal of a kind, worked out from its class. */
+internal fun codeOf(error: KClass<out DomainError>): String = error.simpleName!!.replaceFirstChar { it.lowercase() }

@@ -31,7 +31,8 @@ than holding them.** The places, as they stand:
   and only those that care about it have to be edited. *(Amended 2026-10-18, below: a fold names only the families
   it hears.)*
 - **The gateway:** what a frame says about a mechanic is worked out in a file of its own beside `Gateway.kt` -
-  `HouseViews.kt`, `DialogueViews.kt`, and the rest - and a refusal's code in `Refusals.kt`.
+  `HouseViews.kt`, `DialogueViews.kt`, and the rest - and a refusal's code in `Refusals.kt`. *(Amended 2026-10-18:
+  the code is worked out from the error's class name, and every code kept in `contracts/refusal-codes.txt`.)*
 
 The rest follows in the steps that build it, each amending this record: the house decided in parts, one a
 mechanic, with `HouseDecider` routing between them; the gateway's connection made of parts in the same way; and
