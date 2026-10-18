@@ -55,8 +55,11 @@ export function toStructureSprite(
   culture: Culture | null = null,
   yours = false,
 ): MapSprite {
-  const heights = catalogue?.types.find((one) => one.type === structure.structureType)?.groundHeight ?? [];
+  const spec = catalogue?.types.find((one) => one.type === structure.structureType);
+  const heights = spec?.groundHeight ?? [];
   const groundHeight = heights[Math.min(Math.max(structure.level, 1), heights.length) - 1];
+  const sides = spec?.footprint ?? [];
+  const footprint = sides[Math.min(Math.max(structure.level, 1), sides.length) - 1];
   return {
     id: `structure:${structure.id}`,
     at: onACorner({ lng: structure.place.lon, lat: structure.place.lat }),
@@ -69,6 +72,8 @@ export function toStructureSprite(
     structure: {
       picture: pictureKey(structure.ruin === true ? RUIN_PICTURE : structure.structureType, culture),
       ...(groundHeight === undefined ? {} : { groundHeight }),
+      ...(footprint === undefined ? {} : { footprint }),
+      ...(structure.ruin === true ? { ruin: true } : {}),
     },
     ...(structure.holder === undefined ? {} : { pennant: tinctureColour(structure.holder.banner.field) }),
   };

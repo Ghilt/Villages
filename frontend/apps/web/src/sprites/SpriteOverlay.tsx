@@ -5,9 +5,11 @@ import { sceneryStore } from './scenery/settings';
 import { circleOf, visionOf } from '../fog/circles';
 import { fieldOf } from '../fog/fogField';
 import { whileInHand } from '../loading/inHand';
+import { note } from '../log/log';
 import { sessionStore } from '../net/gateway';
 import { focusOn } from '../map/focus';
 import { CrowdCard } from './CrowdCard';
+import { workedGround, yardOf } from './ground/workedGround';
 import { cameraOf } from './mapCamera';
 import { createPixiSpriteRenderer } from './PixiSpriteRenderer';
 import type { MapSprite } from './SpriteRenderer';
@@ -70,6 +72,19 @@ export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick }: 
   );
   const field = useMemo(() => fieldOf(circles, tension), [circles, tension]);
   const vision = useMemo(() => visionOf(sight?.points ?? [], today, tension), [sight, today, tension]);
+
+  // The ground worn bare under the buildings the page holds, worked out again only when they change, and said in the
+  // log when how much of it there is changes. See docs/plans/worked-ground.md.
+  const yards = useMemo(() => sprites.flatMap((sprite) => yardOf(sprite) ?? []), [sprites]);
+  const worked = useMemo(() => workedGround(yards), [yards]);
+  const said = useRef('');
+  useEffect(() => {
+    const now = `${worked.size} diamonds of worked ground under ${yards.length} buildings`;
+    if (now !== said.current) {
+      said.current = now;
+      note('ground', now);
+    }
+  }, [worked, yards]);
 
   useEffect(() => {
     const container = containerRef.current;

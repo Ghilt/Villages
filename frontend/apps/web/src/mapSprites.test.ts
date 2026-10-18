@@ -56,6 +56,11 @@ describe('a structure as the map draws it', () => {
     });
   });
 
+  it('covers as many diamonds as the catalogue says at its level, for the yard laid round it', () => {
+    expect(toStructureSprite(structure('castle', 2), CATALOGUE).structure?.footprint).toBe(3);
+    expect(toStructureSprite(structure('castle', 2), null).structure).not.toHaveProperty('footprint');
+  });
+
   it('stands at the highest level the catalogue has, for a level beyond it', () => {
     expect(toStructureSprite(structure('mill', 7), CATALOGUE).structure?.groundHeight).toBe(3);
   });
@@ -98,7 +103,12 @@ describe('a ruin', () => {
   it('is drawn as a ruin, as tall as what it was, and flies no pennant', () => {
     const drawn = toStructureSprite({ ...structure('castle', 2), ruin: true }, CATALOGUE);
 
-    expect(drawn.structure).toEqual({ picture: 'a ruin@european', groundHeight: 4.5 });
+    expect(drawn.structure).toEqual({
+      picture: 'a ruin@european',
+      groundHeight: 4.5,
+      footprint: 3,
+      ruin: true,
+    });
     expect(drawn).not.toHaveProperty('pennant');
   });
 });

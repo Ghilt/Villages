@@ -562,7 +562,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
 - A structure on the map: its type's placeholder picture, drawn in code (`sprites/structurePictures.ts`) in its
   own colours and in the look of the culture under it, read off the master's culture map: European as drawn,
   Islamic in plaster, sandstone and green tile under a dome, East Asian in dark tile under a flared roof, African
-  in mud under a cone of thatch (`sprites/cultureStyles.ts`), a ruin too; as tall on the ground as `groundHeight` in the catalogue says at its level, standing on the front corner of its base on the corner of the ground's diamonds nearest its place, and, when your house
+  in mud under a cone of thatch (`sprites/cultureStyles.ts`), a ruin too; as tall on the ground as `groundHeight` in the catalogue says at its level, standing on the front corner of its base on the corner of the ground's diamonds nearest its place, its yard worked out under it - the log says under `ground` how many diamonds of worked ground lie under how many buildings, which nothing draws yet (`docs/plans/worked-ground.md`) - and, when your house
   controls it, far out its type's pin from `world/sprites/marks/structures/`, at the size of a word, from 7.5, where
   your house's people become their busts too; its own picture stands in for the pin until the atlas is read. **A mark
   never fades**: your holdings and key figures reach the page at every zoom, and out to the whole world they are only

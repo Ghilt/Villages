@@ -24,9 +24,11 @@ export interface MapSprite {
   kind: 'candidate' | 'character' | 'structure';
   /**
    * A structure's picture, by its type's name, and its height on the ground in world units, which its level
-   * raises. Its tint is white, because a structure is drawn in its own colours. Absent for every other kind.
+   * raises; how many of the ground's diamonds its base covers along a side, its footprint; and whether it is a ruin,
+   * whose yard is going back to grass (docs/plans/worked-ground.md). Its tint is white, because a structure is drawn
+   * in its own colours. Absent for every other kind.
    */
-  structure?: { picture: string; groundHeight?: number };
+  structure?: { picture: string; groundHeight?: number; footprint?: number; ruin?: boolean };
   /**
    * A structure the player's house controls, or one of its key figures: far out it becomes its mark, a type's pin
    * or a bust, and is drawn at every zoom. Anyone else's stays itself, shrinks with the map and fades at the floor.
