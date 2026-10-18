@@ -30,8 +30,8 @@ after them wait on the same thing. Fog of war, the exception, is under way a ste
 character dialogue; the UI component library is built and waiting on Adam's eye, and so is the choice roll,
 and so is the origin map, the first of real names on the edited world. Structures are planned and not
 started; the world cache is built and waiting on Adam's eye; quests are built and on main, waiting on Adam's
-eye for their experiment; catalogues are built and waiting on Adam's eye; and ruined cities, the newest, are
-planned and not started.
+eye for their experiment; catalogues are built and waiting on Adam's eye; ruined cities are
+planned and not started; and worked ground, the newest, is planned and not started.
 
 - **Characters and key figures**: the people of the world, each with a history of their own, and the
   house's tie to the few it acts through, shown in a pane in the corner beside the house status. The shape
@@ -176,6 +176,11 @@ planned and not started.
   player, sent as the scenery is, only near revealed ground, with crows and rats in them. The ground and the roads
   under them are left for later. The steps, one commit each, are in `docs/plans/ruined-cities.md`; none is built.
   What the story says of the ruins is `STORY.md`. Asked for by Adam on 2026-10-17.
+- **Worked ground**: the buildings standing in the land rather than laid on it - a worn yard on the diamonds under
+  every building, trees cleared off it, paths between near buildings, and a shadow under each. It is worked out by
+  the browser from the structures it holds, so it keeps to the fog exactly as the buildings do, with nothing stored
+  or sent. It is drawn by one pass of the sprite canvas over a mask of the diamonds. The steps, one commit each, are
+  in `docs/plans/worked-ground.md`; none is built. Asked for by Adam on 2026-10-18.
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps
 its world in MongoDB whenever Docker is running, and RabbitMQ carries every event it stores to the read models.
