@@ -20,7 +20,8 @@ function memberNamed(kind: string): CastMember | null {
  * A critter put where a click asked for one (`critterSpawn.ts`), beginning at `seconds`: what the world would bring
  * there, made up from the ground there and seen or not - a flock bursting out of the tree or bush nearest the click, a
  * squirrel or a hare bounding from the cover of its own nearest the click to more near it, a fish leaping from the
- * water clicked, a hawk circling over the open ground clicked, a covey or a lark bursting up off the open ground clicked; a frog from the reeds or the grass nearest the click
+ * water clicked, a hawk or gulls circling over the open ground or the sea clicked, a covey or a lark bursting up off the open
+ * ground clicked, dolphins leaping or a whale blowing out of the sea clicked; a frog from the reeds or the grass nearest the click
  * into the water beside them, or to the next tuft with no water near, and a snake gliding from them to the next; out
  * of the piece of the ruins nearest the click, crows bursting out or circling over it, or a rat scurrying to the next. Null while the ground there is not yet known; in a few
  * words why not, when nothing of its kind could come there.

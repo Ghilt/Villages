@@ -130,3 +130,18 @@ of the crows circling over a ruined town on farmland, which a test caught, so th
 member keeps its share. A bird of a flush climbs and flies as its kind does (`look.ts`, `climb` and `far`): the
 partridges low, the lark high and coming down near where it rose. The flush itself moved out of the clock into
 `flush.ts` first, beside the other ways of moving.
+
+## Amendment, 2026-10-18: the sea
+
+The second of step 14's three: gulls wheeling low and quick over the shallow sea, two to four together; dolphins of
+the shallow sea leaping one after another in a row; and a whale far out on the ocean, now and then, which blows
+rather than leaps, its frames played through once where it came up and a wide ring spreading as its back goes under.
+The leap and the soar have each kind's own numbers now, the fish's and the hawk's where a kind has none of its own
+(`look.ts`, `leap.kinds` and `soar.kinds`), and a row of dolphins is the leap's animals, each behind the one before
+and a little later (`leapersOf`).
+
+The ocean's cast is a whale alone, and what comes out of the open water comes as often as the open ground's share of
+the cast says: every slot of the ocean would have brought a whale. So the share is of one where the whole cast weighs
+less than that, and a ground with a light cast is that much quieter (`openOf`): a whale weighing 0.15 blows in about
+one slot in seven. The same rule makes a hawk over the bare rock and the desert, whose casts were a hawk alone, as
+rare as a hawk over the meadow, where before it came into every slot.

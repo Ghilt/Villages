@@ -2,7 +2,7 @@ import { FROGS, memberFrom, memberOf, openOf } from './casts';
 import type { CastMember } from './casts';
 import { FLUSH_LONGEST, flockOf, flushPose } from './flush';
 import { HOP_LONGEST, hopPose, hopRings, hopper, waterNear } from './hop';
-import { LEAP_LONGEST, leapPose, leapRings, leaper } from './leap';
+import { LEAP_LONGEST, leapPose, leapRings, leapersOf } from './leap';
 import { CRITTERS_LOOK } from './look';
 import { SLITHER_LONGEST, slitherPose, slitherer } from './slither';
 import { SOAR_LONGEST, soarPose, soarersOf } from './soar';
@@ -163,7 +163,7 @@ export function eventIn(
  * leaping, a bird circling, a flock bursting up off the ground with no tree near to take shelter in.
  */
 export function openAnimals(member: CastMember, from: Cover, draw: (salt: number) => number): Animal[] {
-  if (member.behaviour === 'leap') return [leaper(draw)];
+  if (member.behaviour === 'leap') return leapersOf(member.kind, draw);
   if (member.behaviour === 'soar') return soarersOf(member.kind, draw);
   if (member.behaviour === 'flush') return flockOf(from, [], false, draw, L.kinds[member.kind]?.together);
   return [];
@@ -207,12 +207,15 @@ export function posesOf(event: CritterEvent, seconds: number, frames: number, si
       continue;
     }
     if (event.behaviour === 'leap') {
-      poses.push(leapPose(event.from, bird, flown, frames));
+      poses.push(leapPose(event.kind, event.from, bird, flown, frames));
       continue;
     }
-    if (event.behaviour === 'soar' || event.behaviour === 'slither') {
-      const pose = event.behaviour === 'soar' ? soarPose : slitherPose;
-      poses.push(pose(event.from, bird, flown, frames));
+    if (event.behaviour === 'soar') {
+      poses.push(soarPose(event.kind, event.from, bird, flown, frames));
+      continue;
+    }
+    if (event.behaviour === 'slither') {
+      poses.push(slitherPose(event.from, bird, flown, frames));
       continue;
     }
     poses.push(flushPose(event, bird, flown, frames, size));
@@ -220,11 +223,13 @@ export function posesOf(event: CritterEvent, seconds: number, frames: number, si
   return poses;
 }
 
-/** The rings on the water a critter leaves at this moment: a leaping fish's, a frog's gone in, and no other's. */
+/** The rings on the water a critter leaves at this moment: a leap's or a blow's, a frog's gone in, and no other's. */
 export function ringsOf(event: CritterEvent, seconds: number): Ring[] {
   if (event.behaviour !== 'leap' && event.behaviour !== 'hop') return [];
   return event.animals.flatMap((animal) => {
     const flown = seconds - event.startsAt - animal.delay;
-    return event.behaviour === 'leap' ? leapRings(event.from, animal, flown) : hopRings(animal, flown);
+    return event.behaviour === 'leap'
+      ? leapRings(event.kind, event.from, animal, flown)
+      : hopRings(animal, flown);
   });
 }

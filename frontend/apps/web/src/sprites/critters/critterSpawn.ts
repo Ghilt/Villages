@@ -11,7 +11,8 @@ import type { SpawnAsk } from './types';
  * window's own, neither remembered nor sent, outside the shared world: what comes is what the world would bring there
  * - a flock out of the nearest tree, a squirrel or a hare from the nearest cover to the next, a fish out of the water,
  * a frog into the water beside the nearest reeds, a snake out of them, crows or a rat out of the nearest piece of a ruin, a
- * covey, a lark, ducks or ptarmigan off the open ground, grouse out of the nearest heather -
+ * covey, a lark, ducks or ptarmigan off the open ground, grouse out of the nearest heather, gulls or dolphins over the
+ * shallow sea clicked, a whale blowing out on the ocean -
  * only sooner, wherever the click, seen or not. The layer makes each one up from the ground there
  * (`spawned.ts`). Escape, or the armed button again, stops.
  */
@@ -33,6 +34,9 @@ export const SPAWNABLE = [
   'grouse',
   'duck',
   'ptarmigan',
+  'gull',
+  'dolphin',
+  'whale',
 ] as const;
 export type Spawnable = (typeof SPAWNABLE)[number];
 

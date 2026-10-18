@@ -48,6 +48,9 @@ export const CRITTER_SQUARES: readonly CritterSquareOf[] = [
   { kind: 'grouse', land: 'heath', every: 5 },
   { kind: 'duck', land: 'marsh', every: 5 },
   { kind: 'ptarmigan', land: 'ice', every: 5 },
+  { kind: 'gull', land: 'shallow-sea', every: 10 },
+  { kind: 'dolphin', land: 'shallow-sea', every: 4 },
+  { kind: 'whale', land: 'ocean', every: 6 },
 ];
 
 export interface RenderSquare {

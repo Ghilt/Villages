@@ -48,6 +48,9 @@ export const CRITTERS_LOOK = {
     grouse: { size: 0.65, together: [2, 4], climb: 1.2 },
     duck: { size: 0.6, together: [2, 5], climb: 3, far: 1.3 },
     ptarmigan: { size: 0.55, together: [3, 6], climb: 1.3, far: 0.8 },
+    gull: { size: 0.8, together: [2, 4] },
+    dolphin: { size: 1.2 },
+    whale: { size: 2.4 },
   } as Record<string, KindLook | undefined>,
   /**
    * A flock bursting out of cover together, fanning out, climbing, flapping and gliding away, fading as it goes; or a
@@ -175,6 +178,26 @@ export const CRITTERS_LOOK = {
     splash: 0.12,
     /** A ring on the water: how wide it starts and ends, in world units, how long it spreads, and how bright at first. */
     ring: { from: 0.08, to: 0.7, seconds: 1.4, alpha: 0.7 },
+    /**
+     * The others that come up out of the water, each with the fish's numbers but for its own. Dolphins of the shallow
+     * sea in a row, so many of them, each this far behind the one before it and leaping this many seconds after it,
+     * further, higher and slower than a fish, their rings wider. A whale far out on the ocean, which does not leap but
+     * blows: its back and a spout of spray stand up out of the sea and fall back, its frames played through once in
+     * one place, coming and going over `fade` seconds, a wide ring spreading as its back goes under.
+     */
+    kinds: {
+      dolphin: {
+        reach: [1.6, 2.4],
+        high: [0.7, 1.1],
+        seconds: [1.1, 1.5],
+        flicksPerSecond: 3,
+        pod: [2, 4],
+        apart: 0.9,
+        after: 0.3,
+        wide: 1.5,
+      },
+      whale: { seconds: [2.6, 3.4], blows: true, fade: 0.5, wide: 2.4 },
+    } as Record<string, LeapKindLook | undefined>,
   },
   /**
    * A snake gliding out of a tuft of the wet land's reeds or grass into another near it, low on the ground and seen from
@@ -215,6 +238,21 @@ export const CRITTERS_LOOK = {
      * stays, so it can be seen sweeping the ground.
      */
     shadow: 0.8,
+    /**
+     * The others that circle, each with the hawk's numbers but for its own: gulls wheeling low and quick over the
+     * shallow sea, two to four together, on small tight circles, beating their wings more often.
+     */
+    kinds: {
+      gull: {
+        high: [2, 3.5],
+        radius: [1.2, 2.2],
+        circleSeconds: 4.5,
+        seconds: [7, 11],
+        fade: 1,
+        flapping: 0.35,
+        flapsPerSecond: 6,
+      },
+    } as Record<string, Partial<SoarLook> | undefined>,
   },
 } as const;
 
@@ -225,6 +263,35 @@ export interface KindLook {
   /** How high a bird of a flush climbs, in world units, where not the flush's own; and how far it flies against it. */
   climb?: number;
   far?: number;
+}
+
+/** A kind's own numbers for the leap, where they are not the fish's: see `CRITTERS_LOOK.leap.kinds`. */
+export interface LeapKindLook {
+  reach?: readonly [number, number];
+  high?: readonly [number, number];
+  seconds?: readonly [number, number];
+  flicksPerSecond?: number;
+  /** How many come up together in a row, the fewest and the most; how far behind each other and how much later. */
+  pod?: readonly [number, number];
+  apart?: number;
+  after?: number;
+  /** How wide its rings spread against a fish's. */
+  wide?: number;
+  /** Whether it blows rather than leaps, its frames played through once in one place, and how long it comes and goes. */
+  blows?: boolean;
+  fade?: number;
+}
+
+/** A soaring kind's numbers: see `CRITTERS_LOOK.soar`. */
+export interface SoarLook {
+  high: readonly [number, number];
+  radius: readonly [number, number];
+  circleSeconds: number;
+  seconds: readonly [number, number];
+  fade: number;
+  drift: number;
+  flapping: number;
+  flapsPerSecond: number;
 }
 
 /** A hopping kind's numbers: see `CRITTERS_LOOK.hop`. */

@@ -15,6 +15,9 @@
     { "name": "lark", "frames": 3 },
     { "name": "grouse", "frames": 3 },
     { "name": "duck", "frames": 3 },
-    { "name": "ptarmigan", "frames": 3 }
+    { "name": "ptarmigan", "frames": 3 },
+    { "name": "gull", "frames": 2 },
+    { "name": "dolphin", "frames": 2 },
+    { "name": "whale", "frames": 3 }
   ]
 }

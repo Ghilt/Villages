@@ -7,7 +7,10 @@ import { CRITTERS_LOOK } from './look';
 describe('the leap', () => {
   it('leaps a fish out of a lake, a river or the shallow sea, and never out of the land', () => {
     for (const water of ['lake', 'river', 'shallow-sea']) {
-      const fish = [...anHour(1, wood({ coverIn: () => [] }, 'oak', water), 600).values()];
+      // The shallow sea's dolphins and gulls are the sea's own: see sea.test.ts.
+      const fish = [...anHour(1, wood({ coverIn: () => [] }, 'oak', water), 600).values()].filter(
+        (event) => event.kind !== 'dolphin' && event.kind !== 'gull',
+      );
       expect(fish.length).toBeGreaterThan(0);
       expect(fish.every((event) => event.kind === 'fish' && event.behaviour === 'leap')).toBe(true);
     }

@@ -21,8 +21,8 @@
   ruin a culture. Cut by a tool of their own, and painted to rules of their own: see below.
 - `world/sprites/critters/<kind>.png`, one for every kind of critter in `world/critters.json`: songbird, squirrel,
   hare, fish, hawk, the frog and the snake of the wet land, the partridge, the lark, the grouse, the duck and the
-  ptarmigan, and the crow, the crow aloft and the rat of the ruins. A strip of frames, cut by a tool of its own: see
-  below.
+  ptarmigan, the gull, the dolphin and the whale of the sea, and the crow, the crow aloft and the rat of the ruins. A
+  strip of frames, cut by a tool of its own: see below.
 - `world/sprites/ruins/<piece>-<culture>.png`, the pieces the ruins of the towns of 1790 are laid out in, eight in
   each of the four cultures: a `shell` (a house open to the sky), a `row` of them, a `tower` stump, a `hall` (the
   culture's great building, roofless), an `arch`, a stretch of `wall`, a `gate`, and `rubble`. Cut by `world:art`
@@ -78,16 +78,20 @@ its nose to the top of the frame, wings spread to glide and then a beat, because
 flies round its circle. A crow is the songbird's flight in black and ragged, seen from behind as it bursts out of a
 ruin; the crow aloft is the hawk's view of it, circling over the ruins; a rat faces right and scurries, stretched,
 gathered, stretched again. The partridge, the lark, the grouse, the duck and the ptarmigan burst up as the songbird
-does, seen from behind, a wing up, level and down. A frog faces right too, sitting gathered, in the air, landing; a
-snake is seen from above, as the hawk is, its head to the top of the frame and its body waving, the wave running
-down it from one frame to the next. Which frame is which is in `apps/web/src/sprites/critters/look.ts`. On a
-transparent background or a flat one, as any sprite, with no plinth; where the animal stands on anything, it stands
-on the bottom edge. A frame is cut 64 pixels tall and a critter is drawn small - eight to thirty pixels at the
-closest zoom - so paint it 256 tall or more, keep the shape bold, and let three or four frames say the motion: at
-that size the motion is what reads, not the outline. A placeholder strip is drawn from simple shapes for every kind
-with no picture, never over a file that is there. To have one back, delete your picture. More frames, or fewer, is a
-change to the number in `world/critters.json`. With the dev server running, a strip saved is cut a moment later and
-shown, playing, on `/admin/inspect-pictures`; `npm run world:critters --prefix frontend` cuts by hand.
+does, seen from behind, a wing up, level and down. A gull is seen from above as the hawk is; a dolphin faces right
+as a fish does, its flukes up and then down, which the map tips along its leap; a whale's three frames are its blow,
+played once where it is, standing on the bottom edge where its back breaks the sea: its back coming up with a puff
+of spray, the spout standing tall, its back going under as the spray falls. A frog faces right too, sitting
+gathered, in the air, landing; a snake is seen from above, as the hawk is, its head to the top of the frame and its
+body waving, the wave running down it from one frame to the next. Which frame is which is in
+`apps/web/src/sprites/critters/look.ts`. On a transparent background or a flat one, as any sprite, with no plinth;
+where the animal stands on anything, it stands on the bottom edge. A frame is cut 64 pixels tall and a critter is
+drawn small - eight to thirty pixels at the closest zoom - so paint it 256 tall or more, keep the shape bold, and
+let three or four frames say the motion: at that size the motion is what reads, not the outline. A placeholder strip
+is drawn from simple shapes for every kind with no picture, never over a file that is there. To have one back,
+delete your picture. More frames, or fewer, is a change to the number in `world/critters.json`. With the dev server
+running, a strip saved is cut a moment later and shown, playing, on `/admin/inspect-pictures`; `npm run
+world:critters --prefix frontend` cuts by hand.
 
 ## What a picture can be
 

@@ -1,10 +1,12 @@
 import { DOWN_WIND } from '../wind';
 
 import { CRITTERS_LOOK } from './look';
+import type { SoarLook } from './look';
 import type { Animal, Cover, Pose } from './types';
 
 /**
- * The soar: a bird circling slowly high over open ground, a hawk, gliding with a beat of its wings now and then, its
+ * The soar: a bird circling slowly high over open ground, a hawk, or gulls wheeling low and quick over the shallow sea,
+ * gliding with a beat of its wings now and then, its
  * circle drifting down the world's one wind (`../wind.ts`), coming and going slowly far up so it never pops. It comes
  * out of no scenery but the open ground at a place of its cell the clock draws, as a fish comes out of the water. It is
  * seen from above, as the map is, so its pose says which way it flies and the layer turns its picture to it; its
@@ -14,8 +16,14 @@ import type { Animal, Cover, Pose } from './types';
 
 const S = CRITTERS_LOOK.soar;
 
+/** A soaring kind's numbers: the hawk's, but for its own (`CRITTERS_LOOK.soar.kinds`). */
+const soarOf = (kind: string): SoarLook => ({ ...S, ...S.kinds[kind] });
+
 /** The longest a soar lasts, so the slots before the current one that may still be circling are asked too. */
-export const SOAR_LONGEST = S.seconds[1];
+export const SOAR_LONGEST = Math.max(
+  S.seconds[1],
+  ...Object.keys(S.kinds).map((kind) => soarOf(kind).seconds[1]),
+);
 
 const between = ([least, most]: readonly [number, number], share: number): number =>
   least + (most - least) * share;
@@ -25,16 +33,16 @@ const ramp = (from: number, to: number, value: number): number =>
 
 /**
  * The one bird of a soar: where on its circle it starts, which way round it goes, how wide its circle is and how high,
- * its own beat, and how long it is in sight.
+ * its own beat, and how long it is in sight. A hawk's, unless another kind is said.
  */
-export function soarer(draw: (salt: number) => number): Animal {
+export function soarer(draw: (salt: number) => number, kind = 'hawk'): Animal {
   return {
     heading: draw(22) * Math.PI * 2,
     delay: 0,
     reach: draw(25),
     phase: draw(26),
     to: null,
-    seconds: between(S.seconds, draw(24)),
+    seconds: between(soarOf(kind).seconds, draw(24)),
     bow: draw(23) < 0.5 ? -1 : 1,
   };
 }
@@ -46,7 +54,9 @@ export function soarer(draw: (salt: number) => number): Animal {
 export function soarersOf(kind: string, draw: (salt: number) => number): Animal[] {
   const [fewest, most] = CRITTERS_LOOK.kinds[kind]?.together ?? [1, 1];
   const count = fewest + Math.floor(draw(27) * (most - fewest + 1));
-  return Array.from({ length: count }, (_, at) => soarer(at === 0 ? draw : (salt) => draw(salt + 30 * at)));
+  return Array.from({ length: count }, (_, at) =>
+    soarer(at === 0 ? draw : (salt) => draw(salt + 30 * at), kind),
+  );
 }
 
 /**
@@ -54,7 +64,8 @@ export function soarersOf(kind: string, draw: (salt: number) => number): Animal[
  * its circle, which drifts down the wind, high above the ground and rising and falling a little as it goes, gliding but
  * for a beat now and then, and fading as it comes and goes.
  */
-export function soarPose(from: Cover, animal: Animal, flown: number, frames: number): Pose {
+export function soarPose(kind: string, from: Cover, animal: Animal, flown: number, frames: number): Pose {
+  const S = soarOf(kind);
   const radius = between(S.radius, animal.reach);
   const turning = ((Math.PI * 2) / S.circleSeconds) * animal.bow;
   const round = animal.heading + turning * flown;

@@ -49,7 +49,7 @@ describe("the critters' clock", () => {
 
   it('brings a critter only where its kind lives and out of what it comes out of', () => {
     expect(anHour(1, wood({}, 'boulder'), 600).size).toBe(0);
-    expect(anHour(1, wood({}, 'oak', 'ocean'), 600).size).toBe(0);
+    expect(anHour(1, wood({}, 'oak', 'no-such-ground'), 600).size).toBe(0);
     expect(anHour(1, wood({ classAt: () => null }), 600).size).toBe(0);
     for (const [land, cast] of Object.entries(CASTS)) {
       // Out of the first cover any of its cast comes out of, or a wood's oaks for a cast that needs none.

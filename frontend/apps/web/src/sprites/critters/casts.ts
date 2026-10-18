@@ -107,13 +107,26 @@ const PTARMIGAN: CastMember = { kind: 'ptarmigan', behaviour: 'flush', weight: 1
 /** Ptarmigan bursting out of the tundra's heather and scrub. */
 const TUNDRA_PTARMIGAN: CastMember = { ...PTARMIGAN, from: ['heather', 'scrub'] };
 
+/** Gulls wheeling low and quick over the shallow sea, two to four together. */
+const GULLS: CastMember = { kind: 'gull', behaviour: 'soar', weight: 0.35, from: [] };
+
+/** Dolphins of the shallow sea, leaping one after another in a row along the same way. */
+const DOLPHINS: CastMember = { kind: 'dolphin', behaviour: 'leap', weight: 0.25, from: [] };
+
+/**
+ * A whale far out on the ocean, blowing now and then: its back and a spout of spray standing up out of the sea and
+ * falling back. Rare, because the ocean's cast weighs so much less than one: see `openOf`.
+ */
+const WHALES: CastMember = { kind: 'whale', behaviour: 'leap', weight: 0.15, from: [] };
+
 /** The waters a frog hops into, whatever the ground beside them. */
 export const WATERS: readonly string[] = ['lake', 'river'];
 
 export const CASTS: Readonly<Record<string, readonly CastMember[]>> = {
   lake: [FISH],
   river: [FISH],
-  'shallow-sea': [FISH],
+  ocean: [WHALES],
+  'shallow-sea': [FISH, DOLPHINS, GULLS],
   ice: [PTARMIGAN],
   'polar-desert': [PTARMIGAN],
   tundra: [TUNDRA_PTARMIGAN],
@@ -208,13 +221,15 @@ export function memberFrom(
 
 /**
  * The members of a ground's cast that come out of the open ground or the water rather than out of cover, and the share
- * of the cast's weight they are: how often a cell's slot there brings one of them rather than one out of cover.
+ * of the cast's weight they are: how often a cell's slot there brings one of them rather than one out of cover. Of
+ * one, where the whole cast weighs less than that, so a ground with a light cast is that much quieter: the ocean's
+ * whales, now and then, and a hawk over the bare rock as rarely as over the meadow.
  */
 export function openOf(land: string | null): { members: readonly CastMember[]; share: number } {
   const cast = land === null ? undefined : CASTS[land];
   const members = cast?.filter((member) => member.from.length === 0) ?? [];
   const weight = (some: readonly CastMember[]) => some.reduce((sum, member) => sum + member.weight, 0);
-  return { members, share: members.length === 0 ? 0 : weight(members) / weight(cast!) };
+  return { members, share: members.length === 0 ? 0 : weight(members) / Math.max(1, weight(cast!)) };
 }
 
 /** The member of a cast a draw from nought to one picks, by weight, or null for ground with no cast. */

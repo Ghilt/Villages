@@ -143,6 +143,72 @@ const ptarmigan = bursting({
   marks: (head) => ellipse(head.x + 4, head.y - 5, 4, 2, '#c8402c', -15),
 });
 
+/**
+ * A gull seen from above, as the hawk is, its nose to the top of the frame: long narrow wings, grey with black tips,
+ * spread to glide and then swept back a little in a beat; white beneath and a yellow bill.
+ */
+const gull: CritterFrame = (at) => {
+  const [tip, sweep] = at === 0 ? [62, 0] : [54, 9];
+  const wing = (side: number) =>
+    path(
+      `M ${64 + 6 * side} 58 C ${64 + 30 * side} ${50 + sweep} ${64 + tip * side} ${54 + sweep} ` +
+        `${64 + tip * side} ${60 + sweep} C ${64 + 40 * side} ${64 + sweep} ${64 + 20 * side} 66 ${64 + 6 * side} 66 Z`,
+      side > 0 ? '#b9c0c6' : '#a4acb3',
+    ) + ellipse(64 + (tip - 5) * side, 58 + sweep, 6, 3, '#222428');
+  return (
+    wing(1) +
+    wing(-1) +
+    path('M 58 82 L 70 82 L 72 98 L 56 98 Z', '#e9ebe8') +
+    ellipse(64, 66, 7, 20, '#f2f2ee') +
+    ellipse(65, 62, 3, 12, '#ffffff') +
+    circle(64, 44, 7, '#f4f4f0') +
+    path('M 62 38 L 64 30 L 66 38 Z', '#e0b030')
+  );
+};
+
+/** A dolphin seen from the side as it leaps, facing right: grey, darker along its back, its flukes up and then down. */
+const dolphin: CritterFrame = (at) => {
+  const flukes = at === 0 ? 'M 28 74 L 4 56 L 12 74 L 2 92 Z' : 'M 28 78 L 6 68 L 12 80 L 4 102 Z';
+  return (
+    path(flukes, '#56636f') +
+    ellipse(64, 76, 40, 14, '#7d8c99') +
+    path('M 26 76 Q 64 54 104 72 Q 64 66 26 76 Z', '#56636f') +
+    path('M 56 64 L 66 44 L 74 64 Z', '#56636f') +
+    ellipse(70, 84, 26, 5, '#d8dee3') +
+    path('M 100 70 L 120 76 L 100 82 Z', '#7d8c99') +
+    circle(96, 72, 2.5, '#121a22')
+  );
+};
+
+/** Spray, white and thin, so the sea shows through it. */
+const mist = (cx: number, cy: number, rx: number, ry: number, opacity: number) =>
+  `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#f2f6fa" fill-opacity="${opacity}"/>`;
+
+/**
+ * A whale blowing, seen from the side, standing on the bottom edge where its back breaks the sea: its back coming up
+ * with a puff of spray, then a tall spout standing up out of it and spreading at the top, then its back going under
+ * and the spray drifting down.
+ */
+const whale: CritterFrame = (at) => {
+  const back = [
+    ellipse(64, 118, 40, 9, '#36414b') + ellipse(70, 114, 18, 3, '#4c5864'),
+    ellipse(64, 116, 44, 11, '#36414b') + ellipse(70, 111, 20, 3, '#4c5864'),
+    ellipse(60, 122, 30, 6, '#36414b'),
+  ][at]!;
+  const spray = [
+    mist(64, 100, 8, 8, 0.8) + mist(60, 92, 5, 5, 0.6),
+    mist(64, 76, 6, 30, 0.85) +
+      mist(54, 40, 14, 11, 0.75) +
+      mist(74, 38, 14, 11, 0.75) +
+      mist(64, 30, 10, 9, 0.7),
+    mist(40, 92, 20, 9, 0.4) +
+      mist(88, 90, 20, 9, 0.4) +
+      mist(64, 100, 26, 10, 0.45) +
+      mist(64, 76, 12, 12, 0.3),
+  ][at]!;
+  return back + spray;
+};
+
 /** Every placeholder drawn here, by its kind's name in `world/critters.json`. */
 export const WILD_DRAWINGS: Readonly<Record<string, CritterFrame>> = {
   partridge,
@@ -150,4 +216,7 @@ export const WILD_DRAWINGS: Readonly<Record<string, CritterFrame>> = {
   grouse,
   duck,
   ptarmigan,
+  gull,
+  dolphin,
+  whale,
 };

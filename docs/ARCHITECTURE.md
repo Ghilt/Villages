@@ -446,14 +446,15 @@ flies, away or into another tree near it (`flush.ts`), or which piece of cover n
 bounds to (`hop.ts`) or a snake glides to (`slither.ts`), and beside a lake or a river a frog may hop into the water
 whatever the ground's cast (`waterNear`); what comes out of no scenery - a fish, a hawk, a covey of partridges off a
 field - needs no cover, and comes out of a place of the cell drawn for it as often as the water or the open ground
-there has one, by a draw of its own so what comes out of cover keeps its shares (`openOf`, `leap.ts`, `soar.ts`) - so
-nothing is stored or sent and every browser has the same ones. `CritterLayer.ts` asks it every frame for what is in
-flight over the view, where the fog's field says the house sees now (`visionAt`, read with the scenery and the class
-tiles in `critterGround.ts`), with any a click in the Critters part asked for (`critterSpawn.ts`, `spawned.ts`, this
-window's own and outside the shared world), and places a sprite a critter from the atlas `world:critters` cuts, and a
-shadow, in two containers inside the one the fog uncolours: the shadows, a fish's rings on the water, drawn in code,
-and what runs or leaps on the ground under the scenery, turned to face the way it goes across the screen or, a snake,
-seen from above and turned to its heading, and what flies over it.
+there has one, by a draw of its own so what comes out of cover keeps its shares, and a ground whose cast weighs less
+than one is that much quieter (`openOf`, `leap.ts`, `soar.ts`) - so nothing is stored or sent and every browser has
+the same ones. `CritterLayer.ts` asks it every frame for what is in flight over the view, where the fog's field says
+the house sees now (`visionAt`, read with the scenery and the class tiles in `critterGround.ts`), with any a click in
+the Critters part asked for (`critterSpawn.ts`, `spawned.ts`, this window's own and outside the shared world), and
+places a sprite a critter from the atlas `world:critters` cuts, and a shadow, in two containers inside the one the
+fog uncolours: the shadows, a fish's rings on the water, drawn in code, and what runs or leaps on the ground under
+the scenery, turned to face the way it goes across the screen or, a snake, seen from above and turned to its heading,
+and what flies over it.
 **The water is not in the sprite canvas but in the map**, a MapLibre custom layer (`water/WaterLayer.ts`) drawn
 in WebGL2 over the painted terrain and under the ink lines, so the fog and everything in the sprite canvas are over
 it (0081). Where the water is comes from the flat tiles, a mask a tile worked out in the browser by the fog's
