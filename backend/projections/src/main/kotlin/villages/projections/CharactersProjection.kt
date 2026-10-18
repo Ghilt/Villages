@@ -13,6 +13,8 @@ import villages.application.KeyFiguresChange
 import villages.application.PlacedCharacter
 import villages.application.StoredEvent
 import villages.application.Follower
+import villages.domain.CharacterEvent
+import villages.domain.KeyFigureEvent
 import villages.domain.Banner
 import villages.domain.CharacterAged
 import villages.domain.CharacterAppeared
@@ -28,16 +30,8 @@ import villages.domain.HouseId
 import villages.domain.HouseLostKeyFigure
 import villages.domain.HouseName
 import villages.domain.PlayerId
-import villages.domain.QuestEvent
 import villages.domain.WorldTime
 import villages.domain.everyStat
-import villages.domain.ResourceEvent
-import villages.domain.SeatEvent
-import villages.domain.ChoiceEvent
-import villages.domain.DialogueEvent
-import villages.domain.VisionEvent
-import villages.domain.StructureEvent
-import villages.domain.WorldStreamEvent
 import villages.protocol.Cell
 import villages.protocol.ON_THE_MAP_FROM
 import java.util.UUID
@@ -85,10 +79,19 @@ class CharactersProjection(feed: EventFeed) : Follower(feed), KeyFiguresByHouse,
     private val mapListeners = CopyOnWriteArraySet<(CharacterMapChange) -> Unit>()
     private val revisions = AtomicLong()
 
+    /** Folds one stored event: the people, and whom each house holds. See decision record 0075. */
     override fun apply(stored: StoredEvent) {
         when (val event = stored.event) {
             is HouseFounded -> houses[event.houseId] = HouseFacts(event.player, event.name, event.banner)
+            is KeyFigureEvent -> keyFigure(event)
+            is CharacterEvent -> character(event)
+            else -> Unit
+        }
+    }
 
+    /** Folds one of the key figures' events. Exhaustive over the family, so a new one has to be placed. */
+    private fun keyFigure(event: KeyFigureEvent) {
+        when (event) {
             is HouseGainedKeyFigure -> {
                 ties.getOrPut(event.houseId) { CopyOnWriteArrayList() }.addIfAbsent(event.characterId)
                 holders.getOrPut(event.characterId) { CopyOnWriteArrayList() }.addIfAbsent(event.houseId)
@@ -103,6 +106,12 @@ class CharactersProjection(feed: EventFeed) : Follower(feed), KeyFiguresByHouse,
                 tell(event.houseId)
             }
 
+        }
+    }
+
+    /** Folds one of a character's events. Exhaustive over the family, so a new one has to be placed. */
+    private fun character(event: CharacterEvent) {
+        when (event) {
             is CharacterAppeared -> {
                 characters[event.characterId] = CharacterRow(
                     id = event.characterId,
@@ -159,11 +168,6 @@ class CharactersProjection(feed: EventFeed) : Follower(feed), KeyFiguresByHouse,
                 moveOnTheMap(event.characterId, to = null, on = event.worldTime)
                 tellHoldersOf(event.characterId)
             }
-
-            // What a house has, what it is asked and told, and what it sees are other read models' business.
-            is ResourceEvent, is ChoiceEvent, is DialogueEvent, is QuestEvent, is VisionEvent, is SeatEvent, is StructureEvent -> Unit
-            // What the world takes on from its catalogues is read by no read model. See decision record 0097.
-            is WorldStreamEvent -> Unit
         }
     }
 

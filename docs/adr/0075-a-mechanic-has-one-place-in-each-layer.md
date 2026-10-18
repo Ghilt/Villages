@@ -28,7 +28,8 @@ than holding them.** The places, as they stand:
   because every mechanic reads it.
 - **The read models:** a fold with nothing to say about a mechanic passes its whole family in one branch, and no
   fold over events has an `else`. A new event is placed by the compiler in every fold that names its family,
-  and only those that care about it have to be edited.
+  and only those that care about it have to be edited. *(Amended 2026-10-18, below: a fold names only the families
+  it hears.)*
 - **The gateway:** what a frame says about a mechanic is worked out in a file of its own beside `Gateway.kt` -
   `HouseViews.kt`, `DialogueViews.kt`, and the rest - and a refusal's code in `Refusals.kt`.
 
@@ -73,6 +74,16 @@ size ceiling (0072). The ports a part is made from are now one value, `Mechanics
 it by `partsOf` in `GatewayParts.kt`; the cell snapshot is read in `Snapshots.kt`. A new mechanic is a field
 of `Mechanics` and a line in `partsOf`, and the core does not grow with it. The core keeps what it reads
 itself: the houses and the people in a cell, for the snapshot.
+
+*Amended 2026-10-18, a fold hears only the families it names:* passing every other family in a branch of its own
+still cost every read model a line for each new mechanic - seven lines for the quests, in folds that had nothing to say
+about a quest - and that line is the only edit to a fold that does not care. Now a read model's fold routes by family,
+names only the families it hears, and passes the rest with one `else`; each family it names is folded by a function of
+its own, `quest(event: QuestEvent)` and the like, whose `when` is exhaustive over that family. So a new event is still
+placed by the compiler in every fold that hears its family, which is what the rule was for, and a new family costs a
+read model nothing until somebody decides it should hear it. That decision is made on purpose, as part of building the
+mechanic, rather than prompted by a line the compiler demands everywhere. The founding, in no family, is named by the
+folds that hear it. `docs/plans/mechanic-modules.md`, step 1.
 
 ## Consequences
 

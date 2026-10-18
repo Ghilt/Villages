@@ -5,21 +5,13 @@ import villages.application.ChoicesByPlayer
 import villages.application.EventFeed
 import villages.application.StoredEvent
 import villages.application.Follower
-import villages.domain.CharacterEvent
+import villages.domain.ChoiceEvent
 import villages.domain.HouseFounded
 import villages.domain.Omen
 import villages.domain.PlayerGivenChoice
 import villages.domain.PlayerRolled
 import villages.domain.PlayerTookAction
 import villages.domain.PlayerId
-import villages.domain.QuestEvent
-import villages.domain.ResourceEvent
-import villages.domain.SeatEvent
-import villages.domain.DialogueEvent
-import villages.domain.KeyFigureEvent
-import villages.domain.VisionEvent
-import villages.domain.StructureEvent
-import villages.domain.WorldStreamEvent
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArraySet
 
@@ -39,9 +31,22 @@ class ChoicesProjection(feed: EventFeed) : Follower(feed), ChoicesByPlayer {
     private val rolled = ConcurrentHashMap<PlayerId, Pair<String, List<Omen>>>()
     private val listeners = CopyOnWriteArraySet<(PlayerId, ChoiceRow?) -> Unit>()
 
-    /** Folds one stored event. Exhaustive over the event types, so a new one has to be placed. */
+    /** Folds one stored event: the choices' own, and the founding, which settles one. See decision record 0075. */
     override fun apply(stored: StoredEvent) {
         when (val event = stored.event) {
+            is ChoiceEvent -> choice(event, stored)
+
+            // Founding by any means settles the question of where to found, so whatever was pending goes.
+            // The domain says the same thing in `evolve`; this is that rule read off the events.
+            is HouseFounded -> forget(event.player)
+
+            else -> Unit
+        }
+    }
+
+    /** Folds one of the choices' events. Exhaustive over the family, so a new one has to be placed. */
+    private fun choice(event: ChoiceEvent, stored: StoredEvent) {
+        when (event) {
             // A roll is written before the hand it deals, in one decision and one story, so its omens are kept
             // until the hand under the same correlation arrives.
             is PlayerRolled -> rolled[event.player] = stored.correlationId to event.omens
@@ -62,23 +67,6 @@ class ChoicesProjection(feed: EventFeed) : Follower(feed), ChoicesByPlayer {
             }
 
             is PlayerTookAction -> forget(event.player)
-
-            // What a house has, whom it holds and what it sees are other read models' business. This one only
-            // tracks what is pending.
-            is ResourceEvent, is KeyFigureEvent, is VisionEvent, is SeatEvent -> return
-
-            // Founding by any means settles the question of where to found, so whatever was pending goes.
-            // The domain says the same thing in `evolve`; this is that rule read off the events.
-            is HouseFounded -> forget(event.player)
-
-            // A dialogue choice is not a choice put to the house, however alike the two are: nothing is pending.
-            is DialogueEvent, is QuestEvent -> return
-
-            // A choice is put to a house, never to a character.
-            is CharacterEvent -> return
-            is StructureEvent -> return
-            // What the world takes on from its catalogues is read by no read model. See decision record 0097.
-            is WorldStreamEvent -> return
         }
     }
 

@@ -8,6 +8,9 @@ import villages.application.StoredEvent
 import villages.application.VisionPoint
 import villages.application.VisionSource
 import villages.application.Follower
+import villages.domain.CharacterEvent
+import villages.domain.KeyFigureEvent
+import villages.domain.VisionEvent
 import villages.domain.CharacterAged
 import villages.domain.CharacterAppeared
 import villages.domain.CharacterDied
@@ -24,16 +27,8 @@ import villages.domain.HouseLostKeyFigure
 import villages.domain.HouseLostVision
 import villages.domain.Location
 import villages.domain.PlayerId
-import villages.domain.QuestEvent
 import villages.domain.Vision
 import villages.domain.WorldTime
-import villages.domain.ResourceEvent
-import villages.domain.HouseLostSeat
-import villages.domain.HouseNamedSeat
-import villages.domain.ChoiceEvent
-import villages.domain.DialogueEvent
-import villages.domain.StructureEvent
-import villages.domain.WorldStreamEvent
 import villages.domain.StructureId
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
@@ -75,11 +70,24 @@ class SightProjection(feed: EventFeed) : Follower(feed), SightsByHouse {
 
     private val listeners = CopyOnWriteArraySet<(SightChange) -> Unit>()
 
+    /**
+     * Folds one stored event: vision given and taken, key figures and where they stand. A seat, a structure and the
+     * world's catalogues give vision only by what they write into a house's history, as vision given. See 0075, 0093.
+     */
     override fun apply(stored: StoredEvent) {
         when (val event = stored.event) {
             // Founding gives no vision of its own: the castle it raises does, a moment after, as vision given.
             is HouseFounded -> players[event.houseId] = event.player
+            is VisionEvent -> vision(event)
+            is KeyFigureEvent -> keyFigure(event)
+            is CharacterEvent -> character(event)
+            else -> Unit
+        }
+    }
 
+    /** Folds one of the visions' events. Exhaustive over the family, so a new one has to be placed. */
+    private fun vision(event: VisionEvent) {
+        when (event) {
             // The size is the event's own, not the rule's today: a vision given is what it was given as.
             is HouseGainedVision -> {
                 open(event.houseId, VisionSource.Given(event.visionId), event.place, event.radius, event.worldTime, event.from)
@@ -92,6 +100,12 @@ class SightProjection(feed: EventFeed) : Follower(feed), SightsByHouse {
                 }
             }
 
+        }
+    }
+
+    /** Folds one of the key figures' events. Exhaustive over the family, so a new one has to be placed. */
+    private fun keyFigure(event: KeyFigureEvent) {
+        when (event) {
             // Taken in while standing somewhere, a key figure gives vision from the day they became the
             // house's, not from the day they came to stand there: what they saw before was not the house's.
             is HouseGainedKeyFigure -> {
@@ -108,6 +122,12 @@ class SightProjection(feed: EventFeed) : Follower(feed), SightsByHouse {
                 }
             }
 
+        }
+    }
+
+    /** Folds one of a character's events: where they stand, and whether they still do. Exhaustive over the family. */
+    private fun character(event: CharacterEvent) {
+        when (event) {
             is CharacterMoved -> {
                 standing[event.characterId] = event.place
                 val source = VisionSource.KeyFigure(event.characterId)
@@ -122,15 +142,8 @@ class SightProjection(feed: EventFeed) : Follower(feed), SightsByHouse {
             is CharacterLeftTheMap -> offTheMap(event.characterId, event.worldTime)
             is CharacterDied -> offTheMap(event.characterId, event.worldTime)
 
-            // Nothing else gives vision or takes it away.
-            // A seat lost takes no vision of its own: what the structure gave ends with its change of hands or its ruin.
-            is ResourceEvent, is ChoiceEvent, is DialogueEvent, is QuestEvent, is HouseNamedSeat, is HouseLostSeat,
-            is CharacterAppeared, is CharacterStatChanged, is CharacterAged, is CharacterPortraitChanged,
-            // What a structure gives its holder to see is written into the house's own history, as vision given. 0093.
-            is StructureEvent,
-            // What the world takes on from its catalogues is not sight: what it changes for a house is written as vision. 0097.
-            is WorldStreamEvent,
-            -> Unit
+            // Nothing else a person does gives vision or takes it away.
+            is CharacterAppeared, is CharacterStatChanged, is CharacterAged, is CharacterPortraitChanged -> Unit
         }
     }
 

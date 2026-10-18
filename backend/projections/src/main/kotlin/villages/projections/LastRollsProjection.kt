@@ -4,24 +4,20 @@ import villages.application.EventFeed
 import villages.application.Follower
 import villages.application.StoredEvent
 import villages.application.fate.StandingAtLastRoll
-import villages.domain.CharacterEvent
 import villages.domain.ChoiceEvent
-import villages.domain.DialogueEvent
 import villages.domain.HouseFounded
 import villages.domain.HouseId
 import villages.domain.HouseIncomeChanged
 import villages.domain.Incomes
 import villages.domain.HouseResourceGranted
+import villages.domain.HouseResourcePledged
+import villages.domain.HouseResourceReleased
+import villages.domain.PlayerGivenChoice
+import villages.domain.PlayerTookAction
 import villages.domain.HouseResourceSpent
-import villages.domain.KeyFigureEvent
-import villages.domain.QuestEvent
-import villages.domain.SeatEvent
 import villages.domain.PlayerRolled
 import villages.domain.Resource
 import villages.domain.ResourceEvent
-import villages.domain.VisionEvent
-import villages.domain.StructureEvent
-import villages.domain.WorldStreamEvent
 import villages.domain.Stock
 import villages.domain.everyStock
 import java.util.concurrent.ConcurrentHashMap
@@ -41,10 +37,19 @@ class LastRollsProjection(feed: EventFeed) : Follower(feed), StandingAtLastRoll 
     private val now = ConcurrentHashMap<HouseId, Held>()
     private val atLastRoll = ConcurrentHashMap<HouseId, Map<Resource, Long>>()
 
-    /** Folds one stored event. Exhaustive over the event types, so a new one has to be placed. */
+    /** Folds one stored event: a house's stocks, and its rolls. See decision record 0075. */
     override fun apply(stored: StoredEvent) {
         when (val event = stored.event) {
             is HouseFounded -> now[event.houseId] = Held(everyStock(event.resources, event.recordedAt))
+            is ResourceEvent -> resource(event)
+            is ChoiceEvent -> choice(event)
+            else -> Unit
+        }
+    }
+
+    /** Folds one of the resources' events. Exhaustive over the family, so a new one has to be placed. */
+    private fun resource(event: ResourceEvent) {
+        when (event) {
             is HouseResourceGranted -> moved(event.houseId) { held ->
                 held.copy(stocks = held.stocks + (event.resource to held.stocks.getValue(event.resource).plus(event.amount, event.recordedAt)))
             }
@@ -57,17 +62,18 @@ class LastRollsProjection(feed: EventFeed) : Follower(feed), StandingAtLastRoll 
                     Held(after.rebased(held.stocks, event.recordedAt), after)
                 }
             }
+            // A pledge ties a resource up without changing how much there is, which is what a rise is of.
+            is HouseResourcePledged, is HouseResourceReleased -> Unit
+        }
+    }
+
+    /** Folds one of the choices' events: a roll, and nothing a hand dealt or taken changes here. */
+    private fun choice(event: ChoiceEvent) {
+        when (event) {
             is PlayerRolled -> now[event.houseId]?.let { held ->
                 atLastRoll[event.houseId] = held.stocks.mapValues { (_, stock) -> stock.at(event.recordedAt) }
             }
-
-            // A pledge ties a resource up without changing how much there is, which is what a rise is of.
-            is ResourceEvent -> return
-
-            // What else a house is asked, told, holds and sees, and the characters, are other read models' business.
-            is ChoiceEvent, is DialogueEvent, is QuestEvent, is KeyFigureEvent, is VisionEvent, is SeatEvent, is CharacterEvent, is StructureEvent -> return
-            // What the world takes on from its catalogues is read by no read model. See decision record 0097.
-            is WorldStreamEvent -> return
+            is PlayerGivenChoice, is PlayerTookAction -> Unit
         }
     }
 

@@ -7,24 +7,15 @@ import villages.application.DialoguesChange
 import villages.application.EventFeed
 import villages.application.StoredEvent
 import villages.application.Follower
-import villages.domain.CharacterEvent
+import villages.domain.DialogueEvent
 import villages.domain.DialogueId
-import villages.domain.HouseFounded
 import villages.domain.HouseId
 import villages.domain.PlayerCompletedDialogue
 import villages.domain.PlayerCompletedDialogueStep
 import villages.domain.PlayerId
 import villages.domain.PlayerLostDialogue
 import villages.domain.PlayerOfferedDialogue
-import villages.domain.QuestEvent
 import villages.domain.walk
-import villages.domain.ResourceEvent
-import villages.domain.SeatEvent
-import villages.domain.ChoiceEvent
-import villages.domain.KeyFigureEvent
-import villages.domain.VisionEvent
-import villages.domain.StructureEvent
-import villages.domain.WorldStreamEvent
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArraySet
 
@@ -42,9 +33,17 @@ class DialoguesProjection(feed: EventFeed) : Follower(feed), DialoguesByHouse {
     private val byHouse = ConcurrentHashMap<HouseId, List<DialogueRow>>()
     private val listeners = CopyOnWriteArraySet<(DialoguesChange) -> Unit>()
 
-    /** Folds one stored event. Exhaustive over the event types, so a new one has to be placed. */
+    /** Folds one stored event: the dialogues' alone, whatever else a house or the world does. See decision record 0075. */
     override fun apply(stored: StoredEvent) {
         when (val event = stored.event) {
+            is DialogueEvent -> dialogue(event, stored)
+            else -> Unit
+        }
+    }
+
+    /** Folds one of the dialogues' events. Exhaustive over the family, so a new one has to be placed. */
+    private fun dialogue(event: DialogueEvent, stored: StoredEvent) {
+        when (event) {
             is PlayerOfferedDialogue -> change(event.houseId, event.player) { rows ->
                 rows + DialogueRow(
                     house = event.houseId,
@@ -69,14 +68,6 @@ class DialoguesProjection(feed: EventFeed) : Follower(feed), DialoguesByHouse {
                 rows.changing(event.dialogueId) { it.copy(ending = DialogueEnding.Lost(event.because)) }
             }
 
-            // What a house has, what it was asked, whom it holds and what it sees are other read models'.
-            is HouseFounded, is ResourceEvent, is ChoiceEvent, is KeyFigureEvent, is VisionEvent, is SeatEvent, is QuestEvent -> return
-
-            // A dialogue is offered to a house; a character's own history says nothing about one.
-            is CharacterEvent -> return
-            is StructureEvent -> return
-            // What the world takes on from its catalogues is read by no read model. See decision record 0097.
-            is WorldStreamEvent -> return
         }
     }
 

@@ -7,12 +7,8 @@ import villages.application.QuestRow
 import villages.application.QuestsByHouse
 import villages.application.QuestsChange
 import villages.application.StoredEvent
-import villages.domain.CharacterEvent
-import villages.domain.ChoiceEvent
-import villages.domain.DialogueEvent
-import villages.domain.HouseFounded
+import villages.domain.QuestEvent
 import villages.domain.HouseId
-import villages.domain.KeyFigureEvent
 import villages.domain.PlayerCompletedQuest
 import villages.domain.PlayerCompletedQuestNode
 import villages.domain.PlayerId
@@ -22,11 +18,6 @@ import villages.domain.PlayerMetQuestObjective
 import villages.domain.PlayerOfferedQuest
 import villages.domain.QuestId
 import villages.domain.QuestProgress
-import villages.domain.ResourceEvent
-import villages.domain.SeatEvent
-import villages.domain.StructureEvent
-import villages.domain.WorldStreamEvent
-import villages.domain.VisionEvent
 import villages.domain.walk
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArraySet
@@ -45,9 +36,17 @@ class QuestsProjection(feed: EventFeed) : Follower(feed), QuestsByHouse {
     private val byHouse = ConcurrentHashMap<HouseId, List<QuestRow>>()
     private val listeners = CopyOnWriteArraySet<(QuestsChange) -> Unit>()
 
-    /** Folds one stored event. Exhaustive over the event types, so a new one has to be placed. */
+    /** Folds one stored event: the quests' alone, whatever else a house or the world does. See decision record 0075. */
     override fun apply(stored: StoredEvent) {
         when (val event = stored.event) {
+            is QuestEvent -> quest(event, stored)
+            else -> Unit
+        }
+    }
+
+    /** Folds one of the quests' events. Exhaustive over the family, so a new one has to be placed. */
+    private fun quest(event: QuestEvent, stored: StoredEvent) {
+        when (event) {
             is PlayerOfferedQuest -> change(event.houseId, event.player) { rows ->
                 rows + QuestRow(
                     house = event.houseId,
@@ -79,15 +78,6 @@ class QuestsProjection(feed: EventFeed) : Follower(feed), QuestsByHouse {
                 rows.changing(event.questId) { it.copy(ending = QuestEnding.Lost(event.because)) }
             }
 
-            // What a house has, what it was asked and told, whom it holds and what it sees are other read models'.
-            is HouseFounded, is ResourceEvent, is ChoiceEvent, is DialogueEvent, is KeyFigureEvent, is VisionEvent,
-            is SeatEvent -> return
-
-            // A quest is offered to a house; a character's or a structure's own history says nothing about one.
-            is CharacterEvent -> return
-            is StructureEvent -> return
-            // What the world takes on from its catalogues is read by no read model. See decision record 0097.
-            is WorldStreamEvent -> return
         }
     }
 

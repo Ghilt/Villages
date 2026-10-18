@@ -10,18 +10,14 @@ import villages.application.StructureFace
 import villages.application.StructureRow
 import villages.application.StructureSlots
 import villages.application.StructuresByCell
-import villages.domain.CharacterEvent
+import villages.domain.SeatEvent
+import villages.domain.StructureEvent
 import villages.domain.CharacterId
-import villages.domain.ChoiceEvent
 import villages.domain.Content
-import villages.domain.DialogueEvent
 import villages.domain.HouseFounded
 import villages.domain.HouseId
 import villages.domain.HouseLostSeat
 import villages.domain.HouseNamedSeat
-import villages.domain.KeyFigureEvent
-import villages.domain.QuestEvent
-import villages.domain.ResourceEvent
 import villages.domain.StructureChangedHands
 import villages.domain.StructureDecider
 import villages.domain.StructureId
@@ -31,8 +27,6 @@ import villages.domain.StructureRebuilt
 import villages.domain.StructureRuined
 import villages.domain.StructureSlotEmptied
 import villages.domain.StructureSlotFilled
-import villages.domain.VisionEvent
-import villages.domain.WorldStreamEvent
 import villages.protocol.Cell
 import villages.protocol.ON_THE_MAP_FROM
 import java.util.UUID
@@ -66,9 +60,19 @@ class StructuresProjection(feed: EventFeed) : Follower(feed), StructuresByCell, 
     private val listeners = CopyOnWriteArraySet<(StructureChange) -> Unit>()
     private val applied = AtomicLong()
 
+    /** Folds one stored event: the structures, whose seat each is, and the houses that hold them. See 0075. */
     override fun apply(stored: StoredEvent) {
         when (val event = stored.event) {
             is HouseFounded -> holders[event.houseId] = Holder(event.houseId, event.name, event.banner)
+            is StructureEvent -> structure(event, stored)
+            is SeatEvent -> seat(event)
+            else -> Unit
+        }
+    }
+
+    /** Folds one of a structure's events. Exhaustive over the family, so a new one has to be placed. */
+    private fun structure(event: StructureEvent, stored: StoredEvent) {
+        when (event) {
             is StructureRaised -> {
                 if (rows.containsKey(event.structureId)) return
                 val face = StructureFace(
@@ -120,6 +124,12 @@ class StructuresProjection(feed: EventFeed) : Follower(feed), StructuresByCell, 
                     holder = event.holder?.let(holders::get), seatOf = null, ruin = false, since = event.worldTime,
                 )
             }
+        }
+    }
+
+    /** Folds one of the seats' events. Exhaustive over the family, so a new one has to be placed. */
+    private fun seat(event: SeatEvent) {
+        when (event) {
             // Whose seat it is goes on its face, so a house that last saw it sees it as whose seat it was then.
             is HouseNamedSeat -> {
                 val held = rows[event.structureId] ?: return
@@ -136,10 +146,6 @@ class StructuresProjection(feed: EventFeed) : Follower(feed), StructuresByCell, 
                 val face = last.copy(seatOf = null, since = event.worldTime, stamp = applied.incrementAndGet())
                 put(held.row.copy(faces = held.row.faces + face), held.streamVersion, appeared = false)
             }
-            // What a house has, is asked, is told, holds and sees, and what befalls a person, changes no structure.
-            is ResourceEvent, is ChoiceEvent, is DialogueEvent, is QuestEvent, is KeyFigureEvent, is VisionEvent, is CharacterEvent -> Unit
-            // What the world takes on from its catalogues is read by no read model. See decision record 0097.
-            is WorldStreamEvent -> Unit
         }
     }
 

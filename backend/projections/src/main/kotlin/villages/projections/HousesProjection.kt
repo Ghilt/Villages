@@ -12,7 +12,7 @@ import villages.application.fate.kmBetween
 import villages.application.HousesByPlayer
 import villages.application.StoredEvent
 import villages.application.Follower
-import villages.domain.CharacterEvent
+import villages.domain.ResourceEvent
 import villages.domain.HouseFounded
 import villages.domain.Pledge
 import villages.domain.HouseResourceSpent
@@ -23,16 +23,8 @@ import villages.domain.HouseIncomeChanged
 import villages.domain.HouseId
 import villages.domain.PlayerId
 import villages.domain.Location
-import villages.domain.QuestEvent
 import villages.domain.WorldTime
 import villages.domain.everyStock
-import villages.domain.ChoiceEvent
-import villages.domain.DialogueEvent
-import villages.domain.KeyFigureEvent
-import villages.domain.SeatEvent
-import villages.domain.VisionEvent
-import villages.domain.StructureEvent
-import villages.domain.WorldStreamEvent
 import villages.protocol.Cell
 import villages.protocol.ON_THE_MAP_FROM
 import java.util.UUID
@@ -67,7 +59,7 @@ class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesBy
     private val listeners = CopyOnWriteArraySet<(HouseChange) -> Unit>()
     private val applied = AtomicLong()
 
-    /** Folds one stored event into its row. Exhaustive over the event types, so a new one has to be placed. */
+    /** Folds one stored event into its row: the founding and the resources, which are all a house's row is. 0075. */
     override fun apply(stored: StoredEvent) {
         val row = when (val event = stored.event) {
             is HouseFounded -> HouseRow(
@@ -84,59 +76,9 @@ class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesBy
                 version = stored.streamVersion,
             )
 
-            // What a house has changes its row but not where it is, so the same fan-out carries it: the
-            // owner is told wherever they are looking, and so is anyone holding its cell.
-            is HouseResourceGranted -> changed(event.houseId, stored) {
-                it.withStock(event.resource) { stock -> stock.plus(event.amount, event.recordedAt) }
-            } ?: return
-
-            is HouseResourceSpent -> changed(event.houseId, stored) {
-                it.withStock(event.resource) { stock -> stock.minus(event.amount, event.recordedAt) }
-            } ?: return
-
-            // A source paying something else: every stock it touches is brought up to then and set running anew.
-            is HouseIncomeChanged -> changed(event.houseId, stored) {
-                it.paid(event.source, event.ratesPerSecond, event.recordedAt)
-            } ?: return
-
-            is HouseResourcePledged -> changed(event.houseId, stored) {
-                it.copy(
-                    pledges = it.pledges + Pledge(
-                        id = event.pledgeId,
-                        resource = event.resource,
-                        amount = event.amount,
-                        until = event.until,
-                        purpose = event.purpose,
-                    ),
-                )
-            } ?: return
-
-            // Dropping the pledge is the whole of the release: what is pledged is the sum of this list,
-            // so nothing is added back and there is no arithmetic to get wrong.
-            is HouseResourceReleased -> changed(event.houseId, stored) {
-                it.copy(pledges = it.pledges.filterNot { pledge -> pledge.id == event.pledgeId })
-            } ?: return
-
-            // Nothing is on the map until a house is founded. Being asked something and answering it are
-            // the choices projection's business; this one draws the map and has nothing to say about them.
-            is ChoiceEvent -> return
-
-            // A conversation puts nothing on the map, whatever is said in it.
-            is DialogueEvent, is QuestEvent -> return
-
-            // Whom a house holds is the characters projection's business; the map's row of a house is unchanged.
-            is KeyFigureEvent -> return
-
-            // What a house sees is the sight projection's, and nobody else is shown it. See decision 0061.
-            is VisionEvent, is SeatEvent -> return
-
-            // A person is not a house, and what one is to a house is the house's own history: nothing a
-            // character's stream says moves a house's row. See decision record 0055.
-            is CharacterEvent -> return
-            // A structure is drawn from a read model of its own. See decision record 0093.
-            is StructureEvent -> return
-            // What the world takes on from its catalogues is read by no read model. See decision record 0097.
-            is WorldStreamEvent -> return
+            is ResourceEvent -> resource(event, stored) ?: return
+            // Every other mechanic leaves a house's row as it was: this read model draws the map. See decision record 0075.
+            else -> return
         }
         // Whether this house was already on the map is the read model's to say. A stream version cannot:
         // a house founded from a choice arrives at version three, behind the choice and the action.
@@ -162,6 +104,42 @@ class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesBy
      * command that would write one - so the null is a replay that began mid-stream rather than a case
      * worth handling.
      */
+    /** The row one of the resources' events leaves, or null for a house not on the map. Exhaustive over the family. */
+    private fun resource(event: ResourceEvent, stored: StoredEvent): HouseRow? = when (event) {
+        // What a house has changes its row but not where it is, so the same fan-out carries it: the
+        // owner is told wherever they are looking, and so is anyone holding its cell.
+        is HouseResourceGranted -> changed(event.houseId, stored) {
+            it.withStock(event.resource) { stock -> stock.plus(event.amount, event.recordedAt) }
+        }
+
+        is HouseResourceSpent -> changed(event.houseId, stored) {
+            it.withStock(event.resource) { stock -> stock.minus(event.amount, event.recordedAt) }
+        }
+
+        // A source paying something else: every stock it touches is brought up to then and set running anew.
+        is HouseIncomeChanged -> changed(event.houseId, stored) {
+            it.paid(event.source, event.ratesPerSecond, event.recordedAt)
+        }
+
+        is HouseResourcePledged -> changed(event.houseId, stored) {
+            it.copy(
+                pledges = it.pledges + Pledge(
+                    id = event.pledgeId,
+                    resource = event.resource,
+                    amount = event.amount,
+                    until = event.until,
+                    purpose = event.purpose,
+                ),
+            )
+        }
+
+        // Dropping the pledge is the whole of the release: what is pledged is the sum of this list,
+        // so nothing is added back and there is no arithmetic to get wrong.
+        is HouseResourceReleased -> changed(event.houseId, stored) {
+            it.copy(pledges = it.pledges.filterNot { pledge -> pledge.id == event.pledgeId })
+        }
+    }
+
     private fun changed(houseId: HouseId, stored: StoredEvent, change: (HouseRow) -> HouseRow): HouseRow? {
         val was = rows[houseId]?.row ?: return null
         return change(was).copy(version = stored.streamVersion)
