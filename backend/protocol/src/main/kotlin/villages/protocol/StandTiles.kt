@@ -19,7 +19,7 @@ const val STAND_TILES = StandRecords.WORLD_UNITS / StandRecords.TILE_UNITS
 /**
  * The layers of the sprite map whose stands the gateway sends: the scenery's own, `biome`, and the towns of 1790
  * laid in ruins, `ruins`, a stand a town. A stands frame says which it carries, and a layer is only ever one of these:
- * a name from a page never picks a folder. See decision records 0067 and 0101.
+ * a name from a page never picks a folder. See decision records 0067 and 0103.
  */
 val STAND_LAYERS = listOf("biome", "ruins")
 

@@ -1,4 +1,4 @@
-# 0101. Every town of 1790 is a ruin, a stand of a layer of its own
+# 0103. Every town of 1790 is a ruin, a stand of a layer of its own
 
 - Status: accepted
 - Date: 2026-10-17
@@ -41,7 +41,7 @@ city as a wood.
   within its reach. The `stands` frame says which layer it carries, `biome` or `ruins`, from `STAND_LAYERS` at both
   ends (protocol version 57); the gateway sends every layer of every held tile, empty where a world has none; and
   its outbox keeps one frame a layer a tile, or a tile's ruins would replace its woods while both waited.
-- How a ruin is laid out is the page's, from the record alone (decision record 0102), so that every player draws the
+- How a ruin is laid out is the page's, from the record alone (decision record 0104), so that every player draws the
   same ruins.
 - A stand written into the tile across the edge of the world is written as standing beside it, so its offset stays
   inside its two bytes. The `biome` layer does not do this yet, and a wood straddling the edge is placed wrong there.

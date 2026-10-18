@@ -6,7 +6,7 @@ import type { StandChunk } from './stands.ts';
 import { CULTURES } from './structures.ts';
 
 /*
- * A ruined city laid out from its record, the same in every browser and in every still. See decision record 0102.
+ * A ruined city laid out from its record, the same in every browser and in every still. See decision record 0104.
  *
  * A town of 1790 is one stand of the `ruins` layer: a middle, a reach, the culture it was built in, how built-up its
  * core was, a seed. Everything else is worked out here, from that and the terrain classes alone. The town's own grid

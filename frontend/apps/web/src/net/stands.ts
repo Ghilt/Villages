@@ -7,7 +7,7 @@ import { TILE } from '../geometry/world';
 
 /**
  * The stands the gateway has sent this page, a layer of a zoom 7 tile at a time, and nothing else: the scenery's own,
- * `biome`, and the towns of 1790 laid in ruins, `ruins` (decision record 0101). Each layer is kept apart, and every
+ * `biome`, and the towns of 1790 laid in ruins, `ruins` (decision record 0103). Each layer is kept apart, and every
  * question asks of the scenery's unless it names the other.
  *
  * The scenery grows from stands, and since decision 0067 they are the server's to hand out: a page is sent the

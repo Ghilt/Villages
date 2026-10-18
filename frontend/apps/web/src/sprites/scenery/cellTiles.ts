@@ -6,7 +6,7 @@ import { TILE } from '../../geometry/world';
 /**
  * Which zoom 7 tiles a scenery cell reads, each `{x, y}`: the tiles of its scenery's stands and terrain, and the tiles
  * of the ruins that may stand in it or near enough to clear its trees. Apart from `sceneryCells.ts`, which keeps the
- * cells, so that file stays a cache. See decision records 0067 and 0102.
+ * cells, so that file stays a cache. See decision records 0067 and 0104.
  */
 
 /** How many world units a zoom 7 tile covers: 256 pixels, one to a unit. */

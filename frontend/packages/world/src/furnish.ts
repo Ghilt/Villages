@@ -9,7 +9,7 @@ import type { StandChunk } from './stands.ts';
 /*
  * One cell of the world furnished: the trees the scatter grows there and the ruins of the towns of 1790 standing
  * there, the trees thinned where a town stood. What the page draws a cell from, and the scenery stills, so a still is
- * a plan of the map. See decision record 0102.
+ * a plan of the map. See decision record 0104.
  *
  * The trees are thinned after they are scattered, by the ruins alone and never by the dial: no tree stands within a
  * piece's half width and `clear` of it, laid out at the full dial so that a thinner drawing clears the same ground;

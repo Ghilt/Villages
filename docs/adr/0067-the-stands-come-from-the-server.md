@@ -3,7 +3,7 @@
 - Status: accepted
 - Date: 2026-09-27
 - Builds on 0061, which said the fog of war holds the scenery back too, and on 0054, whose sprite map it sends
-- Amended 2026-10-17 by 0101: a stands frame says which layer of the sprite map it carries, the scenery's or the
+- Amended 2026-10-17 by 0103: a stands frame says which layer of the sprite map it carries, the scenery's or the
   ruined towns', and the gateway sends every layer of every held tile
 
 ## Context

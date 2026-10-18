@@ -15,7 +15,7 @@ export const STAND_TILES = 128;
 
 /**
  * The layers of the sprite map whose stands the gateway sends: the scenery's own, `biome`, and the towns of 1790 laid
- * in ruins, `ruins`, a stand a town. A stands frame says which it carries. See decision records 0067 and 0101.
+ * in ruins, `ruins`, a stand a town. A stands frame says which it carries. See decision records 0067 and 0103.
  */
 export const STAND_LAYERS = ['biome', 'ruins'] as const;
 export type StandLayer = (typeof STAND_LAYERS)[number];
@@ -25,7 +25,7 @@ export type StandLayer = (typeof STAND_LAYERS)[number];
  * has revealed: the layer's own records, eight bytes a stand, in base64, which `decodeStands` reads. Sent for every
  * layer of every tile under a held cell from zoom 6 in, and again when the house's sight or the fog switch changes
  * what it lets through; empty when nothing there does. What the fog holds back is left out. See decision records 0067
- * and 0101.
+ * and 0103.
  */
 export const standsFrameSchema = z.object({
   type: z.literal('stands'),

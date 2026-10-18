@@ -38,7 +38,7 @@ import {
  * which says nothing of where any town is (decision record 0067). A town standing in a square of sea on the culture
  * map takes the culture of the place on Earth it came from; its ruins are drawn only where there is land. With
  * `--picture`, it also draws every town's ruins as rings over the culture map around a few great cities into
- * `world/painterly/ruins/`, to look at. A second or two. See docs/plans/ruined-cities.md and decision record 0101.
+ * `world/painterly/ruins/`, to look at. A second or two. See docs/plans/ruined-cities.md and decision record 0103.
  */
 
 const LAYER = 'ruins';

@@ -15,7 +15,7 @@ import java.util.Base64
  * cells it holds, every layer of a tile, for the world it draws, which hello names, and only where they touch ground
  * its house has revealed. A tile's layer is sent once while it is held, empty where the world has no such layer so
  * the page knows it has all there is, and again only when what the fog lets through of it changes. See decision
- * records 0061, 0067, 0075 and 0101.
+ * records 0061, 0067, 0075 and 0103.
  */
 internal class StandsPart(private val stands: Stands) : Part {
     /** What one connection draws, and what it has been sent of it. */

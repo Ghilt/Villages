@@ -10,7 +10,7 @@ import { heldStandsOf, onStandsArrived } from '../net/stands';
  * are built over and a fainter one at how far they reach, in the colour of the culture they are built in - the Culture
  * renderer's. Only what the fog let through is here, because nothing else ever reached the page: with the fog lifted,
  * every town under the cells the page follows; with it down, only those touching ground the house has revealed. The
- * game server sends ruins from zoom 6 in, as it sends the scenery's stands. See decision record 0101.
+ * game server sends ruins from zoom 6 in, as it sends the scenery's stands. See decision record 0103.
  */
 
 const COLOURS: Record<Culture, string> = {

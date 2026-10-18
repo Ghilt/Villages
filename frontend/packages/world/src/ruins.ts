@@ -303,7 +303,7 @@ export function fullnessOf(ruins: Ruins, people: number): number {
 /**
  * A town as a stand of the `ruins` layer: its middle in world units, how far its ruins reach, the culture they are
  * built in as the favourite byte - its place in `cultures` - how built-up its core is as the thickness, and a seed
- * from its Wikidata id, so that two towns of one size are laid out differently. See decision record 0101.
+ * from its Wikidata id, so that two towns of one size are laid out differently. See decision record 0103.
  */
 export function ruinStand(
   ruins: Ruins,

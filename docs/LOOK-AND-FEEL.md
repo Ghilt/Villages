@@ -192,7 +192,7 @@ its towns a broken wall with gates where the streets met it. A great city's ruin
 hamlet's are a handful of shells. The core is open ground, the outer ruins as wooded as the land about them, and
 nothing stands in a river or the sea: a port's ruins stop at the shore. Each piece is drawn in the culture's own
 look - grey stone, sand and green tile, dark tile and lacquer, mud and thatch - and East Asian towns stand square to
-the four quarters. It is the same city in every browser. See decision records 0101 and 0102.
+the four quarters. It is the same city in every browser. See decision records 0103 and 0104.
 
 **Critters live where the house sees.** From zoom 9 in, every so often a few small birds burst out of a tree or a
 bush the scenery drew - in the woods, the scrub and the heath, and out of a lone bush or tree in the open - each

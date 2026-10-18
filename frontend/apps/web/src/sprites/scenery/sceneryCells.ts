@@ -39,7 +39,7 @@ import { Waiting } from './waiting';
  * grows there.
  *
  * **And the ruins.** A cell is furnished with the pieces of the ruined towns of 1790 whose feet stand in it, and its
- * trees thinned by them (`furnishCell`, decision record 0102), from the `ruins` layer's stands of the tiles under it
+ * trees thinned by them (`furnishCell`, decision record 0104), from the `ruins` layer's stands of the tiles under it
  * and the eight cells about it, which it waits for and is cut again for as it does the scenery's.
  */
 

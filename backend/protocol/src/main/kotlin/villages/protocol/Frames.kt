@@ -263,7 +263,7 @@ data class Snapshot(
  * `biome`, or the ruined towns of 1790, `ruins`, one of `STAND_LAYERS`. Sent for every layer of every tile under a
  * held cell from zoom 6 in, once while a held cell stays over it, and again when the house's sight or the fog switch
  * changes what it lets through; empty when nothing there does. What the fog holds back is simply not in it, and
- * nothing says how much. See decision records 0054, 0067 and 0101.
+ * nothing says how much. See decision records 0054, 0067 and 0103.
  */
 data class StandsFrame(val x: Int, val y: Int, val stands: String, val layer: String = "biome") : ServerFrame
 

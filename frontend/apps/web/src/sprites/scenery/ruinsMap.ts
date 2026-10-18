@@ -14,7 +14,7 @@ import type {
  * The ruined towns of 1790 as the scenery draws them: the master's ruins map, fetched once, and the pieces of the
  * ruins as kinds of scenery after the sprite map's own, so one layer draws trees and ruins and sorts them in depth
  * together. Where a town is comes only from the stands the gateway sends of the `ruins` layer, as far as the fog lets
- * them through; this says how to lay one out. See decision records 0101 and 0102.
+ * them through; this says how to lay one out. See decision records 0103 and 0104.
  */
 
 const files = new Map<string, Promise<RuinsMapFile | null>>();

@@ -1,9 +1,9 @@
-# 0102. A ruined city is laid out by the page from its record
+# 0104. A ruined city is laid out by the page from its record
 
 - Status: accepted
 - Date: 2026-10-17
 - Plan: `docs/plans/ruined-cities.md`
-- Builds on 0101, which made every town of 1790 one stand of the `ruins` layer, and on 0052 and 0054, which place
+- Builds on 0103, which made every town of 1790 one stand of the `ruins` layer, and on 0052 and 0054, which place
   the scenery the same way: a pure function of the ground and the stands, stored nowhere
 
 ## Context
