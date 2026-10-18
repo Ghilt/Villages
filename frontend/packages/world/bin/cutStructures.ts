@@ -7,7 +7,7 @@ import sharp from 'sharp';
 
 import { crop, opaqueBox, packShelves } from '../src/art.ts';
 import type { Rgba } from '../src/art.ts';
-import { flagOf, keyOfStructureFile, structurePictureFile } from '../src/structureArt.ts';
+import { flagOf, footOfBuilding, keyOfStructureFile, structurePictureFile } from '../src/structureArt.ts';
 import type { StructureAtlasFile, StructureFrame } from '../src/structureArt.ts';
 import {
   DRAWN_CULTURES,
@@ -29,7 +29,7 @@ import { ART_DIR, STRUCTURE_MARKS_DIR, STRUCTURES_DIR } from './lib/paths.ts';
  * First it draws a placeholder for every picture `world/sprites/structures/` has none of, from the same shapes the
  * map draws in code, and remembers what it drew in `placeholders.json` there, so a picture saved over one is known to
  * be Adam's and is never drawn over. Then it crops every picture to what is drawn in it, scales it to one height,
- * finds where a pennant stands on it, and packs them all into `public/art/structures.webp` with `structures.json`
+ * finds where a pennant stands on it and where it stands on the ground, and packs them all into `public/art/structures.webp` with `structures.json`
  * beside it, which the map draws from where it has a picture and draws in code where it has none. The marks of
  * `world/sprites/marks/structures/`, a pin a type and the ruin's, are drawn and cut the same way into the same atlas,
  * with a record of their own. Nothing is written
@@ -84,7 +84,7 @@ for (const picture of [...DRAWN_TYPES, RUIN_PICTURE]) {
 }
 
 // Cut every picture there is.
-const pieces: { key: string; file: string; image: Rgba; placeholder: boolean }[] = [];
+const pieces: { key: string; file: string; image: Rgba; footX: number; placeholder: boolean }[] = [];
 const files = async (from: Folder) =>
   (await readdir(from.dir))
     .filter((file) => from.keyOf(file) !== null)
@@ -113,6 +113,8 @@ for (const { from, file } of [...(await files(pictures)), ...(await files(marks)
     key: from.keyOf(file)!,
     file: from === marks ? `../marks/structures/${file}` : file,
     image: { width, height: HEIGHT, data: new Uint8Array(scaled) },
+    // Read before the picture is scaled down, where the corner is still sharp.
+    footX: footOfBuilding(cropped),
     placeholder,
   });
 }
@@ -150,11 +152,13 @@ pieces.forEach((piece, at) => {
     height: piece.image.height,
     flagX: flag.x,
     flagY: flag.y,
+    footX: piece.footX,
     placeholder: piece.placeholder,
     source: piece.file,
   };
 });
-const version = sha(atlas).slice(0, 16);
+// Of the frames too, so a change in what is measured on a picture is written when the pictures are not.
+const version = sha(Buffer.concat([atlas, Buffer.from(JSON.stringify(frames))])).slice(0, 16);
 const atlasJson = resolve(ART_DIR, 'structures.json');
 const before = existsSync(atlasJson)
   ? (JSON.parse(await readFile(atlasJson, 'utf8')) as StructureAtlasFile)

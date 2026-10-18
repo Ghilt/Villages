@@ -52,8 +52,10 @@ It never draws over a file that is there.
 which are still placeholders, `placeholders.json` in that folder: `<type>-<culture>.png` for every type of
 `world/catalogues/structures.json` in every culture - `castle-european.png`, `castle-islamic.png`,
 `printingHouse-eastAsian.png` - and `ruin-<culture>.png` for what any of them falls to. Sixty-eight, every one a
-placeholder drawn from the shapes the map draws in code until you save over it. Upright, the front of the
-building, on a transparent background, standing on the bottom edge: it is cropped to what is drawn and scaled to
+placeholder drawn from the shapes the map draws in code until you save over it. Upright, on a transparent
+background, standing on the bottom edge on the front corner of its base, which must be the lowest thing in the
+picture: the tool reads the foot from the lowest two rows, so a cart, a crate or a ship's cradle painted lower than
+that corner takes the foot with it, and the Pictures page ticks where it landed in gold. It is cropped to what is drawn and scaled to
 160 pixels tall, so paint it 640 tall or more. Its pennant flies from the middle of the highest row anything is
 drawn in, so the tallest tower carries it. With the dev server running, a picture saved is on the map a few
 seconds later with no reload; `npm run world:structures --prefix frontend` cuts by hand. To have a placeholder
@@ -123,8 +125,10 @@ that instead. A picture with its own transparency is never keyed or lifted.
 
 - **Drawn from the camera's angle.** The player's camera looks north and down at 45 degrees at the closest
   zoom, and less further out: from straight down at zoom 7 it tips up as it comes in (decision record 0060,
-  experiment 0011). A round tree hides a different angle, but a building does not: draw buildings front-on
-  and seen from that height, not as isometric diamonds.
+  experiment 0011). A round tree hides a different angle, but a building does not: draw a building seen from
+  that height and turned twenty-six degrees, as the ground's diamonds are, so its base sits on them - its front
+  corner a little right of its middle and lowest, its long front running off up to the left, its short side up to
+  the right.
 - **Light from the upper right**, because the first picture has it there and every picture has to agree.
 - **Standing on its foot.** The tool finds the foot as the middle of whatever is in the lowest few rows, so
   a trunk and its roots should be the lowest thing in the picture. Nothing should hang below them, such as

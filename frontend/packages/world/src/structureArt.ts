@@ -18,6 +18,8 @@ export interface StructureFrame {
   height: number;
   flagX: number;
   flagY: number;
+  /** Where it stands on the ground across its width, as a fraction from the left: the front corner of its base. */
+  footX: number;
   /** Still the placeholder drawn for it, not a picture painted over it. */
   placeholder: boolean;
   /** The file it was cut from, under `world/sprites/structures/`. */
@@ -63,4 +65,38 @@ export function flagOf(image: Rgba): { x: number; y: number } {
     if (count > 0) return { x: (sum / count + 0.5) / image.width, y: y / image.height };
   }
   return { x: 0.5, y: 0 };
+}
+
+/** How many of a building's lowest rows its foot is read from. */
+const BASE_ROWS = 2;
+
+/**
+ * Where a building stands across its picture, as a fraction of its width from the left: the front corner of its base.
+ *
+ * A building is painted turned to sit on the ground's diamonds, so its base is one, and the corner nearest the eye is
+ * the lowest thing drawn. It is not the middle: the turn of twenty-six degrees puts it about a sixth of the base's
+ * width right of it. Read as a tree's foot is, the lowest rows' middle weighted by how solid each pixel is, but from
+ * its lowest two rows alone, because a tree's band would take in the long front edge running off to the left and walk
+ * the foot with it. Faint pixels are passed over, so a soft painted edge under the corner does not count as the ground. The middle,
+ * for a picture of nothing. See docs/plans/worked-ground.md.
+ */
+export function footOfBuilding(image: Rgba): number {
+  const solid = (x: number, y: number) => image.data[(y * image.width + x) * 4 + 3]! > 127;
+  let bottom = image.height - 1;
+  while (bottom >= 0 && !Array.from({ length: image.width }, (_, x) => solid(x, bottom)).some(Boolean)) {
+    bottom -= 1;
+  }
+  if (bottom < 0) return 0.5;
+  let weight = 0;
+  let sum = 0;
+  for (let y = Math.max(0, bottom - BASE_ROWS + 1); y <= bottom; y += 1) {
+    for (let x = 0; x < image.width; x += 1) {
+      if (solid(x, y)) {
+        const alpha = image.data[(y * image.width + x) * 4 + 3]!;
+        weight += alpha;
+        sum += alpha * (x + 0.5);
+      }
+    }
+  }
+  return sum / weight / image.width;
 }
