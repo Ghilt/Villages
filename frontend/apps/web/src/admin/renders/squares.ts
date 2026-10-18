@@ -43,6 +43,11 @@ export const CRITTER_SQUARES: readonly CritterSquareOf[] = [
   { kind: 'hawk', land: 'steppe', every: 20 },
   { kind: 'frog', land: 'marsh', every: 4 },
   { kind: 'snake', land: 'marsh', every: 7 },
+  { kind: 'partridge', land: 'farmland', every: 5 },
+  { kind: 'lark', land: 'meadow', every: 6 },
+  { kind: 'grouse', land: 'heath', every: 5 },
+  { kind: 'duck', land: 'marsh', every: 5 },
+  { kind: 'ptarmigan', land: 'ice', every: 5 },
 ];
 
 export interface RenderSquare {
@@ -59,7 +64,7 @@ export interface RenderSquare {
 export interface RendersLayout {
   /** A square of every kind of land, by the palette's groups and then its order. */
   lands: RenderSquare[];
-  /** A square for each critter, in a row of their own under the lands, with the sky above them. */
+  /** A square for each critter, in rows of their own under the lands, with the sky above each row. */
   critters: RenderSquare[];
   /** The world units the layout covers, its north-west corner and its south-east. */
   from: { x: number; y: number };
@@ -83,20 +88,22 @@ export function rendersLayout(
     y: ORIGIN.y + GAP + Math.floor(at / across) * pitch,
   }));
   const rows = Math.ceil(ordered.length / across);
-  const crittersAt = ORIGIN.y + rows * pitch + SKY;
+  // The critters wrap as the lands do, each row of them with the sky over it a bird circles in.
+  const crittersAt = ORIGIN.y + rows * pitch;
+  const critterRows = Math.ceil(CRITTER_SQUARES.length / across);
   const critters = CRITTER_SQUARES.map((critter, at) => ({
     land: critter.land,
     id: kinds.find((kind) => kind.name === critter.land)?.id ?? BETWEEN,
-    x: ORIGIN.x + at * pitch,
-    y: crittersAt + GAP,
+    x: ORIGIN.x + (at % across) * pitch,
+    y: crittersAt + SKY + GAP + Math.floor(at / across) * (pitch + SKY),
     critter,
   }));
-  const wide = Math.max(Math.min(across, ordered.length), critters.length);
+  const wide = Math.min(across, Math.max(ordered.length, critters.length));
   return {
     lands,
     critters,
     from: { x: ORIGIN.x, y: ORIGIN.y },
-    to: { x: ORIGIN.x + wide * pitch - GAP, y: crittersAt + pitch },
+    to: { x: ORIGIN.x + wide * pitch - GAP, y: crittersAt + critterRows * (pitch + SKY) },
   };
 }
 

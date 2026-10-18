@@ -49,16 +49,16 @@ describe('the hop', () => {
   });
 
   it('brings a hare out from behind a bush or a tuft on grassland, and a squirrel only in the woods', () => {
-    // The hawks circling over it come out of no cover, and are the soar's.
+    // The hawks circling over it and the larks rising out of it come out of no cover.
     const meadow = [...anHour(1, wood({}, 'grass', 'meadow', 3), 600).values()].filter(
-      (event) => event.kind !== 'hawk',
+      (event) => event.kind !== 'hawk' && event.kind !== 'lark',
     );
     expect(meadow.length).toBeGreaterThan(0);
     expect(meadow.every((event) => event.kind === 'hare' && event.behaviour === 'hop')).toBe(true);
     // Neither comes out of what it does not live in: no hare in a wood of tufts, no squirrel among a meadow's oaks.
     expect(anHour(1, wood({}, 'grass', 'mixed-forest', 3), 600).size).toBe(0);
     const oaks = [...anHour(1, wood({}, 'oak', 'meadow'), 600).values()].filter(
-      (event) => event.kind !== 'hawk',
+      (event) => event.kind !== 'hawk' && event.kind !== 'lark',
     );
     expect(oaks.length).toBeGreaterThan(0);
     expect(oaks.every((event) => event.kind === 'songbird')).toBe(true);

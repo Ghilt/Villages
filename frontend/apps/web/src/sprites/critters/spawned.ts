@@ -1,9 +1,8 @@
 import { CASTS, RUINS_CAST } from './casts';
 import type { CastMember } from './casts';
-import { coverNear, critterHash } from './critterClock';
+import { coverNear, critterHash, openAnimals } from './critterClock';
 import { flockOf } from './flush';
 import { hopper, waterNear } from './hop';
-import { leaper } from './leap';
 import { CRITTERS_LOOK } from './look';
 import { slitherer } from './slither';
 import { soarersOf } from './soar';
@@ -21,7 +20,7 @@ function memberNamed(kind: string): CastMember | null {
  * A critter put where a click asked for one (`critterSpawn.ts`), beginning at `seconds`: what the world would bring
  * there, made up from the ground there and seen or not - a flock bursting out of the tree or bush nearest the click, a
  * squirrel or a hare bounding from the cover of its own nearest the click to more near it, a fish leaping from the
- * water clicked, a hawk circling over the open ground clicked; a frog from the reeds or the grass nearest the click
+ * water clicked, a hawk circling over the open ground clicked, a covey or a lark bursting up off the open ground clicked; a frog from the reeds or the grass nearest the click
  * into the water beside them, or to the next tuft with no water near, and a snake gliding from them to the next; out
  * of the piece of the ruins nearest the click, crows bursting out or circling over it, or a rat scurrying to the next. Null while the ground there is not yet known; in a few
  * words why not, when nothing of its kind could come there.
@@ -33,16 +32,18 @@ export function spawnedAt(ask: SpawnAsk, seconds: number, ground: Ground): Critt
   const draw = (salt: number) => critterHash(ask.id, 0x5eed, Math.floor(ask.at), salt);
   const key = `spawn/${ask.id}`;
   const event = { key, kind: member.kind, behaviour: member.behaviour, startsAt: seconds };
-  if (member.behaviour === 'leap' || (member.behaviour === 'soar' && member.from.length === 0)) {
+  if (member.from.length === 0) {
     const open = ground.classAt(ask.x, ask.y);
     if (open === null) return null;
     if (!CASTS[open]?.some((one) => one.kind === member.kind)) {
       return member.behaviour === 'leap'
         ? `a ${ask.kind} leaps only from water it lives in`
-        : `a ${ask.kind} circles only over the open ground it lives over`;
+        : member.behaviour === 'soar'
+          ? `a ${ask.kind} circles only over the open ground it lives over`
+          : `a ${ask.kind} comes only out of the open ground it lives on`;
     }
-    const animals = member.behaviour === 'leap' ? [leaper(draw)] : soarersOf(member.kind, draw);
-    return { ...event, from: { x: ask.x, y: ask.y, kind: open, height: 0 }, animals };
+    const from = { x: ask.x, y: ask.y, kind: open, height: 0 };
+    return { ...event, from, animals: openAnimals(member, from, draw) };
   }
   const reach = 4;
   const around = ground.coverIn(ask.x - reach, ask.y - reach, ask.x + reach, ask.y + reach);

@@ -8,7 +8,8 @@ import type { Animal, Cover, CritterEvent, Pose } from './types';
  * clock, `critterClock.ts`: a pure function of the draws its cell and slot give it, the same in every browser.
  */
 
-const F = CRITTERS_LOOK.flush;
+const L = CRITTERS_LOOK;
+const F = L.flush;
 
 /** The longest a flush lasts, the last bird of a flock flying off or taking shelter. */
 export const FLUSH_LONGEST = F.stagger + Math.max(F.seconds, F.shelterSeconds[1]);
@@ -85,17 +86,19 @@ export function flushPose(
   if (bird.to !== null) return shelterPose(event.from, bird, share, crown, out, beat, frames);
   // Whole through the turn and the drop, and fading quickly once it has settled.
   const alpha = Math.min(out, ramp(1, 1 - F.fadeOut, share));
-  // From where it sat in its cover, a little apart from the rest.
+  // From where it sat in its cover, a little apart from the rest; as high and as far as its kind flies.
   const start = { x: event.from.x + (bird.nudge?.x ?? 0), y: event.from.y + (bird.nudge?.y ?? 0) };
   const sat = crown + (bird.nudge?.height ?? 0);
-  if (share > F.hookAt) return hookPose(start, bird, share, sat, alpha, beat, frames, size);
-  const on = arcAt(start, bird, F.reach * bird.reach * share ** 0.85);
+  const climb = L.kinds[event.kind]?.climb ?? F.climb;
+  const flier = { ...bird, reach: bird.reach * (L.kinds[event.kind]?.far ?? 1) };
+  if (share > F.hookAt) return hookPose(start, flier, share, sat, climb, alpha, beat, frames, size);
+  const on = arcAt(start, flier, F.reach * flier.reach * share ** 0.85);
   // Flapping for the first part of the flight, then gliding, with a beat now and then.
   const flapping = share < F.flapping || Math.sin((flown + bird.phase * 7) * 2.1) > 0.6;
   return {
     x: on.x,
     y: on.y,
-    height: sat + F.climb * Math.sin((share * Math.PI) / 2),
+    height: sat + climb * Math.sin((share * Math.PI) / 2),
     frame: flapping ? pingPong(beat, frames) : Math.floor(frames / 2),
     alpha,
   };
@@ -134,6 +137,7 @@ function hookPose(
   bird: Animal,
   share: number,
   crown: number,
+  climb: number,
   alpha: number,
   beat: number,
   frames: number,
@@ -144,7 +148,7 @@ function hookPose(
   const k = Math.min(1, (share - at) / (1 - F.fadeOut - at));
   const turned = arcAt(from, bird, F.reach * bird.reach * at ** 0.85);
   const on = F.hookTurn * size * (1 - (1 - Math.min(1, k / F.hookTurning)) ** 2);
-  const high = crown + F.climb * Math.sin((at * Math.PI) / 2);
+  const high = crown + climb * Math.sin((at * Math.PI) / 2);
   return {
     x: turned.x + Math.cos(turned.heading) * on,
     y: turned.y + Math.sin(turned.heading) * on,

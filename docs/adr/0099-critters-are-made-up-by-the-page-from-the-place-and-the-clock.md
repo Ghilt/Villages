@@ -111,3 +111,22 @@ there whatever the ground, and hops into the water rather than to more cover, a 
 fish's ring a little smaller (`ringAt`). So a meadow by a lake has frogs on its shore, which some of what the meadow
 would have brought there gives way to, and none inland; a test holds both. The shore is looked for only from cover a
 frog comes out of, so the rest of the world's critters are as they were.
+
+## Amendment, 2026-10-18: every kind of ground its cast, the birds
+
+Step 14 of `docs/plans/living-world.md` gives the rest of the ground its critters, in a run Adam picked that evening,
+and starts with the birds: a covey of partridges off the open fields, a lark or two rising over the grassland and the
+fields, grouse out of the heather of the heath and the scrub, ducks off the wet land, and ptarmigan off the ice and
+the polar desert and out of the tundra's heather. The plan had crows lifting from the fields, but Adam's word with the
+ruins was that crows and rats come out of the ruins and nothing else, and a test holds it; so the fields have
+partridges instead.
+
+Most of them come out of no scenery but the open ground, as a fish comes out of the water and a hawk out of the open
+sky: a member of a cast with nothing to come out of comes out of a place of its cell the clock draws, now whatever its
+way of moving, with no tree near to take shelter in. How often a cell's slot brings one of them rather than one out of
+cover is their share of the cast's weight there, by a draw of its own (`openOf`); what comes out of cover is picked
+from the members that do, by the draw it always was. Sharing that draw, the partridges of the fields took the slots
+of the crows circling over a ruined town on farmland, which a test caught, so the two draws are apart and every
+member keeps its share. A bird of a flush climbs and flies as its kind does (`look.ts`, `climb` and `far`): the
+partridges low, the lark high and coming down near where it rose. The flush itself moved out of the clock into
+`flush.ts` first, beside the other ways of moving.

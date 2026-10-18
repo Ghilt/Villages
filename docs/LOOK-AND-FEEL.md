@@ -211,25 +211,28 @@ a little apart in it, all off in one direction like a shotgun's blast, curving t
 flight turns; they climb, flap and glide away, and then hook down - a sharp turn and a drop of a little over half a
 bird length straight down the screen, settling, and then a quick fade; a few of them drop into a tree near by
 instead; or a bird or two flits from one tree into another near it, as if seeking shelter, and goes into its leaves.
-In the woods a squirrel bounds now and then from one tree to another near it, stopping once on the way, and is gone
-behind it; on grassland a hare comes out from behind a bush or a tuft of grass, a few bounds and a stop, and is gone
-behind another. In the wet land a frog hops from one tuft of the reeds to the next and sits a while between, and
-beside any lake or river, whatever the ground, one may hop out of the reeds or the grass into the water, a ring
-spreading where it went in; now and then a snake glides out of the reeds into another tuft near it, seen from above
-as the map is, its body waving as it goes. They run on the ground, so a tree in front of one hides it, and each faces
-the way it is going. Over a lake, a river or the shallow sea a fish now and then jumps clear across the screen and
-falls back, tipped along its arc, and a ring of light spreads on the water where it left and another where it fell,
-flattened as the ground is tipped. High over open ground, rock and desert a hawk now and then circles slowly,
-gliding, seen from above as the map is and turned the way it flies, its circle drifting down the wind and its shadow
-sweeping the ground below it, under the trees. The ruins of the towns of 1790 have their own and nothing else has
-them: crows burst out of what still stands high in a black flock bigger than the songbirds', or two or three circle
-slowly over the stones, and a rat scurries low and quick from one heap of rubble to the next. Each has a soft shadow
-on the ground below it and away from the light, which a tree in front of it hides. They are drawn at the scenery's
-scale, smaller than any other sprite, so what tells a bird from a speck is its wingbeat rather than its outline. They
-come only where the house sees now: the grey ground is a memory and holds still. Nothing pops: a critter comes out of
-its cover, and one first seen on its way fades up. The same birds leave the same bush at the same moment in every
-browser. A player who asked for less motion sees none. Every number is in `apps/web/src/sprites/critters/look.ts`;
-see decision record 0099.
+Off the open fields a covey of partridges bursts up together, low and fast, and comes down further off; over the
+grassland and the fields a lark or two rises high and comes down not far from where it rose; a few dark grouse burst
+whirring out of the heather of the heath and the scrub; ducks lift off the wet land and climb away; and on the ice,
+the polar desert and the tundra's heather white ptarmigan burst up off the white. In the woods a squirrel bounds now
+and then from one tree to another near it, stopping once on the way, and is gone behind it; on grassland a hare comes
+out from behind a bush or a tuft of grass, a few bounds and a stop, and is gone behind another. In the wet land a
+frog hops from one tuft of the reeds to the next and sits a while between, and beside any lake or river, whatever the
+ground, one may hop out of the reeds or the grass into the water, a ring spreading where it went in; now and then a
+snake glides out of the reeds into another tuft near it, seen from above as the map is, its body waving as it goes.
+They run on the ground, so a tree in front of one hides it, and each faces the way it is going. Over a lake, a river
+or the shallow sea a fish now and then jumps clear across the screen and falls back, tipped along its arc, and a ring
+of light spreads on the water where it left and another where it fell, flattened as the ground is tipped. High over
+open ground, rock and desert a hawk now and then circles slowly, gliding, seen from above as the map is and turned
+the way it flies, its circle drifting down the wind and its shadow sweeping the ground below it, under the trees. The
+ruins of the towns of 1790 have their own and nothing else has them: crows burst out of what still stands high in a
+black flock bigger than the songbirds', or two or three circle slowly over the stones, and a rat scurries low and
+quick from one heap of rubble to the next. Each has a soft shadow on the ground below it and away from the light,
+which a tree in front of it hides. They are drawn at the scenery's scale, smaller than any other sprite, so what
+tells a bird from a speck is its wingbeat rather than its outline. They come only where the house sees now: the grey
+ground is a memory and holds still. Nothing pops: a critter comes out of its cover, and one first seen on its way
+fades up. The same birds leave the same bush at the same moment in every browser. A player who asked for less motion
+sees none. Every number is in `apps/web/src/sprites/critters/look.ts`; see decision record 0099.
 
 **The seam.** The join between the two **bays**, drawn as a moulding lying over it: three gold rules
 running the length of the stage — a heavy one on the join and a lighter one either side — with a fixed

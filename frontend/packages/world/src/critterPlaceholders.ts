@@ -5,18 +5,12 @@
  * (`LOOK-AND-FEEL.md`), on a transparent ground, standing on the bottom edge where the kind stands on anything.
  */
 
+import { circle, ellipse, leg, path } from './critterShapes.ts';
+import type { CritterFrame as Frame } from './critterShapes.ts';
+import { WILD_DRAWINGS } from './critterPlaceholdersWild.ts';
+
 /** How big a frame of a placeholder is drawn, before the cut crops and scales it. */
 export const CRITTER_DRAWN = 128;
-
-type Frame = (at: number) => string;
-
-const ellipse = (cx: number, cy: number, rx: number, ry: number, fill: string, turn = 0) =>
-  `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${fill}" transform="rotate(${turn} ${cx} ${cy})"/>`;
-const circle = (cx: number, cy: number, r: number, fill: string) =>
-  `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}"/>`;
-const path = (d: string, fill: string) => `<path d="${d}" fill="${fill}"/>`;
-const leg = (x1: number, y1: number, x2: number, y2: number, colour: string, width = 5) =>
-  `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${colour}" stroke-width="${width}" stroke-linecap="round"/>`;
 
 /** A small bird seen from behind and above, its wings up, then level, then down: one beat. */
 const songbird: Frame = (at) => {
@@ -313,6 +307,7 @@ const DRAWINGS: Record<string, Frame> = {
   rat,
   frog,
   snake,
+  ...WILD_DRAWINGS,
 };
 
 /** The kinds a placeholder can be drawn for. A kind listed in `world/critters.json` and not here is drawn as a blot. */

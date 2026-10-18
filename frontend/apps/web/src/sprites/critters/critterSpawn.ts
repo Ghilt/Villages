@@ -10,7 +10,8 @@ import type { SpawnAsk } from './types';
  * buttons arm a kind, and while one is armed every click on the map asks for one of that kind there, now. It is this
  * window's own, neither remembered nor sent, outside the shared world: what comes is what the world would bring there
  * - a flock out of the nearest tree, a squirrel or a hare from the nearest cover to the next, a fish out of the water,
- * a frog into the water beside the nearest reeds, a snake out of them, crows or a rat out of the nearest piece of a ruin -
+ * a frog into the water beside the nearest reeds, a snake out of them, crows or a rat out of the nearest piece of a ruin, a
+ * covey, a lark, ducks or ptarmigan off the open ground, grouse out of the nearest heather -
  * only sooner, wherever the click, seen or not. The layer makes each one up from the ground there
  * (`spawned.ts`). Escape, or the armed button again, stops.
  */
@@ -27,6 +28,11 @@ export const SPAWNABLE = [
   'rat',
   'frog',
   'snake',
+  'partridge',
+  'lark',
+  'grouse',
+  'duck',
+  'ptarmigan',
 ] as const;
 export type Spawnable = (typeof SPAWNABLE)[number];
 

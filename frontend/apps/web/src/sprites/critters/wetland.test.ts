@@ -21,13 +21,17 @@ const posesOver = (event: Parameters<typeof posesOf>[0], steps = 400) =>
   ).flat();
 
 describe('the wet land', () => {
-  it('brings frogs hopping from reed to reed in a marsh, and snakes gliding through them, and nothing else', () => {
+  it('brings frogs hopping from reed to reed in a marsh, snakes gliding through them and ducks off it, and nothing else', () => {
     const marsh = [...anHour(1, wood({}, 'reed', 'marsh', 1.5), 900).values()];
     const frogs = marsh.filter((event) => event.kind === 'frog');
     const snakes = marsh.filter((event) => event.kind === 'snake');
+    const ducks = marsh.filter((event) => event.kind === 'duck');
     expect(frogs.length).toBeGreaterThan(10);
     expect(snakes.length).toBeGreaterThan(3);
-    expect(frogs.length + snakes.length).toBe(marsh.length);
+    expect(ducks.length).toBeGreaterThan(3);
+    expect(frogs.length + snakes.length + ducks.length).toBe(marsh.length);
+    // The ducks lift off the marsh itself, out of no reed.
+    expect(ducks.every((event) => event.behaviour === 'flush' && event.from.kind === 'marsh')).toBe(true);
     expect(frogs.every((event) => event.behaviour === 'hop' && event.animals[0]!.to!.kind === 'reed')).toBe(
       true,
     );

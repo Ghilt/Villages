@@ -45,7 +45,14 @@ describe("the ruins' cast", () => {
   it('brings crows out of what stands high, rats out of what has fallen, and songbirds out of the trees among them', () => {
     const events = [...anHour(1, ruinedWood()).values()];
     const kinds = new Set(events.map((event) => `${event.kind} ${event.behaviour}`));
-    expect([...kinds].sort()).toEqual(['crow flush', 'crow-aloft soar', 'rat hop', 'songbird flush']);
+    // And partridges off the open fields between, which come out of no piece of it.
+    expect([...kinds].sort()).toEqual([
+      'crow flush',
+      'crow-aloft soar',
+      'partridge flush',
+      'rat hop',
+      'songbird flush',
+    ]);
     for (const event of events) {
       if (event.kind === 'crow') expect(event.from.kind).toBe('ruin:hall-european');
       if (event.kind === 'rat')

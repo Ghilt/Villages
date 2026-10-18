@@ -1,11 +1,12 @@
-import { CASTS, FROGS, memberFrom, memberOf } from './casts';
+import { FROGS, memberFrom, memberOf, openOf } from './casts';
+import type { CastMember } from './casts';
 import { FLUSH_LONGEST, flockOf, flushPose } from './flush';
 import { HOP_LONGEST, hopPose, hopRings, hopper, waterNear } from './hop';
 import { LEAP_LONGEST, leapPose, leapRings, leaper } from './leap';
 import { CRITTERS_LOOK } from './look';
 import { SLITHER_LONGEST, slitherPose, slitherer } from './slither';
 import { SOAR_LONGEST, soarPose, soarersOf } from './soar';
-import type { Cover, CritterEvent, Ground, Pose, Ring } from './types';
+import type { Animal, Cover, CritterEvent, Ground, Pose, Ring } from './types';
 
 export type { Animal, Cover, CritterEvent, Ground, Pose, Ring } from './types';
 
@@ -98,16 +99,20 @@ export function eventIn(
   const draw = (salt: number) => critterHash(cellX, cellY, slot, salt);
   const key = `${cellX}/${cellY}/${slot}`;
   const startsAt = slot * L.slot + draw(5) * L.slot;
-  // A fish or a hawk needs no cover: a place of the cell is drawn, and where the water or the open ground there has
-  // one, it leaps from it or circles over it.
+  // What comes out of no scenery - a fish, a hawk, a covey off a field - needs no cover: a place of the cell is drawn,
+  // and as often as the water or the open ground there has one, by its weight in the cast, it comes out of it there.
+  // Its own draw, so what comes out of cover, a ruin's crows among them, keeps every share it has of the rest.
   const at = { x: fromX + draw(20) * L.cell, y: fromY + draw(21) * L.cell };
   const open = ground.classAt(at.x, at.y);
-  const free = open === null ? null : memberOf(CASTS[open], draw(2));
-  if (free?.behaviour === 'leap' || free?.behaviour === 'soar') {
+  const opens = openOf(open);
+  const free = draw(90) < opens.share ? memberOf(opens.members, draw(2)) : null;
+  if (free !== null) {
     if (!ground.sees(at.x, at.y)) return null;
     const from = { ...at, kind: open!, height: 0 };
-    const animals = free.behaviour === 'leap' ? [leaper(draw)] : soarersOf(free.kind, draw);
-    return { key, kind: free.kind, behaviour: free.behaviour, startsAt, from, animals };
+    const animals = openAnimals(free, from, draw);
+    return animals.length === 0
+      ? null
+      : { key, kind: free.kind, behaviour: free.behaviour, startsAt, from, animals };
   }
   const cover = ground.coverIn(fromX, fromY, fromX + L.cell, fromY + L.cell);
   if (cover === null || cover.length === 0) return null;
@@ -151,6 +156,17 @@ export function eventIn(
     from,
     animals: flockOf(from, near, flit, draw, L.kinds[member.kind]?.together),
   };
+}
+
+/**
+ * The animals of a critter that comes out of the open ground or the water at a place, rather than out of cover: a fish
+ * leaping, a bird circling, a flock bursting up off the ground with no tree near to take shelter in.
+ */
+export function openAnimals(member: CastMember, from: Cover, draw: (salt: number) => number): Animal[] {
+  if (member.behaviour === 'leap') return [leaper(draw)];
+  if (member.behaviour === 'soar') return soarersOf(member.kind, draw);
+  if (member.behaviour === 'flush') return flockOf(from, [], false, draw, L.kinds[member.kind]?.together);
+  return [];
 }
 
 /** Every critter in flight at this moment over these cells, inclusive, at this density. */

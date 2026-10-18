@@ -28,7 +28,9 @@ export const CRITTERS_LOOK = {
   /**
    * How big each kind is drawn: how tall its frames stand, in world units. And how many come together, the fewest and
    * the most, where a kind's own number is not the flush's flock or a single bird circling: the crows of the ruins,
-   * bursting out in a bigger flock than the songbirds', and circling over a ruin two or three together.
+   * bursting out in a bigger flock than the songbirds', and circling over a ruin two or three together. A bird of a
+   * flush may climb higher or lower than the flush's own and fly further or less far, as a share of its reach: a
+   * covey of partridges low and fast, a lark rising high and coming down near where it rose.
    */
   kinds: {
     songbird: { size: 0.55 },
@@ -41,6 +43,11 @@ export const CRITTERS_LOOK = {
     rat: { size: 0.35 },
     frog: { size: 0.5 },
     snake: { size: 1.1 },
+    partridge: { size: 0.6, together: [4, 8], climb: 0.9, far: 0.9 },
+    lark: { size: 0.45, together: [1, 2], climb: 5.5, far: 0.35 },
+    grouse: { size: 0.65, together: [2, 4], climb: 1.2 },
+    duck: { size: 0.6, together: [2, 5], climb: 3, far: 1.3 },
+    ptarmigan: { size: 0.55, together: [3, 6], climb: 1.3, far: 0.8 },
   } as Record<string, KindLook | undefined>,
   /**
    * A flock bursting out of cover together, fanning out, climbing, flapping and gliding away, fading as it goes; or a
@@ -215,6 +222,9 @@ export const CRITTERS_LOOK = {
 export interface KindLook {
   size: number;
   together?: readonly [number, number];
+  /** How high a bird of a flush climbs, in world units, where not the flush's own; and how far it flies against it. */
+  climb?: number;
+  far?: number;
 }
 
 /** A hopping kind's numbers: see `CRITTERS_LOOK.hop`. */

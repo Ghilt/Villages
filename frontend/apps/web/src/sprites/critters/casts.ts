@@ -4,8 +4,9 @@ import type { RuinPieceName } from '@villages/world';
 /**
  * Who lives where: the cast of each kind of ground, by its name in `world/palette.json`. Each member is a kind of
  * critter, `world/critters.json`, the way it moves, how common it is there against the rest of the cast, and the
- * scenery it comes out of, by the kinds' names in `world/biomes.json`. Ground with no cast has no critters yet; the
- * rest of the casts come with step 14 of docs/plans/living-world.md. The ruined towns of 1790 have a cast of their own,
+ * scenery it comes out of, by the kinds' names in `world/biomes.json`, or none for a critter that comes out of the open
+ * ground or the water at a place of its cell. Ground with no cast has no critters yet; the rest of the casts come with
+ * step 14 of docs/plans/living-world.md. The ruined towns of 1790 have a cast of their own,
  * which comes out of the pieces of the ruins wherever they stand, whatever the ground: see `RUINS_CAST`.
  */
 
@@ -20,7 +21,10 @@ export interface CastMember {
   behaviour: Behaviour;
   /** How common it is on this ground, against the rest of the cast: a weight, not a chance. */
   weight: number;
-  /** The scenery it comes out of; none for a fish or a hawk, which come out of the water or the open sky. */
+  /**
+   * The scenery it comes out of; none for one that comes out of the open ground, the water or the open sky: a fish, a
+   * hawk, a covey of partridges off a field.
+   */
   from: readonly string[];
 }
 
@@ -85,6 +89,24 @@ const SNAKES: CastMember = {
   from: ['reed', 'grass', 'heather', 'fern', 'mangrove'],
 };
 
+/** A covey of partridges, bursting up together out of the open field, low and fast, and down again further off. */
+const PARTRIDGES: CastMember = { kind: 'partridge', behaviour: 'flush', weight: 1, from: [] };
+
+/** A lark or two rising out of the open grass, high, and coming down again not far from where they rose. */
+const LARKS: CastMember = { kind: 'lark', behaviour: 'flush', weight: 0.5, from: [] };
+
+/** A few grouse bursting out of the heather, low and whirring. */
+const GROUSE: CastMember = { kind: 'grouse', behaviour: 'flush', weight: 0.6, from: ['heather'] };
+
+/** Ducks lifting off the wet land's open water and mud between the reeds, climbing away. */
+const DUCKS: CastMember = { kind: 'duck', behaviour: 'flush', weight: 0.7, from: [] };
+
+/** Ptarmigan, white on the white, bursting up off the open ice and the polar desert, where nothing stands. */
+const PTARMIGAN: CastMember = { kind: 'ptarmigan', behaviour: 'flush', weight: 1, from: [] };
+
+/** Ptarmigan bursting out of the tundra's heather and scrub. */
+const TUNDRA_PTARMIGAN: CastMember = { ...PTARMIGAN, from: ['heather', 'scrub'] };
+
 /** The waters a frog hops into, whatever the ground beside them. */
 export const WATERS: readonly string[] = ['lake', 'river'];
 
@@ -92,6 +114,9 @@ export const CASTS: Readonly<Record<string, readonly CastMember[]>> = {
   lake: [FISH],
   river: [FISH],
   'shallow-sea': [FISH],
+  ice: [PTARMIGAN],
+  'polar-desert': [PTARMIGAN],
+  tundra: [TUNDRA_PTARMIGAN],
   taiga: [SONGBIRDS, SQUIRRELS],
   'taiga-open': [SONGBIRDS, SQUIRRELS],
   'conifer-forest': [SONGBIRDS, SQUIRRELS],
@@ -99,20 +124,20 @@ export const CASTS: Readonly<Record<string, readonly CastMember[]>> = {
   'mixed-forest': [SONGBIRDS, SQUIRRELS],
   rainforest: [SONGBIRDS, SQUIRRELS],
   'dry-forest': [SONGBIRDS, SQUIRRELS],
-  'swamp-forest': [SONGBIRDS, FROGS, SNAKES],
-  mangrove: [SONGBIRDS, SNAKES],
-  marsh: [FROGS, SNAKES],
-  bog: [SONGBIRDS, FROGS, SNAKES],
-  floodplain: [HARES, FROGS, SNAKES],
-  paddy: [FROGS, SNAKES],
-  scrub: [SONGBIRDS],
-  heath: [SONGBIRDS],
-  'farmland-with-woods': [SONGBIRDS],
-  meadow: [SONGBIRDS, HARES, HAWKS],
-  steppe: [SONGBIRDS, HARES, HAWKS],
-  savanna: [SONGBIRDS, HARES, HAWKS],
+  'swamp-forest': [SONGBIRDS, FROGS, SNAKES, DUCKS],
+  mangrove: [SONGBIRDS, SNAKES, DUCKS],
+  marsh: [FROGS, SNAKES, DUCKS],
+  bog: [SONGBIRDS, FROGS, SNAKES, DUCKS],
+  floodplain: [HARES, FROGS, SNAKES, DUCKS],
+  paddy: [FROGS, SNAKES, DUCKS],
+  scrub: [SONGBIRDS, GROUSE],
+  heath: [SONGBIRDS, GROUSE],
+  'farmland-with-woods': [SONGBIRDS, PARTRIDGES],
+  meadow: [SONGBIRDS, HARES, HAWKS, LARKS],
+  steppe: [SONGBIRDS, HARES, HAWKS, LARKS],
+  savanna: [SONGBIRDS, HARES, HAWKS, LARKS],
   'alpine-meadow': [SONGBIRDS, HAWKS],
-  farmland: [SONGBIRDS, HAWKS],
+  farmland: [SONGBIRDS, HAWKS, PARTRIDGES, LARKS],
   'bare-rock': [HAWKS],
   'desert-sand': [HAWKS],
   'desert-stone': [HAWKS],
@@ -158,9 +183,9 @@ export const isRuin = (kind: string): boolean => kind.startsWith('ruin:');
 
 /**
  * The member a piece of cover brings out that a draw from nought to one picks: out of a piece of the ruins, one of the
- * ruins' cast that comes out of that piece, by weight; out of anything else, one of the cast of the ground it stands on,
- * by weight, or null for ground with no cast or none known yet. Beside the water, `byWater`, a frog may come out of
- * any cover it lives in too, whatever the ground's own cast.
+ * ruins' cast that comes out of that piece, by weight; out of anything else, one of the cast of the ground it stands on
+ * that comes out of cover, by weight, or null for ground with no such cast or none known yet. Beside the water,
+ * `byWater`, a frog may come out of any cover it lives in too, whatever the ground's own cast.
  */
 export function memberFrom(
   cover: string,
@@ -174,11 +199,22 @@ export function memberFrom(
       draw,
     );
   if (land === null) return null;
-  const cast = CASTS[land];
+  const cast = CASTS[land]?.filter((member) => member.from.length > 0);
   if (byWater && FROGS.from.includes(cover) && !cast?.includes(FROGS)) {
     return memberOf([...(cast ?? []), FROGS], draw);
   }
   return memberOf(cast, draw);
+}
+
+/**
+ * The members of a ground's cast that come out of the open ground or the water rather than out of cover, and the share
+ * of the cast's weight they are: how often a cell's slot there brings one of them rather than one out of cover.
+ */
+export function openOf(land: string | null): { members: readonly CastMember[]; share: number } {
+  const cast = land === null ? undefined : CASTS[land];
+  const members = cast?.filter((member) => member.from.length === 0) ?? [];
+  const weight = (some: readonly CastMember[]) => some.reduce((sum, member) => sum + member.weight, 0);
+  return { members, share: members.length === 0 ? 0 : weight(members) / weight(cast!) };
 }
 
 /** The member of a cast a draw from nought to one picks, by weight, or null for ground with no cast. */

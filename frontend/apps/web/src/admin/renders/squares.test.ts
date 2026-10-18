@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import {
   BETWEEN,
   CRITTER_SQUARES,
+  GAP,
   SQUARE,
   biomeFor,
   classAtOf,
@@ -37,7 +38,7 @@ describe('the renders page', () => {
     expect(layout.lands[0]!.land).toBe('ocean');
   });
 
-  it('keeps every square apart and inside what the layout covers, the critters under the lands', () => {
+  it('keeps every square apart and inside what the layout covers, the critters under the lands, never too wide', () => {
     for (const columns of [3, 8, 40]) {
       const layout = rendersLayout(PALETTE.classes, GROUPS, columns);
       const all = squaresOf(layout);
@@ -53,6 +54,8 @@ describe('the renders page', () => {
       }
       const lowestLand = Math.max(...layout.lands.map((square) => square.y));
       expect(Math.min(...layout.critters.map((square) => square.y))).toBeGreaterThan(lowestLand + SQUARE);
+      // No wider than its columns, the critters' rows too, so the page never scrolls sideways.
+      expect(layout.to.x - layout.from.x).toBeLessThanOrEqual(columns * (SQUARE + GAP));
     }
   });
 

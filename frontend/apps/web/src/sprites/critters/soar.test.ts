@@ -11,9 +11,10 @@ const open = (land: string) => wood({ coverIn: () => [] }, 'oak', land);
 describe('the soar', () => {
   it('circles a hawk high over open ground, rock and desert, and never over a wood or the water', () => {
     for (const land of ['meadow', 'steppe', 'farmland', 'bare-rock', 'desert-sand']) {
-      const hawks = [...anHour(1, open(land), 600).values()];
+      // The larks and the partridges bursting up off the same open ground are the flush's.
+      const hawks = [...anHour(1, open(land), 600).values()].filter((event) => event.behaviour === 'soar');
       expect(hawks.length).toBeGreaterThan(0);
-      expect(hawks.every((event) => event.kind === 'hawk' && event.behaviour === 'soar')).toBe(true);
+      expect(hawks.every((event) => event.kind === 'hawk')).toBe(true);
     }
     expect(anHour(1, open('mixed-forest'), 600).size).toBe(0);
     expect([...anHour(1, open('lake'), 600).values()].every((event) => event.kind === 'fish')).toBe(true);
@@ -21,7 +22,9 @@ describe('the soar', () => {
 
   it('goes round its circle high and slow, drifting down the wind, turned the way it flies, and never pops', () => {
     const S = CRITTERS_LOOK.soar;
-    const hawks = [...anHour(1, open('meadow'), 600).values()].slice(0, 10);
+    const hawks = [...anHour(1, open('meadow'), 600).values()]
+      .filter((event) => event.kind === 'hawk')
+      .slice(0, 10);
     for (const event of hawks) {
       const bird = event.animals[0]!;
       expect(lastsFor(event)).toBeGreaterThanOrEqual(S.seconds[0]);
