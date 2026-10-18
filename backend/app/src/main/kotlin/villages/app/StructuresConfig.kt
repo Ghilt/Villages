@@ -1,5 +1,9 @@
 package villages.app
 
+import villages.gateway.GatewayMechanic
+import villages.gateway.HoldingsMechanic
+import villages.gateway.StructuresMechanic
+import villages.projections.CharactersProjection
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.ApplicationRunner
 import org.springframework.context.annotation.Bean
@@ -76,4 +80,21 @@ class StructuresConfig {
     @Bean
     fun raiseAntarctica(antarctica: Antarctica, @Value("\${villages.instruments:true}") instruments: Boolean): ApplicationRunner =
         ApplicationRunner { if (instruments) antarctica.raise() }
+
+    /** The holdings' place in the gateway: what a house holds, every slot of it shown. See docs/plans/structures.md. */
+    @Bean
+    fun holdingsInTheGateway(
+        structuresOnTheMap: StructuresProjection,
+        houses: HousesProjection,
+        shelf: Shelf,
+        characters: CharactersProjection,
+    ): GatewayMechanic = HoldingsMechanic(structuresOnTheMap, houses, { shelf.structures }, characters)
+
+    /** The structures' place in the gateway: on the map, and Adam's levers for them. See docs/plans/structures.md. */
+    @Bean
+    fun structuresInTheGateway(
+        structuresOnTheMap: StructuresProjection,
+        structures: StructureService,
+        antarctica: Antarctica,
+    ): GatewayMechanic = StructuresMechanic(structuresOnTheMap, structures, antarctica)
 }

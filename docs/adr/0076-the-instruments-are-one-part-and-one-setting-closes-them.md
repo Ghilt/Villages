@@ -37,7 +37,9 @@ list of which instruments to keep, because none of them is a player's.
 
 - A server can be run with the instruments closed, `--villages.instruments=false`, and then nothing a socket sends
   reaches past what a player may do. The debug panel's levers are then each refused, which the log says.
-- A new lever is a handler in `Instruments` and closes with the rest without being named; a new player's command is
+- A new lever is a handler in `Instruments` and closes with the rest without being named *(amended 2026-10-18: a
+  mechanic's levers are registered by its own part through the shared `lever`, and close with the rest the same way;
+  `Instruments` keeps the four looks. See 0075)*; a new player's command is
   a handler in its mechanic's part. Neither is a branch in the connection.
 - `instrumentsClosed` is a reason and an error code like any other, a word on the wire rather than a new frame, so
   the wire's shape and its version are unchanged.

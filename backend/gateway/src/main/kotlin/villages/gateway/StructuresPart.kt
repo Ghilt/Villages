@@ -1,5 +1,7 @@
 package villages.gateway
 
+import villages.application.Antarctica
+import villages.application.StructureService
 import villages.application.StructureChange
 import villages.application.StructuresByCell
 import villages.application.WorldClock
@@ -19,6 +21,9 @@ internal class StructuresPart(
     private val core: Core,
     structures: StructuresByCell,
     private val world: WorldClock,
+    private val open: Boolean,
+    private val service: StructureService,
+    private val antarctica: Antarctica,
 ) : Part {
     private val changes: AutoCloseable = structures.watch { change -> fanOut(change) }
 
@@ -40,7 +45,20 @@ internal class StructuresPart(
         }
     }
 
+    override fun register(commands: Commands, frames: Frames) {
+        structureLevers(commands, open, service, antarctica)
+    }
+
     override fun close() {
         changes.close()
     }
+}
+
+/** The structures' place in the gateway: on the map, under the cells held, and Adam's levers for them. */
+class StructuresMechanic(
+    private val structures: StructuresByCell,
+    private val service: StructureService,
+    private val antarctica: Antarctica,
+) : GatewayMechanic(greeting = 400) {
+    override fun part(made: Made): Part = StructuresPart(made.core, structures, made.world, made.open, service, antarctica)
 }

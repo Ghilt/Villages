@@ -165,6 +165,9 @@ internal class Rig(
         while (reactions.pending > 0) reactions.tick()
     }
 
+    /** Antarctica, which both the fog of the core and the structures' levers read: one of it. */
+    private val antarctica = Antarctica(world, { RIG_CATALOGUE }, { noon }, worldClock)
+
     val gateway = Gateway(
         tokens = AnonymousTokens,
         faults = faults,
@@ -174,27 +177,8 @@ internal class Rig(
         onTheMap = characters,
         structures = structuresOnTheMap,
         mechanics = Mechanics(
-            foundHouse = FoundHouseService(world, clock = { noon }, world = worldClock),
             events = world,
             houseById = houses,
-            theirHouses = houses,
-            arrival = Arrival(
-                world,
-                clock = { noon },
-                world = worldClock,
-                // Known ids rather than random ones, so a story can be named in an assertion.
-                ids = { UUID.fromString("a1000000-0000-4000-8000-%012x".format(++minted)) },
-            ),
-            takeAction = TakeActionService(world, clock = { noon }, world = worldClock),
-            rolls = rolls,
-            resources = ResourceService(
-                world,
-                clock = { noon },
-                world = worldClock,
-                calendar = thirtyDayMonths,
-                ids = { UUID.fromString("b1000000-0000-4000-8000-%012x".format(++minted)) },
-            ),
-            choices = choices,
             recent = recent,
             emptyTheWorld = {
                 val gone = world.events.size + world.characterEvents.size + world.structureEvents.size
@@ -211,26 +195,6 @@ internal class Rig(
                 questRows.reset()
                 gone
             },
-            // A die that always comes up one, so every newcomer is the same known woman of eighteen.
-            keyFigures = KeyFigureService(
-                houses = world,
-                characters = world,
-                clock = { noon },
-                world = worldClock,
-                calendar = thirtyDayMonths,
-                dice = { 1 },
-                portraits = { listOf("woman-01", "man-01") },
-                balance = { RIG_BALANCE },
-                names = { RIG_NAMES },
-            ),
-            figures = characters,
-            sights = sights,
-            visions = VisionService(
-                world,
-                clock = { noon },
-                world = worldClock,
-                ids = { UUID.fromString("e1000000-0000-4000-8000-%012x".format(++minted)) },
-            ),
             stands = Stands { master, layer, x, y ->
                 val tile = y * STAND_TILES + x
                 when {
@@ -241,8 +205,7 @@ internal class Rig(
                 }
             },
             waters = WaterAt({ grounds[it] }, { names[it] }),
-            structures = StructureService(world, houses, { noon }, worldClock, structuresOnTheMap, { UUID.randomUUID() }),
-            antarctica = Antarctica(world, { RIG_CATALOGUE }, { noon }, worldClock),
+            antarctica = antarctica,
             instrumentsOpen = instrumentsOpen,
             worldKept = worldKept,
             catalogues = catalogues,
@@ -252,6 +215,55 @@ internal class Rig(
         later = later,
         sendOn = sendOn,
         own = listOf(
+            HousesMechanic(houses, houses, FoundHouseService(world, clock = { noon }, world = worldClock)),
+            // A die that always comes up one, so every newcomer is the same known woman of eighteen.
+            KeyFiguresMechanic(
+                characters,
+                characters,
+                KeyFigureService(
+                    houses = world,
+                    characters = world,
+                    clock = { noon },
+                    world = worldClock,
+                    calendar = thirtyDayMonths,
+                    dice = { 1 },
+                    portraits = { listOf("woman-01", "man-01") },
+                    balance = { RIG_BALANCE },
+                    names = { RIG_NAMES },
+                ),
+            ),
+            HoldingsMechanic(structuresOnTheMap, houses, { null }, { null }),
+            StructuresMechanic(structuresOnTheMap, StructureService(world, houses, { noon }, worldClock, structuresOnTheMap, { UUID.randomUUID() }), antarctica),
+            SightMechanic(
+                sights,
+                VisionService(
+                    world,
+                    clock = { noon },
+                    world = worldClock,
+                    ids = { UUID.fromString("e1000000-0000-4000-8000-%012x".format(++minted)) },
+                ),
+            ),
+            ChoicesMechanic(
+                Arrival(
+                    world,
+                    clock = { noon },
+                    world = worldClock,
+                    // Known ids rather than random ones, so a story can be named in an assertion.
+                    ids = { UUID.fromString("a1000000-0000-4000-8000-%012x".format(++minted)) },
+                ),
+                TakeActionService(world, clock = { noon }, world = worldClock),
+                choices,
+                rolls,
+            ),
+            ResourcesMechanic(
+                ResourceService(
+                    world,
+                    clock = { noon },
+                    world = worldClock,
+                    calendar = thirtyDayMonths,
+                    ids = { UUID.fromString("b1000000-0000-4000-8000-%012x".format(++minted)) },
+                ),
+            ),
             DialoguesMechanic(DialogueService(world, characters, houses, clock = { noon }, world = worldClock) { mapOf("letter" to RIG_LETTER) }, dialogueRows),
             QuestsMechanic(
                 QuestService(

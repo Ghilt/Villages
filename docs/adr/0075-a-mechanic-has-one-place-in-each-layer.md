@@ -91,8 +91,10 @@ of the gateway's own wiring for every mechanic, and a parameter of `GatewayConfi
 gateway a `GatewayMechanic` from its own configuration - its ports, and the part made from them once there is a core -
 and says its part's place in the order a page is told things by a number; the gateway makes the parts in that order and
 refuses two at one number. Its levers are registered by its part, through the shared `lever`, rather than by the
-instruments. The quests and the dialogues are the first; the rest follow in the next step of
-`docs/plans/mechanic-modules.md`.
+instruments. The quests and the dialogues were the first; the houses, the key figures, the holdings, the structures,
+the sight, the choices and the resources followed the same day, so `Mechanics` keeps only what the core and the
+gateway's own parts read - the stands, the waters, the timeline, the windows and the instruments - and the instruments
+keep their four looks. `docs/plans/mechanic-modules.md`, steps 5 and 6.
 
 ## Consequences
 

@@ -1,5 +1,7 @@
 package villages.app
 
+import villages.gateway.GatewayMechanic
+import villages.gateway.KeyFiguresMechanic
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import villages.application.CharacterDeaths
@@ -56,4 +58,9 @@ class CharactersConfig {
     /** The characters, and which of them each house holds, folded from the same feed. See decision 0055. */
     @Bean(initMethod = "start", destroyMethod = "close")
     fun characters(world: EventWorld): CharactersProjection = CharactersProjection(world.feed)
+
+    /** The key figures' place in the gateway: their part, and Adam's levers for a house's people. See 0055. */
+    @Bean
+    fun keyFiguresInTheGateway(characters: CharactersProjection, keyFigures: KeyFigureService): GatewayMechanic =
+        KeyFiguresMechanic(characters, characters, keyFigures)
 }

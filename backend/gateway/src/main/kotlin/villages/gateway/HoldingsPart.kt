@@ -1,5 +1,7 @@
 package villages.gateway
 
+import villages.application.CharacterById
+import villages.domain.StructureCatalogue
 import villages.application.HouseById
 import villages.application.StructureRow
 import villages.application.StructuresByCell
@@ -54,4 +56,14 @@ internal class HoldingsPart(
     override fun close() {
         changes.close()
     }
+}
+
+/** The holdings' place in the gateway: told after whom a house holds, what it holds, every slot of it shown. */
+class HoldingsMechanic(
+    private val structures: StructuresByCell,
+    private val houses: HouseById,
+    private val catalogue: () -> StructureCatalogue?,
+    private val people: CharacterById,
+) : GatewayMechanic(greeting = 300) {
+    override fun part(made: Made): Part = HoldingsPart(made.core, structures, houses, SlotsSeen(catalogue, people))
 }

@@ -1,47 +1,16 @@
 package villages.gateway
 
-import villages.application.Antarctica
-import villages.application.StructureService
 import villages.application.EventFeed
-import villages.application.FoundHouseService
-import villages.application.KeyFigureService
 import villages.application.RecentEvents
-import villages.application.ResourceService
 import villages.application.Start
 import villages.application.StoredEvent
 import villages.application.Unreadable
-import villages.application.VisionService
 import villages.application.WorldKept
 import villages.application.WorldWipe
-import villages.application.fate.RollService
-import villages.domain.CharacterId
-import villages.domain.HouseId
-import villages.domain.HouseName
 import villages.domain.PlayerId
-import villages.domain.Location
-import villages.domain.PledgeId
-import villages.domain.VisionId
-import villages.protocol.AddKeyFigurePayload
-import villages.protocol.AgeCharacterPayload
-import villages.protocol.ChangePortraitPayload
-import villages.protocol.ChangeStatPayload
-import villages.protocol.CommandPayload
 import villages.protocol.ErrorFrame
 import villages.protocol.FogOfWar
-import villages.protocol.FoundHousePayload
-import villages.protocol.GiveVisionPayload
-import villages.protocol.GrantResourcePayload
-import villages.protocol.KillCharacterPayload
-import villages.protocol.MoveCharacterPayload
-import villages.protocol.NextRarityPayload
-import villages.protocol.PledgeResourcePayload
-import villages.protocol.ReleasePledgePayload
-import villages.protocol.ConsideredView
-import villages.protocol.RollDrawn
 import villages.protocol.SeeAll
-import villages.protocol.SpendResourcePayload
-import villages.protocol.TakeOffTheMapPayload
-import villages.protocol.TakeVisionPayload
 import villages.protocol.WatchEvents
 import villages.protocol.WipeWorld
 import villages.protocol.WorldWiped
@@ -59,52 +28,29 @@ const val MOST_RECENT_EVENTS = 100
 internal class InstrumentsClosed : RuntimeException("the instruments are closed on this server")
 
 /**
- * Adam's instruments, as one part of the gateway: the levers of the debug panel that are not yet a mechanic's own, and the event page, which
- * stand in for what the world will one day do, and the four frames that look at the world rather than play in
- * it - watching every event as it is stored, seeing everything whatever its significance, lifting the fog, and
- * emptying the world.
+ * Adam's instruments, as one part of the gateway: the four frames that look at the world rather than play in it -
+ * watching every event as it is stored, seeing everything whatever its significance, lifting the fog, and emptying the
+ * world - and the event page. Each mechanic's levers, which stand in for what the world will one day do, are its own
+ * part's, through the shared `lever`, and close with these (see `docs/plans/mechanic-modules.md`, step 6).
  *
  * One setting closes all of them, `villages.instruments`. Open, as it is by default, they are what they always
  * were. Closed, every lever is refused `instrumentsClosed` and each of the four frames is answered with an error
  * of that code, while the player's own commands go on as before. The event page watches without saying hello, so
  * nothing about a player is asked of a look. See decision record 0076.
  */
-@Suppress("LongParameterList")
 internal class Instruments(
     val open: Boolean,
     private val core: Core,
     events: EventFeed,
     private val recent: RecentEvents,
     private val emptyTheWorld: WorldWipe,
-    private val foundHouse: FoundHouseService,
-    private val resources: ResourceService,
-    private val keyFigures: KeyFigureService,
-    private val visions: VisionService,
-    private val rolls: RollService,
     private val kept: WorldKept,
-    private val structures: StructureService,
-    private val antarctica: Antarctica,
 ) : Part {
     private val watching = ConcurrentHashMap.newKeySet<Gateway.Connection>()
 
     // From now: the debug panel watches the world happening, and would not thank us for the whole
     // chronicle replayed at it on every connect.
     private val feed: AutoCloseable = events.subscribe(Start.FROM_NOW) { stored -> tellWatchers(stored) }
-
-    // What a roll drew from goes to the roller's own panel: the pools are never the player's to see, so it is said
-    // only while the instruments are open.
-    private val drawn: AutoCloseable = rolls.watch { player, rolled, forced ->
-        if (open) {
-            core.sessionOf(player)?.out?.send(
-                RollDrawn(
-                    opened = rolled.opened,
-                    considered = rolled.considered.map { ConsideredView(it.action, it.weight) },
-                    rarity = rolled.rarity.toWire(),
-                    forced = forced,
-                ),
-            )
-        }
-    }
 
     /**
      * A window arriving is told what the world holds that this code cannot read, while the instruments are open: what
@@ -115,140 +61,13 @@ internal class Instruments(
         if (open && !unreadable.none) connection.out.send(ErrorFrame("unreadableEvents", told(unreadable)))
     }
 
-    /**
-     * The levers, each a command like any other, and the four looks, each a frame: every one of them refused
-     * while the instruments are closed.
-     */
+    /** The four looks, each a frame, every one refused while the instruments are closed. */
     override fun register(commands: Commands, frames: Frames) {
         frames.on<WatchEvents> { connection, frame -> watchEvents(connection, frame.on) }
         frames.on<SeeAll> { connection, frame -> seeAll(connection, frame.on) }
         frames.on<FogOfWar> { connection, frame -> fogOfWar(connection, frame.on) }
         frames.on<WipeWorld> { connection, _ -> wipe(connection) }
-        levers(commands)
     }
-
-    private fun levers(commands: Commands) {
-        lever<FoundHousePayload>(commands) { asking, payload ->
-            foundHouse.found(
-                houseId = HouseId.of(asking.who),
-                player = asking.who,
-                name = HouseName.of(payload.name),
-                seat = Location(payload.seat.lat, payload.seat.lon),
-                banner = payload.banner.toDomain(),
-                provenance = asking.startingAStory,
-            )
-        }
-        lever<GrantResourcePayload>(commands) { asking, payload ->
-            resources.grant(
-                player = asking.who,
-                resource = asResource(payload.resource),
-                amount = payload.amount,
-                provenance = asking.startingAStory,
-            )
-        }
-        lever<SpendResourcePayload>(commands) { asking, payload ->
-            resources.spend(
-                player = asking.who,
-                resource = asResource(payload.resource),
-                amount = payload.amount,
-                provenance = asking.startingAStory,
-            )
-        }
-        lever<PledgeResourcePayload>(commands) { asking, payload ->
-            resources.pledge(
-                player = asking.who,
-                resource = asResource(payload.resource),
-                amount = payload.amount,
-                months = payload.months,
-                purpose = payload.purpose,
-                provenance = asking.startingAStory,
-            )
-        }
-        lever<ReleasePledgePayload>(commands) { asking, payload ->
-            resources.release(
-                player = asking.who,
-                pledgeId = PledgeId(asUuid(payload.pledgeId, "a pledge id")),
-                provenance = asking.startingAStory,
-            )
-        }
-        keyFigureLevers(commands)
-        structureLevers(commands, open, structures, antarctica)
-        // A place off the world is refused by the place itself, as `invalidLocation`.
-        lever<GiveVisionPayload>(commands) { asking, payload ->
-            visions.give(
-                player = asking.who,
-                place = Location(payload.place.lat, payload.place.lon),
-                provenance = asking.startingAStory,
-            )
-        }
-        lever<TakeVisionPayload>(commands) { asking, payload ->
-            visions.take(
-                player = asking.who,
-                visionId = VisionId(asUuid(payload.visionId, "a vision id")),
-                provenance = asking.startingAStory,
-            )
-        }
-        // The world's luck, for the next roll this player makes: a rarity, or none for the throw again. See 0083.
-        lever<NextRarityPayload>(commands) { asking, payload -> rolls.forceNext(asking.who, payload.rarity?.let(::asRarity)) }
-    }
-
-    private fun keyFigureLevers(commands: Commands) {
-        lever<AddKeyFigurePayload>(commands) { asking, _ -> keyFigures.add(asking.who, asking.startingAStory) }
-        lever<ChangeStatPayload>(commands) { asking, payload ->
-            keyFigures.changeStat(
-                player = asking.who,
-                characterId = figure(payload.characterId),
-                stat = asStat(payload.stat),
-                by = payload.by,
-                provenance = asking.startingAStory,
-            )
-        }
-        lever<AgeCharacterPayload>(commands) { asking, payload ->
-            keyFigures.age(
-                player = asking.who,
-                characterId = figure(payload.characterId),
-                years = payload.years,
-                provenance = asking.startingAStory,
-            )
-        }
-        lever<ChangePortraitPayload>(commands) { asking, payload ->
-            keyFigures.changePortrait(
-                player = asking.who,
-                characterId = figure(payload.characterId),
-                portrait = payload.portrait,
-                provenance = asking.startingAStory,
-            )
-        }
-        lever<KillCharacterPayload>(commands) { asking, payload ->
-            keyFigures.kill(
-                player = asking.who,
-                characterId = figure(payload.characterId),
-                cause = payload.cause,
-                provenance = asking.startingAStory,
-            )
-        }
-        // A place off the world is refused by the place itself, as `invalidLocation`.
-        lever<MoveCharacterPayload>(commands) { asking, payload ->
-            keyFigures.move(
-                player = asking.who,
-                characterId = figure(payload.characterId),
-                place = Location(payload.place.lat, payload.place.lon),
-                provenance = asking.startingAStory,
-            )
-        }
-        lever<TakeOffTheMapPayload>(commands) { asking, payload ->
-            keyFigures.takeOffTheMap(
-                player = asking.who,
-                characterId = figure(payload.characterId),
-                provenance = asking.startingAStory,
-            )
-        }
-    }
-
-    private fun figure(id: String) = CharacterId(asUuid(id, "a character id"))
-
-    private inline fun <reified P : CommandPayload> lever(commands: Commands, noinline pull: (Asking, P) -> Unit) =
-        commands.lever(open, pull)
 
     /**
      * Starts sending a connection every event, beginning with what it missed, or stops.
@@ -313,7 +132,6 @@ internal class Instruments(
 
     override fun close() {
         feed.close()
-        drawn.close()
     }
 }
 

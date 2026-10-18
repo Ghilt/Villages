@@ -1,5 +1,10 @@
 package villages.gateway
 
+import villages.application.FoundHouseService
+import villages.domain.HouseId
+import villages.domain.HouseName
+import villages.domain.Location
+import villages.protocol.FoundHousePayload
 import villages.application.HouseChange
 import villages.application.HousesByCell
 import villages.application.HousesByPlayer
@@ -16,6 +21,8 @@ internal class HousesPart(
     private val core: Core,
     houses: HousesByCell,
     private val theirHouses: HousesByPlayer,
+    private val open: Boolean,
+    private val foundHouse: FoundHouseService,
 ) : Part {
     private val changes: AutoCloseable = houses.watch { change -> told(change) }
 
@@ -29,7 +36,30 @@ internal class HousesPart(
         core.sessionOf(row.player)?.out?.send(YourHouse(row.toYours(Cell.of(row.seat.lat, row.seat.lon))))
     }
 
+    /** Adam's lever: founding the sender's house, standing in for the founding choice. Refused when the instruments are. */
+    override fun register(commands: Commands, frames: Frames) {
+        commands.lever<FoundHousePayload>(open) { asking, payload ->
+            foundHouse.found(
+                houseId = HouseId.of(asking.who),
+                player = asking.who,
+                name = HouseName.of(payload.name),
+                seat = Location(payload.seat.lat, payload.seat.lon),
+                banner = payload.banner.toDomain(),
+                provenance = asking.startingAStory,
+            )
+        }
+    }
+
     override fun close() {
         changes.close()
     }
+}
+
+/** The houses' place in the gateway: the first thing a player arriving is told is their house. */
+class HousesMechanic(
+    private val houses: HousesByCell,
+    private val theirHouses: HousesByPlayer,
+    private val foundHouse: FoundHouseService,
+) : GatewayMechanic(greeting = 100) {
+    override fun part(made: Made): Part = HousesPart(made.core, houses, theirHouses, made.open, foundHouse)
 }

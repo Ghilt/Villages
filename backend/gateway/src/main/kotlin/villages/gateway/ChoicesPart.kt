@@ -1,5 +1,8 @@
 package villages.gateway
 
+import villages.protocol.ConsideredView
+import villages.protocol.NextRarityPayload
+import villages.protocol.RollDrawn
 import villages.application.Arrival
 import villages.application.ChoicesByPlayer
 import villages.application.Provenance
@@ -34,7 +37,23 @@ internal class ChoicesPart(
     private val takeAction: TakeActionService,
     private val choices: ChoicesByPlayer,
     private val rolls: RollService,
+    private val open: Boolean,
 ) : Part {
+    // What a roll drew from goes to the roller's own panel: the pools are never the player's to see, so it is said
+    // only while the instruments are open.
+    private val drawn: AutoCloseable = rolls.watch { player, rolled, forced ->
+        if (open) {
+            core.sessionOf(player)?.out?.send(
+                RollDrawn(
+                    opened = rolled.opened,
+                    considered = rolled.considered.map { ConsideredView(it.action, it.weight) },
+                    rarity = rolled.rarity.toWire(),
+                    forced = forced,
+                ),
+            )
+        }
+    }
+
     private val asked: AutoCloseable = choices.watch { player, row ->
         core.sessionOf(player)?.let { tell(it, row?.choice?.toView(row.omens)) }
     }
@@ -73,6 +92,8 @@ internal class ChoicesPart(
     }
 
     override fun register(commands: Commands, frames: Frames) {
+        // The world's luck, for the next roll this player makes: a rarity, or none for the throw again. See 0083.
+        commands.lever<NextRarityPayload>(open) { asking, payload -> rolls.forceNext(asking.who, payload.rarity?.let(::asRarity)) }
         // A roll begins a story of its own, which the hand it deals and the action that answers it continue. The
         // hand it hands back is what goes out, as arrival's does, rather than a read of the projection.
         commands.on<RollPayload> { asking, payload ->
@@ -138,6 +159,17 @@ internal class ChoicesPart(
     }
 
     override fun close() {
+        drawn.close()
         asked.close()
     }
+}
+
+/** The choices' place in the gateway: told last of what a house is, what it is asked; and the roll that deals it. */
+class ChoicesMechanic(
+    private val arrival: Arrival,
+    private val takeAction: TakeActionService,
+    private val choices: ChoicesByPlayer,
+    private val rolls: RollService,
+) : GatewayMechanic(greeting = 800) {
+    override fun part(made: Made): Part = ChoicesPart(made.core, arrival, takeAction, choices, rolls, made.open)
 }

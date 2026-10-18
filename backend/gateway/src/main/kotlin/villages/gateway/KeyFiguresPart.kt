@@ -1,5 +1,15 @@
 package villages.gateway
 
+import villages.application.KeyFigureService
+import villages.domain.CharacterId
+import villages.domain.Location
+import villages.protocol.AddKeyFigurePayload
+import villages.protocol.AgeCharacterPayload
+import villages.protocol.ChangePortraitPayload
+import villages.protocol.ChangeStatPayload
+import villages.protocol.KillCharacterPayload
+import villages.protocol.MoveCharacterPayload
+import villages.protocol.TakeOffTheMapPayload
 import villages.application.CharacterMapChange
 import villages.application.CharacterRow
 import villages.application.CharacterSpan
@@ -25,6 +35,8 @@ internal class KeyFiguresPart(
     private val figures: KeyFiguresByHouse,
     onTheMap: CharactersByCell,
     private val world: WorldClock,
+    private val open: Boolean,
+    private val keyFigures: KeyFigureService,
 ) : Part {
     /** Whom a house holds is its own, and needs no cell. See decision record 0055. */
     private val changed: AutoCloseable = figures.watch { change ->
@@ -89,8 +101,73 @@ internal class KeyFiguresPart(
         return found
     }
 
+    /** Adam's levers for a house's people, standing in for the world: refused when the instruments are. See 0055. */
+    override fun register(commands: Commands, frames: Frames) {
+        commands.lever<AddKeyFigurePayload>(open) { asking, _ -> keyFigures.add(asking.who, asking.startingAStory) }
+        commands.lever<ChangeStatPayload>(open) { asking, payload ->
+            keyFigures.changeStat(
+                player = asking.who,
+                characterId = figure(payload.characterId),
+                stat = asStat(payload.stat),
+                by = payload.by,
+                provenance = asking.startingAStory,
+            )
+        }
+        commands.lever<AgeCharacterPayload>(open) { asking, payload ->
+            keyFigures.age(
+                player = asking.who,
+                characterId = figure(payload.characterId),
+                years = payload.years,
+                provenance = asking.startingAStory,
+            )
+        }
+        commands.lever<ChangePortraitPayload>(open) { asking, payload ->
+            keyFigures.changePortrait(
+                player = asking.who,
+                characterId = figure(payload.characterId),
+                portrait = payload.portrait,
+                provenance = asking.startingAStory,
+            )
+        }
+        commands.lever<KillCharacterPayload>(open) { asking, payload ->
+            keyFigures.kill(
+                player = asking.who,
+                characterId = figure(payload.characterId),
+                cause = payload.cause,
+                provenance = asking.startingAStory,
+            )
+        }
+        // A place off the world is refused by the place itself, as `invalidLocation`.
+        commands.lever<MoveCharacterPayload>(open) { asking, payload ->
+            keyFigures.move(
+                player = asking.who,
+                characterId = figure(payload.characterId),
+                place = Location(payload.place.lat, payload.place.lon),
+                provenance = asking.startingAStory,
+            )
+        }
+        commands.lever<TakeOffTheMapPayload>(open) { asking, payload ->
+            keyFigures.takeOffTheMap(
+                player = asking.who,
+                characterId = figure(payload.characterId),
+                provenance = asking.startingAStory,
+            )
+        }
+    }
+
+    private fun figure(id: String) = CharacterId(asUuid(id, "a character id"))
+
     override fun close() {
         changed.close()
         moves.close()
     }
+}
+
+/** The key figures' place in the gateway: told after the house, whom it holds. */
+class KeyFiguresMechanic(
+    private val figures: KeyFiguresByHouse,
+    private val onTheMap: CharactersByCell,
+    private val keyFigures: KeyFigureService,
+) : GatewayMechanic(greeting = 200) {
+    override fun part(made: Made): Part = KeyFiguresPart(made.core, figures, onTheMap, made.world, made.open, keyFigures)
 }

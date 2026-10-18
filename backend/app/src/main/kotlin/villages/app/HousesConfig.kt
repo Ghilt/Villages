@@ -1,5 +1,7 @@
 package villages.app
 
+import villages.gateway.GatewayMechanic
+import villages.gateway.HousesMechanic
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import villages.application.FoundHouseService
@@ -22,4 +24,9 @@ class HousesConfig {
     /** The map's read model, folded from the feed. In memory, so it starts empty with the store. */
     @Bean(initMethod = "start", destroyMethod = "close")
     fun houses(world: EventWorld): HousesProjection = HousesProjection(world.feed)
+
+    /** The houses' place in the gateway: their part, and the lever that founds one. See decision record 0075. */
+    @Bean
+    fun housesInTheGateway(houses: HousesProjection, foundHouse: FoundHouseService): GatewayMechanic =
+        HousesMechanic(houses, houses, foundHouse)
 }

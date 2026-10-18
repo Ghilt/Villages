@@ -1,5 +1,7 @@
 package villages.app
 
+import villages.gateway.GatewayMechanic
+import villages.gateway.ResourcesMechanic
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import villages.application.FreshIds
@@ -42,4 +44,8 @@ class ResourcesConfig {
         clock: Clock,
         ids: FreshIds,
     ): Pledges = Pledges(world.storeFeed, later, faults, world.gate, resources, worldClock, clock = { clock.instant() }, ids = ids)
+
+    /** The resources' place in the gateway: Adam's levers granting, spending, pledging and releasing. See 0006. */
+    @Bean
+    fun resourcesInTheGateway(resources: ResourceService): GatewayMechanic = ResourcesMechanic(resources)
 }

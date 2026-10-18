@@ -1,5 +1,7 @@
 package villages.app
 
+import villages.gateway.GatewayMechanic
+import villages.gateway.SightMechanic
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import villages.application.FreshIds
@@ -24,4 +26,8 @@ class VisionsConfig {
     /** What every house sees, worked out from where its seat and its people stand. See decision 0061. */
     @Bean(initMethod = "start", destroyMethod = "close")
     fun sights(world: EventWorld): SightProjection = SightProjection(world.feed)
+
+    /** Sight's place in the gateway: the fog, what a house sees, and the levers giving vision. See 0061. */
+    @Bean
+    fun sightInTheGateway(sights: SightProjection, visions: VisionService): GatewayMechanic = SightMechanic(sights, visions)
 }

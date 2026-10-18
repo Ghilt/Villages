@@ -1,5 +1,8 @@
 package villages.app
 
+import villages.gateway.GatewayMechanic
+import villages.gateway.ChoicesMechanic
+import villages.application.fate.RollService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import villages.application.Arrival
@@ -29,4 +32,13 @@ class ChoicesConfig {
     /** What each player has been asked and has not answered, folded from the same feed. */
     @Bean(initMethod = "start", destroyMethod = "close")
     fun choices(world: EventWorld): ChoicesProjection = ChoicesProjection(world.feed)
+
+    /** The choices' place in the gateway: what a house is asked, the roll that deals it, and its lever. See 0083. */
+    @Bean
+    fun choicesInTheGateway(
+        arrival: Arrival,
+        takeAction: TakeActionService,
+        choices: ChoicesProjection,
+        rolls: RollService,
+    ): GatewayMechanic = ChoicesMechanic(arrival, takeAction, choices, rolls)
 }
