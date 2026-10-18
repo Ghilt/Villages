@@ -1,6 +1,5 @@
 {
   "marks/candidate.png": "c464158f0339369a08621a02704ab246b8e35dcc5079e073c3b50279855df42c",
-  "marks/castle-icon.png": "aa7ef73bb7b8f931eb84788860dfaccf171392ecc1b0bc0243c1c4f802f5d5b1",
   "marks/castle.png": "34d7ad0506c09b27b4d2ff3612a199fc52d6cb0fd0b9d9dc7731f35f0314ab12",
   "marks/figure-icon.png": "73333428d676c7014029b2e7e4c6fb6be41a716cadfe4c7e186cc8cf53f37f95",
   "marks/figure.png": "e29576223ed612f0908040f1dcf8a291fd9046d8bd0220129df59225c40fbd1b",
@@ -36,11 +35,5 @@
   "ruins/wall-african.png": "b618fffca24b8d20b082922c02b38e9538f8ed0f47c41011c7d85d4d11141816",
   "ruins/wall-eastAsian.png": "b89ddd7777d1361b5a83a8d0a7e555ba04b9453e9d0057893005813fa5e69eb7",
   "ruins/wall-european.png": "1602d1a51ebeb7e4703c282be7af28bc5fd9bba38182d6130eb804b7db7bea01",
-  "ruins/wall-islamic.png": "07958f303d452c06793cf3b307cd91bc324b1cbcf53f9305f56008a1b07ce75b",
-  "scenery/acacia.png": "36707286074beb8fe7a16a11f5b36b39a941337dc3f5401ddcbfb3aea87700d5",
-  "scenery/cactus.png": "32afe5a30bab257cb59c71eb8a53c6f5d725e1ad3275f1ac5d25e863eeded91f",
-  "scenery/grass.png": "f060b89ae9150b7662bceae40ff847988b4b0e1ff3b02b42af754d4ba7366065",
-  "scenery/heather.png": "ba5388ac54876114adb1a4074e56d9a11c0b1c6eb01a038637961e3f985fe306",
-  "scenery/jungle.png": "5410aa0c68abad84cfe49bff49252d5ffbe92092361be751a348fea678033a6a",
-  "scenery/snag.png": "83555bef0d0202456b438c64b0364ea46f5744c6da05da721781de726904303d"
+  "ruins/wall-islamic.png": "07958f303d452c06793cf3b307cd91bc324b1cbcf53f9305f56008a1b07ce75b"
 }
