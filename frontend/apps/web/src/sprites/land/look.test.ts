@@ -55,13 +55,16 @@ describe('the land', () => {
     expect(DRAWN).toContain('wet');
   });
 
-  it('glints on the ice and the salt and drifts over the ice and the sand, each kind in a look of its own', () => {
+  it('glints on the salt, drifts and swirls over the ice, and lies in dunes on the sand, each kind in a look of its own', () => {
     const icy = KINDS.filter((kind) => motionOf(kind) === 'ice-salt-sand').sort();
     expect(icy).toEqual(['desert-sand', 'ice', 'polar-desert', 'salt-flat']);
     expect(Object.keys(LAND_LOOK.ice.kinds).sort()).toEqual(icy);
     expect(new Set(icy.map(lookOf)).size).toBe(icy.length);
     expect(LAND_LOOK.ice.kinds['salt-flat'].glints).toBeGreaterThan(0);
-    expect(LAND_LOOK.ice.kinds['desert-sand'].crests).toBe(1);
+    expect(LAND_LOOK.ice.kinds['desert-sand'].dunes).toBe(1);
+    // No stars on the ice, Adam's word of 2026-10-18: its snow swirls instead.
+    expect(LAND_LOOK.ice.kinds.ice.glints).toBe(0);
+    expect(LAND_LOOK.ice.kinds.ice.swirls).toBeGreaterThan(0);
   });
 
   it('draws every kind of land that moves, so every kind has its motion or stands still on purpose', () => {
@@ -71,6 +74,17 @@ describe('the land', () => {
     expect(
       [...new Set(moving)].filter((motion) => !(DRAWN as readonly (string | null)[]).includes(motion)),
     ).toEqual([]);
+  });
+
+  it('sways the mist a whole number of times an hour, so it comes round with the clock without a jump', () => {
+    expect(3600 % LAND_LOOK.wet.mist.period).toBe(0);
+    expect(3600 % LAND_LOOK.wet.pools.shore.period).toBe(0);
+  });
+
+  it('flows the sand a whole number of its cells an hour and curls it a whole number of times, so it never jumps', () => {
+    const flow = LAND_LOOK.ice.sandFlow;
+    expect(Number.isInteger((flow.speed * 3600) / flow.cell)).toBe(true);
+    expect(3600 % flow.curl).toBe(0);
   });
 
   it('leaves the water to the water shader, the woods to their trees and bare stone still', () => {

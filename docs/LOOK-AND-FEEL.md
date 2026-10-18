@@ -170,15 +170,20 @@ band of light where the crops bend with a darker one behind it where they stand 
 as a wave passes. On heath, scrub and tundra a gust only stirs the low woody growth, far more gently than the grass:
 heather in small purple clumps close together, scrub in bigger grey-green bushes with bare ground between, the tundra
 a low khaki mat with here and there cotton grass nodding its white head. On the wet land open water lies among the
-growth, dark and catching the light where the wind ruffles it, and now and then a ring spreads on it: reeds stand in
-clumps in the marsh, tufts on the floodplain and shoots in rows in the paddy's terraces, which are a sheet of water,
-all bending with the gusts, and over the marsh and the bog mist lies in low banks drifting down the wind, thin enough
-to see through. On the ice and the salt flats points of light flash for a moment and are gone, small stars a cool
-blue on ground so near white; over the ice and the polar desert snow streams along the wind in faint streamers, cool
-grey on the white, and over the sand desert sand blows off the crests of the dunes in pale ribbons, both running
-faster than the gusts and strongest where one blows. It is one layer for every kind of land, and the rest stands
-still as it is painted, on purpose: the water moves by its own shader, a wood by its trees, and bare stone not at
-all, on purpose. Every number is in `apps/web/src/sprites/land/look.ts`; see decision record 0102.
+growth, dark and catching the light where the wind ruffles it, the light running slowly over it and the little waves
+near every pool's edge following its shore, lapping in towards it, and now and then a ring spreads on it: reeds stand
+in clumps in the marsh, tufts on the floodplain and shoots in rows in the paddy's terraces, which are a sheet of
+water, all bending with the gusts, and over the marsh and the bog mist lies in long thin banks along the screen,
+streaked, rising and falling along their length and swaying slowly to and fro, thin enough to see through. On the
+salt flats points of light flash for a moment and are gone. Over the ice and the polar desert snow streams along the
+wind in faint streamers, cool grey on the white, and now and then a little swirl of it spins and drifts down the
+wind. The sand desert lies in crescent dunes scattered over flat sand, each standing apart with its horns reaching
+down the wind and standing up the screen as the trees do, a long gentle slope up to its crest and a short steep slip
+face down the lee, lit and shaded by the one light so the slip faces fall dark, the sand rippled; and sand streams
+over the crests in thin pale ribbons along the screen, curling as it flows, running faster than the gusts and
+strongest where one blows. It is one layer for every kind of land, and the rest stands still as it is painted, on
+purpose: the water moves by its own shader, a wood by its trees, and bare stone not at all, on purpose. Every number
+is in `apps/web/src/sprites/land/look.ts`; see decision record 0102.
 
 **The scenery bends in the wind.** Close in, every tree, bush, reed and tuft leans down the wind as a gust passes
 and settles behind it, its foot where it stands and its shadow leaning with it, and its crown turns a little paler,

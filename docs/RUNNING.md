@@ -105,29 +105,32 @@ stage alone, with none of the debug panel in it (decision record 0079).
   way, with long slow waves rolling through them down the wind, a band of light and a darker one behind it, carried by
   the wall clock so every browser has the same wave at the same place; and on heath, scrub and tundra the low woody
   growth stirs as a gust passes, far more gently than the grass, each in clumps of its own size and colours, with
-  cotton grass nodding on the tundra; and on the wet land open water lies among the growth catching the light, a ring
-  spreading on it now and then, reeds in the marsh and shoots in rows in the paddy bending with the gusts, and mist
-  drifting low over the marsh and the bog; and on the ice and the salt flats points of light flash and are gone, while
-  snow streams along the wind over the ice and the polar desert and sand blows off the crests of the dunes. It is one
-  layer for every kind of land, the **Land** part of the Shaders section (decision record 0102): `off`, `low` or
-  `high` in its bar, low at every load, low a quarter of the screen's pixels at fifteen frames a second and high all
-  of them at thirty, asked for only while some land that moves is on the screen; the first time it is drawn at a level
-  the log says once under `land` what that costs the graphics card. What moves on every kind of land is the table in
-  `apps/web/src/sprites/land/look.ts`; every kind of land moves but the water, which the water shader moves, the
-  woods, whose life is their trees, and bare stone, which stand still on purpose. Inside the part a fold for each
-  motion, with its box in its bar, drawn or left as painted: **Grass**, with ten sliders - how big the patches are,
-  how ragged their edges, how softly one kind gives way to the next, how much the kinds mingle, how much ground is
-  bare, how much stands tall and how much is brush, how tall the tall grass is, how big a clump of brush, how thickly
-  the tufts grow. They change the grass on the next frame, are remembered in the browser that moved them, and once one
-  stops the log says them all under `land` as `grass tuned: …`, the line to hand over when a setting should become the
-  default; `reset` puts them back. **Crops**, with six - how big the fields are, how many lie fallow, how far apart
-  the rows are, how tall the crops stand, how broad the waves are and how strongly they show - remembered and said the
-  same way, as `crops tuned: …`, with a `reset` of their own. **Heath, scrub and tundra**, with four - how big the
-  clumps are, how thickly they grow, how much cotton grass grows on the tundra and how much a gust stirs them - said
-  as `heath tuned: …`. **Wet land**, with four - how much mist, how much open water, how often a ring spreads and how
-  tall the reeds and the shoots stand - said as `wet tuned: …`. **Ice, salt and sand**, with three - how many glints
-  flash, how strongly the snow streams and how strongly the sand blows - said as `ice tuned: …`. The gusts are the one
-  wind the trees bend in, and a player who has asked for less motion gets the land still.
+  cotton grass nodding on the tundra; and on the wet land open water lies among the growth catching the light, the
+  little waves near every pool's edge following its shore, a ring spreading on it now and then, reeds in the marsh and
+  shoots in rows in the paddy bending with the gusts, and mist lying in long thin banks along the screen over the
+  marsh and the bog, swaying slowly; and on the salt flats points of light flash and are gone, snow streams along the
+  wind over the ice and the polar desert with a little swirl of it now and then, and the sand desert lies in crescent
+  dunes standing apart on the flat sand and up the screen, lit and shaded by the one light, with sand streaming over
+  their crests in thin curling ribbons along the screen. It is one layer for every kind of land, the **Land** part of
+  the Shaders section (decision record 0102): `off`, `low` or `high` in its bar, low at every load, low a quarter of
+  the screen's pixels at fifteen frames a second and high all of them at thirty, asked for only while some land that
+  moves is on the screen; the first time it is drawn at a level the log says once under `land` what that costs the
+  graphics card. What moves on every kind of land is the table in `apps/web/src/sprites/land/look.ts`; every kind of
+  land moves but the water, which the water shader moves, the woods, whose life is their trees, and bare stone, which
+  stand still on purpose. Inside the part a fold for each motion, with its box in its bar, drawn or left as painted:
+  **Grass**, with ten sliders - how big the patches are, how ragged their edges, how softly one kind gives way to the
+  next, how much the kinds mingle, how much ground is bare, how much stands tall and how much is brush, how tall the
+  tall grass is, how big a clump of brush, how thickly the tufts grow. They change the grass on the next frame, are
+  remembered in the browser that moved them, and once one stops the log says them all under `land` as `grass tuned:
+  …`, the line to hand over when a setting should become the default; `reset` puts them back. **Crops**, with six -
+  how big the fields are, how many lie fallow, how far apart the rows are, how tall the crops stand, how broad the
+  waves are and how strongly they show - remembered and said the same way, as `crops tuned: …`, with a `reset` of
+  their own. **Heath, scrub and tundra**, with four - how big the clumps are, how thickly they grow, how much cotton
+  grass grows on the tundra and how much a gust stirs them - said as `heath tuned: …`. **Wet land**, with four - how
+  much mist, how much open water, how often a ring spreads and how tall the reeds and the shoots stand - said as `wet
+  tuned: …`. **Ice, salt and sand**, with five - how many glints flash on the salt, how strongly the snow streams, how
+  often it swirls, how strongly the sand blows over the crests and how high the dunes stand - said as `ice tuned: …`.
+  The gusts are the one wind the trees bend in, and a player who has asked for less motion gets the land still.
 - The towns of 1790 stand in ruins among the scenery, from zoom 7.5 in, wherever the game server sent their records
   of the `ruins` layer - only near revealed ground, as the scenery's stands: a cell is furnished with the pieces
   whose feet stand in it and its trees thinned by them (`furnishCell`), in the scenery's own particle layer, so trees

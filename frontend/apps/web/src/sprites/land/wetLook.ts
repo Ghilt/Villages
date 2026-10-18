@@ -76,10 +76,21 @@ export const WET_LOOK = {
     size: 2.4,
     opacity: 0.5,
     soft: 0.05,
-    /** The light a ruffled pool catches: its colour, how strong, and how fine the ripples, which run with the gusts. */
+    /**
+     * The light a ruffled pool catches: its colour, how strong, how fine the ripples, and how fast they run down the
+     * wind, in world units a second - slowly, a tenth of the gusts' pace, Adam's word of 2026-10-18.
+     */
     glint: [0.88, 0.92, 0.94],
     glintOpacity: 0.55,
     ripple: 0.35,
+    rippleSpeed: 0.22,
+    /**
+     * Near a pool's edge the little waves follow it: bands along the shore, lapping in towards it, Adam's word of
+     * 2026-10-18. How far in from the edge they reach and how far apart, in world units; how many seconds a wave takes
+     * to come in by one band, a whole share of an hour; and how bright. The pools draw back from the wet land's own edge
+     * by `recede` of the pattern they are cut from, so its edge is a shore too.
+     */
+    shore: { reach: 1.1, apart: 0.3, period: 3, opacity: 0.5, recede: 0.35 },
   },
   rings: {
     /** A pool is cut into cells this many world units across, and the clock into slots this many seconds long. */
@@ -111,10 +122,19 @@ export const WET_LOOK = {
     fromPixels: 2.5,
     wholePixels: 4.5,
   },
+  /**
+   * The mist, lying in banks along the screen's horizontal, long and thin and streaked, rising and falling along their
+   * length and swaying slowly to and fro, Adam's word of 2026-10-18.
+   */
   mist: {
-    /** How big a bank of mist is, in world units, how fast it drifts down the wind, its colour and its most. */
-    size: 14,
-    speed: 0.35,
+    /** How long a bank is along the screen and how thin across it, in world units. */
+    long: 9,
+    thin: 0.9,
+    /** How long a rise and fall along a bank is, and how far it rises, in world units. */
+    wave: 3,
+    sway: 0.35,
+    /** How many seconds one sway to and fro takes: a whole share of an hour, so it comes round with the clock. */
+    period: 60,
     colour: [0.93, 0.94, 0.95],
     opacity: 0.5,
   },

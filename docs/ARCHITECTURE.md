@@ -429,11 +429,13 @@ projection backwards, reads what moves there from a mask of the flat tiles under
 byte a world unit, read unblended, saying which of its motion's looks the land there has, and works out only those
 motions there, each a part of the shader of its own (`grassShader.ts`, `cropsShader.ts`, `heathShader.ts`,
 `wetShader.ts`, `iceShader.ts`), laid over one another where two meet, each reading its sliders from uniforms of its
-own (`motionUniforms.ts`). The crops' long waves, the wet land's mist and the drift keep the wall clock on lattices
-of their own that come round with the world's width, as the gusts' does. The renders page, `/admin/inspect-renders`,
-draws the same land, trees and critters over a world of its own, a square of every kind of land: the land layer takes
-its class tiles from whoever makes it (`ClassTiles`), and the critters' layer the ground they come out of, so the
-page hands them its squares rather than the map's (`admin/renders/`).
+own (`motionUniforms.ts`). The sand's dunes stand up the screen as the scenery does: a pixel walks down the screen
+from as high as a dune stands to the ground under it, and is drawn as the frontmost dune whose face reaches up to it.
+The crops' long waves, the wet land's ripples and the drift keep the wall clock on lattices of their own that come
+round with the world's width, as the gusts' does. The renders page, `/admin/inspect-renders`, draws the same land,
+trees and critters over a world of its own, a square of every kind of land: the land layer takes its class tiles from
+whoever makes it (`ClassTiles`), and the critters' layer the ground they come out of, so the page hands them its
+squares rather than the map's (`admin/renders/`).
 **The critters are made up by the page** (0099): `sprites/critters/critterClock.ts` is a pure function of the
 place and the wall clock - a hash of a cell and a slot says whether a critter comes, out of which tree or bush of
 the scenery's own cells (`currentPointsOf`), which of the cast of the class under it (`casts.ts`), and how each bird

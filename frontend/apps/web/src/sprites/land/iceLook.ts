@@ -1,22 +1,29 @@
 /**
- * The ice, the polar desert, the salt flats and the sand desert: points of light flashing for a moment and gone on
- * the ice and the salt, and drift - snow streaming along the wind over the ice and the polar desert, sand blowing off
- * the crests of the dunes - in faint pale streamers that run faster than the gusts. What the sliders set is in
- * `iceTuning.ts`.
+ * The ice, the polar desert, the salt flats and the sand desert: points of light flashing for a moment and gone on the
+ * salt; snow streaming along the wind over the ice and the polar desert in faint streamers, and now and then a little
+ * swirl of it; and on the sand, dunes standing up the screen as the trees do, lit and shaded by the one light, with
+ * sand blowing over their crests. What the sliders set is in `iceTuning.ts`.
  */
 export const ICE_LOOK = {
   /**
    * Each kind's own look, in the order the mask numbers them: the share of its cells that glint, and in what colour;
-   * how strongly it drifts, and in what; and whether its drift comes off the crests of dunes. A kind of land whose
+   * how strongly it drifts, and in what; how often the snow swirls; and whether it lies in dunes. A kind of land whose
    * motion is this one's and is not here fails a test.
    */
   kinds: {
-    // On the ice, near white, snow and light are seen by their cool shades rather than their white.
-    ice: { glints: 0.35, glint: [0.55, 0.8, 1], drift: 1, colour: [0.72, 0.8, 0.9], crests: 0 },
-    'polar-desert': { glints: 0.08, glint: [0.62, 0.84, 1], drift: 0.8, colour: [0.97, 0.98, 1], crests: 0 },
-    'salt-flat': { glints: 0.4, glint: [0.78, 0.9, 1], drift: 0, colour: [0.98, 0.97, 0.94], crests: 0 },
+    // On the ice, near white, snow is seen by its cool shade rather than its white.
+    ice: { glints: 0, glint: [1, 1, 1], drift: 1, colour: [0.72, 0.8, 0.9], swirls: 1, dunes: 0 },
+    'polar-desert': {
+      glints: 0,
+      glint: [1, 1, 1],
+      drift: 0.8,
+      colour: [0.97, 0.98, 1],
+      swirls: 0.7,
+      dunes: 0,
+    },
+    'salt-flat': { glints: 0.4, glint: [1, 1, 1], drift: 0, colour: [0.98, 0.97, 0.94], swirls: 0, dunes: 0 },
     // Sand blowing off a crest is paler than the sand it lies on, so it reads.
-    'desert-sand': { glints: 0, glint: [1, 0.97, 0.88], drift: 0.8, colour: [1, 0.95, 0.8], crests: 1 },
+    'desert-sand': { glints: 0, glint: [1, 1, 1], drift: 1, colour: [1, 0.96, 0.84], swirls: 0, dunes: 1 },
   },
   glints: {
     /**
@@ -37,7 +44,62 @@ export const ICE_LOOK = {
     speed: 4,
     /** How strong a streamer is at its most, where a gust blows. */
     opacity: 0.55,
-    /** How far apart the dunes' crests stand, down the wind, in world units. */
-    dunes: 2.6,
+  },
+  swirls: {
+    /** One swirl at the most to a cell this many world units across and a slot of the clock this many seconds long. */
+    cell: 4,
+    slot: 6,
+    /** The share of the cells' slots that bring one, before the kind's own share and the slider. */
+    chance: 0.35,
+    /** How long one lasts, in seconds; how wide it is from its middle, in world units; how fast it drifts down the wind. */
+    seconds: 2.6,
+    radius: 0.9,
+    drift: 0.6,
+    /** How many times its two arms wind from the middle to the edge, and how many turns a second it spins. */
+    turns: 1.4,
+    spin: 0.5,
+    colour: [0.62, 0.71, 0.85],
+    opacity: 0.6,
+  },
+  dunes: {
+    /**
+     * The dunes stand in rows across the wind, this many world units apart down it, and along a row one at the most to a
+     * stretch this long, the rows staggered so they lie in a scatter; this share of the stretches has one. Each is a
+     * crescent: highest in its middle and lower to its ends, its horns reaching further down the wind, a long gentle
+     * slope up to its crest from the windward side and a short steep slip face down the lee, and flat sand about it.
+     * Twice the size they first were, and more curved, Adam's word of 2026-10-18.
+     */
+    apart: 6,
+    length: 6,
+    share: 0.7,
+    height: 1.4,
+    crest: 0.68,
+    /** How far its horns reach down the wind at its ends, as a share of its depth. */
+    horns: 0.45,
+    /** The lit faces and the shaded ones, against the flat sand, and how strongly a face is lit or shaded. */
+    lit: [1, 0.95, 0.82],
+    litOpacity: 0.5,
+    shade: [0.5, 0.38, 0.24],
+    shadeOpacity: 0.7,
+    /** A thin bright line along each crest, where the lit slope meets the shaded slip face, and how wide, as a share of the dune. */
+    crestLight: 0.5,
+    crestWidth: 0.02,
+    /** The ripples the wind lays across the windward slopes and the flat sand: how far apart, and how strongly they shade. */
+    ripples: 0.28,
+    rippleStrength: 0.12,
+    /** How many steps the walk down the screen takes to find the dune a pixel sees. */
+    steps: 16,
+  },
+  /**
+   * The sand blowing over the dunes, in thin streaks along the screen's horizontal, flowing along it the way the wind
+   * leans and curling as they go, Adam's word of 2026-10-18: how long a streak's cell is and how thin it is, in world
+   * units; how fast it flows, in world units a second; and how many seconds a curl takes. Its flow over an hour is a
+   * whole number of cells and its curls a whole number of turns, so it comes round with the clock without a jump.
+   */
+  sandFlow: {
+    cell: 1.5,
+    thin: 0.12,
+    speed: 1.5,
+    curl: 20,
   },
 } as const;

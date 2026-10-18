@@ -88,9 +88,18 @@ const WET_SLIDERS: readonly SliderDef<keyof WetTuning>[] = [
 ];
 
 const ICE_SLIDERS: readonly SliderDef<keyof IceTuning>[] = [
-  { key: 'glints', label: 'How many glints flash', min: 0, max: 3, step: 0.05, say: times },
+  { key: 'glints', label: 'How many glints flash on the salt', min: 0, max: 3, step: 0.05, say: times },
   { key: 'snow', label: 'How strongly the snow streams', min: 0, max: 2, step: 0.05, say: times },
-  { key: 'sand', label: 'How strongly the sand blows', min: 0, max: 2, step: 0.05, say: times },
+  { key: 'swirls', label: 'How often the snow swirls', min: 0, max: 3, step: 0.05, say: times },
+  {
+    key: 'sand',
+    label: 'How strongly the sand blows over the crests',
+    min: 0,
+    max: 2,
+    step: 0.05,
+    say: times,
+  },
+  { key: 'dunes', label: 'How high the dunes stand', min: 0, max: 2, step: 0.05, say: times },
 ];
 
 /** What the part is, behind the question mark in its bar. */
@@ -107,7 +116,7 @@ const WET_ABOUT =
   'Marsh, bog, paddy, floodplain, mangrove and swamp forest: open water among the growth catching the light, a ring spreading on it now and then, reeds in the marsh and shoots in rows in the paddy bending with the gusts, and mist lying low over the marsh and the bog, drifting down the wind.';
 
 const ICE_ABOUT =
-  'Points of light flashing for a moment and gone on the ice, the polar desert and the salt flats; snow streaming along the wind over the ice and the polar desert, and sand blowing off the crests of the dunes, in faint pale streamers that run faster than the gusts.';
+  'Points of light flashing for a moment and gone on the salt flats; snow streaming along the wind over the ice and the polar desert, with a little swirl of it now and then; and on the sand desert dunes standing up as the trees do, lit and shaded by the one light, with sand blowing over their crests.';
 
 const CROPS_ABOUT =
   'Farmland and farmland with woods cut into fields, each fallow, ripe or green, its crops standing in rows its own way, with long slow waves rolling through them down the wind, the same in every browser.';

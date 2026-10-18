@@ -8,10 +8,11 @@ import { LAND_LOOK } from './look';
  * the land under a pixel is marsh, bog, paddy, floodplain, mangrove or swamp forest.
  *
  * Open water lies among the growth where a slow pattern over the ground is high, dark, catching the light in glints
- * where the wind ruffles it - the gusts' own ripples, carried by the wall clock - and now and then a ring spreads on
+ * where the wind ruffles it - ripples carried slowly down the wind by the wall clock - and now and then a ring spreads on
  * it, at a place and a moment a cell of the ground and a slot of the clock draw. Stems stand in it: reeds in clumps
  * in the marsh, tufts on the floodplain, shoots in rows in the paddy's terraces, each a stroke bending with the gusts.
- * Over the marsh and the bog mist lies in low banks drifting down the wind, thin enough to see through. How much of
+ * Over the marsh and the bog mist lies in long thin banks along the screen, rising and falling along their length and
+ * swaying slowly to and fro with the wall clock, thin enough to see through. How much of
  * each a kind has is its own look, blended between the world units about a pixel so nothing steps at a texel's edge;
  * every number is in `look.ts`, under `wet`, and the sliders' in `wetTuning.ts`.
  */
@@ -39,9 +40,8 @@ uniform float uMist;
 uniform float uPools;
 uniform float uRings;
 uniform float uStems;
-// The mist's lattice, its cell along the wind and how many cells it comes round after, and how far it has drifted.
-uniform vec2 uMistLattice;
-uniform float uMistCarried;
+// How far the wind has carried the ripples on the water, in world units modulo the world's width: slower than the gusts.
+uniform float uRippleCarried;
 
 const int WET = ${channelOf('wet')};
 const int WET_LOOKS = ${KINDS.length};
@@ -58,6 +58,13 @@ const float POOL_ALPHA = ${float(P.opacity)};
 const float POOL_SOFT = ${float(P.soft)};
 const vec3 GLINT = ${colour(P.glint)};
 const float GLINT_ALPHA = ${float(P.glintOpacity)};
+const float SHORE_REACH = ${float(P.shore.reach)};
+const float SHORE_APART = ${float(P.shore.apart)};
+const float SHORE_PERIOD = ${float(P.shore.period)};
+const float SHORE_ALPHA = ${float(P.shore.opacity)};
+const float SHORE_RECEDE = ${float(P.shore.recede)};
+// How far apart, in world units, the pattern is read to find how steeply it rises towards a pool's middle.
+const float SHORE_STEP = 0.1;
 const float RIPPLE_CELL = ${float(RIPPLES.cell)};
 const float RIPPLE_AROUND = ${float(RIPPLES.around)};
 const float RING_CELL = ${float(R.cell)};
@@ -79,6 +86,11 @@ const float STEM_SWAY = ${float(S.sway)};
 const float STEM_SWAY_SPEED = ${float(S.swaySpeed)};
 const float STEMS_FROM_PIXELS = ${float(S.fromPixels)};
 const float STEMS_WHOLE_PIXELS = ${float(S.wholePixels)};
+const float MIST_LONG = ${float(M.long)};
+const float MIST_THIN = ${float(M.thin)};
+const float MIST_WAVE = ${float(M.wave)};
+const float MIST_SWAY = ${float(M.sway)};
+const float MIST_PERIOD = ${float(M.period)};
 const vec3 MIST_COLOUR = ${colour(M.colour)};
 const float MIST_ALPHA = ${float(M.opacity)};
 const float TALLEST_STEM = ${float(Math.max(...KINDS.map((kind) => kind.tall)))};
@@ -118,18 +130,43 @@ WetLooks wetLooksAt(vec2 world) {
   return blend;
 }
 
-// How much open water there is at a point, nought to one: where a slow pattern over the ground is high.
-float poolAt(vec2 world, float share) {
-  float pattern = noise(world / POOL_SIZE + vec2(17.0, 3.0)) * 0.65 + noise(world / (POOL_SIZE * 0.4) + vec2(5.0, 41.0)) * 0.35;
-  float edge = 0.72 - 0.5 * share * uPools;
-  return smoothstep(edge - POOL_SOFT, edge + POOL_SOFT, pattern);
+// The slow pattern over the ground the pools are cut from: open water where it is high.
+float poolPatternAt(vec2 world) {
+  return noise(world / POOL_SIZE + vec2(17.0, 3.0)) * 0.65 + noise(world / (POOL_SIZE * 0.4) + vec2(5.0, 41.0)) * 0.35;
 }
 
-// The light the water catches: fine ripples carried down the wind with the gusts, brightest where a gust blows.
+// How far in from a pool's edge a point is, in the pattern: below nought, dry. Drawing back from the wet land's own
+// edge, so where it meets dry land is a shore like any pool's.
+float poolAt(vec2 world, float share) {
+  float inland = softenedIn(uMask, world)[WET];
+  float edge = 0.72 - 0.5 * share * uPools;
+  return poolPatternAt(world) - (1.0 - inland) * SHORE_RECEDE - edge;
+}
+
+// How far in from a pool's edge a point is, in world units: how far in it is in the pattern, over how steeply the
+// pattern rises there.
+float shoreDistanceAt(vec2 world, float inside) {
+  float here = poolPatternAt(world);
+  vec2 rise = vec2(
+    poolPatternAt(world + vec2(SHORE_STEP, 0.0)) - here,
+    poolPatternAt(world + vec2(0.0, SHORE_STEP)) - here
+  ) / SHORE_STEP;
+  return inside / max(length(rise), 0.02);
+}
+
+// The little waves near a pool's edge, so many world units in from it: bands along its shore, lapping in towards it,
+// coming round with the clock.
+float shoreAt(float away) {
+  float near = 1.0 - smoothstep(0.0, SHORE_REACH, away);
+  float lap = pow(0.5 + 0.5 * sin(TAU * (away / SHORE_APART + uTime / SHORE_PERIOD)), 4.0);
+  return near * lap * smoothstep(0.0, SHORE_APART * 0.5, away);
+}
+
+// The light the water catches: fine ripples carried slowly down the wind, a little brighter where a gust blows.
 float glintAt(vec2 world) {
-  vec2 wind = vec2(dot(world, WIND) - uCarried, dot(world, WIND_ACROSS));
+  vec2 wind = vec2(dot(world, WIND) - uRippleCarried, dot(world, WIND_ACROSS));
   float ripple = windNoise(wind / RIPPLE_CELL, RIPPLE_AROUND, 131) * 0.6 + windNoise(wind / (RIPPLE_CELL * 0.5), RIPPLE_AROUND * 2.0, 132) * 0.4;
-  return smoothstep(0.6, 0.85, ripple) * (0.4 + 0.6 * gustAt(world, uCarried));
+  return smoothstep(0.6, 0.85, ripple) * (0.6 + 0.4 * gustAt(world, uCarried));
 }
 
 // A ring spreading on the water now and then: a cell of the ground and a slot of the clock may bring one, at a place
@@ -160,12 +197,19 @@ float ringsAt(vec2 world) {
   return best;
 }
 
-// The mist, in low banks drifting slowly down the wind, with wisps in them.
+// The mist, in long thin banks along the screen's horizontal, streaked, rising and falling along their length and
+// swaying slowly to and fro: every motion of it a whole number of turns an hour, so it comes round with the clock.
 float mistAt(vec2 world) {
-  vec2 wind = vec2(dot(world, WIND) - uMistCarried, dot(world, WIND_ACROSS));
-  float bank = windNoise(vec2(wind.x / uMistLattice.x, wind.y / (uMistLattice.x * 0.7)), uMistLattice.y, 121);
-  float wisp = windNoise(wind / (uMistLattice.x * 0.25), uMistLattice.y * 4.0, 122);
-  return smoothstep(0.42, 0.8, bank * 0.7 + wisp * 0.3);
+  vec2 across = vec2(uTilt.x, uTilt.y);
+  vec2 up = vec2(-uTilt.y, uTilt.x);
+  float s = dot(world, across);
+  float t = dot(world, up);
+  float phase = TAU * uTime / MIST_PERIOD;
+  float wave = sin(s / MIST_WAVE + phase) * MIST_SWAY + sin(s / (MIST_WAVE * 0.43) - 2.0 * phase) * MIST_SWAY * 0.5;
+  float shift = sin(phase) * MIST_LONG * 0.15 + cos(3.0 * phase) * MIST_LONG * 0.05;
+  float bank = noise(vec2((s + shift) / MIST_LONG, (t + wave) / MIST_THIN) + vec2(17.0, 41.0));
+  float streak = noise(vec2((s - shift * 2.0) / (MIST_LONG * 0.35), (t + wave * 1.3) / (MIST_THIN * 0.4)) + vec2(5.0, 3.0));
+  return smoothstep(0.5, 0.8, bank * 0.65 + streak * 0.35);
 }
 
 // One stem, a stroke from its root bending down the wind: how much of this pixel it covers, and its colour.
@@ -185,11 +229,16 @@ void stemInk(vec2 root, float size, vec2 downWind, float blow, float swayAt, int
 // standing in it, and the mist over all of it.
 vec4 wetHere(vec2 world) {
   WetLooks looks = wetLooksAt(world);
-  float pool = poolAt(world, looks.pools);
+  float inside = poolAt(world, looks.pools);
+  float pool = smoothstep(-POOL_SOFT, POOL_SOFT, inside);
   float waterAlpha = pool * POOL_ALPHA;
   vec3 rgb = looks.water * waterAlpha;
   float alpha = waterAlpha;
-  float glint = glintAt(world) * GLINT_ALPHA * pool;
+  // Near the shore the waves follow it, and the wind's ripples give way to them.
+  float away = inside > 0.0 ? shoreDistanceAt(world, inside) : 0.0;
+  float shore = inside > 0.0 ? shoreAt(away) : 0.0;
+  float near = inside > 0.0 ? 1.0 - smoothstep(0.0, SHORE_REACH, away) : 1.0;
+  float glint = max(glintAt(world) * GLINT_ALPHA * (1.0 - 0.8 * near), shore * SHORE_ALPHA) * pool;
   rgb = GLINT * glint + rgb * (1.0 - glint);
   alpha = glint + alpha * (1.0 - glint);
   float ring = uRings > 0.0 ? ringsAt(world) * RING_ALPHA * pool : 0.0;

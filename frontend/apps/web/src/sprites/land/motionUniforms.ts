@@ -11,7 +11,7 @@ import { wetTuningStore } from './wetTuning';
 
 /**
  * Each land motion's own uniforms, the ones its part of the land shader reads beside the land's: its sliders, and for
- * the crops' waves, the wet land's mist and the drift where the wall clock has carried them, on lattices that come round with the
+ * the crops' waves, the wet land's ripples and the drift where the wall clock has carried them, on lattices that come round with the
  * world's width as the gusts' does. Handed to the shader as resources of their own, set every frame by `tune`; a
  * slider moved asks for a frame through `watch`, so it shows even where nothing else moves the map.
  */
@@ -57,13 +57,14 @@ export function createMotionUniforms(): MotionUniforms {
     uPools: f32(1),
     uRings: f32(0),
     uStems: f32(1),
-    uMistLattice: vec2(14, 1),
-    uMistCarried: f32(0),
+    uRippleCarried: f32(0),
   });
   const ice = new UniformGroup({
     uGlints: f32(1),
     uSnow: f32(1),
+    uSwirls: f32(1),
     uSand: f32(1),
+    uDunes: f32(1),
     uDriftLattice: vec2(3, 1),
     uDriftCarried: f32(0),
   });
@@ -119,17 +120,16 @@ export function createMotionUniforms(): MotionUniforms {
       w.uPools = wetly.pools;
       w.uRings = wetly.rings;
       w.uStems = wetly.stems;
-      const banks = latticeNear(LAND_LOOK.wet.mist.size);
-      w.uMistLattice[0] = banks.cell;
-      w.uMistLattice[1] = banks.around;
-      w.uMistCarried = still ? 0 : carried(wall, LAND_LOOK.wet.mist.speed);
+      w.uRippleCarried = still ? 0 : carried(wall, LAND_LOOK.wet.pools.rippleSpeed);
       wet.update();
 
       const icy = iceTuningStore.get();
       const i = ice.uniforms;
       i.uGlints = icy.glints;
       i.uSnow = icy.snow;
+      i.uSwirls = icy.swirls;
       i.uSand = icy.sand;
+      i.uDunes = icy.dunes;
       const streamers = latticeNear(LAND_LOOK.ice.drift.long);
       i.uDriftLattice[0] = streamers.cell;
       i.uDriftLattice[1] = streamers.around;
