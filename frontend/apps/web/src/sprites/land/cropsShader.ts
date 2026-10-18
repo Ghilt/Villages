@@ -66,16 +66,17 @@ struct Field {
   vec2 next;
 };
 
-// The field a point of the ground is in: of the jittered points of the cells about it, the nearest, and the next.
-Field fieldAt(vec2 world) {
-  ivec2 base = ivec2(floor(world / uFieldSize));
+// The field a point of the ground is in, on a lattice of fields this many world units across: of the jittered points of
+// the cells about it, the nearest, and the next. The paddy's terraces are cut by it too.
+Field fieldAt(vec2 world, float size) {
+  ivec2 base = ivec2(floor(world / size));
   Field field = Field(base, vec2(1e9), vec2(1e9));
   float best = 1e18;
   float second = 1e18;
   for (int dy = -1; dy <= 1; dy++) {
     for (int dx = -1; dx <= 1; dx++) {
       ivec2 cell = base + ivec2(dx, dy);
-      vec2 middle = (vec2(cell) + 0.15 + 0.7 * vec2(hash(cell, 41), hash(cell, 42))) * uFieldSize;
+      vec2 middle = (vec2(cell) + 0.15 + 0.7 * vec2(hash(cell, 41), hash(cell, 42))) * size;
       vec2 off = middle - world;
       float far = dot(off, off);
       if (far < best) {
@@ -110,7 +111,7 @@ float waveAt(vec2 world) {
 // The crops over the ground under this pixel, premultiplied: the field's wash and the wave's paler side, and close in
 // the stalks standing in the field's rows.
 vec4 cropsHere(vec2 world) {
-  Field here = fieldAt(world);
+  Field here = fieldAt(world, uFieldSize);
   bool fallow = hash(here.id, 43) < uFallow;
   bool ripe = hash(here.id, 44) < RIPE;
   // Nothing on the track between two fields, so the patchwork's edges show.
@@ -143,7 +144,7 @@ vec4 cropsHere(vec2 world) {
   // A stalk rises from its root and leans down the wind, so the roots that can reach this pixel lie on the ground
   // below it and up the wind from it: the field there, and the rows and stalks of it about there, are the ones looked at.
   vec2 reach = groundUnder(vScreen + vec2(0.0, tall * 0.5) - downWind * tall * 0.3);
-  Field field = fieldAt(reach);
+  Field field = fieldAt(reach, uFieldSize);
   if (hash(field.id, 43) < uFallow) {
     return vec4(rgb, alpha);
   }

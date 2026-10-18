@@ -43,6 +43,18 @@ describe('the land', () => {
     expect(DRAWN).toContain('heath');
   });
 
+  it('gives the wet land its water, its stems and its mist, each kind in a look of its own', () => {
+    const wet = KINDS.filter((kind) => motionOf(kind) === 'wet').sort();
+    expect(wet).toEqual(['bog', 'floodplain', 'mangrove', 'marsh', 'paddy', 'swamp-forest']);
+    expect(Object.keys(LAND_LOOK.wet.kinds).sort()).toEqual(wet);
+    expect(new Set(wet.map(lookOf)).size).toBe(wet.length);
+    // The paddy is a sheet of water with its shoots in rows; mist lies over the marsh and the bog.
+    expect(LAND_LOOK.wet.kinds.paddy.rows).toBe(1);
+    expect(LAND_LOOK.wet.kinds.marsh.mist).toBeGreaterThan(0);
+    expect(LAND_LOOK.wet.kinds.bog.mist).toBeGreaterThan(0);
+    expect(DRAWN).toContain('wet');
+  });
+
   it('leaves the water to the water shader, the woods to their trees and bare stone still', () => {
     expect(KINDS.filter((kind) => motionOf(kind) === 'water').sort()).toEqual([
       'lake',

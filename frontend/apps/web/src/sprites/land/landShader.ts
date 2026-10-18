@@ -3,13 +3,14 @@ import { GUSTS_GLSL } from '../wind';
 import { CROPS_GLSL } from './cropsShader';
 import { GRASS_GLSL } from './grassShader';
 import { HEATH_GLSL } from './heathShader';
+import { WET_GLSL } from './wetShader';
 
 /**
  * The land, worked out a pixel at a time over the whole screen, as the fog is: one triangle that covers it, and for
  * each pixel the ground under it, found by the sprites' own projection backwards, and what moves on the land there,
  * from the mask (`landMask.ts`). Each pixel works out only the motions of the land under it, each a part of its own
- * - the grass, `grassShader.ts`, the crops, `cropsShader.ts`, and the heath, `heathShader.ts` - laid over one another
- * where two meet, so a screen of rock costs almost
+ * - the grass, `grassShader.ts`, the crops, `cropsShader.ts`, the heath, `heathShader.ts`, and the wet land,
+ * `wetShader.ts` - laid over one another where two meet, so a screen of rock costs almost
  * nothing and a screen of grass what the grass costs. Every number is in `look.ts`.
  */
 
@@ -128,6 +129,7 @@ int lookAt(vec2 world) {
 ${GRASS_GLSL}
 ${CROPS_GLSL}
 ${HEATH_GLSL}
+${WET_GLSL}
 
 void main() {
   vec2 world = groundUnder(vScreen);
@@ -147,6 +149,10 @@ void main() {
   if (land[HEATH] > 0.002) {
     vec4 heath = heathHere(world) * land[HEATH];
     drawn = heath + drawn * (1.0 - heath.a);
+  }
+  if (land[WET] > 0.002) {
+    vec4 wet = wetHere(world) * land[WET];
+    drawn = wet + drawn * (1.0 - wet.a);
   }
   fragColor = drawn;
 }

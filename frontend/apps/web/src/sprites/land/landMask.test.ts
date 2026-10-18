@@ -70,11 +70,12 @@ describe('the land mask', () => {
     expect(landMaskOf(range, [null, null], channels, looks).counts).toEqual([0, 0, 0, 0]);
   });
 
-  it('draws each motion drawn from a channel of its own, four at the most: the grass, the crops, the heath', () => {
+  it('draws each motion drawn from a channel of its own, four at the most: the grass, the crops, the heath, the wet land', () => {
     expect(DRAWN.length).toBeLessThanOrEqual(4);
     expect(channelOf('grass')).toBe(0);
     expect(channelOf('crops')).toBe(1);
     expect(channelOf('heath')).toBe(2);
+    expect(channelOf('wet')).toBe(3);
     expect(new Set(DRAWN.map(channelOf)).size).toBe(DRAWN.length);
     expect(channelOf('still')).toBeNull();
     expect(channelOf(null)).toBeNull();

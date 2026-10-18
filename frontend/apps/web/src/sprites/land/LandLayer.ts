@@ -19,17 +19,14 @@ import { createCostMeter } from '../../shaders/costMeter';
 import { drawnAt, sayLevel, shadersStore } from '../../shaders/levels';
 import type { ShaderLevel } from '../../shaders/levels';
 import type { Layer } from '../layer';
-import { carried, latticeNear } from '../clouds/cloudClock';
 import { gustsCarried, windTime } from '../wind';
 
-import { cropsTuningStore } from './cropsTuning';
-import { grassTuningStore } from './grassTuning';
-import { heathTuningStore } from './heathTuning';
 import { DRAWN, channelOf, landMaskOf, sameRange, tilesUnder } from './landMask';
 import type { TileRange } from './landMask';
 import { landStore } from './landMode';
 import { LAND_FRAGMENT, LAND_VERTEX } from './landShader';
 import { LAND_LOOK, lookOf, motionOf } from './look';
+import { createMotionUniforms } from './motionUniforms';
 
 /**
  * The land moving in the wind and the light, one layer for every kind of land, as a layer of the sprite canvas:
@@ -98,33 +95,7 @@ export function createLandLayer(
     uMaskSize: { value: new Float32Array([1, 1]), type: 'vec2<f32>' },
     uShown: { value: new Float32Array(4), type: 'vec4<f32>' },
   });
-  const grassUniforms = new UniformGroup({
-    uPatch: { value: 7, type: 'f32' },
-    uRagged: { value: 0, type: 'f32' },
-    uSoft: { value: 0, type: 'f32' },
-    uMingle: { value: 0, type: 'f32' },
-    uBare: { value: 0, type: 'f32' },
-    uTall: { value: 0, type: 'f32' },
-    uBrush: { value: 0, type: 'f32' },
-    uTallHeight: { value: 1, type: 'f32' },
-    uBrushSize: { value: 0.17, type: 'f32' },
-    uDensity: { value: 1, type: 'f32' },
-  });
-  const cropsUniforms = new UniformGroup({
-    uFieldSize: { value: 3.5, type: 'f32' },
-    uFallow: { value: 0, type: 'f32' },
-    uRows: { value: 0.4, type: 'f32' },
-    uCropHeight: { value: 0.3, type: 'f32' },
-    uWaves: { value: 0, type: 'f32' },
-    uWaveLattice: { value: new Float32Array([16, 1]), type: 'vec2<f32>' },
-    uWaveCarried: { value: 0, type: 'f32' },
-  });
-  const heathUniforms = new UniformGroup({
-    uHeathSize: { value: 1, type: 'f32' },
-    uHeathDensity: { value: 1, type: 'f32' },
-    uCotton: { value: 0, type: 'f32' },
-    uStir: { value: 1, type: 'f32' },
-  });
+  const motions = createMotionUniforms();
   const empty = new BufferImageSource({
     resource: new Uint8Array(4),
     width: 1,
@@ -147,9 +118,7 @@ export function createLandLayer(
     }),
     resources: {
       landUniforms: uniforms,
-      grassUniforms,
-      cropsUniforms,
-      heathUniforms,
+      ...motions.groups,
       uMask: empty,
       uLooks: noLooks,
     },
@@ -178,10 +147,7 @@ export function createLandLayer(
 
   const stopWatching = landStore.watch(repaint);
   const stopWatchingShaders = shadersStore.watch(repaint);
-  // A slider moved shows on the next frame even where nothing else is moving the map.
-  const stopWatchingTuning = grassTuningStore.watch(repaint);
-  const stopWatchingCrops = cropsTuningStore.watch(repaint);
-  const stopWatchingHeath = heathTuningStore.watch(repaint);
+  const stopWatchingMotions = motions.watch(repaint);
 
   /** Pieces the mask for a range of tiles, and puts it in place unless the view has moved on meanwhile. */
   async function build(range: TileRange, root: string): Promise<void> {
@@ -306,39 +272,7 @@ export function createLandLayer(
       u.uPixel = 1 / (levelLook.resolution * resolution);
       for (let channel = 0; channel < 4; channel += 1) u.uShown[channel] = moving[channel] === true ? 1 : 0;
       uniforms.update();
-      const tuning = grassTuningStore.get();
-      const g = grassUniforms.uniforms;
-      g.uPatch = tuning.size;
-      g.uRagged = tuning.ragged;
-      g.uSoft = tuning.soft;
-      g.uMingle = tuning.mingle;
-      g.uBare = tuning.bare;
-      g.uTall = tuning.tall;
-      g.uBrush = tuning.brush;
-      g.uTallHeight = tuning.tallHeight;
-      g.uBrushSize = tuning.brushSize;
-      g.uDensity = tuning.density;
-      grassUniforms.update();
-      const crops = cropsTuningStore.get();
-      const c = cropsUniforms.uniforms;
-      c.uFieldSize = crops.fieldSize;
-      c.uFallow = crops.fallow;
-      c.uRows = crops.rows;
-      c.uCropHeight = crops.height;
-      c.uWaves = crops.waves;
-      // The waves on a lattice that comes round with the world's width, carried by the wall clock as the gusts are.
-      const waves = latticeNear(crops.waveSize);
-      c.uWaveLattice[0] = waves.cell;
-      c.uWaveLattice[1] = waves.around;
-      c.uWaveCarried = still ? 0 : carried(wall, LAND_LOOK.crops.waves.speed);
-      cropsUniforms.update();
-      const heath = heathTuningStore.get();
-      const h = heathUniforms.uniforms;
-      h.uHeathSize = heath.size;
-      h.uHeathDensity = heath.density;
-      h.uCotton = heath.cotton;
-      h.uStir = heath.stir;
-      heathUniforms.update();
+      motions.tune(wall, still);
 
       const width = Math.max(1, Math.ceil(view.width * levelLook.resolution));
       const height = Math.max(1, Math.ceil(view.height * levelLook.resolution));
@@ -357,9 +291,7 @@ export function createLandLayer(
     destroy(): void {
       stopWatching();
       stopWatchingShaders();
-      stopWatchingTuning();
-      stopWatchingCrops();
-      stopWatchingHeath();
+      stopWatchingMotions();
       meter.dispose();
       sprite.destroy();
       target.destroy(true);
