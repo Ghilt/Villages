@@ -118,6 +118,9 @@ export const RECIPES = {
   /** Something that happened, said in a corner: the card's frame on night, to stand out over the map. */
   'toast.plain': { border: 'gilt-thin', fill: 'night', padding: [2, 4, 2, 6] },
 
+  /** What covers the game while it is made ready: the letter's clouds round their own sky, the whole window. */
+  'screen.loading': { border: 'cloud-border', fill: 'cloud-sky', padding: 4 },
+
   /** A few words about what is under the pointer: the card's frame at half its size, on parchment. */
   'tooltip.plain': { border: 'gilt-thin', scale: 0.5, fill: 'parchment', text: 'ink', padding: [1, 5, 1, 5] },
 } as const satisfies Record<string, Recipe>;

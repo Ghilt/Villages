@@ -1,0 +1,46 @@
+/*
+ * The loading screen: over the whole of what holds it, in the colour its fill averages to until the fill's
+ * picture has arrived, so it covers from the first frame. Lifted, it fades, and takes no pointer from the
+ * moment it starts to.
+ */
+
+@layer ui {
+  .ui-loading {
+    position: absolute;
+    z-index: 30;
+    inset: 0;
+    container-type: size;
+    background: var(--ui-night-raised);
+    opacity: 1;
+  }
+
+  .ui-loading--lifted {
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--ui-loading-fade) ease-in;
+  }
+
+  .ui-loading__middle {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-3);
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: var(--ui-space-3);
+    /* Its words as large as the screen is, a phone's at a page's size and a wide window's nearly twice that. */
+    font-size: clamp(1rem, 4cqmin, 1.75rem);
+    text-align: center;
+    box-sizing: border-box;
+  }
+
+  .ui-loading__meter {
+    width: min(16rem, 70%);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-loading--lifted {
+      transition: none;
+    }
+  }
+}

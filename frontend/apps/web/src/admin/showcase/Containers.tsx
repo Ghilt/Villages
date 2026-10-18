@@ -152,6 +152,7 @@ const HOLDS: Record<RecipeName, () => ReactNode> = {
   'strip.middle': () => <span className="ui-caps">A letter</span>,
   'card.figure': () => <Figure name="Count de Montreuil" what="Noble · Rationalist" stats="12 · 8 · 4" />,
   'tooltip.plain': () => <span className="ui-body">Keep your holdings in sight</span>,
+  'screen.loading': () => <Pane title="Villages, while the map is painted" />,
   'choice.frame': () => <span className="ui-body">One of a few, side by side</span>,
   'dialog.plain': () => (
     <>

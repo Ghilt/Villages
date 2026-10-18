@@ -7,6 +7,7 @@ import { Containers } from './Containers';
 import { Controls } from './Controls';
 import { DialogsAndFields } from './DialogsAndFields';
 import { Foundations } from './Foundations';
+import { LoadingScreens } from './LoadingScreens';
 import { MarksAndReadouts } from './MarksAndReadouts';
 import { Pictures } from './Pictures';
 import { Quests } from './Quests';
@@ -110,5 +111,11 @@ export const SECTIONS: readonly Section[] = [
     title: 'Dialogs and fields',
     says: 'The dialog, the toast, the text field, the dropdown and the medallion.',
     Body: DialogsAndFields,
+  },
+  {
+    id: 'loading',
+    title: 'The loading screen',
+    says: 'What covers the game while it is made ready, held, filling and fading.',
+    Body: LoadingScreens,
   },
 ];

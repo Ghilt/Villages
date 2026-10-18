@@ -456,3 +456,11 @@ A line each: what it is for, its variants, and where on the page it is.
   from the picture by `npm run world:ui`, `windowOf` in the world package's `uiWindow.ts`, so a frame
   painted with a clear middle needs no file beside it. Painted whole - the compass, a house's shield - it
   is an emblem and holds nothing. Its `label` is what it is for a screen reader. *Dialogs and fields*.
+- **`LoadingScreen`**, `ui/loadingScreen/LoadingScreen.tsx`: what covers the game while it is made ready, over
+  the whole of whatever holds it and everything in it: a `title` on its plate in the middle, a line under it,
+  `says`, and a meter of how far along the work is, `share`, nought to one, only when there is a figure for it.
+  Its words grow with it, a phone's at a page's size and a wide window's nearly twice that. It is drawn in the
+  colour its sky averages to before its pictures have arrived, so it covers from its first frame. `lifted`, it
+  fades over `FADE_MS` and is gone, taking no pointer from the moment it starts to, and says so at `onGone`;
+  covered again, it is there at once. In the `screen.loading` recipe. *The loading screen*, where it is played
+  through as the game plays it, and held in each state and at a phone's shape.
