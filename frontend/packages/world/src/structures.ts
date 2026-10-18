@@ -2,7 +2,7 @@
  * The catalogue of structures, `world/catalogues/structures.json`, as the page and the tools read it: every type, what each
  * culture calls it, and what it is at each of its levels. The server reads the same file for its rules, and the two
  * readers are held to one shape by `contracts/fixtures/structures.json`. This side keeps what the server passes over
- * - the words, the size on the map, the influence zone - as well as everything the debug panel lists. A file this
+ * - the words, the size on the map, the footprint, the influence zone - as well as everything the debug panel lists. A file this
  * cannot read is refused whole, naming the type and the field. See decision record 0093.
  */
 
@@ -42,6 +42,11 @@ export interface StructureTypeSpec {
   significance: number[];
   sightKm: number[];
   groundHeight: number[];
+  /**
+   * How many of the ground's diamonds its base covers along each side at each level: a square of whole diamonds whose
+   * front corner is where the building stands, which its yard is laid round. See docs/plans/worked-ground.md.
+   */
+  footprint: number[];
   /** What it yields its holder a world month, a real day, at each level. */
   yields: Partial<Record<StructureResource, number[]>>;
   /** The ground it reaches, drawn while it is selected, or none. */
@@ -152,6 +157,10 @@ function typeOf(type: string, node: unknown): StructureTypeSpec {
       levels,
     );
   }
+  const footprint = numbers(node, 'footprint', type, levels);
+  if (footprint.some((side) => !Number.isInteger(side) || side < 1)) {
+    refuse(type, 'footprint of whole diamonds');
+  }
   const zone = node.zone;
   if (zone !== undefined && !(isObject(zone) && typeof zone.reach === 'number' && zone.reach > 0)) {
     refuse(type, 'zone');
@@ -175,6 +184,7 @@ function typeOf(type: string, node: unknown): StructureTypeSpec {
     significance,
     sightKm,
     groundHeight: numbers(node, 'groundHeight', type, levels),
+    footprint,
     yields,
     zone: zone === undefined ? null : { reach: zone.reach as number },
     slots,

@@ -21,3 +21,42 @@
 .inspect-list .structures-named + .structures-named {
   margin-top: 0.2rem;
 }
+
+/*
+ * On the ground: each culture's picture standing on its footprint, the diamonds under it in the colour of worn earth
+ * and the square's outline drawn again over it in ink, so a base can be seen to lie in it or not.
+ */
+.structures-levels .inspect-button {
+  margin-left: 0.3rem;
+}
+
+.structures-levels .inspect-button[aria-pressed='true'] {
+  border-color: var(--ink);
+  background: var(--parchment-edge);
+}
+
+.structures-standing {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-end;
+  margin-top: 0.4rem;
+}
+
+.structures-footing {
+  flex: none;
+  overflow: visible;
+}
+
+.structures-diamond {
+  fill: rgb(156 122 78 / 45%);
+  stroke: rgb(110 82 48 / 60%);
+  stroke-width: 0.06;
+}
+
+.structures-outline {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 0.14;
+  stroke-dasharray: 0.4 0.25;
+  opacity: 0.85;
+}

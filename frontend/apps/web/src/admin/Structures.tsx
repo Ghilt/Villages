@@ -1,5 +1,7 @@
 import './structures.css';
 
+import { useState } from 'react';
+
 import { CULTURES, markKey, parseStructureCatalogue, pictureKey } from '@villages/world';
 import type {
   StructureCatalogue,
@@ -8,6 +10,7 @@ import type {
   StructureTypeSpec,
 } from '@villages/world';
 
+import { footingOf } from './footing';
 import { Cut, useAtlas } from './frame/Atlas';
 import type { Atlas } from './frame/Atlas';
 import { LevelsField, NumberField, WordsField } from './frame/Fields';
@@ -28,6 +31,8 @@ const SAID: Record<StructureResource, string> = {
 /** How tall a structure's picture is drawn beside its words, and its pin beside its name, and how wide at most. */
 const TALL = 40;
 const WIDE = 48;
+/** How many pixels a world unit is drawn where a building stands on its footprint: a castle of eight is 72 tall. */
+const UNIT = 9;
 
 /** Levels as the page says them: one number when every level agrees, else each in turn. */
 function byLevel(values: readonly number[]): string {
@@ -48,11 +53,16 @@ function byLevel(values: readonly number[]): string {
  * `world:structures` cut them into their atlas, read again whenever the dev server cuts it again: save a picture over
  * a placeholder and it is here. A placeholder is ringed in dashes. See docs/plans/structures.md and
  * docs/plans/catalogues.md.
+ *
+ * On the ground, each culture's picture stands on its footprint at the level chosen, as tall as it is drawn on the map
+ * and on the diamonds as the camera sees them closest in, so a footprint is tuned against the base it lies under. See
+ * docs/plans/worked-ground.md.
  */
 export function Structures() {
   const editor = useCatalogueEditor('structures.json', parseStructureCatalogue);
   const read = editor.value;
   const atlas = useAtlas('structures');
+  const [level, setLevel] = useState(1);
 
   return (
     <InspectPage
@@ -75,7 +85,25 @@ export function Structures() {
           start
         </p>
       )}
-      {read !== null && <TypesTable editor={editor} read={read} atlas={atlas === 'missing' ? null : atlas} />}
+      {read !== null && (
+        <p className="inspect-note structures-levels">
+          standing at level{' '}
+          {[1, 2, 3].map((one) => (
+            <button
+              key={one}
+              type="button"
+              className="inspect-button"
+              aria-pressed={one === level}
+              onClick={() => setLevel(one)}
+            >
+              {one}
+            </button>
+          ))}
+        </p>
+      )}
+      {read !== null && (
+        <TypesTable editor={editor} read={read} atlas={atlas === 'missing' ? null : atlas} level={level} />
+      )}
       <WholeFile editor={editor} />
     </InspectPage>
   );
@@ -85,10 +113,12 @@ function TypesTable({
   editor,
   read,
   atlas,
+  level,
 }: {
   editor: CatalogueEditor<StructureCatalogue>;
   read: StructureCatalogue;
   atlas: Atlas | null;
+  level: number;
 }) {
   return (
     <div className="inspect-scroll">
@@ -102,12 +132,13 @@ function TypesTable({
             <th>gives a month</th>
             <th>slots</th>
             <th>zone</th>
+            <th>on the ground</th>
             <th>in each culture</th>
           </tr>
         </thead>
         <tbody>
           {read.types.map((spec) => (
-            <TypeRow key={spec.type} editor={editor} spec={spec} atlas={atlas} />
+            <TypeRow key={spec.type} editor={editor} spec={spec} atlas={atlas} level={level} />
           ))}
         </tbody>
       </table>
@@ -119,11 +150,14 @@ function TypeRow({
   editor,
   spec,
   atlas,
+  level,
 }: {
   editor: CatalogueEditor<StructureCatalogue>;
   spec: StructureTypeSpec;
   atlas: Atlas | null;
+  level: number;
 }) {
+  const shown = Math.min(level, spec.levels) - 1;
   const at = ['types', spec.type] as const;
   const resources = Object.keys(spec.yields) as StructureResource[];
   return (
@@ -185,6 +219,29 @@ function TypeRow({
       </td>
       <td>
         <ul className="inspect-list">
+          <li>
+            tall <LevelsField editor={editor} path={[...at, 'groundHeight']} label={`${spec.type} height`} />
+          </li>
+          <li>
+            footprint{' '}
+            <LevelsField editor={editor} path={[...at, 'footprint']} label={`${spec.type} footprint`} />
+          </li>
+        </ul>
+        <div className="structures-standing">
+          {CULTURES.map((culture) => (
+            <Standing
+              key={culture}
+              atlas={atlas}
+              at={pictureKey(spec.type, culture)}
+              name={`${spec.type}, ${culture}, on its footprint`}
+              height={spec.groundHeight[shown]!}
+              side={spec.footprint[shown]!}
+            />
+          ))}
+        </div>
+      </td>
+      <td>
+        <ul className="inspect-list">
           {CULTURES.map((culture) => (
             <li key={culture} className="structures-named">
               <Picture atlas={atlas} at={pictureKey(spec.type, culture)} name={`${spec.type}, ${culture}`} />
@@ -213,6 +270,61 @@ function Picture({ atlas, at, name }: { atlas: Atlas | null; at: string; name: s
         <Cut name={name} atlas={atlas} image="/art/structures.webp" frame={frame} tall={TALL} wide={WIDE} />
       )}
     </span>
+  );
+}
+
+/**
+ * A building's picture standing on its footprint's diamonds, as the camera sees both closest in: the diamonds under it,
+ * and the square's outline drawn again over it, so its base can be seen to lie in the square or not.
+ */
+function Standing({
+  atlas,
+  at,
+  name,
+  height,
+  side,
+}: {
+  atlas: Atlas | null;
+  at: string;
+  name: string;
+  height: number;
+  side: number;
+}) {
+  const frame = atlas?.frames[at];
+  if (atlas === null || frame === undefined) return null;
+  const { diamonds, outline, picture, box } = footingOf(
+    height,
+    frame.width / frame.height,
+    frame.footX ?? 0.5,
+    side,
+  );
+  const points = (corners: readonly { x: number; y: number }[]) =>
+    corners.map((corner) => `${corner.x},${corner.y}`).join(' ');
+  const pad = 0.5;
+  return (
+    <svg
+      className="structures-footing"
+      role="img"
+      aria-label={name}
+      width={(box.width + pad * 2) * UNIT}
+      height={(box.height + pad * 2) * UNIT}
+      viewBox={`${box.x - pad} ${box.y - pad} ${box.width + pad * 2} ${box.height + pad * 2}`}
+    >
+      {diamonds.map((corners, index) => (
+        <polygon key={index} className="structures-diamond" points={points(corners)} />
+      ))}
+      <svg
+        x={picture.x}
+        y={picture.y}
+        width={picture.width}
+        height={picture.height}
+        viewBox={`${frame.x} ${frame.y} ${frame.width} ${frame.height}`}
+        preserveAspectRatio="none"
+      >
+        <image href={`/art/structures.webp?v=${atlas.version}`} width={atlas.width} height={atlas.height} />
+      </svg>
+      <polygon className="structures-outline" points={points(outline)} />
+    </svg>
   );
 }
 

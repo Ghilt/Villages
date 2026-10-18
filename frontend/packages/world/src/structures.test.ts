@@ -21,6 +21,7 @@ describe('the catalogue of structures', () => {
     expect(castle!.sightKm[1]).toBe(40);
     expect(castle!.yields).toEqual({ naturalDomain: [3, 5], wealth: [0, 2] });
     expect(castle!.groundHeight).toEqual([4, 4.5]);
+    expect(castle!.footprint).toEqual([3, 4]);
     expect(castle!.zone).toEqual({ reach: 25 });
     expect(castle!.words.islamic).toBe('kasbah');
 
@@ -49,6 +50,15 @@ describe('the catalogue of structures', () => {
     const broken = fixture.replace('"sightKm": [50]', '"sightKm": ["far"]');
     expect(() => parseStructureCatalogue(broken)).toThrow(
       'world/catalogues/structures.json: watchtower has no sightKm the page can read',
+    );
+  });
+
+  it('refuses a footprint that is not whole diamonds, one to each level', () => {
+    expect(() => parseStructureCatalogue(fixture.replace('"footprint": [2]', '"footprint": [2.5]'))).toThrow(
+      'watchtower has no footprint of whole diamonds',
+    );
+    expect(() => parseStructureCatalogue(fixture.replace('"footprint": [3, 4]', '"footprint": [3]'))).toThrow(
+      'castle has no footprint the page can read',
     );
   });
 

@@ -6,6 +6,7 @@
       "significance": [20, 24],
       "sightKm": [34, 40],
       "groundHeight": [4, 4.5],
+      "footprint": [3, 4],
       "yields": { "naturalDomain": [3, 5], "wealth": [0, 2] },
       "zone": { "reach": 25 },
       "slots": [
@@ -18,6 +19,7 @@
       "significance": [12],
       "sightKm": [50],
       "groundHeight": [3.2],
+      "footprint": [2],
       "yields": {},
       "slots": []
     }

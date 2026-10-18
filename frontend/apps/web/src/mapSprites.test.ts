@@ -15,6 +15,7 @@ const type = (name: string, groundHeight: number[]): StructureTypeSpec => ({
   significance: groundHeight.map(() => 10),
   sightKm: groundHeight.map(() => 10),
   groundHeight,
+  footprint: groundHeight.map(() => 3),
   yields: {},
   zone: null,
   slots: [],

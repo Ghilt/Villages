@@ -454,9 +454,12 @@ stage alone, with none of the debug panel in it (decision record 0079).
   the server says what is there, on ground the house has revealed. See `docs/adr/0087`.
 - The structures there can be: **`/admin/inspect-structures`**, a page of its own as the events' types have, is every type
   in `world/catalogues/structures.json` as the page reads it, a row a type - what it gives its holder a month at
-  each level, how far it sees and how significant it is, its slots and what makes each count, its zone, and
-  what each culture calls it, **with the type's pin beside its name and its picture in each culture beside that
-  culture's word**, as `world:structures` cut them; a placeholder is ringed in dashes, and a picture saved over one
+  each level, how far it sees and how significant it is, its slots and what makes each count, its zone, how tall
+  it stands on the map and its **footprint**, the side of the square of the ground's diamonds its base covers, with
+  **each culture's picture standing on its footprint** as the camera sees them closest in, the diamonds under it and
+  the square's outline dashed over it, at the level the buttons over the table choose; and what each culture calls
+  it, **with the type's pin beside its name and its picture in each culture beside that culture's word**, as
+  `world:structures` cut them; a placeholder is ringed in dashes, and a picture saved over one
   is there as soon as the dev server has cut it again. It reads the file again whenever it changes on disk; one it cannot read is said in
   place of the table, naming the type and the field. **Every number and word in a cell can be changed there**: point
   at it, type - a level at a time as `34 / 40 / 48` - and leave it or press Enter, and it is marked; the bar at the
@@ -674,8 +677,8 @@ and `-- --drop` takes them off; by hand only.
   them through the game server; only the names that differ from the file are marked. Not the world's place names,
   which are `world/names/`.
 - What a structure is: `world/catalogues/structures.json`, hand-edited, one entry a type - its words in each culture, and level
-  by level how far out it is drawn, how far it sees, its size on the map and what it yields a world month, which is
-  a real day - with its slots and its influence zone if it has one. Nothing cuts it. The game server reads it as
+  by level how far out it is drawn, how far it sees, its size on the map, the footprint its yard is laid round, and
+  what it yields a world month, which is a real day - with its slots and its influence zone if it has one. Nothing cuts it. The game server reads it as
   it starts, and will not start on one it cannot read, saying which type and which field, and takes on a change
   while it runs, as every catalogue; the page reads it through the dev server at `/catalogues/structures.json`, so
   `/admin/inspect-structures` and the game server both show a change at once. Every number in it is a placeholder. See `docs/plans/structures.md`.
