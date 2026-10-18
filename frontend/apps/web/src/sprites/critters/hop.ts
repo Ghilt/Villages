@@ -1,33 +1,68 @@
+import { WATERS } from './casts';
+import { ringAt } from './leap';
 import { CRITTERS_LOOK } from './look';
 import type { HopLook } from './look';
-import type { Animal, Cover, Pose } from './types';
+import type { Animal, Cover, Ground, Pose, Ring } from './types';
 
 /**
  * The hop: a small animal bounding a few times from one piece of cover to another near it, and gone behind it - a
- * squirrel from tree to tree in the woods, a hare out from behind a bush or a tuft on grassland. It runs on the ground,
+ * squirrel from tree to tree in the woods, a hare out from behind a bush or a tuft on grassland, a frog from one tuft of
+ * the reeds to the next - or a frog into the water beside it, leaving a ring where it went in. It runs on the ground,
  * so it is drawn under the scenery and a tree in front of it hides it, and it fades as it comes out from behind its
- * cover and as it goes behind the next, so it never appears or vanishes in the open. Part of the critters' clock,
- * `critterClock.ts`: a pure function of the draws its cell and slot give it, the same in every browser.
+ * cover and as it goes behind the next, or into the water, so it never appears or vanishes in the open. Part of the
+ * critters' clock, `critterClock.ts`: a pure function of the draws its cell and slot give it, the same in every browser.
  */
 
 const L = CRITTERS_LOOK;
+/** How long the ring spreads after a frog has gone into the water, and how wide it grows against a fish's. */
+const PLOP = L.leap.ring.seconds;
+const PLOP_WIDE = 0.6;
+
+/** Whether a hop ends in the water rather than behind a piece of cover: a frog's, into a lake or a river. */
+const intoWater = (to: Cover): boolean => WATERS.includes(to.kind);
+
+/** How long an animal is on its way: all of its hop but the ring spreading after a frog that went into the water. */
+const hoppingOf = (animal: Animal): number => animal.seconds - (intoWater(animal.to!) ? PLOP : 0);
+
+/**
+ * The place of a lake or a river nearest a piece of cover, as near and as far as said, looked for every quarter of a
+ * world unit out in eight ways round it; null with none so near, or while the ground there is not yet known.
+ */
+export function waterNear(
+  from: Cover,
+  ground: Ground,
+  [least, most]: readonly [number, number],
+): Cover | null {
+  for (let away = least; away <= most + 1e-9; away += 0.25) {
+    for (let way = 0; way < 8; way += 1) {
+      const x = from.x + Math.cos((way * Math.PI) / 4) * away;
+      const y = from.y + Math.sin((way * Math.PI) / 4) * away;
+      const kind = ground.classAt(x, y);
+      if (kind !== null && WATERS.includes(kind)) return { x, y, kind, height: 0 };
+    }
+  }
+  return null;
+}
 
 /** How many bounds it takes to cover so much ground: never fewer than two, so it can stop once between them. */
 function boundsFor(look: HopLook, away: number): number {
   return Math.max(2, Math.round(away / look.bound));
 }
 
-/** The longest any hop lasts, so the slots before the current one that may still be bounding are asked too. */
+/**
+ * The longest any hop lasts, with the ring after a frog that went into the water, so the slots before the current one
+ * that may still be bounding are asked too.
+ */
 export const HOP_LONGEST = Math.max(
   0,
   ...Object.values(L.hop).map((look) =>
-    look === undefined ? 0 : boundsFor(look, look.reach[1]) / look.boundsPerSecond + look.pause,
+    look === undefined ? 0 : boundsFor(look, look.reach[1]) / look.boundsPerSecond + look.pause + PLOP,
   ),
 );
 
 /**
  * The one animal of a hop, bounding from its cover to one of the pieces near enough that `draw` picks, given nearest
- * first; null for a kind that does not hop, or with nowhere near to go.
+ * first, or into the water a frog is given; null for a kind that does not hop, or with nowhere near to go.
  */
 export function hopper(
   kind: string,
@@ -45,7 +80,7 @@ export function hopper(
     reach: 1,
     phase: draw(8),
     to,
-    seconds: boundsFor(look, away) / look.boundsPerSecond + look.pause,
+    seconds: boundsFor(look, away) / look.boundsPerSecond + look.pause + (intoWater(to) ? PLOP : 0),
     bow: (draw(9) - 0.5) * 2,
   };
 }
@@ -61,6 +96,7 @@ const ramp = (from: number, to: number, value: number): number =>
 export function hopPose(kind: string, from: Cover, animal: Animal, flown: number, frames: number): Pose {
   const look = L.hop[kind]!;
   const to = animal.to!;
+  const hopping = hoppingOf(animal);
   const dx = to.x - from.x;
   const dy = to.y - from.y;
   const bounds = boundsFor(look, Math.hypot(dx, dy));
@@ -81,6 +117,13 @@ export function hopPose(kind: string, from: Cover, animal: Animal, flown: number
     y: from.y + dy * along + dx * side,
     height: look.high * 4 * through * (1 - through),
     frame: Math.min(frames - 1, role),
-    alpha: Math.min(ramp(0, L.hopFade, flown), ramp(animal.seconds, animal.seconds - L.hopFade, flown)),
+    alpha: Math.min(ramp(0, L.hopFade, flown), ramp(hopping, hopping - L.hopFade, flown)),
   };
+}
+
+/** The ring a frog leaves where it went into the water, `flown` seconds after it set off; none for any other hop. */
+export function hopRings(animal: Animal, flown: number): Ring[] {
+  if (animal.to === null || !intoWater(animal.to)) return [];
+  const ring = ringAt(animal.to, flown - hoppingOf(animal) + L.hopFade / 2, PLOP_WIDE);
+  return ring === null ? [] : [ring];
 }

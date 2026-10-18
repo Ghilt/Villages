@@ -156,35 +156,37 @@ stage alone, with none of the debug panel in it (decision record 0079).
   small birds burst out of a tree or a bush the scenery drew - in the woods, the scrub and the heath, and out of a
   lone bush or tree in the open - each from a little apart in it, all off in one direction like a shotgun's blast,
   curving the same way together; they climb, flap and glide away, and then hook down, a sharp turn and a drop of a
-  little over half a bird length down the screen,
-  settling, and then fade quickly, a few dropping into a tree near by instead; or a bird or two flits from one tree into another near it, as if seeking shelter, and fades into
-  its leaves. In the woods a squirrel bounds now and then from one tree to another near it, stopping once on the
-  way, and is gone behind it; on grassland a hare comes out from behind a bush or a tuft of grass, a few bounds and
-  a stop, and is gone behind another, each facing the way it goes; over a lake, a river or the shallow sea a fish
-  jumps clear and falls back, a ring spreading where it left and one where it fell; high over open ground, rock and
-  desert a hawk circles slowly, turned the way it flies, its shadow sweeping the ground below; in the ruins of the
-  towns of 1790, and nowhere else, crows burst out of the halls, towers and walls or circle two or three together over
-  them, and rats scurry from one heap of rubble to the next. Each has a soft shadow below it. The same
-  critters leave the same bush at the same moment in every browser; one first seen on its way fades up; a player who asked for less motion sees none. They are drawn from the critters' atlas (`world:critters`,
-  below). They are the **Critters** part of the Shaders section: `off`, `low` or `high` in its bar, low at every
-  load, low moving them at fifteen frames a second and high at thirty. Inside it, first what is about now, `3
-  songbirds, 1 hare`, or why there are none, `from zoom 9 in`, `off`; then **spawn** and a button a kind,
-  `songbird`, `squirrel`, `hare`, `fish`, `hawk`, `crow`, `crow-aloft` and `rat`: press one and every click on the map
-  puts one of that kind there, now, seen or not - a flock out of the tree or bush nearest the click, a squirrel or a
-  hare from the cover nearest it to more near it, a fish out of the water clicked, a hawk over the open ground clicked,
-  crows bursting out of or circling over the piece of a ruin nearest the click, a rat from it to the next - this
-  window's own and nobody
-  else's, with the log saying why when
-  nothing of the kind could come there; the cursor is a cross while one is armed, and the button again or escape
-  stops. Then three sliders: **how many**, from none to all
-  there can be, where fewer is always some of the same critters every browser has and never others; **how often, to
-  look at them**, from as often as a player sees them up to twenty times that, which keeps every critter of the
-  lower and adds more, until every cell of a wood has a flock at once - a lever for watching a behaviour, not
-  remembered, so every load is back at a player's; and **how big**, as times the sizes in
-  `apps/web/src/sprites/critters/look.ts`. They change the critters on the next frame, how many and how big are
-  remembered in the browser that moved them, and once one stops the log says them all under `critters` as `critters
-  tuned: …`, the line to hand over when a setting should become the default; `reset` puts them back.
-  Every other number of theirs is in that `look.ts`, and who lives where is `casts.ts` beside it. See
+  little over half a bird length down the screen, settling, and then fade quickly, a few dropping into a tree near by
+  instead; or a bird or two flits from one tree into another near it, as if seeking shelter, and fades into its
+  leaves. In the woods a squirrel bounds now and then from one tree to another near it, stopping once on the way, and
+  is gone behind it; on grassland a hare comes out from behind a bush or a tuft of grass, a few bounds and a stop, and
+  is gone behind another, each facing the way it goes; in the wet land a frog hops from one tuft of the reeds to the
+  next, and beside any lake or river, whatever the ground, one may hop out of the reeds or the grass into the water, a
+  ring spreading where it went in, and now and then a snake glides out of the reeds into another tuft near it, seen
+  from above and turned the way it goes; over a lake, a river or the shallow sea a fish jumps clear and falls back, a
+  ring spreading where it left and one where it fell; high over open ground, rock and desert a hawk circles slowly,
+  turned the way it flies, its shadow sweeping the ground below; in the ruins of the towns of 1790, and nowhere else,
+  crows burst out of the halls, towers and walls or circle two or three together over them, and rats scurry from one
+  heap of rubble to the next. Each has a soft shadow below it. The same critters leave the same bush at the same
+  moment in every browser; one first seen on its way fades up; a player who asked for less motion sees none. They are
+  drawn from the critters' atlas (`world:critters`, below). They are the **Critters** part of the Shaders section:
+  `off`, `low` or `high` in its bar, low at every load, low moving them at fifteen frames a second and high at thirty.
+  Inside it, first what is about now, `3 songbirds, 1 hare`, or why there are none, `from zoom 9 in`, `off`; then
+  **spawn** and a button a kind, `songbird`, `squirrel`, `hare`, `fish`, `hawk`, `crow`, `crow-aloft`, `rat`, `frog`
+  and `snake`: press one and every click on the map puts one of that kind there, now, seen or not - a flock out of the
+  tree or bush nearest the click, a squirrel or a hare from the cover nearest it to more near it, a fish out of the
+  water clicked, a hawk over the open ground clicked, crows bursting out of or circling over the piece of a ruin
+  nearest the click, a rat from it to the next, a frog from the reeds or the grass nearest the click into the water
+  beside them or to the next tuft, a snake from them to the next - this window's own and nobody else's, with the log
+  saying why when nothing of the kind could come there; the cursor is a cross while one is armed, and the button again
+  or escape stops. Then three sliders: **how many**, from none to all there can be, where fewer is always some of the
+  same critters every browser has and never others; **how often, to look at them**, from as often as a player sees
+  them up to twenty times that, which keeps every critter of the lower and adds more, until every cell of a wood has a
+  flock at once - a lever for watching a behaviour, not remembered, so every load is back at a player's; and **how
+  big**, as times the sizes in `apps/web/src/sprites/critters/look.ts`. They change the critters on the next frame,
+  how many and how big are remembered in the browser that moved them, and once one stops the log says them all under
+  `critters` as `critters tuned: …`, the line to hand over when a setting should become the default; `reset` puts them
+  back. Every other number of theirs is in that `look.ts`, and who lives where is `casts.ts` beside it. See
   `docs/adr/0099`.
 - Clouds drift over the world from zoom 7 out, every lump lit cream from the upper right and shaded violet-grey
   away from it, each cloud with its soft violet shadow down and to the left. They live in weather systems, masses
@@ -845,13 +847,13 @@ and `-- --drop` takes them off; by hand only.
   changes nothing: Adam paints the files, as `AUTHORING-THE-ART.md` says, and a tree that has cut no atlas yet says
   which tool cuts it.
 - **`/admin/inspect-renders`** is a square of every kind of land side by side, and needs nothing else running: the
-  thirty-two of `world/palette.json`, by its groups, each painted as the map paints it with the land moving on it,
-  its trees and bushes grown by the map's own scatter bending in the wind, and the critters the clock brings there;
-  and under them a square for each critter - a songbird, a squirrel, a hare, a fish, a hawk - one put in its middle
-  every few seconds. One zoom, 10, and a camera that never moves, so a look is compared across every kind at once
-  without hunting the map for it; as many squares to a row as the window is wide. The levels and the sliders of the
-  debug panel's Shaders section are the game's own, and those it remembers are as the game was left in this
-  browser. The water's own motion is the map's and the clouds the sky's, and neither is drawn there. It changes
+  thirty-two of `world/palette.json`, by its groups, each painted as the map paints it with the land moving on it, its
+  trees and bushes grown by the map's own scatter bending in the wind, and the critters the clock brings there; and
+  under them a square for each critter - a songbird, a squirrel, a hare, a fish, a hawk, a frog and a snake - one put
+  in its middle every few seconds. One zoom, 10, and a camera that never moves, so a look is compared across every
+  kind at once without hunting the map for it; as many squares to a row as the window is wide. The levels and the
+  sliders of the debug panel's Shaders section are the game's own, and those it remembers are as the game was left in
+  this browser. The water's own motion is the map's and the clouds the sky's, and neither is drawn there. It changes
   nothing. It draws the game's own layers over a world of the page's own (`apps/web/src/admin/renders/`).
 - **`/admin/inspect-architecture`** is how the world is set up, and needs nothing else running. Along the top,
   the numbers: how long a brand-new worktree takes to the game with its world borrowed, how long a master's

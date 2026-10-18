@@ -51,8 +51,11 @@ describe("the critters' clock", () => {
     expect(anHour(1, wood({}, 'boulder'), 600).size).toBe(0);
     expect(anHour(1, wood({}, 'oak', 'ocean'), 600).size).toBe(0);
     expect(anHour(1, wood({ classAt: () => null }), 600).size).toBe(0);
-    for (const land of Object.keys(CASTS))
-      expect(anHour(1, wood({}, 'oak', land), 600).size).toBeGreaterThan(0);
+    for (const [land, cast] of Object.entries(CASTS)) {
+      // Out of the first cover any of its cast comes out of, or a wood's oaks for a cast that needs none.
+      const cover = cast.flatMap((member) => member.from)[0] ?? 'oak';
+      expect(anHour(1, wood({}, cover, land), 600).size).toBeGreaterThan(0);
+    }
   });
 
   it('brings nothing where the house does not see now, nor where the scenery is not yet known', () => {

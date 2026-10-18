@@ -240,6 +240,68 @@ const rat: Frame = (at) => {
   );
 };
 
+/** A frog hopping to the right, seen from the side: sitting gathered, stretched out in the air, landing. */
+const frog: Frame = (at) => {
+  // A bright green, paler than the wet land's, so it reads against it by its colour; no picture has an outline.
+  const skin = '#8cc64a';
+  const dark = '#4d7a2a';
+  const body = [
+    { x: 62, y: 100, rx: 24, ry: 15, turn: -18 },
+    { x: 64, y: 84, rx: 30, ry: 11, turn: -14 },
+    { x: 64, y: 102, rx: 26, ry: 12, turn: 10 },
+  ][at]!;
+  const head = [
+    [84, 90],
+    [92, 74],
+    [88, 104],
+  ][at]! as [number, number];
+  const legs = [
+    ellipse(50, 104, 16, 10, dark, -20) + leg(44, 116, 66, 118, dark, 5) + leg(78, 104, 80, 118, dark, 5),
+    leg(40, 90, 18, 104, dark, 7) + leg(18, 104, 4, 98, dark, 4) + leg(88, 84, 106, 96, dark, 5),
+    leg(42, 98, 28, 108, dark, 7) + leg(28, 108, 42, 116, dark, 4) + leg(82, 106, 92, 118, dark, 5),
+  ][at]!;
+  return (
+    legs +
+    ellipse(body.x, body.y, body.rx, body.ry, skin, body.turn) +
+    ellipse(body.x + 4, body.y + 6, body.rx * 0.6, body.ry * 0.4, '#c9d48a', body.turn) +
+    circle(body.x - 6, body.y - 5, 3, dark) +
+    circle(body.x + 5, body.y - 8, 2.5, dark) +
+    ellipse(head[0], head[1], 13, 10, skin, body.turn) +
+    circle(head[0] - 1, head[1] - 9, 6, skin) +
+    circle(head[0], head[1] - 10, 3, '#1b1a10') +
+    circle(head[0] + 1, head[1] - 11, 1, '#e8eccf')
+  );
+};
+
+/**
+ * A snake seen from above, as the map is, its head to the top of the frame and its body waving behind it, the wave
+ * running down it from one frame to the next as it glides. The map turns it to the way it goes, so it is drawn facing up.
+ */
+const snake: Frame = (at) => {
+  const points = Array.from({ length: 25 }, (_, step) => {
+    const t = step / 24;
+    const wave = Math.sin(Math.PI * 2 * (1.1 * t - at / 3));
+    return { x: 64 + 14 * wave * (0.35 + 0.65 * t), y: 24 + t * 98, t };
+  });
+  const along = (colour: string, wide: number) =>
+    points
+      .slice(1)
+      .map((point, step) =>
+        leg(points[step]!.x, points[step]!.y, point.x, point.y, colour, wide * (1 - 0.75 * point.t)),
+      )
+      .join('');
+  const neck = points[0]!;
+  // Dark, with a pale collar behind its head, as a grass snake has, so it reads against the reeds by its colour.
+  return (
+    along('#2e2c1d', 17) +
+    `<path d="M ${neck.x} 8 L ${neck.x} 1" stroke="#b8402e" stroke-width="2"/>` +
+    ellipse(neck.x, 27, 10, 5, '#e3cf6a') +
+    ellipse(neck.x, 17, 9, 11, '#2e2c1d') +
+    circle(neck.x - 4, 13, 2, '#e3cf6a') +
+    circle(neck.x + 4, 13, 2, '#e3cf6a')
+  );
+};
+
 const DRAWINGS: Record<string, Frame> = {
   songbird,
   squirrel,
@@ -249,6 +311,8 @@ const DRAWINGS: Record<string, Frame> = {
   crow,
   'crow-aloft': crowAloft,
   rat,
+  frog,
+  snake,
 };
 
 /** The kinds a placeholder can be drawn for. A kind listed in `world/critters.json` and not here is drawn as a blot. */

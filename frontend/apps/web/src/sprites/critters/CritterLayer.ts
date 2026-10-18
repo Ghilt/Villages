@@ -235,13 +235,16 @@ export function createCritterLayer(
             // Seen from its start, its own fade brings it out of its cover; seen first in flight, it fades up.
             const arriving = since - event.startsAt * 1000 > 200 ? ramp(since, since + ARRIVING_MS, now) : 1;
             const foot = feet.get(event.kind) ?? { x: 0.5, y: 1 };
-            // What is on the ground faces the way it goes across the screen; the pictures face right.
-            const onGround = event.behaviour === 'hop' || event.behaviour === 'leap';
+            // What is on the ground faces the way it goes across the screen; the pictures face right. A snake is seen
+            // from above, as a soaring bird is, and turned to its heading instead.
+            const slithers = event.behaviour === 'slither';
+            const onGround = event.behaviour === 'hop' || event.behaviour === 'leap' || slithers;
             const soars = event.behaviour === 'soar';
             const heading = event.animals[0]?.heading ?? 0;
-            const facing = onGround
-              ? Math.sign(camera.tiltGround(Math.cos(heading), Math.sin(heading), layer.tilt).x) || 1
-              : 1;
+            const facing =
+              onGround && !slithers
+                ? Math.sign(camera.tiltGround(Math.cos(heading), Math.sin(heading), layer.tilt).x) || 1
+                : 1;
             for (const pose of posesOf(event, now / 1000, strip.length, size)) {
               const alpha = pose.alpha * fade * arriving;
               if (alpha <= 0) continue;
@@ -253,8 +256,8 @@ export function createCritterLayer(
               const bird = onGround
                 ? spriteAt(runners, running, ran, texture)
                 : spriteAt(sprites, flying, drawn - ran, texture);
-              // A soaring bird is seen from above and turns about its middle; the rest stand on their feet.
-              if (soars) bird.anchor.set(0.5, 0.5);
+              // A soaring bird and a snake are seen from above and turn about their middles; the rest stand on their feet.
+              if (soars || slithers) bird.anchor.set(0.5, 0.5);
               else bird.anchor.set(foot.x, foot.y);
               // Its scale set whole each frame, so a sprite turned one way keeps no sign of it the next.
               const scale = tall / texture.height;
@@ -289,8 +292,10 @@ export function createCritterLayer(
                 shadow.height = tall * 0.45;
               }
               shadow.position.set(layer.x + below.x * layer.scale, layer.y + below.y * layer.scale);
-              // Fainter the higher it is, but a soaring bird's stays, so its shadow can be seen sweeping the ground.
-              shadow.alpha = alpha * SHADOW_ALPHA * (soars ? L.soar.shadow : 1 / (1 + pose.height / 6));
+              // Fainter the higher it is, but a soaring bird's stays, so its shadow can be seen sweeping the ground; a
+              // snake lies on the ground and casts none of its own.
+              const lifted = soars ? L.soar.shadow : slithers ? 0 : 1 / (1 + pose.height / 6);
+              shadow.alpha = alpha * SHADOW_ALPHA * lifted;
               counted[event.kind] = (counted[event.kind] ?? 0) + 1;
               drawn += 1;
             }

@@ -97,3 +97,17 @@ flush out of what still stands high, in a bigger flock than the songbirds' (a ki
 first soar out of cover rather than out of a place of the cell. A hawk is still the one bird it was: the first bird of
 a soar is drawn as a lone one always was. Outside the ruins nothing changed, which was checked once by comparing over
 a million critters from the code before and after, and is held by tests that no ground's cast names a crow or a rat.
+
+## Amendment, 2026-10-18: the wet land's frogs and snakes
+
+Adam asked for snakes and frogs in the wetlands, and for frogs near any little lake. The marsh, the bog, the
+floodplain, the paddy and the swamp forest have frogs, which hop (`hop.ts`), and snakes, and the mangrove snakes
+alone. A snake moves in a fifth way, the slither (`sprites/critters/slither.ts`): out of a tuft of the reeds or the
+grass into another near it, low on the ground, its way swinging gently from side to side, drawn from above as a hawk
+is and turned to its heading, and on the ground under the scenery as a hare is. A frog beside the water is the one
+member that is not its ground's: when the cover the clock drew is one a frog comes out of, and a lake or a river lies
+within a world unit or two of it (`waterNear`, which reads the class tiles round it), a frog joins the ground's cast
+there whatever the ground, and hops into the water rather than to more cover, a ring spreading where it went in, the
+fish's ring a little smaller (`ringAt`). So a meadow by a lake has frogs on its shore, which some of what the meadow
+would have brought there gives way to, and none inland; a test holds both. The shore is looked for only from cover a
+frog comes out of, so the rest of the world's critters are as they were.

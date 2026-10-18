@@ -1,7 +1,8 @@
-import { CASTS, memberFrom, memberOf } from './casts';
-import { HOP_LONGEST, hopPose, hopper } from './hop';
+import { CASTS, FROGS, memberFrom, memberOf } from './casts';
+import { HOP_LONGEST, hopPose, hopRings, hopper, waterNear } from './hop';
 import { LEAP_LONGEST, leapPose, leapRings, leaper } from './leap';
 import { CRITTERS_LOOK } from './look';
+import { SLITHER_LONGEST, slitherPose, slitherer } from './slither';
 import { SOAR_LONGEST, soarPose, soarersOf } from './soar';
 import type { Animal, Cover, CritterEvent, Ground, Pose, Ring } from './types';
 
@@ -13,8 +14,9 @@ export type { Animal, Cover, CritterEvent, Ground, Pose, Ring } from './types';
  * sky. The ground is cut into cells and the clock into slots; a hash of a cell and a slot says whether anything comes
  * there then, out of which piece of the scenery standing in the cell, which of that ground's cast, when in the slot,
  * and everything about how it goes: a flock bursting out of cover, here, a small animal hopping to the next piece of
- * cover, `hop.ts`, a fish jumping out of the water, `leap.ts`, or a hawk circling over open ground, `soar.ts`, the
- * last two out of no scenery but the water or the ground at a place of the cell drawn for them. After that it is a function of the seconds since it began. See
+ * cover, `hop.ts`, a snake gliding to the next tuft, `slither.ts`, a fish jumping out of the water, `leap.ts`, or a hawk
+ * circling over open ground, `soar.ts`, the last two out of no scenery but the water or the ground at a place of the
+ * cell drawn for them. Beside any lake or river a frog may come out of the reeds or the grass and hop into it. After that it is a function of the seconds since it began. See
  * docs/plans/living-world.md. A piece of the ruins of a town of 1790 brings out the ruins' own cast, whatever the
  * ground it stands on: crows bursting out of it or circling over it, a rat scurrying from it (`RUINS_CAST`).
  *
@@ -61,6 +63,7 @@ const LONGEST = Math.max(
   HOP_LONGEST,
   LEAP_LONGEST,
   SOAR_LONGEST,
+  SLITHER_LONGEST,
 );
 
 /**
@@ -115,7 +118,9 @@ export function eventIn(
   if (cover === null || cover.length === 0) return null;
   const sorted = [...cover].sort((one, other) => one.y - other.y || one.x - other.x);
   const from = sorted[Math.floor(critterHash(cellX, cellY, slot, 1) * sorted.length)]!;
-  const member = memberFrom(from.kind, ground.classAt(from.x, from.y), critterHash(cellX, cellY, slot, 2));
+  const shore = L.hop.frog?.water;
+  const water = shore !== undefined && FROGS.from.includes(from.kind) ? waterNear(from, ground, shore) : null;
+  const member = memberFrom(from.kind, ground.classAt(from.x, from.y), draw(2), water !== null);
   if (member === null || !member.from.includes(from.kind) || !ground.sees(from.x, from.y)) return null;
   if (member.behaviour === 'soar') {
     // Crows circling over the piece of the ruins they came to, a few together.
@@ -128,13 +133,15 @@ export function eventIn(
       animals: soarersOf(member.kind, draw),
     };
   }
-  if (member.behaviour === 'hop') {
-    // One animal bounding to cover near by; with none near enough, nothing comes.
-    const near = coverNear(from, member.from, ground, L.hop[member.kind]?.reach ?? [0, 0]);
+  if (member.behaviour === 'hop' || member.behaviour === 'slither') {
+    // One animal bounding or gliding to cover near by, or a frog into the water beside it; with none near, nothing comes.
+    const hops = member.behaviour === 'hop';
+    const reach = hops ? (L.hop[member.kind]?.reach ?? [0, 0]) : L.slither.reach;
+    const near = water !== null && member === FROGS ? [water] : coverNear(from, member.from, ground, reach);
     if (near === null) return null;
-    const animal = hopper(member.kind, from, near, draw);
+    const animal = hops ? hopper(member.kind, from, near, draw) : slitherer(from, near, draw);
     if (animal === null) return null;
-    return { key, kind: member.kind, behaviour: 'hop', startsAt, from, animals: [animal] };
+    return { key, kind: member.kind, behaviour: member.behaviour, startsAt, from, animals: [animal] };
   }
   const near = coverNear(from, member.from, ground, F.shelter);
   if (near === null) return null;
@@ -247,8 +254,9 @@ export function posesOf(event: CritterEvent, seconds: number, frames: number, si
       poses.push(leapPose(event.from, bird, flown, frames));
       continue;
     }
-    if (event.behaviour === 'soar') {
-      poses.push(soarPose(event.from, bird, flown, frames));
+    if (event.behaviour === 'soar' || event.behaviour === 'slither') {
+      const pose = event.behaviour === 'soar' ? soarPose : slitherPose;
+      poses.push(pose(event.from, bird, flown, frames));
       continue;
     }
     const beat = Math.floor((flown + bird.phase) * F.flapsPerSecond);
@@ -280,12 +288,13 @@ export function posesOf(event: CritterEvent, seconds: number, frames: number, si
   return poses;
 }
 
-/** The rings on the water a critter leaves at this moment: a leaping fish's, and nothing of any other. */
+/** The rings on the water a critter leaves at this moment: a leaping fish's, a frog's gone in, and no other's. */
 export function ringsOf(event: CritterEvent, seconds: number): Ring[] {
-  if (event.behaviour !== 'leap') return [];
-  return event.animals.flatMap((animal) =>
-    leapRings(event.from, animal, seconds - event.startsAt - animal.delay),
-  );
+  if (event.behaviour !== 'leap' && event.behaviour !== 'hop') return [];
+  return event.animals.flatMap((animal) => {
+    const flown = seconds - event.startsAt - animal.delay;
+    return event.behaviour === 'leap' ? leapRings(event.from, animal, flown) : hopRings(animal, flown);
+  });
 }
 
 /**

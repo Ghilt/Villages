@@ -70,23 +70,23 @@ export function leapPose(from: Cover, animal: Animal, flown: number, frames: num
 
 /** The rings on the water of a leap, `flown` seconds after the fish left it: one where it left, one where it fell. */
 export function leapRings(from: Cover, animal: Animal, flown: number): Ring[] {
-  const R = LP.ring;
   const landing = landingOf(from, animal);
-  const rings: Ring[] = [];
-  for (const [at, born] of [
-    [from, 0],
-    [landing, airOf(animal)],
-  ] as const) {
-    const age = flown - born;
-    if (age <= 0 || age >= R.seconds) continue;
-    const k = age / R.seconds;
-    rings.push({
-      x: at.x,
-      y: at.y,
-      radius: R.from + (R.to - R.from) * (1 - (1 - k) ** 2),
-      // Bright as it is made, within a moment, and fading as it spreads until it is gone.
-      alpha: R.alpha * (1 - k) ** 1.5 * ramp(0, 0.08, age),
-    });
-  }
-  return rings;
+  return [ringAt(from, flown), ringAt(landing, flown - airOf(animal))].filter((ring) => ring !== null);
+}
+
+/**
+ * A ring spreading on the water at a place, `age` seconds after something went into it or came out, as wide as the
+ * share of a fish's it is; null before it is made and once it is gone. A frog hopping into the water leaves one too.
+ */
+export function ringAt(at: { x: number; y: number }, age: number, wide = 1): Ring | null {
+  const R = LP.ring;
+  if (age <= 0 || age >= R.seconds) return null;
+  const k = age / R.seconds;
+  return {
+    x: at.x,
+    y: at.y,
+    radius: (R.from + (R.to - R.from) * (1 - (1 - k) ** 2)) * wide,
+    // Bright as it is made, within a moment, and fading as it spreads until it is gone.
+    alpha: R.alpha * (1 - k) ** 1.5 * ramp(0, 0.08, age),
+  };
 }

@@ -8,6 +8,8 @@
     { "name": "hawk", "frames": 2 },
     { "name": "crow", "frames": 3 },
     { "name": "crow-aloft", "frames": 2 },
-    { "name": "rat", "frames": 3 }
+    { "name": "rat", "frames": 3 },
+    { "name": "frog", "frames": 3 },
+    { "name": "snake", "frames": 3 }
   ]
 }

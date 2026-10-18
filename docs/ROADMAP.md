@@ -160,7 +160,11 @@ planned and not started.
   built and verified, with an inspect page of a square of every kind of land and every critter,
   `/admin/inspect-renders`, asked for by Adam that day to verify them on, step 9, wet land, and step 10, ice, salt and
   sand, with which every kind of land has its motion or stands still on purpose; all of them are verified and on
-  main. Asked for by Adam on 2026-10-16.
+  main. Adam's notes on them of 2026-10-18 - no stars on the ice but swirls of snow, the water's light slower, the mist
+  in streaks along the screen, the sand in dunes standing up - and his second of that day - the dunes apart, bigger
+  and more curved, the sand streaming along the screen, the little waves following the shore, ferns under the
+  forests' trees, and frogs and snakes in the wet land, a frog by any water - are built. Asked for by Adam on
+  2026-10-16.
 - **Ruined cities**: every town of 1790 a ruin on the map at the world's start, the bigger the town the more ground
   its ruins cover - ruin pieces in each place's culture laid out by the browser as a ruined city, the same for every
   player, sent as the scenery is, only near revealed ground, with crows and rats in them. The ground and the roads

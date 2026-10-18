@@ -39,6 +39,8 @@ export const CRITTERS_LOOK = {
     crow: { size: 0.7, together: [4, 9] },
     'crow-aloft': { size: 0.9, together: [2, 3] },
     rat: { size: 0.35 },
+    frog: { size: 0.5 },
+    snake: { size: 1.1 },
   } as Record<string, KindLook | undefined>,
   /**
    * A flock bursting out of cover together, fanning out, climbing, flapping and gliding away, fading as it goes; or a
@@ -133,6 +135,20 @@ export const CRITTERS_LOOK = {
       pause: 0.35,
       frames: { gathered: 1, air: 0, landing: 2, still: 1 },
     },
+    /**
+     * A frog of the wet land: short low hops from one tuft to the next, sitting a long while between them; and beside
+     * any water, a lake's or a river's, a few hops into it, a ring spreading where it went in. How near and how far the
+     * water may be, in world units, for a frog to hop into it.
+     */
+    frog: {
+      reach: [1, 3],
+      bound: 0.45,
+      high: 0.22,
+      boundsPerSecond: 2.2,
+      pause: 1.4,
+      frames: { gathered: 0, air: 1, landing: 2, still: 0 },
+      water: [0.75, 1.75],
+    },
   } as Record<string, HopLook | undefined>,
   /** How long a hopping animal takes to come out from behind its cover, and to go behind the next. */
   hopFade: 0.25,
@@ -152,6 +168,20 @@ export const CRITTERS_LOOK = {
     splash: 0.12,
     /** A ring on the water: how wide it starts and ends, in world units, how long it spreads, and how bright at first. */
     ring: { from: 0.08, to: 0.7, seconds: 1.4, alpha: 0.7 },
+  },
+  /**
+   * A snake gliding out of a tuft of the wet land's reeds or grass into another near it, low on the ground and seen from
+   * above, as the map is, its body waving as it goes: how near and how far the tuft it goes to may be, in world units;
+   * how fast it glides, in world units a second; how far its way swings to either side and how many times a second;
+   * how many of its frames go by a second; and how long it takes to come out of its cover and to go into the next.
+   */
+  slither: {
+    reach: [2, 5],
+    speed: 0.7,
+    sway: 0.05,
+    swaysPerSecond: 0.9,
+    wavesPerSecond: 4,
+    fade: 0.45,
   },
   /**
    * A bird circling slowly high over open ground, a hawk, its shadow sweeping the ground below it and away from the
@@ -195,4 +225,6 @@ export interface HopLook {
   boundsPerSecond: number;
   pause: number;
   frames: { gathered: number; air: number; landing: number; still: number };
+  /** How near and how far the water may be for it to hop into: a frog's, and no other's. */
+  water?: readonly [number, number];
 }

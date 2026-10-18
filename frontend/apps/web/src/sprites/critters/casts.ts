@@ -11,9 +11,9 @@ import type { RuinPieceName } from '@villages/world';
 
 /**
  * How a critter moves: a flock bursting out of cover, a small animal bounding from one piece of cover to another, a
- * fish jumping out of the water, or a bird circling high over open ground.
+ * fish jumping out of the water, a bird circling high over open ground, or a snake gliding through the reeds.
  */
-export type Behaviour = 'flush' | 'hop' | 'leap' | 'soar';
+export type Behaviour = 'flush' | 'hop' | 'leap' | 'soar' | 'slither';
 
 export interface CastMember {
   kind: string;
@@ -66,6 +66,28 @@ const FISH: CastMember = { kind: 'fish', behaviour: 'leap', weight: 1, from: [] 
 /** A hawk, circling high and slow over open ground: rare, and long in sight. */
 const HAWKS: CastMember = { kind: 'hawk', behaviour: 'soar', weight: 0.12, from: [] };
 
+/**
+ * A frog, out of the reeds or the grass of the wet land, hopping to the next tuft; and by any water, a lake's or a
+ * river's, out of whatever of these stands beside it, on any ground, hopping into it: see `memberFrom`.
+ */
+export const FROGS: CastMember = {
+  kind: 'frog',
+  behaviour: 'hop',
+  weight: 1,
+  from: ['reed', 'grass', 'fern', 'heather'],
+};
+
+/** A snake, gliding out of the reeds or the grass of the wet land into another tuft near by: rarer than the frogs. */
+const SNAKES: CastMember = {
+  kind: 'snake',
+  behaviour: 'slither',
+  weight: 0.35,
+  from: ['reed', 'grass', 'heather', 'fern', 'mangrove'],
+};
+
+/** The waters a frog hops into, whatever the ground beside them. */
+export const WATERS: readonly string[] = ['lake', 'river'];
+
 export const CASTS: Readonly<Record<string, readonly CastMember[]>> = {
   lake: [FISH],
   river: [FISH],
@@ -77,7 +99,12 @@ export const CASTS: Readonly<Record<string, readonly CastMember[]>> = {
   'mixed-forest': [SONGBIRDS, SQUIRRELS],
   rainforest: [SONGBIRDS, SQUIRRELS],
   'dry-forest': [SONGBIRDS, SQUIRRELS],
-  'swamp-forest': [SONGBIRDS],
+  'swamp-forest': [SONGBIRDS, FROGS, SNAKES],
+  mangrove: [SONGBIRDS, SNAKES],
+  marsh: [FROGS, SNAKES],
+  bog: [SONGBIRDS, FROGS, SNAKES],
+  floodplain: [HARES, FROGS, SNAKES],
+  paddy: [FROGS, SNAKES],
   scrub: [SONGBIRDS],
   heath: [SONGBIRDS],
   'farmland-with-woods': [SONGBIRDS],
@@ -132,15 +159,26 @@ export const isRuin = (kind: string): boolean => kind.startsWith('ruin:');
 /**
  * The member a piece of cover brings out that a draw from nought to one picks: out of a piece of the ruins, one of the
  * ruins' cast that comes out of that piece, by weight; out of anything else, one of the cast of the ground it stands on,
- * by weight, or null for ground with no cast or none known yet.
+ * by weight, or null for ground with no cast or none known yet. Beside the water, `byWater`, a frog may come out of
+ * any cover it lives in too, whatever the ground's own cast.
  */
-export function memberFrom(cover: string, land: string | null, draw: number): CastMember | null {
+export function memberFrom(
+  cover: string,
+  land: string | null,
+  draw: number,
+  byWater = false,
+): CastMember | null {
   if (isRuin(cover))
     return memberOf(
       RUINS_CAST.filter((member) => member.from.includes(cover)),
       draw,
     );
-  return memberOf(land === null ? undefined : CASTS[land], draw);
+  if (land === null) return null;
+  const cast = CASTS[land];
+  if (byWater && FROGS.from.includes(cover) && !cast?.includes(FROGS)) {
+    return memberOf([...(cast ?? []), FROGS], draw);
+  }
+  return memberOf(cast, draw);
 }
 
 /** The member of a cast a draw from nought to one picks, by weight, or null for ground with no cast. */
