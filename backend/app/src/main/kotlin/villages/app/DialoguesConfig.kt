@@ -2,6 +2,8 @@ package villages.app
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import villages.gateway.DialoguesMechanic
+import villages.gateway.GatewayMechanic
 import villages.application.BrokenRequirements
 import villages.application.DialogueService
 import villages.application.Faults
@@ -49,4 +51,9 @@ class DialoguesConfig {
     /** Every dialogue each house was offered, and how far each has got, folded from the same feed. See 0071. */
     @Bean(initMethod = "start", destroyMethod = "close")
     fun dialogueRows(world: EventWorld): DialoguesProjection = DialoguesProjection(world.feed)
+
+    /** The dialogues' place in the gateway: their part, and the lever that offers one. See decision record 0071. */
+    @Bean
+    fun dialoguesInTheGateway(dialogues: DialogueService, dialogueRows: DialoguesProjection): GatewayMechanic =
+        DialoguesMechanic(dialogues, dialogueRows)
 }

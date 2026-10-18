@@ -2,6 +2,8 @@ package villages.app
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import villages.gateway.GatewayMechanic
+import villages.gateway.QuestsMechanic
 import villages.application.FreshIds
 import villages.application.Islands
 import villages.application.QuestObjectives
@@ -49,4 +51,8 @@ class QuestsConfig {
     /** Every quest each house was offered, and what it recorded of each, folded from the same feed. See 0096. */
     @Bean(initMethod = "start", destroyMethod = "close")
     fun questRows(world: EventWorld): QuestsProjection = QuestsProjection(world.feed)
+
+    /** The quests' place in the gateway: their part, and the lever that offers one. See decision record 0096. */
+    @Bean
+    fun questsInTheGateway(quests: QuestService, questRows: QuestsProjection): GatewayMechanic = QuestsMechanic(quests, questRows)
 }

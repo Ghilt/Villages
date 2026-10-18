@@ -17,11 +17,13 @@ import java.util.UUID
 /**
  * A house's quests: they reach its player wherever they are looking, as its dialogues do, because what a house set
  * out to do is its own and needs no cell; and meeting an objective or collecting a reward is the player's own
- * command. Each window is sent what the walk draws of them, and nothing behind a question mark. Offering one is a
- * lever, and the instruments'. See decision records 0075 and 0096.
+ * command. Each window is sent what the walk draws of them, and nothing behind a question mark. Offering one is
+ * Adam's lever, registered here and refused with the rest of the instruments when they are closed (0076). See decision
+ * records 0075 and 0096.
  */
 internal class QuestsPart(
     private val core: Core,
+    private val open: Boolean,
     private val quests: QuestService,
     private val rows: QuestsByHouse,
 ) : Part {
@@ -34,6 +36,7 @@ internal class QuestsPart(
     }
 
     override fun register(commands: Commands, frames: Frames) {
+        questLevers(commands, open, quests)
         // A move in a quest continues the story the offer began, as a step continues its dialogue's, so the tick, what
         // it costs and the move on wear the offer's correlation. The server decides this, not the client.
         commands.on<MeetObjectivePayload> { asking, payload ->
@@ -69,4 +72,9 @@ internal class QuestsPart(
     override fun close() {
         changed.close()
     }
+}
+
+/** The quests' place in the gateway: told after what a house was told, and before what it is asked. */
+class QuestsMechanic(private val quests: QuestService, private val rows: QuestsByHouse) : GatewayMechanic(greeting = 700) {
+    override fun part(made: Made): Part = QuestsPart(made.core, made.open, quests, rows)
 }

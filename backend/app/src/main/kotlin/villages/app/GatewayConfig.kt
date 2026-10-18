@@ -6,11 +6,9 @@ import org.springframework.context.annotation.Configuration
 import villages.application.AnonymousTokens
 import villages.application.Antarctica
 import villages.application.Arrival
-import villages.application.DialogueService
 import villages.application.Faults
 import villages.application.FoundHouseService
 import villages.application.KeyFigureService
-import villages.application.QuestService
 import villages.application.ResourceService
 import villages.application.ScheduledLater
 import villages.application.Stands
@@ -26,13 +24,12 @@ import villages.application.fate.RollService
 import villages.application.fate.WaterAt
 import villages.application.Shelf
 import villages.gateway.Gateway
+import villages.gateway.GatewayMechanic
 import villages.gateway.Mechanics
 import villages.occurrent.EventWorld
 import villages.projections.CharactersProjection
 import villages.projections.ChoicesProjection
-import villages.projections.DialoguesProjection
 import villages.projections.HousesProjection
-import villages.projections.QuestsProjection
 import villages.projections.RecentEventsProjection
 import villages.projections.SightProjection
 import villages.projections.StructuresProjection
@@ -65,10 +62,6 @@ class GatewayConfig {
         characters: CharactersProjection,
         sights: SightProjection,
         visions: VisionService,
-        dialogues: DialogueService,
-        dialogueRows: DialoguesProjection,
-        quests: QuestService,
-        questRows: QuestsProjection,
         stands: Stands,
         ground: GroundMaps,
         placeNames: PlaceNamesByMaster,
@@ -80,6 +73,7 @@ class GatewayConfig {
         structuresOnTheMap: StructuresProjection,
         shelf: Shelf,
         saves: WorldSaves,
+        own: List<GatewayMechanic>,
         @Value("\${villages.instruments:true}") instruments: Boolean,
     ): Gateway = Gateway(
         tokens = AnonymousTokens,
@@ -105,10 +99,6 @@ class GatewayConfig {
             figures = characters,
             sights = sights,
             visions = visions,
-            dialogues = dialogues,
-            dialogueRows = dialogueRows,
-            quests = quests,
-            questRows = questRows,
             stands = stands,
             waters = WaterAt(ground, placeNames),
             structures = structures,
@@ -124,5 +114,6 @@ class GatewayConfig {
         ),
         later = gatewayLater,
         sendOn = gatewaySending,
+        own = own,
     )
 }

@@ -56,14 +56,14 @@ class Gateway(
     private val onTheMap: CharactersByCell,
     /** The structures on the map, which a cell's snapshot carries beside the houses and the people. */
     private val structures: StructuresByCell,
-    /** What every part is made from, a mechanic's ports apiece: see [Mechanics]. */
-    mechanics: Mechanics,
+    /** What the parts not yet a mechanic's own are made from: see [Mechanics]. */ mechanics: Mechanics,
     private val later: Later,
     /**
      * What a connection's frames are sent on, and its cells answered again on: the thread that queued them, unless
      * the gateway is given threads of its own, as the app gives it. See decision record 0077.
      */
     private val sendOn: Executor = Executor { it.run() },
+    /** The mechanics that bring their own part, each from its configuration: [GatewayMechanic]. */ own: List<GatewayMechanic> = emptyList(),
 ) : AutoCloseable {
     /** Whether Adam's instruments are open, which says whether hello says where the world is kept. */
     private val instrumentsOpen = mechanics.instrumentsOpen
@@ -105,7 +105,7 @@ class Gateway(
     }
 
     /** A part for each mechanic, made after the index and the sessions: see [partsOf] and decision record 0075. */
-    private val parts: List<Part> = partsOf(core, mechanics, houses, onTheMap, structures, world)
+    private val parts: List<Part> = partsOf(core, mechanics, own, houses, onTheMap, structures, world)
 
     /** Every command the gateway takes, and every frame a part answers, each with the one part that handles it. */
     private val commands = Commands()

@@ -86,6 +86,14 @@ read model nothing until somebody decides it should hear it. That decision is ma
 mechanic, rather than prompted by a line the compiler demands everywhere. The founding, in no family, is named by the
 folds that hear it. `docs/plans/mechanic-modules.md`, step 1.
 
+*Amended 2026-10-18, a mechanic brings its own part:* a field of `Mechanics` and a line in `partsOf` was still an edit
+of the gateway's own wiring for every mechanic, and a parameter of `GatewayConfig` besides. Now a mechanic hands the
+gateway a `GatewayMechanic` from its own configuration - its ports, and the part made from them once there is a core -
+and says its part's place in the order a page is told things by a number; the gateway makes the parts in that order and
+refuses two at one number. Its levers are registered by its part, through the shared `lever`, rather than by the
+instruments. The quests and the dialogues are the first; the rest follow in the next step of
+`docs/plans/mechanic-modules.md`.
+
 ## Consequences
 
 - A sixth mechanic adds a family, a read model and a view file, and edits the folds that care about it and no

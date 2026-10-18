@@ -9,6 +9,7 @@ import villages.domain.HouseId
 import villages.domain.LineId
 import villages.domain.PlayerId
 import villages.protocol.CompleteDialogueStepPayload
+import villages.protocol.OfferDialoguePayload
 import villages.protocol.YourDialogues
 import java.util.UUID
 
@@ -16,10 +17,12 @@ import java.util.UUID
  * A house's dialogues: they reach its player wherever they are looking, like its key figures, because what a
  * house was offered is its own and needs no cell; and a step through one is the player's own command. Each
  * window is sent what it may know of them - what has been said and the stretch ahead, and never a requirement.
- * Offering one is a lever, and the instruments'. See decision records 0071 and 0075.
+ * Offering one is Adam's lever, registered here and refused with the rest of the instruments when they are closed
+ * (0076). See decision records 0071 and 0075.
  */
 internal class DialoguesPart(
     private val core: Core,
+    private val open: Boolean,
     private val dialogues: DialogueService,
     private val rows: DialoguesByHouse,
 ) : Part {
@@ -32,6 +35,11 @@ internal class DialoguesPart(
     }
 
     override fun register(commands: Commands, frames: Frames) {
+        // A sample by its name. A name that is not a sample is refused as malformed, and a house with no key
+        // figure to speak it as `noSuchKeyFigure`. See decision record 0071.
+        commands.lever<OfferDialoguePayload>(open) { asking, payload ->
+            dialogues.offer(player = asking.who, name = payload.sample, provenance = asking.startingAStory)
+        }
         commands.on<CompleteDialogueStepPayload> { asking, payload ->
             val dialogue = DialogueId(asUuid(payload.dialogueId, "a dialogue id"))
             dialogues.step(
@@ -57,4 +65,9 @@ internal class DialoguesPart(
     override fun close() {
         changed.close()
     }
+}
+
+/** The dialogues' place in the gateway: told after what a house sees, and before what it set out to do. */
+class DialoguesMechanic(private val dialogues: DialogueService, private val rows: DialoguesByHouse) : GatewayMechanic(greeting = 600) {
+    override fun part(made: Made): Part = DialoguesPart(made.core, made.open, dialogues, rows)
 }

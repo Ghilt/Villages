@@ -231,17 +231,6 @@ internal class Rig(
                 world = worldClock,
                 ids = { UUID.fromString("e1000000-0000-4000-8000-%012x".format(++minted)) },
             ),
-            dialogues = DialogueService(world, characters, houses, clock = { noon }, world = worldClock) { mapOf("letter" to RIG_LETTER) },
-            dialogueRows = dialogueRows,
-            quests = QuestService(
-                world,
-                clock = { noon },
-                world = worldClock,
-                calendar = thirtyDayMonths,
-                ids = { UUID.fromString("f1000000-0000-4000-8000-%012x".format(++minted)) },
-                quests = questRows,
-            ) { Catalogues(RIG_CATALOGUE, RIG_BALANCE, RIG_FATE, RIG_NAMES, ABBOT_DIALOGUES + ("letter" to RIG_LETTER), mapOf("abbot" to ABBOT)) },
-            questRows = questRows,
             stands = Stands { master, layer, x, y ->
                 val tile = y * STAND_TILES + x
                 when {
@@ -262,6 +251,20 @@ internal class Rig(
         ),
         later = later,
         sendOn = sendOn,
+        own = listOf(
+            DialoguesMechanic(DialogueService(world, characters, houses, clock = { noon }, world = worldClock) { mapOf("letter" to RIG_LETTER) }, dialogueRows),
+            QuestsMechanic(
+                QuestService(
+                    world,
+                    clock = { noon },
+                    world = worldClock,
+                    calendar = thirtyDayMonths,
+                    ids = { UUID.fromString("f1000000-0000-4000-8000-%012x".format(++minted)) },
+                    quests = questRows,
+                ) { Catalogues(RIG_CATALOGUE, RIG_BALANCE, RIG_FATE, RIG_NAMES, ABBOT_DIALOGUES + ("letter" to RIG_LETTER), mapOf("abbot" to ABBOT)) },
+                questRows,
+            ),
+        ),
     )
 
     /** The choice a player is holding, as the gateway would send it. */

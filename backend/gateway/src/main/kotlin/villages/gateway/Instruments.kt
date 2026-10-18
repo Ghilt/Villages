@@ -2,11 +2,9 @@ package villages.gateway
 
 import villages.application.Antarctica
 import villages.application.StructureService
-import villages.application.DialogueService
 import villages.application.EventFeed
 import villages.application.FoundHouseService
 import villages.application.KeyFigureService
-import villages.application.QuestService
 import villages.application.RecentEvents
 import villages.application.ResourceService
 import villages.application.Start
@@ -36,7 +34,6 @@ import villages.protocol.GrantResourcePayload
 import villages.protocol.KillCharacterPayload
 import villages.protocol.MoveCharacterPayload
 import villages.protocol.NextRarityPayload
-import villages.protocol.OfferDialoguePayload
 import villages.protocol.PledgeResourcePayload
 import villages.protocol.ReleasePledgePayload
 import villages.protocol.ConsideredView
@@ -62,7 +59,7 @@ const val MOST_RECENT_EVENTS = 100
 internal class InstrumentsClosed : RuntimeException("the instruments are closed on this server")
 
 /**
- * Adam's instruments, as one part of the gateway: the fifteen levers of the debug panel and the event page, which
+ * Adam's instruments, as one part of the gateway: the levers of the debug panel that are not yet a mechanic's own, and the event page, which
  * stand in for what the world will one day do, and the four frames that look at the world rather than play in
  * it - watching every event as it is stored, seeing everything whatever its significance, lifting the fog, and
  * emptying the world.
@@ -83,12 +80,10 @@ internal class Instruments(
     private val resources: ResourceService,
     private val keyFigures: KeyFigureService,
     private val visions: VisionService,
-    private val dialogues: DialogueService,
     private val rolls: RollService,
     private val kept: WorldKept,
     private val structures: StructureService,
     private val antarctica: Antarctica,
-    private val quests: QuestService,
 ) : Part {
     private val watching = ConcurrentHashMap.newKeySet<Gateway.Connection>()
 
@@ -178,7 +173,6 @@ internal class Instruments(
         }
         keyFigureLevers(commands)
         structureLevers(commands, open, structures, antarctica)
-        questLevers(commands, open, quests)
         // A place off the world is refused by the place itself, as `invalidLocation`.
         lever<GiveVisionPayload>(commands) { asking, payload ->
             visions.give(
@@ -193,11 +187,6 @@ internal class Instruments(
                 visionId = VisionId(asUuid(payload.visionId, "a vision id")),
                 provenance = asking.startingAStory,
             )
-        }
-        // A sample by its name. A name that is not a sample is refused as malformed, and a house with no key
-        // figure to speak it as `noSuchKeyFigure`. See decision record 0071.
-        lever<OfferDialoguePayload>(commands) { asking, payload ->
-            dialogues.offer(player = asking.who, name = payload.sample, provenance = asking.startingAStory)
         }
         // The world's luck, for the next roll this player makes: a rarity, or none for the throw again. See 0083.
         lever<NextRarityPayload>(commands) { asking, payload -> rolls.forceNext(asking.who, payload.rarity?.let(::asRarity)) }
