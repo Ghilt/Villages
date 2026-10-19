@@ -12,12 +12,11 @@ import { WET_LOOK } from './wetLook';
 
 /**
  * A kind of land's land motion, how it moves in the wind and the light, as the folds of the Land part name them: the
- * grass swaying, the crops in their rows, the heath, the scrub and the tundra stirring, the wet land's water, reeds and
- * mist, and the ice's, the salt's and the sand's glints and drift. Or nothing of the land layer's, on purpose: the water,
- * which the water shader moves; a wood, whose life is its trees bending, the Trees part's; and bare stone, which
- * stands still.
+ * grass swaying, on the grassland and under the woods' trees, the crops in their rows, the heath, the scrub and the
+ * tundra stirring, the wet land's water, reeds and mist, and the ice's, the salt's and the sand's glints and drift. Or
+ * nothing of the land layer's, on purpose: the water, which the water shader moves, and bare stone, which stands still.
  */
-export type LandMotion = 'grass' | 'crops' | 'heath' | 'wet' | 'ice-salt-sand' | 'water' | 'trees' | 'still';
+export type LandMotion = 'grass' | 'crops' | 'heath' | 'wet' | 'ice-salt-sand' | 'water' | 'still';
 
 export const LAND_LOOK = {
   /**
@@ -32,13 +31,13 @@ export const LAND_LOOK = {
     ice: 'ice-salt-sand',
     'polar-desert': 'ice-salt-sand',
     tundra: 'heath',
-    taiga: 'trees',
-    'taiga-open': 'trees',
-    'conifer-forest': 'trees',
-    'broadleaf-forest': 'trees',
-    'mixed-forest': 'trees',
-    rainforest: 'trees',
-    'dry-forest': 'trees',
+    taiga: 'grass',
+    'taiga-open': 'grass',
+    'conifer-forest': 'grass',
+    'broadleaf-forest': 'grass',
+    'mixed-forest': 'grass',
+    rainforest: 'grass',
+    'dry-forest': 'grass',
     // Their trees bend as every wood's do, with pools between their roots.
     mangrove: 'wet',
     'swamp-forest': 'wet',
@@ -71,8 +70,45 @@ export const LAND_LOOK = {
     low: { resolution: 0.5, framesPerSecond: 15 },
     high: { resolution: 1, framesPerSecond: 30 },
   },
-  /** The grass, on steppe, meadow, savanna and alpine meadow: its gusts, its patches and its tufts. */
+  /**
+   * The grass, on steppe, meadow, savanna and alpine meadow, and under the woods' trees: its gusts, its patches, its
+   * tufts, and each kind's own look.
+   */
   grass: {
+    /**
+     * How much of the woods' undergrowth each kind's grass is, from nought, the grassland's own, to one, all of it:
+     * under the woods' trees their ground looked too bare, Adam's word of 2026-10-19, and the steppe's tufts would
+     * look good there. The conifers' floor of needles and moss is the sparest; the open taiga and the dry forest,
+     * grassy under their trees, are half way. A kind of land whose motion is the grass and is not here fails a test.
+     */
+    woods: {
+      steppe: 0,
+      meadow: 0,
+      savanna: 0,
+      'alpine-meadow': 0,
+      taiga: 1,
+      'taiga-open': 0.6,
+      'conifer-forest': 1,
+      'broadleaf-forest': 0.85,
+      'mixed-forest': 0.9,
+      rainforest: 0.85,
+      'dry-forest': 0.45,
+    },
+    /**
+     * The woods' undergrowth at its fullest, which a kind's grass is as much of as `woods` says, and the grassland's
+     * own the rest: this share of the tufts the grassland's density grows; a deeper green at the root and green at
+     * the tip rather than straw; this share of the patches' tall grass, hardly any; this much low brush besides the
+     * patches'; and the trees taking most of the gust, so this share of its sheen and of its bend.
+     */
+    undergrowth: {
+      density: 0.4,
+      root: [0.13, 0.2, 0.08],
+      tip: [0.5, 0.6, 0.3],
+      tall: 0.15,
+      brush: 0.2,
+      sheen: 0.3,
+      bend: 0.5,
+    },
     /** The gusts are the world's one wind's, `../wind.ts`, blowing the sea's way; the grass gives them its colour. */
     gusts: {
       /** The paler side a bent field shows, and how much of it a full gust shows. */
@@ -101,7 +137,7 @@ export const LAND_LOOK = {
       sway: 0.12,
       /** How fast the gentle sway goes, in turns a second. */
       swaySpeed: 0.6,
-      /** The shaded root and the lit tip of a stroke, and how strong each is. */
+      /** The shaded root and the lit tip of a stroke on the grassland, and how strong each is. */
       root: [0.24, 0.32, 0.12],
       rootOpacity: 0.32,
       tip: [0.86, 0.85, 0.58],
@@ -128,6 +164,19 @@ export function looksOf(motion: LandMotion | null): readonly string[] {
   if (motion === 'wet') return Object.keys(LAND_LOOK.wet.kinds);
   if (motion === 'ice-salt-sand') return Object.keys(LAND_LOOK.ice.kinds);
   return [];
+}
+
+/** How many steps of the woods' undergrowth the mask can tell apart, a kind's grass written that many below full. */
+export const UNDERGROWTH_STEPS = 12;
+
+/**
+ * The byte a kind of land's motion is written in the mask at: full, but for the grass under the woods, a little below
+ * full by how much of the woods' undergrowth it is, so a tuft knows it from the one look at the mask it takes anyway.
+ * Never below 242 of 255, so the grass of the woods is as whole in the mask as the grassland's.
+ */
+export function strengthOf(name: string): number {
+  const woods = (LAND_LOOK.grass.woods as Record<string, number | undefined>)[name] ?? 0;
+  return motionOf(name) === 'grass' ? 255 - Math.round(woods * UNDERGROWTH_STEPS) : 255;
 }
 
 /**

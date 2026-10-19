@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import { CLUMP_ACROSS, CLUMP_ALONG, CLUMP_ROOM } from './duneShader';
 import { DRAWN } from './landMask';
-import { LAND_LOOK, lookOf, motionOf } from './look';
+import { LAND_LOOK, UNDERGROWTH_STEPS, lookOf, motionOf, strengthOf } from './look';
 
 /** Every kind of land, by name, as `world/palette.json` lists them. */
 const KINDS = (
@@ -20,9 +20,33 @@ describe('the land', () => {
     expect(Object.keys(LAND_LOOK.lands).filter((kind) => !KINDS.includes(kind))).toEqual([]);
   });
 
-  it('sways the grass on the grassland, as it did before it was the land', () => {
-    const grass = KINDS.filter((kind) => motionOf(kind) === 'grass');
-    expect(grass.sort()).toEqual(['alpine-meadow', 'meadow', 'savanna', 'steppe']);
+  it('sways the grass on the grassland and under the woods, where it is their undergrowth', () => {
+    const grass = KINDS.filter((kind) => motionOf(kind) === 'grass').sort();
+    expect(grass).toEqual([
+      'alpine-meadow',
+      'broadleaf-forest',
+      'conifer-forest',
+      'dry-forest',
+      'meadow',
+      'mixed-forest',
+      'rainforest',
+      'savanna',
+      'steppe',
+      'taiga',
+      'taiga-open',
+    ]);
+    expect(Object.keys(LAND_LOOK.grass.woods).sort()).toEqual(grass);
+    // The grassland's grass is as it was, written whole in the mask; the woods' is their undergrowth, a little below.
+    for (const open of ['steppe', 'meadow', 'savanna', 'alpine-meadow'])
+      expect(strengthOf(open), open).toBe(255);
+    for (const wood of grass.filter((kind) => kind.includes('forest') || kind.startsWith('taiga'))) {
+      expect(strengthOf(wood), wood).toBeLessThan(255);
+      expect(strengthOf(wood), wood).toBeGreaterThanOrEqual(255 - UNDERGROWTH_STEPS);
+    }
+    expect(LAND_LOOK.grass.undergrowth.density).toBeLessThan(1);
+    expect(LAND_LOOK.grass.undergrowth.sheen).toBeLessThan(1);
+    // Every other motion is written whole.
+    expect(strengthOf('heath')).toBe(255);
     expect(DRAWN).toContain('grass');
   });
 
@@ -40,7 +64,8 @@ describe('the land', () => {
     // A kind of land the heath's motion takes, with no look of its own, fails here rather than drawing as another.
     expect(Object.keys(LAND_LOOK.heath.kinds).sort()).toEqual(heath);
     expect(new Set(heath.map(lookOf)).size).toBe(heath.length);
-    expect(lookOf('meadow')).toBe(0);
+    // A kind whose motion has the one look is nought.
+    expect(lookOf('farmland')).toBe(0);
     expect(DRAWN).toContain('heath');
   });
 
@@ -69,9 +94,7 @@ describe('the land', () => {
   });
 
   it('draws every kind of land that moves, so every kind has its motion or stands still on purpose', () => {
-    const moving = KINDS.map(motionOf).filter(
-      (motion) => !['water', 'trees', 'still'].includes(motion ?? ''),
-    );
+    const moving = KINDS.map(motionOf).filter((motion) => !['water', 'still'].includes(motion ?? ''));
     expect(
       [...new Set(moving)].filter((motion) => !(DRAWN as readonly (string | null)[]).includes(motion)),
     ).toEqual([]);
@@ -99,7 +122,7 @@ describe('the land', () => {
     expect(D.clumps.together.reduce((sum, one) => sum + one, 0)).toBeCloseTo(1);
   });
 
-  it('leaves the water to the water shader, the woods to their trees and bare stone still', () => {
+  it('leaves the water to the water shader and bare stone still', () => {
     expect(KINDS.filter((kind) => motionOf(kind) === 'water').sort()).toEqual([
       'lake',
       'ocean',
@@ -107,6 +130,6 @@ describe('the land', () => {
       'shallow-sea',
     ]);
     expect(KINDS.filter((kind) => motionOf(kind) === 'still').sort()).toEqual(['bare-rock', 'desert-stone']);
-    expect(DRAWN.filter((motion) => ['water', 'trees', 'still'].includes(motion))).toEqual([]);
+    expect(DRAWN.filter((motion) => ['water', 'still'].includes(motion))).toEqual([]);
   });
 });

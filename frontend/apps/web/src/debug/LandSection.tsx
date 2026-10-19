@@ -115,7 +115,7 @@ const ABOUT =
   'The land moving in the wind and the light, one layer for every kind of land, from zoom 8.5 in: the grass, the crops, the heath, the scrub and the tundra, the wet land, and the ice, the salt and the sand. Every other kind of land stands still on purpose: the water moves by a shader of its own, a wood by its trees, and bare stone not at all. What a level costs the graphics card is said once in the log, the first time the land is drawn at it.';
 
 const GRASS_ABOUT =
-  'Gusts, tufts, tall grass and brush on steppe, meadow, savanna and alpine meadow, bending in the one wind the trees bend in.';
+  'Gusts, tufts, tall grass and brush on steppe, meadow, savanna and alpine meadow, bending in the one wind the trees bend in; and under the trees of the woods their undergrowth, sparser, shaded, with more low brush, sheltered from the gusts.';
 
 const HEATH_ABOUT =
   'Low woody growth a gust only stirs, gentler than the grass: small purple clumps of heather close together, bigger grey-green bushes of scrub with bare ground between, the low mat of the tundra, and cotton grass nodding its white heads there.';

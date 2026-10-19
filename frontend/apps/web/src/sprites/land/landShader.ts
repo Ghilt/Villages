@@ -131,6 +131,16 @@ vec4 rootsAt(vec2 world) {
   return rootedIn(uMask, world);
 }
 
+// The first four motions of the world unit a point of the ground is in, as the mask writes them, unblended: the grass's
+// tells how much of the woods' undergrowth it is by how far below full it is written (strengthOf, look.ts).
+vec4 rootedExactly(vec2 world) {
+  ivec2 texel = ivec2(floor(world - uMaskOrigin));
+  if (any(lessThan(texel, ivec2(0))) || any(greaterThanEqual(texel, ivec2(uMaskSize)))) {
+    return vec4(0.0);
+  }
+  return texelFetch(uMask, texel, 0);
+}
+
 // Which of its motion's looks the land at a point of the ground has - heath, scrub or tundra, say - unblended.
 int lookAt(vec2 world) {
   ivec2 texel = ivec2(floor(world - uMaskOrigin));

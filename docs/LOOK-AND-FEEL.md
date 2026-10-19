@@ -163,7 +163,10 @@ decision record 0059.
 **The land moves.** Close in, from zoom 8.5, on the grassland - steppe, meadow, savanna and alpine meadow - gusts
 travel down the wind as soft bands, and where one blows the grass shows its paler side; closer still, tufts stand up
 from the ground and lean with the gust, tall grass in patches with a paler straw tip, low round clumps of brush that
-a gust only nudges, and bare ground between. On the farmland the land is cut into fields, a patchwork of uneven
+a gust only nudges, and bare ground between. Under the woods' trees the same grass is their undergrowth: fewer tufts,
+a deeper green and green at the tip rather than straw, hardly any tall grass, a little more low brush, and the trees
+taking most of the gust, so it shows less of one; sparest on the needles and moss of the conifers' floor, and grassy
+under the open taiga's and the dry forest's trees. On the farmland the land is cut into fields, a patchwork of uneven
 shapes a few world units across with a bare track between them, each lying fallow or standing ripe or green, faintly
 washed in its own colour, its crops in rows running its own way; long slow waves roll through them down the wind, a
 band of light where the crops bend with a darker one behind it where they stand again, and close in each stalk leans

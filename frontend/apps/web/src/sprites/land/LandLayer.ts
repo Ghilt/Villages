@@ -25,7 +25,7 @@ import { CHANNELS_IN_FIRST, DRAWN, channelOf, landMaskOf, sameRange, tilesUnder 
 import type { TileRange } from './landMask';
 import { landStore } from './landMode';
 import { LAND_FRAGMENT, LAND_VERTEX } from './landShader';
-import { LAND_LOOK, lookOf, motionOf } from './look';
+import { LAND_LOOK, lookOf, motionOf, strengthOf } from './look';
 import { createMotionUniforms } from './motionUniforms';
 
 /**
@@ -152,6 +152,8 @@ export function createLandLayer(
   // The channel of the mask each class of the palette is drawn in, by its id; null for land the layer leaves alone.
   let channels: (number | null)[] | null = null;
   let looks: number[] | null = null;
+  // The byte each class's motion is written at, full but for the grass under the woods.
+  let strengths: number[] | null = null;
 
   // What each level costs, measured on the graphics card where it will say, and said once a level.
   const meter = createCostMeter((renderer as WebGLRenderer).gl as WebGL2RenderingContext | undefined);
@@ -172,6 +174,9 @@ export function createLandLayer(
       const looksOf = new Array<number>(256).fill(0);
       for (const one of palette.classes) looksOf[one.id] = lookOf(one.name);
       looks = looksOf;
+      const strengthsOf = new Array<number>(256).fill(255);
+      for (const one of palette.classes) strengthsOf[one.id] = strengthOf(one.name);
+      strengths = strengthsOf;
     }
     const asked: Promise<Uint8Array | null>[] = [];
     for (let y = range.fromY; y <= range.toY; y += 1) {
@@ -183,7 +188,7 @@ export function createLandLayer(
     if (wanted === null || !sameRange(wanted.range, range) || wanted.root !== root) {
       return;
     }
-    const built = landMaskOf(range, tiles, channels, looks ?? []);
+    const built = landMaskOf(range, tiles, channels, looks ?? [], strengths ?? []);
     const source = new BufferImageSource({
       resource: built.texels,
       width: built.width,

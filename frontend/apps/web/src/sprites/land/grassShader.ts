@@ -1,5 +1,5 @@
 import { channelOf } from './landMask';
-import { LAND_LOOK } from './look';
+import { LAND_LOOK, UNDERGROWTH_STEPS } from './look';
 
 /**
  * The grass, the first of the land's motions: a part of the land shader, `landShader.ts`, which finds the ground under
@@ -9,7 +9,10 @@ import { LAND_LOOK } from './look';
  * side: the world's one wind, `../wind.ts`, which the trees bend in too. And close in, a tuft stands up in every
  * small cell of the ground, a stroke from a shaded root to a lit tip, which the gust bends down the wind and which
  * sways a little when there is none. A tuft stands up the screen, as the trees and the castles do, so it is drawn
- * in pixels from its root rather than lying on the ground. Every number is in `look.ts`, under `grass`.
+ * in pixels from its root rather than lying on the ground. Under the woods' trees it is their undergrowth, sparser,
+ * shaded, with more low brush, and sheltered from the gusts: how much of it the grass of a world unit is, the mask
+ * says by how far below full it writes the grass there (`strengthOf`), which a tuft reads from the one look at the
+ * mask it takes to know it is rooted in grass at all. Every number is in `look.ts`, under `grass`.
  */
 
 const float = (value: number): string => (Number.isInteger(value) ? value.toFixed(1) : String(value));
@@ -18,6 +21,7 @@ const colour = (rgb: readonly number[]): string => rgb.map(float).join(', ');
 const G = LAND_LOOK.grass.gusts;
 const B = LAND_LOOK.grass.blades;
 const P = LAND_LOOK.grass.patches;
+const U = LAND_LOOK.grass.undergrowth;
 
 export const GRASS_GLSL = `
 // How the grass grows in patches, from the sliders: grassTuning.ts says what each is.
@@ -41,10 +45,18 @@ const float WIDTH = ${float(B.width)};
 const float BEND = ${float(B.bend)};
 const float SWAY = ${float(B.sway)};
 const float SWAY_SPEED = ${float(B.swaySpeed)};
-const vec3 ROOT = vec3(${colour(B.root)});
 const float ROOT_ALPHA = ${float(B.rootOpacity)};
-const vec3 TIP = vec3(${colour(B.tip)});
 const float TIP_ALPHA = ${float(B.tipOpacity)};
+const vec3 ROOT = vec3(${colour(B.root)});
+const vec3 TIP = vec3(${colour(B.tip)});
+const float UNDERGROWTH_STEPS = ${float(UNDERGROWTH_STEPS)};
+const float UNDER_DENSITY = ${float(U.density)};
+const vec3 UNDER_ROOT = vec3(${colour(U.root)});
+const vec3 UNDER_TIP = vec3(${colour(U.tip)});
+const float UNDER_TALL = ${float(U.tall)};
+const float UNDER_BRUSH = ${float(U.brush)};
+const float UNDER_SHEEN = ${float(U.sheen)};
+const float UNDER_BEND = ${float(U.bend)};
 const float FROM_PIXELS = ${float(B.fromPixels)};
 const float WHOLE_PIXELS = ${float(B.wholePixels)};
 const float BARE_LEFT = ${float(P.bareLeft)};
@@ -52,6 +64,12 @@ const vec3 TALL_TIP = vec3(${colour(P.tallTip)});
 const vec3 BRUSH_DARK = vec3(${colour(P.brushDark)});
 const vec3 BRUSH_LIGHT = vec3(${colour(P.brushLight)});
 const float BRUSH_ALPHA = ${float(P.brushOpacity)};
+
+// How much of the woods' undergrowth the grass of a world unit is, from the byte the mask writes it at: full for the
+// grassland's, a step below full for each step of the woods'. Nought where no grass is rooted.
+float woodsOf(float rooted) {
+  return rooted < 0.5 ? 0.0 : clamp((1.0 - rooted) * 255.0 / UNDERGROWTH_STEPS, 0.0, 1.0);
+}
 
 // The two slow fields over the ground that mark out the patches.
 vec2 fieldsAt(vec2 world) {
@@ -85,9 +103,10 @@ vec3 chancesOf(vec2 fields) {
 // The grass over the ground under this pixel, premultiplied: the gusts' paler side, and close in the tufts and the
 // brush rooted in the grassland about it.
 vec4 grassHere(vec2 world) {
-  // The gusts show least on bare ground and most in tall grass, and the brush hardly bends.
+  // The gusts show least on bare ground and most in tall grass, and the brush hardly bends; under the trees, little.
   vec3 kindHere = chancesOf(fieldsAt(world));
-  float gust = gustAt(world, uCarried) * (1.0 - 0.85 * kindHere.x) * (1.0 + 0.6 * kindHere.y) * (1.0 - 0.5 * kindHere.z);
+  float sheltered = mix(1.0, UNDER_SHEEN, woodsOf(rootedExactly(world)[GRASS]));
+  float gust = gustAt(world, uCarried) * (1.0 - 0.85 * kindHere.x) * (1.0 + 0.6 * kindHere.y) * (1.0 - 0.5 * kindHere.z) * sheltered;
   vec3 rgb = SHEEN * gust * SHEEN_ALPHA;
   float alpha = gust * SHEEN_ALPHA;
 
@@ -119,13 +138,18 @@ vec4 grassHere(vec2 world) {
       for (int dx = -2; dx <= 2; dx++) {
         ivec2 cell = middle + ivec2(dx, dy);
         vec2 rootWorld = (vec2(cell) + vec2(hash(cell, 1), hash(cell, 2))) * CELL;
-        if (rootsAt(rootWorld)[GRASS] < 0.5) {
+        float rooted = rootedExactly(rootWorld)[GRASS];
+        if (rooted < 0.5) {
           continue;
         }
+        float woods = woodsOf(rooted);
         vec2 off = rootWorld - about;
         vec3 odds = chancesOf(fields + east * off.x + south * off.y);
-        // So many of the tufts there could be grow at all, and bare ground keeps only a few of those.
-        if (hash(cell, 5) > uDensity * mix(1.0, BARE_LEFT, odds.x)) {
+        // Under the trees, little of the patches' tall grass, and low brush besides theirs.
+        odds.y *= mix(1.0, UNDER_TALL, woods);
+        odds.z = mix(odds.z, 1.0, UNDER_BRUSH * woods);
+        // So many of the tufts there could be grow at all, fewer under the trees, and bare ground keeps only a few.
+        if (hash(cell, 5) > uDensity * mix(1.0, UNDER_DENSITY, woods) * mix(1.0, BARE_LEFT, odds.x)) {
           continue;
         }
         // Each tuft draws its kind: brush, tall grass, or the meadow's own.
@@ -149,14 +173,17 @@ vec4 grassHere(vec2 world) {
           // A tuft: a stroke from a shaded root to a lit tip, taller and paler in tall grass, bending down the wind.
           float sway = sin(TAU * (uTime * SWAY_SPEED + hash(cell, 3))) * SWAY;
           float size = tall * mix(1.0, uTallHeight, isTall) * mix(0.7, 1.15, hash(cell, 4));
-          vec2 tip = root + vec2(0.0, -size) + downWind * size * (blow * BEND * mix(1.0, 1.3, isTall) + sway);
+          float bend = blow * BEND * mix(1.0, UNDER_BEND, woods) * mix(1.0, 1.3, isTall);
+          vec2 tip = root + vec2(0.0, -size) + downWind * size * (bend + sway);
           float width = thick * mix(1.0, 1.25, isTall);
           float on = 1.0 - smoothstep(width * 0.5, width * 0.5 + uPixel, segment(vScreen, root, tip));
           if (on > ink) {
             ink = on;
             vec2 rise = tip - root;
             float lit = clamp(dot(vScreen - root, rise) / max(dot(rise, rise), 1e-6), 0.0, 1.0) * mix(0.75, 1.0, blow);
-            colour = mix(ROOT * ROOT_ALPHA, mix(TIP, TALL_TIP, isTall) * TIP_ALPHA, lit);
+            vec3 rootColour = mix(ROOT, UNDER_ROOT, woods);
+            vec3 tipColour = mix(TIP, UNDER_TIP, woods);
+            colour = mix(rootColour * ROOT_ALPHA, mix(tipColour, TALL_TIP, isTall) * TIP_ALPHA, lit);
             inkAlpha = mix(ROOT_ALPHA, TIP_ALPHA, lit);
           }
         }

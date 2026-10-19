@@ -93,7 +93,8 @@ export function sameRange(one: TileRange | null, other: TileRange | null): boole
 /**
  * The mask of a range of tiles, given each tile's class ids row by row from the north-west, null for a tile that is
  * not there; the channel each class id is drawn in, null for one with no motion drawn; and which look of its motion
- * each class id is. Hands back its size in texels, which is its size in world units, its looks a byte a texel, and
+ * each class id is; and the byte each class id's channel is written at, full unless said, which the grass under
+ * the woods is written a little below (`strengthOf`). Hands back its size in texels, which is its size in world units, its looks a byte a texel, and
  * how many of its texels have each channel's motion, so a view with none of a motion can leave it out and a view
  * with none at all can draw nothing.
  */
@@ -102,6 +103,7 @@ export function landMaskOf(
   tiles: readonly (Uint8Array | null)[],
   channels: readonly (number | null)[],
   looks: readonly number[],
+  strengths: readonly number[] = [],
 ): {
   width: number;
   height: number;
@@ -127,7 +129,7 @@ export function landMaskOf(
   const inMore = new Uint8Array(256);
   channels.forEach((channel, id) => {
     if (channel === null || id >= 256) return;
-    if (channel < CHANNELS_IN_FIRST) packed[id] = (0xff << (channel * 8)) >>> 0;
+    if (channel < CHANNELS_IN_FIRST) packed[id] = ((strengths[id] ?? 0xff) << (channel * 8)) >>> 0;
     else inMore[id] = 255;
   });
   const perClass = new Float64Array(256);

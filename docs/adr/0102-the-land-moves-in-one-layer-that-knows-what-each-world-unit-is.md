@@ -63,3 +63,21 @@ stands still on purpose, which the land's table test now holds. Their channel is
 beside the mask's four, softened as the others are. Every one of the shader's textures is given a placeholder of
 its own until the first mask comes: two samplers handed the same placeholder were bound to only one of them, and the
 fifth motion read nothing until it had its own.
+
+## Amendment, 2026-10-19: the grass under the woods
+
+The woods were the one kind of land the layer left alone on purpose, their life their trees bending, and Adam found
+their ground too bare: the steppe's tufts would look good there too. So the seven forests' motion is the grass, and
+under their trees it is their undergrowth, a blend between the grassland's grass and the undergrowth's own numbers
+(`look.ts`, `grass.undergrowth`) by how much of it each kind is (`grass.woods`): fewer tufts, shaded, hardly any tall
+grass, more low brush, and less of a gust. The mangrove and the swamp forest keep the wet land's motion.
+
+A tuft first read its kind's numbers by its look, from arrays of them a look long, and the grass cost ten times as
+much on the renders page where the browser draws through Direct3D, 7 ms of the graphics card a frame against 0.75:
+an array picked from by a number the mask gives, in the loop over the tufts, is a slow path there. A strip of texels
+of each kind's numbers, read a texel a tuft, still tripled a screen of meadow. So the kind is in the byte the mask
+already writes, and that every tuft already reads: the grass under the woods is written a step or a few below full in
+its channel, as many of twelve as it is woods (`strengthOf`), never below 242 of 255, so it is as whole in the mask's
+softened edges as the grassland's, and a tuft reads the world unit it is rooted in unblended (`rootedExactly`) and
+blends its numbers by it. A screen of meadow costs what it did, and a screen of taiga what a meadow does, 3.3 ms at
+the high level where it cost nothing before.

@@ -87,6 +87,20 @@ describe('the land mask', () => {
     expect(fifth.counts[4]).toBe(TILE * TILE - 2);
   });
 
+  it("writes a class's channel at its own strength where one is given, the grass under the woods a little below full", () => {
+    const range = { fromX: 0, toX: 0, fromY: 0, toY: 0 };
+    const tile = new Uint8Array(TILE * TILE).fill(17);
+    tile[1] = 21;
+    const channels = new Array<number | null>(256).fill(null);
+    channels[17] = 0;
+    channels[21] = 0;
+    const strengths = new Array<number>(256).fill(255);
+    strengths[21] = 243;
+    const mask = landMaskOf(range, [tile], channels, [], strengths);
+    expect(texelOf(mask, 0)).toEqual([255, 0, 0, 0]);
+    expect(texelOf(mask, 1)).toEqual([243, 0, 0, 0]);
+  });
+
   it('draws each motion drawn from a channel of its own, the four of the first texture and one past them: the grass, the crops, the heath, the wet land, the ice', () => {
     expect(DRAWN.length).toBeLessThanOrEqual(CHANNELS_IN_FIRST + 1);
     expect(channelOf('grass')).toBe(0);
