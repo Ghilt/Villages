@@ -569,9 +569,10 @@ made, filed and borrowed when nobody has made it yet. The shelf is `E:\Code\Vill
 the machine; a borrowed folder is hard links to the shelf's files, a few seconds for a whole master, and the few
 loose files are copies. It prints a line a step: *current*, *borrowed from the world cache, made in* the tree that
 made it with the last thing its tool said, or the tool's own output as it makes one, with the reason
-(*world/palette.json changed*). A borrowed folder whose new files a virus scanner is still reading cannot be moved into
-place, so it waits up to three minutes and says how long it waited; a borrow that fails leaves `<folder>.borrowing-<pid>` beside it, which
-the next run clears. `-- terrain2` for another master, `-- --only origin` for a step and every step made
+(*world/palette.json changed*). A borrowed folder whose new files another program still has open, a virus scanner or
+the Warp terminal reading them, cannot be moved into place, so it waits up to three minutes, names the programs holding
+it as Windows reports them, and says how long it waited; a borrow that fails leaves `<folder>.borrowing-<pid>` beside
+it, which the next run clears. `-- terrain2` for another master, `-- --only origin` for a step and every step made
 from it, `-- --force` to make them again even when the shelf has them, `-- --why` to be told where each step stands
 and what moved without making anything. What a tree borrowed is written in `public/world/borrowed.json`. A master
 nobody has made costs its steps once, about nine minutes; every tree after it, seconds. See

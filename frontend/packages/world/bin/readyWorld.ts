@@ -7,6 +7,7 @@ import { DEFAULT_MASTER, masterNameOf } from '../src/masters.ts';
 
 import { worldCacheDir } from './lib/checkouts.ts';
 import { args, flag, named } from './lib/flags.ts';
+import { holdersSaid, whoHolds } from './lib/holders.ts';
 import { removeHere } from './lib/links.ts';
 import { lock } from './lib/locks.ts';
 import type { Held } from './lib/locks.ts';
@@ -252,15 +253,16 @@ try {
     }
     let heldSince: number | undefined;
     try {
-      borrow(entry, step, master, REPO, (path, waited) => {
+      borrow(entry, step, master, REPO, ({ path, folder, waited }) => {
         heldSince = performance.now() - waited;
+        const holding = whoHolds(folder);
         say(
-          `  ${state.name}: waiting up to three minutes for a virus scanner to let go of the new files in ${path}`,
+          `  ${state.name}: waiting up to three minutes to move the new files into ${path}${holding === undefined ? '' : `, ${holdersSaid(holding)}`}`,
         );
       });
       if (heldSince !== undefined) {
         say(
-          `  ${state.name}: the virus scanner let go after ${Math.round((performance.now() - heldSince) / 1000)} s`,
+          `  ${state.name}: moved into place after ${Math.round((performance.now() - heldSince) / 1000)} s`,
         );
       }
     } catch (error) {

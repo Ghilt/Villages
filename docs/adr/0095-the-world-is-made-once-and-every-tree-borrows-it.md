@@ -100,7 +100,7 @@ it was made from, and a tree borrows it by hard link.** The shape, the steps and
 - **Make the world faster instead**, running the master's steps side by side. Six of them read only the master,
   and each wants 8 GB. Worth doing one day; with the shelf it is a cost paid once a change, not once a tree.
 
-## Amendment, 2026-10-18: a borrowed folder waits for the virus scanner
+## Amendment, 2026-10-18: a borrowed folder waits for whatever holds its new files
 
 A fresh tree's `world:ready` could not borrow its tiles. The folder of 21,846 new hard links, made beside `tiles`, was
 refused its rename into place with `EPERM`, and the same rename went through by hand fifteen seconds later. Windows will
@@ -109,10 +109,21 @@ file it sees made. The rename had been given the same three seconds as a single 
 borrowed again into another fresh tree and held for forty-five seconds; its height, as many files, was held once and
 then not at all.
 
-A folder's rename now waits up to three minutes, `FOLDER_PATIENCE` in `bin/lib/links.ts`, and `world:ready` says so
-once it has waited a second, and how long it waited when the scanner lets go; a single file keeps its three seconds. Filing an entry on the shelf waits the same way, because a
-tool's last files are as new. A borrow that still fails says so on its step's line and leaves its `.borrowing-<pid>`
-folder behind, and the tree's next borrow clears every such folder before it links: one run borrows into a tree at a
-time, under the tree's lock, so none is a live run's. An exclusion for `E:\Code\Villages` in Windows Security would
-spare the wait, at the price of the scanner no longer reading what npm installs there; that is a setting of the machine,
-not of the repository.
+A folder's rename now waits up to three minutes, `FOLDER_PATIENCE` in `bin/lib/links.ts`; a single file keeps its three
+seconds. Filing an entry on the shelf waits the same way, because a tool's last files are as new. Once `world:ready` has
+waited a second it says so, naming the programs that have the folder's files open as Windows itself reports them
+(`bin/lib/holders.ts`), and when the folder moves it says how long the wait was. A borrow that still fails says so on
+its step's line and leaves its `.borrowing-<pid>` folder behind, and the tree's next borrow clears every such folder
+before it links: one run borrows into a tree at a time, under the tree's lock, so none is a live run's.
+
+The scanner was the likely holder, not a proven one, which is why the waiting line names what it finds. An exclusion of
+`.claude\worktrees` and `.git\world-cache` was added in Windows Security at 21:53 that evening and measured. It made no
+difference that could be told from noise to writing many files: an install of the frontend's packages took 7 to 13
+seconds inside it and 10 to 11 outside, and a tile set copied as new files 11 seconds inside and 10 outside. Borrows
+had waited in four of six before it, 29 to 45 seconds, and waited in one of six after it, 25 seconds, a minute after it
+was added. Six borrows made only to provoke a wait, of old files and new, inside the exclusion and outside it, never
+waited. The first wait the line looked at, at 22:22 with Defender excluded, lasted 107 seconds, and what held the
+folder was the Warp terminal, with 29 of the tiles open: Warp keeps an index of the Git repositories it is opened in,
+though it says it skips what `.gitignore` names, which the world's folders are. So the holder is not always the
+scanner, and may never have been. An exclusion is a setting of the machine, not of the repository, and it costs the
+scanner's reading of what npm installs there.

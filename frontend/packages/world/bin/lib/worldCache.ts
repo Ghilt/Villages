@@ -255,14 +255,15 @@ function clearBorrowings(to: string): void {
  * the tree, beside where it goes and moved into place, as hard links to the entry's files; each loose file is copied
  * with the entry's date, in the order the step lists them, data before manifest. A file the step makes only
  * sometimes, missing from the entry, goes from the tree too. A folder Windows will not let be moved yet, because a
- * virus scanner is reading its new files, is waited for up to `FOLDER_PATIENCE`, and `waiting` is told of it.
+ * virus scanner is reading its new files, is waited for up to `FOLDER_PATIENCE`, and `waiting` is told of it: where
+ * it goes, the folder it is made in, and how long it has waited.
  */
 export function borrow(
   entry: string,
   step: WorldStep,
   master: string,
   root: string,
-  waiting?: (path: string, waited: number) => void,
+  waiting?: (held: { path: string; folder: string; waited: number }) => void,
 ): void {
   for (const made of step.makes) {
     const path = forMaster(made.path, master);
@@ -280,7 +281,7 @@ export function borrow(
       removeHere(to);
       patiently(() => renameSync(beside, to), {
         within: FOLDER_PATIENCE,
-        waiting: (waited) => waiting?.(path, waited),
+        waiting: (waited) => waiting?.({ path, folder: beside, waited }),
       });
     } else {
       placeFile(from, to);
