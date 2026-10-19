@@ -36,7 +36,7 @@ const LIST: UiArtFile = {
 
 describe('the page served with its pictures on their way', () => {
   it('asks for every picture the loading screen draws, at every density, and for no other', () => {
-    const asked = pageTagsOf(LIST).filter((tag) => tag.tag === 'link');
+    const asked = pageTagsOf(LIST, []).filter((tag) => tag.tag === 'link');
 
     expect(asked).toHaveLength(LOADING_SCREEN_PICTURES.length);
     expect(asked[0]?.attrs).toMatchObject({ rel: 'preload', as: 'image' });
@@ -47,10 +47,31 @@ describe('the page served with its pictures on their way', () => {
   });
 
   it('writes the whole list into the page, so that nothing in it can close the script it stands in', () => {
-    const written = pageTagsOf(LIST).find((tag) => tag.tag === 'script');
+    const written = pageTagsOf(LIST, []).find((tag) => tag.tag === 'script');
 
     expect(written?.attrs).toMatchObject({ type: 'application/json', id: 'ui-pictures' });
     expect(written?.children).not.toContain('<');
     expect(JSON.parse(written?.children as string)).toEqual(LIST);
+  });
+
+  it('asks for the faces the words are set in, as a face is fetched, whether or not there are pictures', () => {
+    const faces = pageTagsOf(null, ['/faces/upright.woff2', '/faces/italic.woff2']);
+
+    expect(faces.map((tag) => tag.attrs)).toEqual([
+      {
+        rel: 'preload',
+        as: 'font',
+        type: 'font/woff2',
+        crossorigin: 'anonymous',
+        href: '/faces/upright.woff2',
+      },
+      {
+        rel: 'preload',
+        as: 'font',
+        type: 'font/woff2',
+        crossorigin: 'anonymous',
+        href: '/faces/italic.woff2',
+      },
+    ]);
   });
 });

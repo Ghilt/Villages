@@ -10,8 +10,9 @@ export function StartupScreen() {
       title="Villages"
       says="The map is being painted"
       lifted={lifted}
-      {...(share === undefined ? {} : { share })}
-      {...(shareSaid === undefined ? {} : { shareSaid })}
+      // From the first frame, empty until the camera is put, so nothing on the screen moves when it starts to fill.
+      share={share ?? 0}
+      shareSaid={shareSaid ?? 'nothing of the map drawn yet'}
     />
   );
 }

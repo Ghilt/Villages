@@ -174,9 +174,9 @@ the browser to pick from. So a picture Adam saves over another is drawn everywhe
 A picture's size as shown is in the list, a quarter of its size as painted; a component lays it at that
 size, or scales it on purpose and says so. **The page is served with the list written into it**, by
 `vite/uiInPage.ts` in the dev server and the build alike, so the first frame draws its pictures without asking
-for the list first, and with the loading screen's own pictures asked for as the page is read, while its code is
-still arriving: `ui/loadingScreen/pictures.json` names them, and its test holds it to the recipes the screen is
-drawn in. What the pictures are and where they go is
+for the list first, and with the loading screen's own pictures and the two faces its words are set in asked for
+as the page is read, while its code is still arriving, so nothing on it moves after its first frame:
+`ui/loadingScreen/pictures.json` names the pictures, and its test holds it to the recipes the screen is drawn in. What the pictures are and where they go is
 `AUTHORING-THE-ART.md`.
 
 ## Adding a component
