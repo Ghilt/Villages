@@ -14,8 +14,8 @@ import { buildMarkTextures } from './markTextures';
 import { watchStructureArt } from './structureAtlas';
 import { createMarksLayer, type MarksLayer } from './MarksLayer';
 import { createRingLayer, type RingLayer } from './RingLayer';
+import { createSceneryDrawing } from './scenery/sceneryDrawing';
 import { createSceneryLayer } from './scenery/SceneryLayer';
-import { noteDrawn } from './scenery/sceneryCells';
 import type { CameraSource, FogHow, Scene, SpriteRenderer } from './SpriteRenderer';
 import { createTreesLayer, type TreesLayer } from './trees/TreesLayer';
 import { LONGEST_STEP_MS } from './twoForms';
@@ -94,10 +94,6 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   let undulation: ReturnType<typeof setTimeout> | null = null;
   const stillHaze =
     typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  /** The worst gap between two frames of a moving map, which is what a stutter is. */
-  let worstGapMs = 0;
-  /** When the last frame was actually drawn, which is what a frame gap is measured between. */
-  let lastDrawnAt = 0;
 
   /**
    * Asks for one frame, however often it is asked before the frame comes: what every change here does - a
@@ -156,31 +152,11 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   };
 
   /** The world's furniture, which asks for its own frames as the cells it cuts land. */
-  const sceneryLayer: Layer = {
-    draw(view: CameraView, now: number): number | null {
-      if (scenery === null) {
-        return null;
-      }
-      const how = scene.scenery;
-      scenery.container.visible = how.on;
-      const drew = how.on
-        ? scenery.update(view, how.tilesRoot, how.dial, how.spacing, how.laterBy, how.shadows, drawSoon)
-        : { particles: 0, shadows: 0, showing: 0, cells: 0, waiting: 0 };
-      // Only gaps short enough to be a moving map are counted. A still map draws nothing, so the gap
-      // since its last frame is seconds, and reporting that as a frame gap would be the panel lying
-      // about a stall that never happened. See decision record 0023.
-      const gap = now - lastDrawnAt;
-      lastDrawnAt = now;
-      if (gap > 0 && gap < 200) {
-        worstGapMs = Math.max(worstGapMs, gap);
-        noteDrawn({ ...drew, frameGapMs: gap, worstGapMs });
-      } else {
-        noteDrawn(drew);
-      }
-      return null;
-    },
-    destroy: () => scenery?.destroy(),
-  };
+  const sceneryLayer = createSceneryDrawing(
+    () => scenery,
+    () => scene.scenery,
+    drawSoon,
+  );
 
   function frame(): void {
     if (layers === null || disposed) {
@@ -344,7 +320,6 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       // so the marks trailed the ground for the length of every flight - which the comment that used to
       // stand here admitted, and accepted because the marks were never quite still. They are still now.
       lastFrameAt = performance.now();
-      lastDrawnAt = lastFrameAt;
       unwatch = camera.watch(frame);
       frame();
 
