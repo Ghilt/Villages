@@ -166,8 +166,8 @@ planned and not started.
   forests' trees, and frogs and snakes in the wet land, a frog by any water - are built; his third to sixth, the dunes
   far fewer, in loose clumps of one to three with still sand between and no dune touching another, each whole, twice
   as broad, most of them long and some bent as an S, are built and on main. Step 14,
-  every kind of ground its cast, is under way in a run Adam picked that evening, in three: the birds, the sea, and the
-  dry and the high ground; all three are built and wait on his eye, every kind of ground now with its cast.
+  every kind of ground its cast, built in a run Adam picked that evening in three - the birds, the sea, and the dry
+  and the high ground - is verified and on main, every kind of ground now with its cast: the plan's last step.
   Asked for by Adam on 2026-10-16.
 - **Ruined cities**: every town of 1790 a ruin on the map at the world's start, the bigger the town the more ground
   its ruins cover - ruin pieces in each place's culture laid out by the browser as a ruined city, the same for every
