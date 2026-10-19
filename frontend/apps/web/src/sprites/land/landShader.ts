@@ -1,3 +1,4 @@
+import { COVER_VERTEX, GROUND_GLSL } from '../../shaders/groundGlsl';
 import { GUSTS_GLSL } from '../wind';
 
 import { CROPS_GLSL } from './cropsShader';
@@ -16,18 +17,7 @@ import { WET_GLSL } from './wetShader';
  * nothing and a screen of grass what the grass costs. Every number is in `look.ts`.
  */
 
-export const LAND_VERTEX = `#version 300 es
-precision highp float;
-in vec2 aPosition;
-uniform vec2 uSize;
-out vec2 vScreen;
-void main() {
-  vScreen = vec2((aPosition.x + 1.0) * 0.5 * uSize.x, (1.0 - aPosition.y) * 0.5 * uSize.y);
-  // Drawn into a picture of its own, which WebGL keeps bottom row first and Pixi shows the other way up: so it
-  // is drawn upside down, to be shown the right way. Straight onto the screen, as the fog is, it would not be.
-  gl_Position = vec4(aPosition.x, -aPosition.y, 0.0, 1.0);
-}
-`;
+export const LAND_VERTEX = COVER_VERTEX;
 
 export const LAND_FRAGMENT = `#version 300 es
 precision highp float;
@@ -57,39 +47,7 @@ out vec4 fragColor;
 const float TAU = 6.2831853;
 ${GUSTS_GLSL}
 
-float hash(ivec2 cell, int salt) {
-  uvec3 u = uvec3(ivec3(cell, salt)) * uvec3(1597334673u, 3812015801u, 2798796415u);
-  uint n = (u.x ^ u.y ^ u.z) * 1597334673u;
-  n ^= n >> 16u;
-  n *= 2246822519u;
-  n ^= n >> 13u;
-  return float(n) / 4294967296.0;
-}
-
-float noise(vec2 at) {
-  vec2 whole = floor(at);
-  vec2 part = at - whole;
-  vec2 w = part * part * (3.0 - 2.0 * part);
-  ivec2 c = ivec2(whole);
-  return mix(
-    mix(hash(c, 0), hash(c + ivec2(1, 0), 0), w.x),
-    mix(hash(c + ivec2(0, 1), 0), hash(c + ivec2(1, 1), 0), w.x),
-    w.y
-  );
-}
-
-vec2 groundUnder(vec2 screen) {
-  vec2 onScreen = screen - uSize * 0.5;
-  float along = onScreen.y / max(uTilt.z, 0.0001);
-  vec2 ground = vec2(onScreen.x * uTilt.x - along * uTilt.y, onScreen.x * uTilt.y + along * uTilt.x);
-  return uCentre + ground / uScale;
-}
-
-// Where a piece of ground lands on the screen, in pixels: groundUnder forwards.
-vec2 screenOf(vec2 world) {
-  vec2 ground = (world - uCentre) * uScale;
-  return uSize * 0.5 + vec2(ground.x * uTilt.x + ground.y * uTilt.y, (ground.y * uTilt.x - ground.x * uTilt.y) * uTilt.z);
-}
+${GROUND_GLSL}
 
 float segment(vec2 p, vec2 a, vec2 b) {
   vec2 pa = p - a;
