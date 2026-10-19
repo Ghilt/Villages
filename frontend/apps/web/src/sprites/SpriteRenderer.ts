@@ -3,6 +3,7 @@ import type { Coverage } from '@villages/protocol';
 import type { FogField } from '../fog/fogField';
 
 import type { LngLat } from '../geometry/cameraMath';
+import type { Worked } from './ground/worked';
 
 /**
  * What the renderer needs to know about a thing on the map. Deliberately not a structure or a person: the renderer
@@ -96,6 +97,11 @@ export interface Scene {
    * marks from the terrain alone. See decision record 0051.
    */
   scenery: SceneryHow;
+  /**
+   * The ground the buildings on the map wear, a kind a diamond by `diamondKey`, worked out from `sprites` by the page
+   * and drawn over the land under everything that stands. See docs/plans/worked-ground.md.
+   */
+  worked: ReadonlyMap<number, Worked>;
 }
 
 /**

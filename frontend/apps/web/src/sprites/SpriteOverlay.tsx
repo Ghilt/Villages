@@ -117,7 +117,10 @@ export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick }: 
       : top?.kind === 'structure'
         ? `${STRUCTURE}${top.id}`
         : null;
-  const scene = useMemo(() => ({ sprites, selected, fog, scenery: how }), [sprites, selected, fog, how]);
+  const scene = useMemo(
+    () => ({ sprites, selected, fog, scenery: how, worked }),
+    [sprites, selected, fog, how, worked],
+  );
 
   // The whole scene at once: the renderer works out what changed, and draws once for however much did.
   useEffect(() => {

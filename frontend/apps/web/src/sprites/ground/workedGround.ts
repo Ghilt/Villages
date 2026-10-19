@@ -3,6 +3,8 @@ import { GROUND_LATTICE, alongU, alongV, frameOf } from '@villages/world';
 import { toMercator } from '../../geometry/cameraMath';
 import { WORLD_MASTER_WIDTH } from '../../geometry/world';
 import type { MapSprite } from '../SpriteRenderer';
+import { WORKED } from './worked';
+import type { Worked } from './worked';
 
 /*
  * Worked ground: the ground people have worn bare, a yard under every building and later the paths between them, a
@@ -11,10 +13,6 @@ import type { MapSprite } from '../SpriteRenderer';
  * all, and a yard has no other source. Never stored and never sent, and the same on every page that holds the same
  * buildings, because every choice in it is seeded by a structure's id and a diamond. See docs/plans/worked-ground.md.
  */
-
-/** What a diamond of worked ground is, in order of strength: where two meet, the stronger is drawn. */
-export const WORKED = { path: 1, ruinRing: 2, ring: 3, ruinFootprint: 4, footprint: 5 } as const;
-export type Worked = (typeof WORKED)[keyof typeof WORKED];
 
 /**
  * A building's yard as the lattice has it: the corner its foot stands on, how many diamonds its base covers along a

@@ -11,6 +11,7 @@ import { sessionStore } from '../net/gateway';
 import { useStore } from '../store/useStore';
 import { Section } from './Section';
 import { SlotLevers } from './SlotLevers';
+import { WorkedGroundLevers } from './WorkedGroundLevers';
 import {
   changeLevel,
   raiseAntarctica,
@@ -37,7 +38,8 @@ interface StructuresSectionProps {
  * filled and emptied, its ruin. Each is a real
  * command, said in the log under `structures` with its answer, and each raising is an event in the events log. The
  * types are the catalogue's, read as `/admin/inspect-structures` reads it, so a type added there is here on a reload.
- * See docs/plans/structures.md.
+ * Under them, the worked ground's: how the buildings' yards are drawn. See docs/plans/structures.md and
+ * docs/plans/worked-ground.md.
  */
 export function StructuresSection({ map }: StructuresSectionProps) {
   const connection = useStore(sessionStore, (state) => state.connection);
@@ -213,6 +215,7 @@ export function StructuresSection({ map }: StructuresSectionProps) {
       <p className="debug__quiet">
         {openName === null ? "open a structure's window to take control of it" : `this building: ${openName}`}
       </p>
+      <WorkedGroundLevers />
     </Section>
   );
 }

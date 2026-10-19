@@ -161,6 +161,16 @@ the Scenery section, 40 per cent where a shadow is whole to begin with; experime
 disappears into the painted forest is a question for the eye. How to hand one over is `AUTHORING-THE-ART.md`; why it works this way is
 decision record 0059.
 
+**Every building stands in worn ground.** Under it and round it the ground is worn bare, a yard of earth laid on the
+same diamonds the ground is painted on: its footprint, the square its base covers, worn whole, and a ragged ring round
+that, thick against the walls and thinning to a few diamonds three out, its corners rounded off, the same shape on
+every screen. Its edges wander a little as the painter's boundaries do and soften where they meet the paint; the earth
+has a tint of its own a diamond and a fine grain, and lets a little of the paint through. A ruin's yard is thinner and
+broken, going back to grass. Nothing moves on it, and it comes and goes with the building: where a house has never
+seen the building there is no yard, and on ground only revealed it loses its colour with it. It comes in with the
+buildings' pictures at zoom 7.5. The earth's colour and how much it covers are levers in the Structures section, to be
+settled by eye. See decision record 0105 and `docs/plans/worked-ground.md`.
+
 **The land moves.** Close in, from zoom 8.5, on the grassland - steppe, meadow, savanna and alpine meadow - gusts
 travel down the wind as soft bands, and where one blows the grass shows its paler side; closer still, tufts stand up
 from the ground and lean with the gust, tall grass in patches with a paler straw tip, low round clumps of brush that

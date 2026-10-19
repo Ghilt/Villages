@@ -388,7 +388,7 @@ fog shader's code for where a pixel lies and how far inside each edge is shared 
 **The sprite canvas is a stack of layers**, each a `Layer` (`sprites/layer.ts`): the scenery, the marks under
 the fog and over it (`MarksLayer.ts`), the fog with the haze's clock, the clouds over the fog with theirs, the
 selection ring (`RingLayer.ts`), the colour taken out of the map on its own canvas, the wind the scenery bends
-in, which draws nothing of its own, and the critters, their shadows and what runs on the ground under the scenery and what flies over it. Each draws its part of a
+in, which draws nothing of its own, the ground worn bare under the buildings over the land's motion (0105), and the critters, their shadows and what runs on the ground under the scenery and what flies over it. Each draws its part of a
 frame from the same camera and says how soon it wants the next - the next frame, a time, or never - and the
 renderer asks for the soonest. So the canvas draws when the map has drawn and has no clock of its own, except the
 haze's and the clouds': while the fog is drawn close in with unknown ground on the screen, it asks for a frame

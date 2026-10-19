@@ -200,7 +200,7 @@ Settled with the plan, for the glossary:
 | 2 | **Every building stands on its foot.** `world:structures` measures each picture's foot into the atlas; the marks hang a structure from it, drawn on the nearest lattice corner; the Pictures page marks it. | 👀 At zoom 10, a castle's front corner sits on its place, and it does not jump as you pan. 👀 `/admin/inspect-pictures`: each building's foot is marked on its front corner. |
 | 3 | **A footprint for every type.** `footprint` per level in `structures.json`, read by the page's catalogue and drawn as diamonds under each picture on the structures page. | 👀 `/admin/inspect-structures`: each building stands on its footprint's diamonds, about as wide as its base. |
 | 4 | **The worked-ground mask.** `sprites/ground/workedMask.ts`, pure, with the tests of the first two rules; the yards and their rings in a window of diamonds; the count said with `note()`. | The checks; 👀 the debug panel says how many diamonds are worked under how many buildings. |
-| 5 | **A yard under every building on the map.** The layer stack's assembly moved out of the renderer first; the shared GLSL to `shaders/`; `groundShader.ts` and `GroundLayer.ts` in `world` over the land; levers in the Structures section; a square of a building on its yard at `/admin/inspect-renders`; a decision record, LOOK-AND-FEEL, RUNNING. | 👀 Every building stands in a worn yard on the diamonds, no tufts moving on it, at zoom 8 to 10. 👀 Switched to a house that has only revealed a rival's castle, its yard is greyed with it; to one that never saw it, there is nothing there. |
+| 5 | **A yard under every building on the map.** The layer stack's assembly moved out of the renderer first; the shared GLSL to `shaders/`; `groundShader.ts` and `GroundLayer.ts` in `world` over the land; levers in the Structures section; a decision record, LOOK-AND-FEEL, RUNNING. | 👀 Every building stands in a worn yard on the diamonds, no tufts moving on it, at zoom 8 to 10. 👀 Switched to a house that has only revealed a rival's castle, its yard is greyed with it; to one that never saw it, there is nothing there. |
 | 6 | **Trees cleared from worked ground.** The test of where scenery grows composed in the renderer, and tested. | 👀 A building raised in a forest from the debug panel stands in a clearing, and the trees behind it stay. |
 | 7 | **Paths between near buildings.** The rule and the course, pure and tested with the last three rules; a mask value and a look of their own; the reach a lever. | 👀 Two buildings near each other are joined by a path that wanders and keeps off water. 👀 A path to a building on unknown ground stops at the edge of the revealed ground. |
 | 8 | **A shadow under every building.** `world:structures` cuts each building's shadow as the ruin pieces' are, and it is drawn on the worked ground under it. | 👀 Every building casts a soft shadow to its left, the light being from the right. |
@@ -208,6 +208,9 @@ Settled with the plan, for the glossary:
 Then it is brought to main.
 
 ## Not in this plan
+
+- A square of a building standing in its yard on `/admin/inspect-renders`, planned with step 5 and left out of it:
+  that page draws the land, the scenery and the critters but no marks, so a building there is a step of its own.
 
 - The old streets of a ruined city drawn as worked ground, though the mask has room for them.
 - Roads a house builds, which would be a mechanic with events of its own, and a road network the server lays over the

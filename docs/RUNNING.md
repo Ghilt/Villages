@@ -501,6 +501,12 @@ stage alone, with none of the debug panel in it (decision record 0079).
   its own step. Yours already is refused `sameHolder`, and with no house `noSuchHouse`. One raised **yours** sees
   the same way from the moment it is raised. Standing in for a story handing one over or a house
   taking it; closed with the instruments.
+- The ground worn bare under the buildings: at the foot of the **Structures** section, **worn ground under the
+  buildings** draws every building's yard or leaves the painted ground as before, **how much of the earth covers the
+  paint** is a slider from none to all of it, **the earth** is its colour, and **as it was** puts both back. The line
+  under them says what is drawn: `85% earth, #806040`. They are the look's, Adam's to settle by eye at zoom 9 or 10
+  over a few buildings, and are not kept across a reload. The yards come in at 7.5 with the buildings' pictures, and
+  keep to the fog as the buildings do: Antarctica's sixteen show theirs with the fog off.
 - A house's seat: founding raises its castle, *Ravenscar Castle*, where the house was founded, held by it, and names
   it the seat, as the founding's own story in the events log: `founded`, `raised`, `namedSeat`, then the house's
   `gainedVision` from the castle. A house is not drawn on the map at all: its structures are, the castle that is its
@@ -562,7 +568,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
 - A structure on the map: its type's placeholder picture, drawn in code (`sprites/structurePictures.ts`) in its
   own colours and in the look of the culture under it, read off the master's culture map: European as drawn,
   Islamic in plaster, sandstone and green tile under a dome, East Asian in dark tile under a flared roof, African
-  in mud under a cone of thatch (`sprites/cultureStyles.ts`), a ruin too; as tall on the ground as `groundHeight` in the catalogue says at its level, standing on the front corner of its base on the corner of the ground's diamonds nearest its place, its yard worked out under it - the log says under `ground` how many diamonds of worked ground lie under how many buildings, which nothing draws yet (`docs/plans/worked-ground.md`) - and, when your house
+  in mud under a cone of thatch (`sprites/cultureStyles.ts`), a ruin too; as tall on the ground as `groundHeight` in the catalogue says at its level, standing on the front corner of its base on the corner of the ground's diamonds nearest its place, standing in its yard of worn earth - the log says under `ground` how many diamonds of worked ground lie under how many buildings (`docs/plans/worked-ground.md`, decision record 0105) - and, when your house
   controls it, far out its type's pin from `world/sprites/marks/structures/`, at the size of a word, from 7.5, where
   your house's people become their busts too; its own picture stands in for the pin until the atlas is read. **A mark
   never fades**: your holdings and key figures reach the page at every zoom, and out to the whole world they are only

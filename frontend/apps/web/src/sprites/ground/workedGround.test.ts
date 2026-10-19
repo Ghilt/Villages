@@ -5,7 +5,8 @@ import { toMercator } from '../../geometry/cameraMath';
 import { onACorner } from '../../geometry/footing';
 import { WORLD_MASTER_WIDTH } from '../../geometry/world';
 import type { MapSprite } from '../SpriteRenderer';
-import { RING, WORKED, diamondKey, diamondOf, workedGround, yardOf } from './workedGround';
+import { WORKED } from './worked';
+import { RING, diamondKey, diamondOf, workedGround, yardOf } from './workedGround';
 import type { Yard } from './workedGround';
 
 const castle: Yard = { id: 'structure:castle', u: 1000, v: 400, side: 6, ruin: false };

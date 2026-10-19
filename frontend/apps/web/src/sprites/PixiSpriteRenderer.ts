@@ -8,6 +8,7 @@ import { hangDevHandles } from './devHandles';
 import { createCloudLayer } from './clouds/CloudLayer';
 import { createCritterLayer } from './critters/CritterLayer';
 import { createFogLayer } from './FogLayer';
+import { createGroundLayer, type GroundLayer } from './ground/GroundLayer';
 import { createLandLayer } from './land/LandLayer';
 import { soonest, type Layer } from './layer';
 import { buildMarkTextures } from './markTextures';
@@ -32,6 +33,7 @@ const NOTHING: Scene = {
   selected: null,
   fog: null,
   scenery: { on: false, dial: 1, spacing: 1, laterBy: 0, shadows: 0, tilesRoot: '' },
+  worked: new Map(),
 };
 
 /**
@@ -67,6 +69,8 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   /** The marks and the ring, once there is a canvas to draw them on; the scene waits for them until then. */
   let layers: { marks: MarksLayer; ring: RingLayer; trees: TreesLayer; drawn: readonly Layer[] } | null =
     null;
+  /** The ground worn bare under the buildings, once there is a canvas to draw it on. */
+  let ground: GroundLayer | null = null;
   /** What is on the map: the last scene handed in, which a renderer mounted late is given whole. */
   let scene: Scene = NOTHING;
   /**
@@ -240,6 +244,9 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     if (was === null || next.selected !== was.selected) {
       layers.ring.setSelected(next.selected);
     }
+    if (was === null || next.worked !== was.worked) {
+      ground?.setWorked(next.worked);
+    }
   }
 
   return {
@@ -280,11 +287,14 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       scenery.setGround(groundOf(groundField));
       // The land moving in the wind and the light, on the ground under everything that stands on it.
       const land = createLandLayer(app.renderer, () => scene.scenery.tilesRoot, drawSoon);
+      // The ground worn bare under the buildings, over the land's motion and under all that stands on it.
+      ground = createGroundLayer(app.renderer, drawSoon);
       // The world outside vision over the scenery, both losing their colour on ground only revealed; then the
       // fog over them, and everything the fog must not cover above that.
       // The critters' shadows under the scenery, and the critters over it: only where the house sees now.
       const critters = createCritterLayer(drawSoon, () => ({ scenery: scene.scenery, sight: groundField }));
-      world.addChild(land.sprite, critters.ground, scenery.container, critters.flying, marks.underTheFog);
+      world.addChild(land.sprite, ground.sprite, critters.ground);
+      world.addChild(scenery.container, critters.flying, marks.underTheFog);
       stage.addChild(world);
       // The clouds over the fog, and under the ring and every sign. See decision record 0098.
       const clouds = createCloudLayer(app.renderer, drawSoon, () => marks.iconsDrawn());
@@ -309,7 +319,18 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
         marks,
         ring,
         trees,
-        drawn: [marks, ring, hazeLayer, uncolouringLayer, land, sceneryLayer, trees, critters, clouds],
+        drawn: [
+          marks,
+          ring,
+          hazeLayer,
+          uncolouringLayer,
+          land,
+          ground,
+          sceneryLayer,
+          trees,
+          critters,
+          clouds,
+        ],
       };
       // Whatever was handed over before the canvas was ready - the seats a founding choice offers always are,
       // since they arrive with the first frames - is given now, whole.
@@ -359,6 +380,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       import.meta.hot?.off(ART_CUT, artCut);
       unpaint?.();
       scenery = null;
+      ground = null;
       unwatch?.();
       unwatch = null;
       if (owed !== null) {
