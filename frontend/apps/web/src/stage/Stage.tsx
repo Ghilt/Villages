@@ -250,11 +250,6 @@ export function Stage({ stage, panes, overlays }: StageProps) {
         {panes.filter(isWindow).map((pane) => bayFor(pane.id))}
       </div>
 
-      {/* The game's own name, over the floor and never over a tile. It left the house card when the card
-          became a tile in the corner: it is the world's name rather than the house's, and it was only ever
-          in there because the house card used to be the whole stage. */}
-      {box.form === 'spread' && <p className="stage__title">Villages</p>}
-
       {tabbedTiles.map((name) => {
         const sharing = panesIn(panes, name);
         const tile = box.bays[name]!;

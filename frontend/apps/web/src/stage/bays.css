@@ -344,26 +344,3 @@
 .tabs__one--up .icon {
   color: var(--gold);
 }
-
-/*
- * The game's own name, over the floor and in no bay.
- *
- * It was in the house card only because that card used to be the whole stage. Now every pixel is either
- * the floor or a tile, so it is chrome on the floor - and the column keeps `TITLE_ROOM` clear at the top
- * for it, which is the one thing in the layout that exists for a decoration.
- */
-.stage__title {
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: 1;
-  pointer-events: none;
-  margin: 1rem;
-  font-size: 0.95rem;
-  letter-spacing: 0.42em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  background: linear-gradient(to right, rgba(239, 230, 211, 0.92), rgba(239, 230, 211, 0));
-  padding: 0.4rem 2.5rem 0.4rem 0.6rem;
-  border-radius: 2px;
-}

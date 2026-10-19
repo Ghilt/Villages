@@ -268,11 +268,10 @@ describe('the spread', () => {
     expect(box.bays.bottomLeft).toEqual({ x: 0, y: SPREAD.h - 200, w: COLUMN_WANTS, h: 200 });
   });
 
-  it('runs the column to the bottom when there is nothing in the corner', () => {
+  it('runs the column from the top to the bottom when there is nothing in the corner', () => {
     const box = spread(SPREAD, { left: true, bottomLeft: null, bottomMiddle: null });
 
-    expect(box.bays.left?.y ?? 0).toBeGreaterThan(0);
-    expect((box.bays.left?.y ?? 0) + (box.bays.left?.h ?? 0)).toBe(SPREAD.h);
+    expect(box.bays.left).toEqual({ x: 0, y: 0, w: COLUMN_WANTS, h: SPREAD.h });
   });
 
   it('sets the column into the left and bottom edges rather than floating it off them', () => {

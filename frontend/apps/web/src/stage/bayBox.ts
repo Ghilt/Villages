@@ -63,15 +63,6 @@ export const GUTTER = 16;
 export const TAB_BAR = 30;
 
 /**
- * What is kept clear at the top of the column, for the game's name.
- *
- * The one number in the layout that exists for a decoration, and it is here rather than in the stylesheet
- * so that the tile below it starts where the label stops. The label itself is in no bay: it lies on the
- * floor, which is why it has to be given room rather than taking it.
- */
-export const TITLE_ROOM = 56;
-
-/**
  * How wide the column down the side wants to be, and the least it will be squeezed to.
  *
  * The wanted width is the house card's own, which is what it has been drawn at since it was written: the
@@ -385,10 +376,9 @@ function tilesOnAMap(stage: Box, wants: SpreadWants): BayLayout {
   }
 
   if (wants.left) {
-    const tall = columnFloor - TITLE_ROOM;
     // Nothing worth drawing is left above the corner. The corner keeps what it has rather than the two of
     // them splitting a sliver each.
-    bays.left = tall >= BAY_LEAST ? { x: 0, y: TITLE_ROOM, w: column, h: tall } : null;
+    bays.left = columnFloor >= BAY_LEAST ? { x: 0, y: 0, w: column, h: columnFloor } : null;
   }
 
   // What stands at the left of the stage, which the right column and the letter both keep clear of: the
