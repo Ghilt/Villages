@@ -172,7 +172,11 @@ in `ui/art/pictures.ts` is the list `npm run world:ui` cut, kept current, `pictu
 finds one in it, and `imageSetOf` or `sourcesOf` give CSS or an `<img>` every density it was cut at, for
 the browser to pick from. So a picture Adam saves over another is drawn everywhere it is used, at once.
 A picture's size as shown is in the list, a quarter of its size as painted; a component lays it at that
-size, or scales it on purpose and says so. What the pictures are and where they go is
+size, or scales it on purpose and says so. **The page is served with the list written into it**, by
+`vite/uiInPage.ts` in the dev server and the build alike, so the first frame draws its pictures without asking
+for the list first, and with the loading screen's own pictures asked for as the page is read, while its code is
+still arriving: `ui/loadingScreen/pictures.json` names them, and its test holds it to the recipes the screen is
+drawn in. What the pictures are and where they go is
 `AUTHORING-THE-ART.md`.
 
 ## Adding a component
@@ -459,8 +463,9 @@ A line each: what it is for, its variants, and where on the page it is.
 - **`LoadingScreen`**, `ui/loadingScreen/LoadingScreen.tsx`: what covers the game while it is made ready, over
   the whole of whatever holds it and everything in it: a `title` on its plate in the middle, a line under it,
   `says`, and a meter of how far along the work is, `share`, nought to one, only when there is a figure for it.
-  Its words grow with it, a phone's at a page's size and a wide window's nearly twice that. It is drawn in the
-  colour its sky averages to before its pictures have arrived, so it covers from its first frame. `lifted`, it
+  Its words grow with it, a phone's at a page's size and a wide window's nearly twice that. Its pictures are on
+  their way with the page itself, so its first frame is drawn whole, and where they are not yet there it is drawn
+  in the colour its sky averages to, so it covers from its first frame. `lifted`, it
   fades over `FADE_MS` and is gone, taking no pointer from the moment it starts to, and says so at `onGone`;
   covered again, it is there at once. In the `screen.loading` recipe. *The loading screen*, where it is played
   through as the game plays it, and held in each state and at a phone's shape.

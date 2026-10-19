@@ -352,3 +352,6 @@ export function weightAt(pictures: readonly UiPicture[], density: number): numbe
 
 /** The most the whole interface's pictures should weigh at 2x, in bytes, so the page stays quick to open. */
 export const UI_BUDGET = 2 * 1024 * 1024;
+
+/** The id of the script the page is served with the list written into, so its first frame need not ask for it. */
+export const UI_LIST_IN_PAGE = 'ui-pictures';

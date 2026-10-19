@@ -1,0 +1,7 @@
+[
+  { "kind": "borders", "name": "cloud-border" },
+  { "kind": "fills", "name": "cloud-sky" },
+  { "kind": "borders", "name": "plate" },
+  { "kind": "controls", "name": "meter" },
+  { "kind": "controls", "name": "meter-full" }
+]

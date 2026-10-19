@@ -16,7 +16,7 @@ export type { StandChunk } from './stands.ts';
 export type { Kind } from './biome.ts';
 export type { ArtAtlasFile } from './art.ts';
 export type { CritterAtlasFile } from './critterArt.ts';
-export { PAINTED_AT, UI_BUDGET, UI_KINDS, weightAt } from './uiArt.ts';
+export { PAINTED_AT, UI_BUDGET, UI_KINDS, UI_LIST_IN_PAGE, weightAt } from './uiArt.ts';
 export type { Repeat, Sides, UiArtFile, UiBorder, UiKind, UiPicture } from './uiArt.ts';
 export { MAX_MERCATOR_LATITUDE } from './sphere.ts';
 export type { Palette, TerrainClass } from './palette.ts';

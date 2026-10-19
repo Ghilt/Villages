@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react';
 
+import { UI_LIST_IN_PAGE } from '@villages/world';
 import type { UiArtFile, UiKind, UiPicture } from '@villages/world';
 
 /**
@@ -23,7 +24,23 @@ export interface Pictures {
   readonly problem: string | null;
 }
 
-let now: Pictures = { list: null, problem: null };
+/**
+ * The list the page was served with, written into it by the dev server and the build (`vite/uiInPage.ts`), so the
+ * first frame draws its pictures without asking for the list first. Null where it was not.
+ */
+function servedWith(): UiArtFile | null {
+  const written = globalThis.document?.getElementById(UI_LIST_IN_PAGE)?.textContent;
+  if (written === undefined || written === null || written === '') {
+    return null;
+  }
+  try {
+    return JSON.parse(written) as UiArtFile;
+  } catch {
+    return null;
+  }
+}
+
+let now: Pictures = { list: servedWith(), problem: null };
 const listeners = new Set<() => void>();
 let asked = false;
 

@@ -17,6 +17,7 @@ import { spriteMarksApi } from './vite/spriteMarksApi.ts';
 import { storyApi } from './vite/storyApi.ts';
 import { structuresArtApi } from './vite/structuresArtApi.ts';
 import { uiArtApi } from './vite/uiArtApi.ts';
+import { uiInPage } from './vite/uiInPage.ts';
 import { worldApi } from './vite/worldApi.ts';
 import { worldFiles } from './vite/worldFiles.ts';
 import { worktreeApi } from './vite/worktrees.ts';
@@ -37,7 +38,8 @@ export default defineConfig({
   // picture in it is saved, as uiArtApi does world/ui, and structuresArtApi and crittersArtApi the structures'
   // and the critters' own folders in it. maplibreWorker is the build's alone: it puts MapLibre's worker beside
   // the chunk MapLibre was bundled into, where a built page looks for it. See decision record 0080.
-  // performanceApi serves the history of swarm runs to the performance page.
+  // performanceApi serves the history of swarm runs to the performance page. uiInPage serves the page with the
+  // interface's pictures already on their way, so the loading screen is drawn whole from its first frame.
   plugins: [
     react(),
     worldApi(),
@@ -52,6 +54,7 @@ export default defineConfig({
     structuresArtApi(),
     crittersArtApi(),
     uiArtApi(),
+    uiInPage(),
     worktreeApi(),
     performanceApi(),
     buildApi(),
