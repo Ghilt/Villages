@@ -510,7 +510,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `ground` how many diamonds are worn under how many buildings and how many paths join them. A path is walked only
   once the flat tiles under it have come, keeps off open water, and is worn only on ground the house has revealed. They are the look's, Adam's to settle by eye at zoom 9 or 10
   over a few buildings, and are not kept across a reload. The yards come in at 7.5 with the buildings' pictures, and
-  keep to the fog as the buildings do: Antarctica's sixteen show theirs with the fog off.
+  keep to the fog as the buildings do: Antarctica's sixteen show theirs with the fog off. Every building casts its
+  shadow on its yard, from the base to the left, cut with its picture by `world:structures`; how dark is the Scenery
+  section's shadows lever, the trees' and the buildings' alike, and a picture drawn in code casts none.
 - A house's seat: founding raises its castle, *Ravenscar Castle*, where the house was founded, held by it, and names
   it the seat, as the founding's own story in the events log: `founded`, `raised`, `namedSeat`, then the house's
   `gainedVision` from the castle. A house is not drawn on the map at all: its structures are, the castle that is its

@@ -157,7 +157,11 @@ drawn over and doubles where two overlap. **The scenery casts its shadows in a l
 every sprite: each is its sprite's outline laid on the ground by the one light, short, to the left and a
 little towards the eye, fading and softening as it goes, over a darker pool right at the foot that stands
 the thing on the ground; where two overlap the ground takes the darker and no more. How dark is a lever in
-the Scenery section, 40 per cent where a shadow is whole to begin with; experiment 0013. Whether a sprite
+the Scenery section, 40 per cent where a shadow is whole to begin with; experiment 0013. **Every building casts one
+too**, as dark, on the worn ground under the trees: cut the same way, but each column of its picture standing on
+the ground where it meets it, the front edges of its base, rather than on a line under the whole picture, which
+would cast a band under it as under a thing floating over the ground. So it falls from its base to the left and a
+little towards the eye, and its walls hide what falls behind them. Whether a sprite
 disappears into the painted forest is a question for the eye. How to hand one over is `AUTHORING-THE-ART.md`; why it works this way is
 decision record 0059.
 

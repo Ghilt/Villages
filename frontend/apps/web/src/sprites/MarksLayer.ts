@@ -7,7 +7,7 @@ import { note } from '../log/log';
 import type { CameraView } from '../geometry/cameraMath';
 import { overTheFog } from './fogLayering';
 import type { Layer } from './layer';
-import { dressIcon, dressPennant, drawnOf, flyPennant, hide, letGo, show, wearBadge } from './markEntry';
+import { castShadow, dress, drawnOf, flyPennant, hide, letGo, show, wearBadge } from './markEntry';
 import type { Entry } from './markEntry';
 import { groupMarks } from './markGroups';
 import type { Groups, Placed } from './markGroups';
@@ -36,6 +36,8 @@ export interface IconDrawn {
 }
 
 export interface MarksLayer extends Layer {
+  /** The shadows the buildings cast, laid on the ground under the fog and the trees, wherever the building is drawn. */
+  readonly shadows: Container;
   readonly underTheFog: Container;
   readonly overIt: Container;
   /** Replace what is on the map. The layer works out what appeared, changed and went away. */
@@ -62,7 +64,12 @@ export interface MarksLayer extends Layer {
   iconsDrawn(): readonly IconDrawn[];
 }
 
-export function createMarksLayer(camera: CameraSource, textures: Textures): MarksLayer {
+export function createMarksLayer(
+  camera: CameraSource,
+  textures: Textures,
+  darkness: () => number,
+): MarksLayer {
+  const shadows = new Container();
   const underTheFog = new Container();
   const overIt = new Container();
   const entries = new Map<string, Entry>();
@@ -95,6 +102,7 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
       ground: null,
       icon: null,
       pennant: null,
+      shadow: null,
       showing,
       blend: showing === 'ground' ? 1 : 0,
       presence: 0,
@@ -114,8 +122,7 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
       (overTheFog('ground', entry.inVision) ? overIt : underTheFog).addChild(sprite);
       entry.ground = sprite;
     }
-    dressIcon(entry, overIt);
-    dressPennant(entry, textures.pennant, overIt);
+    dress(entry, textures.pennant, overIt, shadows);
     return entry;
   }
 
@@ -147,11 +154,13 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
   }
 
   return {
+    shadows,
     underTheFog,
     overIt,
 
     draw(view: CameraView, _now: number, elapsed: number): number | null {
       const { zoom } = view;
+      const dark = darkness();
       let trading = false;
       const gone: string[] = [];
       // Where each mark on the screen stands this frame, worked out first, because which of them are hidden in a
@@ -223,6 +232,7 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
         const alphas = alphasFor(entry.blend);
         show(entry.ground, sizes.ground, alphas.ground * here);
         show(entry.icon, sizes.icon, alphas.icon * here);
+        castShadow(entry, sizes.ground, alphas.ground * here * dark, point);
 
         for (const sprite of [entry.ground, entry.icon]) {
           if (sprite !== null && sprite.visible) {
@@ -295,8 +305,7 @@ export function createMarksLayer(camera: CameraSource, textures: Textures): Mark
             existing.ground.anchor.set(existing.look.groundAnchor, 1);
             existing.ground.tint = spec.tint;
           }
-          dressIcon(existing, overIt);
-          dressPennant(existing, textures.pennant, overIt);
+          dress(existing, textures.pennant, overIt, shadows);
           // A person who moved may have walked into vision or out of it.
           sideOfTheFog(existing);
         }

@@ -33,6 +33,11 @@ export interface StructurePicture {
   texture: Texture;
   flag: { across: number; down: number };
   foot: number;
+  /**
+   * The shadow it casts on the ground, cut from it at the same scale, and where its foot falls in it as fractions of the
+   * shadow's width and height. Null for a picture drawn in code, which casts none.
+   */
+  shadow: { texture: Texture; foot: { x: number; y: number } } | null;
 }
 
 function draw(picture: Picture, rasterise: Rasterise): StructurePicture {
@@ -68,7 +73,7 @@ function draw(picture: Picture, rasterise: Rasterise): StructurePicture {
   const texture = rasterise(shape);
   shape.destroy();
   // Drawn front-on rather than turned onto the diamonds, so it stands on its middle.
-  return { texture, flag, foot: 0.5 };
+  return { texture, flag, foot: 0.5, shadow: null };
 }
 
 /**
@@ -105,14 +110,27 @@ export function buildStructurePictures(rasterise: Rasterise): StructurePictures 
     },
     markOf: (key) => painted.get(markKey(key.split('@')[0] ?? ''))?.texture ?? null,
     paint: (file, source) => {
-      for (const one of painted.values()) one.texture.destroy();
+      for (const one of painted.values()) {
+        one.texture.destroy();
+        one.shadow?.texture.destroy();
+      }
       painted.clear();
+      const cut = (frame: { x: number; y: number; width: number; height: number }) =>
+        new Texture({ source, frame: new Rectangle(frame.x, frame.y, frame.width, frame.height) });
       for (const [key, frame] of Object.entries(file.frames)) {
+        const shadow = file.shadows?.[key];
         painted.set(key, {
-          texture: new Texture({ source, frame: new Rectangle(frame.x, frame.y, frame.width, frame.height) }),
+          texture: cut(frame),
           flag: { across: frame.flagX, down: frame.flagY },
           // An atlas cut before the foot was measured stands every picture on its middle, as all of them stood then.
           foot: frame.footX ?? 0.5,
+          shadow:
+            shadow === undefined
+              ? null
+              : {
+                  texture: cut(shadow),
+                  foot: { x: shadow.footX / shadow.width, y: shadow.footY / shadow.height },
+                },
         });
       }
     },

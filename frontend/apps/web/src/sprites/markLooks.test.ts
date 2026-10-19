@@ -11,6 +11,8 @@ const picture = (width: number, height: number) => ({ width, height }) as Textur
 
 const MILL = picture(120, 160);
 const PIN = picture(100, 130);
+/** The mill's shadow as the cutter lays it, its foot towards its right, where the light comes from. */
+const MILL_SHADOW = { texture: picture(190, 90), foot: { x: 0.65, y: 0.7 } };
 const TEXTURES = {
   candidate: picture(44, 64),
   figure: picture(80, 160),
@@ -22,6 +24,7 @@ const TEXTURES = {
       texture: MILL,
       flag: { across: type === 'mill' ? 0.5 : 0.25, down: 0 },
       foot: type === 'mill' ? 0.6 : 0.5,
+      shadow: type === 'mill' ? MILL_SHADOW : null,
     }),
     markOf: (type: string) => (type === 'castle' ? PIN : null),
     paint: () => {},
@@ -88,6 +91,12 @@ describe("a structure's look", () => {
 
   it('flies no pennant on anything that is not a structure', () => {
     expect(lookOf({ ...structure(), kind: 'character' }, TEXTURES).flag).toBeNull();
+  });
+
+  it('casts the shadow cut for its picture, and nothing casts one that has none cut', () => {
+    expect(lookOf(structure(2.4), TEXTURES).shadow).toBe(MILL_SHADOW);
+    expect(lookOf({ ...structure(8), structure: { picture: 'castle' } }, TEXTURES).shadow).toBeNull();
+    expect(lookOf({ ...structure(), kind: 'character' }, TEXTURES).shadow).toBeNull();
   });
 });
 

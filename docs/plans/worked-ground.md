@@ -142,9 +142,18 @@ the paths come from. The mask and the layer that draws them stay.
 ## A shadow under every building
 
 The ruin pieces each have a shadow cut with them, a cast shadow and a pool at the foot (`shadowOf`,
-`packages/world/src/art.ts`), drawn in a layer of their own under the scenery. The structures get the same:
-- cut by `world:structures` into their atlas;
-- drawn on the worked ground under the building, the light from the right as for everything else.
+`packages/world/src/art.ts`), drawn in a layer of their own under the scenery. The structures get the same, by the
+same light, with one difference:
+- cut by `world:structures` into their atlas, `shadows` beside `frames` in `structures.json`, a pin casting none;
+- **cast from where each column meets the ground** (`shadowOfBuilding`, `packages/world/src/structureArt.ts`). A
+  tree stands on one point, so `shadowOf` lays every row from the bottom of the picture; a building stands on a
+  diamond whose front edges run up from its foot, and laid from its bottom row it casts a band under its whole width,
+  as a castle floating over the ground would, which is how the first cut of it looked. So each column stands at its
+  own lowest pixel, every pixel above it falls `lean` to the left and `flat` towards the eye for each pixel it stands
+  up, and the shade right at the front edges stands the building on the ground, so it needs no pool;
+- drawn by the marks layer in a container of its own on the worked ground, under the critters' shadows and the
+  trees, inside the world the fog covers, as dark as the scenery's shadows (the Scenery section's lever), and fading
+  with the building's ground form.
 
 ## The rules that must hold
 
@@ -203,7 +212,7 @@ Settled with the plan, for the glossary:
 | 5 | **A yard under every building on the map.** The layer stack's assembly moved out of the renderer first; the shared GLSL to `shaders/`; `groundShader.ts` and `GroundLayer.ts` in `world` over the land; levers in the Structures section; a decision record, LOOK-AND-FEEL, RUNNING. | 👀 Every building stands in a worn yard on the diamonds, no tufts moving on it, at zoom 8 to 10. 👀 Switched to a house that has only revealed a rival's castle, its yard is greyed with it; to one that never saw it, there is nothing there. |
 | 6 | **Trees cleared from worked ground.** The test of where scenery grows composed in the renderer, and tested. | 👀 A building raised in a forest from the debug panel stands in a clearing, and the trees behind it stay. |
 | 7 | **Paths between near buildings.** The rule and the course, pure and tested with the last three rules; a mask value and a look of their own; the reach a lever. | 👀 Two buildings near each other are joined by a path that wanders and keeps off water. 👀 A path to a building on unknown ground stops at the edge of the revealed ground. |
-| 8 | **A shadow under every building.** `world:structures` cuts each building's shadow as the ruin pieces' are, and it is drawn on the worked ground under it. | 👀 Every building casts a soft shadow to its left, the light being from the right. |
+| 8 | **A shadow under every building.** `world:structures` cuts each building's shadow by the ruin pieces' light, cast from where each column meets the ground, and it is drawn on the worked ground under it. | 👀 Every building casts a soft shadow to its left, the light being from the right. |
 
 Then it is brought to main.
 

@@ -1,6 +1,7 @@
 import type { Texture } from 'pixi.js';
 
 import type { Textures } from './markTextures';
+import type { StructurePicture } from './structurePictures';
 import type { MapSprite } from './SpriteRenderer';
 import type { Form, TwoForms } from './twoForms';
 
@@ -56,6 +57,8 @@ export interface Look {
   flag: { across: number; down: number } | null;
   /** Where it stands on the sign, which is another picture: the top of a structure's pin. */
   iconFlag: { across: number; down: number } | null;
+  /** The shadow its ground form casts, drawn as tall as the picture is: a building's, once the atlas is read. */
+  shadow: StructurePicture['shadow'];
 }
 
 /** The least a pennant is drawn, in pixels: smaller, the holder's colours could not be told at the size of a word. */
@@ -104,6 +107,7 @@ export function lookOf(spec: MapSprite, textures: Textures): Look {
       iconAnchor: mark === null ? picture.foot : 0.5,
       flag: picture.flag,
       iconFlag: mark === null ? picture.flag : PIN_TOP,
+      shadow: picture.shadow,
     };
   }
   const person = spec.kind === 'character';
@@ -116,5 +120,6 @@ export function lookOf(spec: MapSprite, textures: Textures): Look {
     iconAnchor: spec.kind === 'candidate' ? 0 : 0.5,
     flag: null,
     iconFlag: null,
+    shadow: null,
   };
 }

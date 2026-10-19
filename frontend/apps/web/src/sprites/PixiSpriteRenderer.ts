@@ -273,7 +273,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
           textureSourceOptions: { autoGenerateMipmaps: true, scaleMode: 'linear' },
         }),
       );
-      const marks = createMarksLayer(camera, textures);
+      const marks = createMarksLayer(camera, textures, () => scene.scenery.shadows);
       // The structures' pictures cut into an atlas, once they are read: until then, and without one, drawn in code.
       unpaint = watchStructureArt(textures.structures, () => {
         marks.setSprites(scene.sprites);
@@ -292,7 +292,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       // fog over them, and everything the fog must not cover above that.
       // The critters' shadows under the scenery, and the critters over it: only where the house sees now.
       const critters = createCritterLayer(drawSoon, () => ({ scenery: scene.scenery, sight: groundField }));
-      world.addChild(land.sprite, ground.sprite, critters.ground);
+      world.addChild(land.sprite, ground.sprite, marks.shadows, critters.ground);
       world.addChild(scenery.container, critters.flying, marks.underTheFog);
       stage.addChild(world);
       // The clouds over the fog, and under the ring and every sign. See decision record 0098.

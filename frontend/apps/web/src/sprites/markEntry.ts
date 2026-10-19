@@ -25,6 +25,8 @@ export interface Entry {
   icon: Sprite | null;
   /** The pennant its holder flies over it, on the side of the fog its ground form is; null for none. */
   pennant: Sprite | null;
+  /** The shadow its ground form casts, on the ground under the trees; null for a mark that casts none. */
+  shadow: Sprite | null;
   /** Which form the camera says this should be showing. Changes at the crossover, not gradually. */
   showing: Form;
   /** Where the trade between them has got to: nought the icon, one the ground form. */
@@ -76,7 +78,7 @@ export function show(sprite: Sprite | null, height: number, alpha: number): void
 
 /** Hides every sprite of a mark, as it is off the screen or faded out. */
 export function hide(entry: Entry): void {
-  for (const sprite of [entry.ground, entry.icon, entry.pennant]) {
+  for (const sprite of [entry.ground, entry.icon, entry.pennant, entry.shadow]) {
     if (sprite !== null) {
       sprite.visible = false;
     }
@@ -89,6 +91,7 @@ export function letGo(entry: Entry): void {
   entry.ground?.destroy();
   entry.icon?.destroy();
   entry.pennant?.destroy();
+  entry.shadow?.destroy();
   entry.badge?.destroy();
 }
 
@@ -127,10 +130,20 @@ export function drawnOf(entry: Entry, overIt: Container): DrawnSprite {
 }
 
 /**
+ * Dresses a mark as its look now says, its sign and its pennant over the fog or with its ground form, and its shadow
+ * on the ground: when it sprouts, and again whenever it changes.
+ */
+export function dress(entry: Entry, pennant: Texture, overIt: Container, shadows: Container): void {
+  dressIcon(entry, overIt);
+  dressPennant(entry, pennant, overIt);
+  dressShadow(entry, shadows);
+}
+
+/**
  * Gives a mark the icon its look asks for, or takes it away: a structure that changes hands into the player's
  * becomes able to be its pin, and one that leaves them loses it.
  */
-export function dressIcon(entry: Entry, overIt: Container): void {
+function dressIcon(entry: Entry, overIt: Container): void {
   const { icon, iconAnchor } = entry.look;
   if (icon === null) {
     entry.icon?.destroy();
@@ -169,7 +182,7 @@ export function wearBadge(
 }
 
 /** Gives a mark the pennant its holder flies, in their colours, or takes it down when nobody holds it. */
-export function dressPennant(entry: Entry, pennant: Texture, overIt: Container): void {
+function dressPennant(entry: Entry, pennant: Texture, overIt: Container): void {
   const colour = entry.look.flag === null ? undefined : entry.spec.pennant;
   if (colour === undefined) {
     entry.pennant?.destroy();
@@ -184,4 +197,41 @@ export function dressPennant(entry: Entry, pennant: Texture, overIt: Container):
     (entry.ground?.parent ?? overIt).addChild(entry.pennant);
   }
   entry.pennant.tint = colour;
+}
+
+/**
+ * Gives a mark the shadow its look casts, on the ground among every other mark's, or takes it away: a building's comes
+ * when the atlas it is cut into is read, and goes with a picture drawn in code.
+ */
+function dressShadow(entry: Entry, ground: Container): void {
+  const shadow = entry.look.shadow;
+  if (shadow === null) {
+    entry.shadow?.destroy();
+    entry.shadow = null;
+    return;
+  }
+  if (entry.shadow === null) {
+    entry.shadow = new Sprite(shadow.texture);
+    entry.shadow.visible = false;
+    ground.addChild(entry.shadow);
+  }
+  entry.shadow.texture = shadow.texture;
+  entry.shadow.anchor.set(shadow.foot.x, shadow.foot.y);
+}
+
+/**
+ * Lays a mark's shadow at its foot, scaled as its ground form is drawn `tall` there, as dark as `alpha`: the ground
+ * form's own share of the mark times how dark the one light's shadows are. Cut from the picture at the picture's
+ * scale, so the one scale fits both.
+ */
+export function castShadow(entry: Entry, tall: number, alpha: number, at: { x: number; y: number }): void {
+  const { shadow, ground } = entry;
+  if (shadow === null || ground === null || alpha <= 0) {
+    if (shadow !== null) shadow.visible = false;
+    return;
+  }
+  shadow.visible = true;
+  shadow.alpha = alpha;
+  shadow.scale.set(tall / ground.texture.height);
+  shadow.position.set(at.x, at.y);
 }
