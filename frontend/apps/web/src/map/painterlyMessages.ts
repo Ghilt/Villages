@@ -22,6 +22,12 @@ export const PAINTED_TILE = 256;
 export const PAINTED_STEP = Math.log2(PAINTED_TILE / TILE);
 
 /**
+ * How many 256-pixel tiles one painted tile is worth, in ground and in bytes. The numbers below were all
+ * found at 256 and are kept in those terms, so that the tile size is one number and everything follows it.
+ */
+export const PER_TILE = (PAINTED_TILE / TILE) ** 2;
+
+/**
  * The deepest painted tile MapLibre is allowed to ask for.
  *
  * MapLibre asks a raster source for tile zoom `round(mapZoom + log2(512 / tileSize))`, so at 256 it asked

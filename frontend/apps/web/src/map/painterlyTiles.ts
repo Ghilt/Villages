@@ -1,8 +1,8 @@
 import { addProtocol } from 'maplibre-gl';
 import type { Lattice } from '@villages/world';
 import { note } from '../log/log';
-import { TILE } from '../geometry/world';
-import { PAINTED_MAX_ZOOM, PAINTED_TILE, type PaintReply, type PaintRequest } from './painterlyMessages';
+import { KEPT_TO_ZOOM, MOST_AHEAD, RING, aroundAsked, wayOut } from './lookAhead';
+import { PAINTED_TILE, PER_TILE, type PaintReply, type PaintRequest } from './painterlyMessages';
 import { PaintQueue } from './paintQueue';
 import type { QueuedJob } from './paintQueue';
 import { forgetTally, requests, tally } from './paintTally';
@@ -35,12 +35,6 @@ const SCHEME = 'painterly';
 const MOST_PAINTERS = 4;
 
 /**
- * How many 256-pixel tiles one painted tile is worth, in ground and in bytes. The numbers below were all
- * found at 256 and are kept in those terms, so that the tile size is one number and everything follows it.
- */
-const PER_TILE = (PAINTED_TILE / TILE) ** 2;
-
-/**
  * Painted tiles kept as pixels, about a hundred and ten megabytes of them whatever size a tile is.
  *
  * It has to hold the view and everything painted around it at once, or looking ahead evicts the very
@@ -62,18 +56,6 @@ const REMEMBER = Math.round(450 / PER_TILE);
 /** How long the map has to be still before anything is painted ahead of being asked for. */
 const QUIET_MS = 180;
 
-/**
- * How deep a ring around the view to paint ahead, in tiles.
- *
- * One was tried and left half the tiles of a screen-sized pan still to paint, because a pan of a whole
- * screen moved two to three 256-pixel tiles. Two covered it. At 512 pixels the same pan is one to one and
- * a half, and one ring is the same ground two was.
- */
-const RING = Math.max(1, Math.round((2 * TILE) / PAINTED_TILE));
-
-/** A bound on how much to paint ahead, so a fast pan cannot queue up a thousand tiles. */
-const MOST_AHEAD = Math.round(140 / PER_TILE);
-
 /** A painted tile, four bytes a pixel. Its buffer is the one transferred out of a painter. */
 type Pixels = Uint8ClampedArray<ArrayBuffer>;
 
@@ -85,13 +67,20 @@ interface Pending {
 const pending = new Map<number, Pending>();
 /** Tiles already painted, by style and address. Pixels, not bitmaps: MapLibre closes a bitmap it uploads. */
 const painted = new Map<string, Pixels>();
+/**
+ * Tiles from `KEPT_TO_ZOOM` out, which are kept for good rather than in `painted`, where the oldest go: those of the
+ * style and the lattice painted last, so that changing the renderer or turning the lattice lets the old ones go.
+ */
+const kept = new Map<string, Pixels>();
+let keptLook = '';
+const held = (key: string): Pixels | undefined => painted.get(key) ?? kept.get(key);
 let painters: Worker[] = [];
 /** How many tiles each painter has been given and not yet answered. */
 const inFlight: number[] = [];
 let nextId = 1;
 
 export function paintedTally(): PaintedTally {
-  return { ...tally, held: painted.size };
+  return { ...tally, held: painted.size + kept.size };
 }
 
 /**
@@ -126,7 +115,16 @@ if (import.meta.env.DEV) {
 const addressOf = (request: PaintRequest): string =>
   `${request.style}/${request.latticeTurn}/${request.latticeSize}/${request.zoom}/${request.x}/${request.y}`;
 
-function remember(key: string, pixels: Pixels): void {
+function remember(request: PaintRequest, key: string, pixels: Pixels): void {
+  if (request.zoom <= KEPT_TO_ZOOM) {
+    const look = `${request.style}/${request.latticeTurn}/${request.latticeSize}`;
+    if (look !== keptLook) {
+      kept.clear();
+      keptLook = look;
+    }
+    kept.set(key, pixels);
+    return;
+  }
   if (painted.size >= REMEMBER) {
     if (!crowded) {
       crowded = true;
@@ -219,7 +217,7 @@ function start(job: Job, to: number): void {
   pending.set(job.request.id, {
     settle: (buffer) => {
       const pixels = new Uint8ClampedArray(buffer);
-      remember(job.key, pixels);
+      remember(job.request, job.key, pixels);
       queue.finish(job);
       job.settle(pixels);
     },
@@ -237,26 +235,31 @@ function start(job: Job, to: number): void {
  * Tiles the map is waiting for go first, newest first, to any painter holding fewer than `DEPTH`. Tiles
  * painted on speculation go only to a painter holding nothing at all and only when no wanted tile is
  * waiting, which is the whole safety of looking ahead: a tile the map is actually waiting for is never
- * queued behind one that nobody has asked for.
+ * queued behind one that nobody has asked for. Those around where the map rests go before the way out.
  */
 function dispatch(): void {
-  const available = pool();
   for (let next = queue.next(inFlight); next !== null; next = queue.next(inFlight)) {
     start(next.job, next.painter);
   }
-  if (queue.anyWaiting) {
-    return;
+  if (!queue.anyWaiting) {
+    speculate(ahead);
+    speculate(later);
   }
-  for (let index = 0; index < available.length && ahead.length > 0; index += 1) {
+}
+
+/** Gives each painter holding nothing the first of `from` that is neither painted nor being painted. */
+function speculate(from: PaintRequest[]): void {
+  const available = pool();
+  for (let index = 0; index < available.length && from.length > 0; index += 1) {
     if ((inFlight[index] ?? 0) !== 0) {
       continue;
     }
-    const next = ahead.shift();
+    const next = from.shift();
     if (next === undefined) {
       break;
     }
     const key = addressOf(next);
-    if (painted.has(key) || queue.has(key)) {
+    if (held(key) !== undefined || queue.has(key)) {
       index -= 1;
       continue;
     }
@@ -278,10 +281,10 @@ function dispatch(): void {
 function wantPixels(request: PaintRequest, signal: AbortSignal): Promise<Pixels> {
   const key = addressOf(request);
   requests.asked += 1;
-  const held = painted.get(key);
-  if (held !== undefined) {
+  const there = held(key);
+  if (there !== undefined) {
     requests.ended += 1;
-    return Promise.resolve(held);
+    return Promise.resolve(there);
   }
 
   let job = queue.find(key);
@@ -339,15 +342,13 @@ function wantPixels(request: PaintRequest, signal: AbortSignal): Promise<Pixels>
 /** Addresses MapLibre has asked for lately. What is around these is what it will ask for next. */
 const wanted = new Map<string, PaintRequest>();
 let ahead: PaintRequest[] = [];
+/** The way out from where the game starts, painted after everything else. See `paintTheWayOut`. */
+let later: PaintRequest[] = [];
+/** The last tile MapLibre asked for, whose style and lattice a tile painted unasked is painted in. */
+let lastAsked: PaintRequest | null = null;
 let quiet: ReturnType<typeof setTimeout> | undefined;
 
-/**
- * Works out what the map will want next, once it has stopped moving.
- *
- * Rather than reading the camera and doing the arithmetic, this takes what MapLibre actually asked for and
- * looks around it: the eight tiles beside each one for panning, the four inside it for zooming in, and the
- * one containing it for zooming out. That way the zoom is always the one MapLibre chose, with no guessing.
- */
+/** Works out what the map will want next, once it has stopped moving: `aroundAsked` in `lookAhead.ts`. */
 function lookAhead(): void {
   quiet = undefined;
   if (droppedSinceRest > 0) {
@@ -357,49 +358,37 @@ function lookAhead(): void {
     );
     droppedSinceRest = 0;
   }
-  const around: PaintRequest[] = [];
-
-  const consider = (from: PaintRequest, zoom: number, x: number, y: number): void => {
-    if (zoom < 0 || zoom > PAINTED_MAX_ZOOM || around.length >= MOST_AHEAD) {
-      return;
-    }
-    const across = 2 ** zoom;
-    if (x < 0 || x >= across || y < 0 || y >= across) {
-      return;
-    }
-    const next: PaintRequest = { ...from, id: 0, tiles: tilesRoot, zoom, x, y };
+  ahead = [];
+  for (const { from, at } of aroundAsked([...wanted.values()], RING)) {
+    const next: PaintRequest = { ...from, id: 0, tiles: tilesRoot, ...at };
     const key = addressOf(next);
-    if (painted.has(key) || queue.has(key) || wanted.has(key)) {
-      return;
+    if (held(key) === undefined && !queue.has(key) && !wanted.has(key)) {
+      ahead.push(next);
     }
-    around.push(next);
-  };
-
-  // Nearest first, so that what is painted ahead is what a small movement reaches first.
-  for (let ring = 1; ring <= RING; ring += 1) {
-    for (const request of wanted.values()) {
-      for (let dy = -ring; dy <= ring; dy += 1) {
-        for (let dx = -ring; dx <= ring; dx += 1) {
-          if (Math.max(Math.abs(dx), Math.abs(dy)) === ring) {
-            consider(request, request.zoom, request.x + dx, request.y + dy);
-          }
-        }
-      }
+    if (ahead.length >= MOST_AHEAD) {
+      break;
     }
   }
-  for (const request of wanted.values()) {
-    consider(request, request.zoom + 1, request.x * 2, request.y * 2);
-    consider(request, request.zoom + 1, request.x * 2 + 1, request.y * 2);
-    consider(request, request.zoom + 1, request.x * 2, request.y * 2 + 1);
-    consider(request, request.zoom + 1, request.x * 2 + 1, request.y * 2 + 1);
-    // Zooming out asks for the tile containing this one; two out as well, so that there is always a
-    // coarse painted version for MapLibre to stretch while a sharp one is still being painted.
-    consider(request, request.zoom - 1, request.x >> 1, request.y >> 1);
-    consider(request, request.zoom - 2, request.x >> 2, request.y >> 2);
-  }
-
   wanted.clear();
-  ahead = around;
+  dispatch();
+}
+
+/**
+ * Paints the way out from where the game starts, once it has: the tiles a zoom out from this camera will ask for,
+ * the nearest zoom first, after everything the map is waiting for or will want around where it rests. Those from
+ * `KEPT_TO_ZOOM` out are kept for good once painted. See `wayOut` in `lookAhead.ts`.
+ */
+export function paintTheWayOut(view: Parameters<typeof wayOut>[0]): void {
+  const like = lastAsked;
+  if (like === null) {
+    return;
+  }
+  later = wayOut(view).map((at) => ({ ...like, id: 0, tiles: tilesRoot, ...at }));
+  const keeping = later.filter((one) => one.zoom <= KEPT_TO_ZOOM).length;
+  note(
+    'paint',
+    `painting the way out ahead of the camera: ${later.length} tiles from zoom ${later[0]?.zoom ?? 0} out, the ${keeping} from zoom ${KEPT_TO_ZOOM} out kept for good`,
+  );
   dispatch();
 }
 
@@ -449,12 +438,13 @@ export function registerPainterlyTiles(worldRoot: string): void {
     };
 
     wanted.set(addressOf(request), request);
+    lastAsked = request;
     if (quiet !== undefined) {
       clearTimeout(quiet);
     }
     quiet = setTimeout(lookAhead, QUIET_MS);
 
-    if (painted.has(addressOf(request))) {
+    if (held(addressOf(request)) !== undefined) {
       tally.ready += 1;
     } else {
       tally.waited += 1;

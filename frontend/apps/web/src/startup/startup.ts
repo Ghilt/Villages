@@ -6,6 +6,7 @@ import { FOUNDING_ZOOM } from '../house/arrival';
 import { inHandStore } from '../loading/inHand';
 import { note } from '../log/log';
 import { paintedRequests } from '../map/paintTally';
+import { paintTheWayOut } from '../map/painterlyTiles';
 import { sessionStore } from '../net/gateway';
 import { startAtIn } from '../net/startAt';
 import { LONGEST_MS, nextStep, shareDrawn } from './rules';
@@ -28,14 +29,24 @@ const startup = createStore<Startup>({ lifted: performance.now() >= LONGEST_MS }
 
 export const startupStore: Readable<Startup> = startup;
 
-// The limit holds whether or not a map ever comes to be watched: a map that never has its style lifts the screen too.
+/** Whether a map is being watched, which then keeps the limit itself, and says what was still coming. */
+let watching = false;
+
+// The limit holds whether or not a map ever comes to be watched: a map that never has its style lifts the screen too,
+// and so does one whose watching ended without lifting it.
+const holdTheLimit = (): void => {
+  if (startup.get().lifted) {
+    return;
+  }
+  if (watching) {
+    globalThis.setTimeout(holdTheLimit, 1_000);
+    return;
+  }
+  startup.set({ lifted: true });
+  note('startup', `lifted at the ${seconds(LONGEST_MS)} limit, with no map to watch`);
+};
 if (!startup.get().lifted) {
-  globalThis.setTimeout(() => {
-    if (!startup.get().lifted) {
-      startup.set({ lifted: true });
-      note('startup', `lifted at the ${seconds(LONGEST_MS)} limit, before the map had its style`);
-    }
-  }, LONGEST_MS - performance.now());
+  globalThis.setTimeout(holdTheLimit, LONGEST_MS - performance.now());
 }
 
 /** How often the screen looks again while nothing tells it to: for its meter, and for the waits it keeps. */
@@ -51,6 +62,7 @@ export function watchStartup(map: maplibregl.Map): () => void {
   if (startup.get().lifted) {
     return () => undefined;
   }
+  watching = true;
   const mapReadyAt = performance.now();
   const linked = startAtIn(globalThis.location.search) !== null;
   let placed: string | null = null;
@@ -86,6 +98,9 @@ export function watchStartup(map: maplibregl.Map): () => void {
   const lift = (cutShort: boolean): void => {
     stop();
     startup.set({ lifted: true, share: 1, shareSaid: 'drawn' });
+    // A player who has just arrived zooms out from where they are, so that is painted next, before they do.
+    const { clientWidth: width, clientHeight: height } = map.getContainer();
+    paintTheWayOut({ centre: map.getCenter(), width, height, zoom: map.getZoom() });
     const now = performance.now();
     if (!cutShort) {
       note(
@@ -148,6 +163,7 @@ export function watchStartup(map: maplibregl.Map): () => void {
   return stop;
 
   function stop(): void {
+    watching = false;
     map.off('idle', idle);
     unwatchSession();
     unwatchInHand();

@@ -12,7 +12,7 @@
 716 debug-quick-start.ps1
 819 frontend/apps/web/src/admin/showcase/showcase.css
 436 frontend/apps/web/src/areas/AreaOverlay.tsx
-466 frontend/apps/web/src/map/painterlyTiles.ts
+456 frontend/apps/web/src/map/painterlyTiles.ts
 429 frontend/apps/web/src/sprites/FogLayer.ts
 719 frontend/apps/web/src/sprites/scenery/SceneryLayer.ts
 599 frontend/apps/web/src/stage/bayBox.test.ts

@@ -50,7 +50,13 @@ stage alone, with none of the debug panel in it (decision record 0079).
   turned off. It is the view to check a master against the file it was painted in, and it is two
   numbers in `world/painterly.json` rather than a look. Only the terrain is precomputed: a tile knows its own zoom, so the treatment is drawn at the
   size it should be at whatever you are looking at. Painting happens in a pool of workers, and the tiles
-  around the view are painted during the pauses so that moving the map finds them done. See
+  around the view are painted during the pauses so that moving the map finds them done. Once the loading screen
+  lifts, the way out is painted after everything else, nearest zoom first: a window's worth of tiles at every zoom
+  out from where the camera starts, and the whole world from zoom 3 out, whose 85 tiles are then kept for good
+  rather than thrown away when the store is full - the log says so under `paint`, *painting the way out ahead of the
+  camera: 344 tiles from zoom 9 out, the 85 from zoom 3 out kept for good*, and the tally in the browser's console,
+  `window.villagesPainterly()`, counts every painted tile held, the kept ones with them. Nothing is kept across a
+  reload. See
   `docs/adr/0021` and `0022`. `Flow` is not a look either: it draws, in place of the water, which way every
   river runs, a colour for each way and arrows marching downstream from about zoom 8, and black where a river
   has no way to any sea or lake - a break in the master's rivers to mend. See `docs/adr/0081`. `Origin` is a
