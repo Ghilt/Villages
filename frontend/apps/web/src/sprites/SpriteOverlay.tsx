@@ -5,20 +5,15 @@ import { sceneryStore } from './scenery/settings';
 import { circleOf, visionOf } from '../fog/circles';
 import { fieldOf } from '../fog/fogField';
 import { whileInHand } from '../loading/inHand';
-import { note } from '../log/log';
 import { sessionStore } from '../net/gateway';
 import { focusOn } from '../map/focus';
 import { CrowdCard } from './CrowdCard';
-import { workedGroundStore } from './ground/settings';
-import type { Worked } from './ground/worked';
-import { rememberingWorkedGround, yardOf } from './ground/workedGround';
+import { revealedBy } from './ground/growing';
+import { useWorkedGround } from './ground/useWorkedGround';
 import { cameraOf } from './mapCamera';
 import { createPixiSpriteRenderer } from './PixiSpriteRenderer';
 import type { MapSprite } from './SpriteRenderer';
 import { useStore } from '../store/useStore';
-
-/** The worked ground with its switch off. */
-const NOTHING_WORN: ReadonlyMap<number, Worked> = new Map();
 
 /** How a person's mark is told from a structure's: its id is theirs with this in front. See App.tsx. */
 const CHARACTER = 'character:';
@@ -78,21 +73,13 @@ export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick }: 
   const field = useMemo(() => fieldOf(circles, tension), [circles, tension]);
   const vision = useMemo(() => visionOf(sight?.points ?? [], today, tension), [sight, today, tension]);
 
-  // The ground worn bare under the buildings the page holds, worked out again only when they change, and said in the
-  // log when how much of it there is changes. See docs/plans/worked-ground.md.
-  const [work] = useState(rememberingWorkedGround);
-  const yards = useMemo(() => sprites.flatMap((sprite) => yardOf(sprite) ?? []), [sprites]);
-  // With the switch off there is no worked ground at all: nothing drawn, and the trees grow back.
-  const wearing = useStore(workedGroundStore, (state) => state.on);
-  const worked = useMemo(() => (wearing ? work(yards) : NOTHING_WORN), [wearing, work, yards]);
-  const said = useRef('');
-  useEffect(() => {
-    const now = `${worked.size} diamonds of worked ground under ${yards.length} buildings`;
-    if (now !== said.current) {
-      said.current = now;
-      note('ground', now);
-    }
-  }, [worked, yards]);
+  // The ground worn bare by the buildings the page holds, a path worn only on ground the house has revealed: all of
+  // it with the fog off, none until the gateway has said what the house sees. See docs/plans/worked-ground.md.
+  const revealed = useMemo(
+    () => revealedBy(!fogOn ? undefined : sight === null ? null : field),
+    [fogOn, sight, field],
+  );
+  const worked = useWorkedGround(sprites, worldRoot, revealed);
 
   useEffect(() => {
     const container = containerRef.current;

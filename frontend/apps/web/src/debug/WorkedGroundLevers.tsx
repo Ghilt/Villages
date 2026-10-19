@@ -3,7 +3,8 @@ import { useStore } from '../store/useStore';
 
 /**
  * The worked ground's levers, in the Structures section: whether the buildings stand in worn ground or on the painted
- * ground as before, how much of the earth covers the paint, and its colour. Matters of taste, settled by eye with the
+ * ground as before, how much of the earth covers the paint, how near two buildings stand for a path to join them, and
+ * the earth's colour. Matters of taste, settled by eye with the
  * map at zoom 9 or 10 over a few buildings. See docs/plans/worked-ground.md.
  */
 export function WorkedGroundLevers() {
@@ -34,6 +35,19 @@ export function WorkedGroundLevers() {
         value={how.strength}
         onChange={(event) => setWorkedGround({ strength: Number(event.target.value) })}
       />
+      <label className="debug-map__label" htmlFor="worked-ground-reach">
+        How near two buildings stand for a path to join them
+      </label>
+      <input
+        id="worked-ground-reach"
+        className="debug__slider"
+        type="range"
+        min={0}
+        max={40}
+        step={1}
+        value={how.reach}
+        onChange={(event) => setWorkedGround({ reach: Number(event.target.value) })}
+      />
       <label className="debug-map__label" htmlFor="worked-ground-earth">
         The earth
       </label>
@@ -47,14 +61,16 @@ export function WorkedGroundLevers() {
         <button
           type="button"
           className="debug__button"
-          title={`back to ${WORKED_GROUND_START.earth} at ${WORKED_GROUND_START.strength}`}
+          title={`back to ${WORKED_GROUND_START.earth} at ${WORKED_GROUND_START.strength}, paths within ${WORKED_GROUND_START.reach}`}
           onClick={() => setWorkedGround({ ...WORKED_GROUND_START })}
         >
           as it was
         </button>
       </div>
       <p className="debug-map__note">
-        {how.on ? `${Math.round(how.strength * 100)}% earth, ${how.earth}` : 'the painted ground, as before'}
+        {how.on
+          ? `${Math.round(how.strength * 100)}% earth, ${how.earth}; ${how.reach === 0 ? 'no paths' : `paths between buildings within ${how.reach} units`}`
+          : 'the painted ground, as before'}
       </p>
     </>
   );

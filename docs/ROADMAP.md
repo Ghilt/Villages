@@ -180,7 +180,8 @@ planned and not started; and worked ground, the newest, is planned and not start
   every building, trees cleared off it, paths between near buildings, and a shadow under each. It is worked out by
   the browser from the structures it holds, so it keeps to the fog exactly as the buildings do, with nothing stored
   or sent. It is drawn by one pass of the sprite canvas over a mask of the diamonds. The steps, one commit each, are
-  in `docs/plans/worked-ground.md`; steps 1 to 6 are built, every building standing in its yard on the map, no tree on it
+  in `docs/plans/worked-ground.md`; steps 1 to 7 are built, every building standing in its yard on the map, no tree on it, and paths between near
+  ones
   (decision record 0105). Asked for by Adam on 2026-10-18.
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps

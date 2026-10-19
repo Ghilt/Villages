@@ -77,3 +77,18 @@ construction.
 **Worked out on the server**, as a read model sent through the fog. It would let a rule see the whole world, which a
 road network may one day need; for yards it adds a projection, a frame and a protocol version to say what the page
 already knows.
+
+## Amendment, 2026-10-19: paths between near buildings
+
+Two buildings are joined by a path when they stand nearer each other than the paths' reach, foot to foot, whoever
+holds them, a ruin included: a rule of the pair alone, so learning of a third building never adds, moves or takes away a
+path already seen, as "each to its nearest" would the moment the fog let a nearer one through (`sprites/ground/paths.ts`).
+The course is walked over the diamonds from the front of one footprint to the front of the other, the cheapest way
+across the ground in a box round the pair: a step onto land costs one and a little of a smooth wander seeded by the
+pair, a river six, and open water - the ocean, the shallow sea and a lake - bars the way; a pair that water bars has
+none. The ground is the flat tiles of class ids at zoom 7, a world unit a texel, asked for as a course needs them
+(`groundTiles.ts`), and a course is not walked until all the ground it looks at has come, so it is never walked on a
+guess and walked again differently. Paths are worn into the worked ground under the yards, as their own kind, and only
+on ground the house has revealed: a path to a building seen through the fog stops where the revealed ground stops. The
+reach is a lever in the Structures section, twelve world units to begin with, which joins the next-door buildings of
+Antarctica's sixteen and not the ones across a diagonal.

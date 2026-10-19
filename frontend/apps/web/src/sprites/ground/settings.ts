@@ -14,9 +14,16 @@ export interface WorkedGroundSettings {
   strength: number;
   /** The colour of the earth, as `#rrggbb`. */
   earth: string;
+  /** How near two buildings stand, foot to foot in world units, for a path to join them: nought for none. */
+  reach: number;
 }
 
-export const WORKED_GROUND_START: WorkedGroundSettings = { on: true, strength: 0.85, earth: '#806040' };
+export const WORKED_GROUND_START: WorkedGroundSettings = {
+  on: true,
+  strength: 0.85,
+  earth: '#806040',
+  reach: 12,
+};
 
 const ground = createStore<WorkedGroundSettings>({ ...WORKED_GROUND_START });
 
@@ -25,7 +32,12 @@ export const workedGroundStore: Readable<WorkedGroundSettings> = ground;
 export function setWorkedGround(change: Partial<WorkedGroundSettings>): void {
   const was = ground.get();
   const next = { ...was, ...change };
-  if (next.on === was.on && next.strength === was.strength && next.earth === was.earth) {
+  if (
+    next.on === was.on &&
+    next.strength === was.strength &&
+    next.earth === was.earth &&
+    next.reach === was.reach
+  ) {
     return;
   }
   if (next.on !== was.on) {

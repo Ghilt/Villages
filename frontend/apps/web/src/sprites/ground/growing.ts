@@ -8,6 +8,14 @@ import { diamondKey } from './workedGround';
 const FRAME = frameOf(GROUND_LATTICE);
 
 /**
+ * Whether a point of world space is ground the house has revealed: null, everywhere, with the fog off, which is
+ * `undefined`; nowhere for a house that sees nothing, which is `null`; and otherwise what the fog's field says.
+ */
+export function revealedBy(field: FogField | null | undefined): ((x: number, y: number) => boolean) | null {
+  return field === undefined ? null : field === null ? () => false : (x, y) => revealedAt(field, x, y);
+}
+
+/**
  * Where the scenery may grow, a point of world space at a time: on ground the house has revealed - everywhere with
  * the fog off, which is `undefined`, and nowhere for a house that sees nothing, which is `null` - and never on a
  * diamond of worked ground, so no tree stands in a building's yard. Null where it may grow everywhere. The scenery
@@ -18,12 +26,7 @@ export function whereSceneryGrows(
   field: FogField | null | undefined,
   worked: ReadonlyMap<number, Worked>,
 ): ((x: number, y: number) => boolean) | null {
-  const revealed =
-    field === undefined
-      ? null
-      : field === null
-        ? () => false
-        : (x: number, y: number) => revealedAt(field, x, y);
+  const revealed = revealedBy(field);
   if (worked.size === 0) {
     return revealed;
   }
