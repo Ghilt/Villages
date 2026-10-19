@@ -211,3 +211,12 @@ ground's diamonds nearest its place (`geometry/footing.ts`), less than a world u
 diamonds a yard will be laid on (`docs/plans/worked-ground.md`). Only the drawing moves: the place the server holds is
 untouched. The Pictures page ticks each building's foot in gold. A thing painted lower than the base's front corner -
 a cart, a stack of crates, a ship's cradle - takes the foot with it, which is the painter's to fix in the picture.
+
+## Amendment, 2026-10-19: a building casts its shadow from the front edges of its base
+
+`world:structures` now cuts each building's shadow into its atlas beside its picture, as `world:art` cuts the
+scenery's, by the same light, and the map draws it on the ground under the building, as dark as the scenery's. It is
+not `shadowOf`, which lays a picture from its bottom row because a tree stands on one point: a building stands on a
+diamond, and laid from its bottom row it cast a band under its whole width, so it looked to float. Each column of a
+building's picture stands on the ground at its own lowest pixel instead, which is the front edge of its base
+(`shadowOfBuilding`). A pin casts none. See `docs/plans/worked-ground.md`.

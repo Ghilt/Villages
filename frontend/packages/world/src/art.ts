@@ -417,7 +417,7 @@ export const SHADOW = {
 } as const;
 
 /** A box blur along one row, in place, `passes` times, which twice over is near enough a Gaussian. */
-function blurRow(row: Float32Array, radius: number, passes: number): void {
+export function blurRow(row: Float32Array, radius: number, passes: number): void {
   if (radius <= 0) return;
   const copy = new Float32Array(row.length);
   for (let pass = 0; pass < passes; pass += 1) {

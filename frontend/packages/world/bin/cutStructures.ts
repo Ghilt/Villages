@@ -7,8 +7,14 @@ import sharp from 'sharp';
 
 import { crop, opaqueBox, packShelves } from '../src/art.ts';
 import type { Rgba } from '../src/art.ts';
-import { flagOf, footOfBuilding, keyOfStructureFile, structurePictureFile } from '../src/structureArt.ts';
-import type { StructureAtlasFile, StructureFrame } from '../src/structureArt.ts';
+import {
+  flagOf,
+  footOfBuilding,
+  keyOfStructureFile,
+  shadowOfBuilding,
+  structurePictureFile,
+} from '../src/structureArt.ts';
+import type { StructureAtlasFile, StructureFrame, StructureShadow } from '../src/structureArt.ts';
 import {
   DRAWN_CULTURES,
   DRAWN_TYPES,
@@ -29,8 +35,8 @@ import { ART_DIR, STRUCTURE_MARKS_DIR, STRUCTURES_DIR } from './lib/paths.ts';
  * First it draws a placeholder for every picture `world/sprites/structures/` has none of, from the same shapes the
  * map draws in code, and remembers what it drew in `placeholders.json` there, so a picture saved over one is known to
  * be Adam's and is never drawn over. Then it crops every picture to what is drawn in it, scales it to one height,
- * finds where a pennant stands on it and where it stands on the ground, and packs them all into `public/art/structures.webp` with `structures.json`
- * beside it, which the map draws from where it has a picture and draws in code where it has none. The marks of
+ * finds where a pennant stands on it and where it stands on the ground, casts its shadow, and packs them all into
+ * `public/art/structures.webp` with `structures.json` beside it, which the map draws from where it has a picture and draws in code where it has none. The marks of
  * `world/sprites/marks/structures/`, a pin a type and the ruin's, are drawn and cut the same way into the same atlas,
  * with a record of their own. Nothing is written
  * when nothing is new. Seconds. See docs/plans/structures.md.
@@ -41,7 +47,8 @@ const HEIGHT = 160;
 /** How big a placeholder is drawn, before it is cropped and scaled. */
 const DRAWN = 384;
 const PAD = 2;
-const WIDEST = 1024;
+/** Twice the scenery's, because the buildings' shadows are packed in too: kept nearer square than tall. */
+const WIDEST = 2048;
 
 const sha = (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex');
 /** A folder of pictures, what a file in it is keyed by, and its record of which are still placeholders. */
@@ -84,7 +91,14 @@ for (const picture of [...DRAWN_TYPES, RUIN_PICTURE]) {
 }
 
 // Cut every picture there is.
-const pieces: { key: string; file: string; image: Rgba; footX: number; placeholder: boolean }[] = [];
+const pieces: {
+  key: string;
+  file: string;
+  image: Rgba;
+  footX: number;
+  placeholder: boolean;
+  pin: boolean;
+}[] = [];
 const files = async (from: Folder) =>
   (await readdir(from.dir))
     .filter((file) => from.keyOf(file) !== null)
@@ -116,11 +130,21 @@ for (const { from, file } of [...(await files(pictures)), ...(await files(marks)
     // Read before the picture is scaled down, where the corner is still sharp.
     footX: footOfBuilding(cropped),
     placeholder,
+    pin: from === marks,
   });
 }
 
+// Every building's shadow, from the cut picture itself, into the same atlas; a pin is a sign and casts none.
+const shadows = pieces.map((piece) =>
+  piece.pin ? null : shadowOfBuilding(piece.image, piece.footX * piece.image.width),
+);
+// The pictures first and the shadows after them, so a picture's place in the atlas is its place in `pieces`.
+const images = [
+  ...pieces.map((piece) => piece.image),
+  ...shadows.flatMap((shadow) => (shadow === null ? [] : [shadow.image])),
+];
 const packed = packShelves(
-  pieces.map((piece) => ({ width: piece.image.width, height: piece.image.height })),
+  images.map((image) => ({ width: image.width, height: image.height })),
   PAD,
   WIDEST,
 );
@@ -133,9 +157,9 @@ const atlas = await sharp({
   },
 })
   .composite(
-    pieces.map((piece, at) => ({
-      input: Buffer.from(piece.image.data),
-      raw: { width: piece.image.width, height: piece.image.height, channels: 4 as const },
+    images.map((image, at) => ({
+      input: Buffer.from(image.data),
+      raw: { width: image.width, height: image.height, channels: 4 as const },
       left: packed.placed[at]!.x,
       top: packed.placed[at]!.y,
     })),
@@ -157,8 +181,24 @@ pieces.forEach((piece, at) => {
     source: piece.file,
   };
 });
+const shadowFrames: Record<string, StructureShadow> = {};
+let castAt = pieces.length;
+pieces.forEach((piece, at) => {
+  const shadow = shadows[at];
+  if (shadow === null || shadow === undefined) return;
+  shadowFrames[piece.key] = {
+    ...packed.placed[castAt]!,
+    width: shadow.image.width,
+    height: shadow.image.height,
+    footX: Math.round(shadow.footX * 100) / 100,
+    footY: shadow.footY,
+  };
+  castAt += 1;
+});
 // Of the frames too, so a change in what is measured on a picture is written when the pictures are not.
-const version = sha(Buffer.concat([atlas, Buffer.from(JSON.stringify(frames))])).slice(0, 16);
+const version = sha(
+  Buffer.concat([atlas, Buffer.from(JSON.stringify({ frames, shadows: shadowFrames }))]),
+).slice(0, 16);
 const atlasJson = resolve(ART_DIR, 'structures.json');
 const before = existsSync(atlasJson)
   ? (JSON.parse(await readFile(atlasJson, 'utf8')) as StructureAtlasFile)
@@ -180,6 +220,7 @@ if (before?.version === version) {
     width: packed.width,
     height: packed.height,
     frames,
+    shadows: shadowFrames,
   };
   // Last, so that a page that finds the file finds the atlas it names.
   await writeFile(atlasJson, `${JSON.stringify(file, null, 2)}\n`);

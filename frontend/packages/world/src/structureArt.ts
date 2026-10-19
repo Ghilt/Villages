@@ -1,3 +1,4 @@
+import { SHADOW, blurRow } from './art.ts';
 import type { Rgba } from './art.ts';
 import { CULTURES } from './structures.ts';
 import type { Culture } from './structures.ts';
@@ -26,6 +27,16 @@ export interface StructureFrame {
   source: string;
 }
 
+/** A building's shadow in the atlas, and where its foot falls in it, in the shadow's own pixels from its top left. */
+export interface StructureShadow {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  footX: number;
+  footY: number;
+}
+
 /** `structures.json` beside the atlas. */
 export interface StructureAtlasFile {
   /** A hash of the atlas's bytes, so a page asks again for a picture cut again. */
@@ -34,6 +45,11 @@ export interface StructureAtlasFile {
   width: number;
   height: number;
   frames: Record<string, StructureFrame>;
+  /**
+   * Each building's shadow, by the same key, cut from its picture by `shadowOfBuilding` into the same atlas. A pin
+   * casts none. Absent from an atlas cut before buildings had shadows.
+   */
+  shadows?: Record<string, StructureShadow>;
 }
 
 /** The file a picture of a type, or a ruin, in a culture is saved as. */
@@ -99,4 +115,124 @@ export function footOfBuilding(image: Rgba): number {
     }
   }
   return sum / weight / image.width;
+}
+
+/** A whole image blurred, along its rows and then down its columns, twice over each. */
+function blurred(shade: Float32Array, width: number, height: number, radius: number): Float32Array {
+  const out = new Float32Array(shade);
+  const row = new Float32Array(width);
+  for (let y = 0; y < height; y += 1) {
+    row.set(out.subarray(y * width, (y + 1) * width));
+    blurRow(row, radius, 2);
+    out.set(row, y * width);
+  }
+  const column = new Float32Array(height);
+  for (let x = 0; x < width; x += 1) {
+    for (let y = 0; y < height; y += 1) column[y] = out[y * width + x]!;
+    blurRow(column, radius, 2);
+    for (let y = 0; y < height; y += 1) out[y * width + x] = column[y]!;
+  }
+  return out;
+}
+
+/**
+ * A building's shadow: its picture laid on the ground by the one light that lays every sprite's, black with the shade's
+ * alpha, and where its foot falls in it.
+ *
+ * A tree stands on one point, so `shadowOf` lays every row of it from the bottom of its picture. A building stands on a
+ * diamond, whose front edges run up to either side of its foot, and laid from its bottom row it would cast a band
+ * under its whole width, as a thing floating over the ground does. So here each column of the picture stands on the
+ * ground at its own lowest pixel, which is the front edge of its base, and every pixel above it is laid as far to the
+ * left and towards the eye as it stands above that, `SHADOW.lean` and `SHADOW.flat` times, lighter the farther it
+ * falls. Where two land on one spot the ground takes the darker. Softened from `SHADOW.soft[0]` near where it is cast
+ * to `soft[1]` far out. The shade cast right at the front edge, where each column meets the ground, is what stands it
+ * there, so a building needs no pool. What falls behind its walls the building is drawn over. See
+ * docs/plans/worked-ground.md.
+ */
+export function shadowOfBuilding(image: Rgba, footX: number): { image: Rgba; footX: number; footY: number } {
+  const { width, height, data } = image;
+  const empty = { image: { width: 1, height: 1, data: new Uint8Array(4) }, footX: 0, footY: 0 };
+  const margin = 2 * SHADOW.soft[1] + SHADOW.pad;
+  const reach = Math.ceil(height * SHADOW.lean);
+  const out = {
+    width: width + reach + 2 * margin,
+    height: height + Math.ceil(height * SHADOW.flat) + 2 * margin,
+  };
+  const originX = reach + margin;
+  const originY = margin;
+  const shade = new Float32Array(out.width * out.height);
+  /** How far out each spot's darkest shade fell, by its shade, so the softening can follow it. */
+  const along = new Float32Array(out.width * out.height);
+  let any = false;
+  for (let x = 0; x < width; x += 1) {
+    let ground = height - 1;
+    while (ground >= 0 && data[(ground * width + x) * 4 + 3]! === 0) ground -= 1;
+    if (ground < 0) continue;
+    const foot = ground + 1;
+    // Half a pixel of height a step, so a column's line of shade has no gaps in it.
+    for (let up = 0; up < foot * 2; up += 1) {
+      const y = foot - 1 - Math.floor(up / 2);
+      const alpha = data[(y * width + x) * 4 + 3]! / 255;
+      if (alpha === 0) continue;
+      const tall = (up + 0.5) / 2;
+      const far = tall / height;
+      const dark = alpha * (1 - SHADOW.fade * far);
+      const atX = Math.round(originX + x + 0.5 - SHADOW.lean * tall - 0.5);
+      const atY = Math.round(originY + foot + SHADOW.flat * tall - 0.5);
+      const at = atY * out.width + atX;
+      if (dark > shade[at]!) {
+        shade[at] = dark;
+        along[at] = far;
+        any = true;
+      }
+    }
+  }
+  if (!any) return empty;
+
+  // Soft near where it is cast and softer far out: the two softenings mixed by how far out each spot's shade fell.
+  const near = blurred(shade, out.width, out.height, SHADOW.soft[0]);
+  const wide = blurred(shade, out.width, out.height, SHADOW.soft[1]);
+  const weighted = blurred(
+    shade.map((value, at) => value * along[at]!),
+    out.width,
+    out.height,
+    SHADOW.soft[1],
+  );
+  const mixed = near.map((value, at) => {
+    const share = wide[at]! > 1e-4 ? Math.min(1, weighted[at]! / wide[at]!) : 1;
+    return value * (1 - share) + wide[at]! * share;
+  });
+
+  // Trimmed to what is in it, with a little room around, so the atlas carries no empty margin.
+  let left = out.width;
+  let top = out.height;
+  let right = -1;
+  let bottom = -1;
+  for (let y = 0; y < out.height; y += 1) {
+    for (let x = 0; x < out.width; x += 1) {
+      if (mixed[y * out.width + x]! >= 1 / 255) {
+        left = Math.min(left, x);
+        right = Math.max(right, x);
+        top = Math.min(top, y);
+        bottom = Math.max(bottom, y);
+      }
+    }
+  }
+  left = Math.max(0, left - SHADOW.pad);
+  top = Math.max(0, top - SHADOW.pad);
+  right = Math.min(out.width - 1, right + SHADOW.pad);
+  bottom = Math.min(out.height - 1, bottom + SHADOW.pad);
+  const trimmed = { width: right - left + 1, height: bottom - top + 1 };
+  const pixels = new Uint8Array(trimmed.width * trimmed.height * 4);
+  for (let y = 0; y < trimmed.height; y += 1) {
+    for (let x = 0; x < trimmed.width; x += 1) {
+      const alpha = mixed[(y + top) * out.width + (x + left)]!;
+      pixels[(y * trimmed.width + x) * 4 + 3] = Math.max(0, Math.min(255, Math.round(alpha * 255)));
+    }
+  }
+  return {
+    image: { width: trimmed.width, height: trimmed.height, data: pixels },
+    footX: originX + footX - left,
+    footY: originY + height - top,
+  };
 }

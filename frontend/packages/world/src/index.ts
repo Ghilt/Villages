@@ -60,7 +60,7 @@ export {
 } from './structureLooks.ts';
 export type { Inked, Part, Picture } from './structureLooks.ts';
 export { markKey } from './structureMarks.ts';
-export type { StructureAtlasFile, StructureFrame } from './structureArt.ts';
+export type { StructureAtlasFile, StructureFrame, StructureShadow } from './structureArt.ts';
 export type { CultureFile } from './culture.ts';
 export type { OriginFile, OriginGrid, WhereFrom } from './originFile.ts';
 export { namesAt } from './names.ts';

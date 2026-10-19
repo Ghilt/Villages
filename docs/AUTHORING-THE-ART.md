@@ -57,7 +57,9 @@ background, standing on the bottom edge on the front corner of its base, which m
 picture: the tool reads the foot from the lowest two rows, so a cart, a crate or a ship's cradle painted lower than
 that corner takes the foot with it, and the Pictures page ticks where it landed in gold. It is cropped to what is drawn and scaled to
 160 pixels tall, so paint it 640 tall or more. Its pennant flies from the middle of the highest row anything is
-drawn in, so the tallest tower carries it. With the dev server running, a picture saved is on the map a few
+drawn in, so the tallest tower carries it. Paint no shadow: the tool casts each building's itself, every column
+of the picture standing on the ground at its own lowest pixel, so the base's front edges are where the shadow
+starts and a stray pixel painted below them casts from the wrong place. With the dev server running, a picture saved is on the map a few
 seconds later with no reload; `npm run world:structures --prefix frontend` cuts by hand. To have a placeholder
 back, delete your picture and cut again: it never draws over a file that is there. The Holdings tab still draws
 its small pictures in code.
