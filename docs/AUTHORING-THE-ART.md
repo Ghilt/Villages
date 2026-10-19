@@ -59,7 +59,10 @@ that corner takes the foot with it, and the Pictures page ticks where it landed 
 160 pixels tall, so paint it 640 tall or more. Its pennant flies from the middle of the highest row anything is
 drawn in, so the tallest tower carries it. Paint no shadow: the tool casts each building's itself, every column
 of the picture standing on the ground at its own lowest pixel, so the base's front edges are where the shadow
-starts and a stray pixel painted below them casts from the wrong place. With the dev server running, a picture saved is on the map a few
+starts and a stray pixel painted below them casts from the wrong place. The map's own perspective is drawn exactly in
+`world/guides/buildings/`: the ground and a base on it, upright walls, a roof and a round tower, a castle blocked out,
+and every type's footprint and frame, by `draw_guides.py` there (Python and Pillow, apart from the program), beside the
+prompt that had asseterizer paint the buildings to them. With the dev server running, a picture saved is on the map a few
 seconds later with no reload; `npm run world:structures --prefix frontend` cuts by hand. To have a placeholder
 back, delete your picture and cut again: it never draws over a file that is there. The Holdings tab still draws
 its small pictures in code.
