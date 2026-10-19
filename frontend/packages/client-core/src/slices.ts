@@ -22,6 +22,11 @@ export interface SessionState {
   playerId?: string;
   /** The player's own house and what only they can see of it, or null when they have none. */
   yourHouse: YourHouseView | null;
+  /**
+   * Whether the gateway has said whether the player has a house, which it says to every connection as it greets
+   * it: until then a null house is not having heard, and after it a house with none.
+   */
+  houseHeard: boolean;
   /** What this player has to decide, or null when they have nothing. What the parchment shows. */
   yourChoice: ChoiceView | null;
   /**
@@ -149,10 +154,10 @@ const SLICES = {
   } satisfies Slice<'onTheMap'>,
 
   house: {
-    initial: { yourHouse: null },
-    onFrame: { yourHouse: (_, frame) => ({ yourHouse: frame.yours }) },
-    onReset: forgottenWhenTakenOver({ yourHouse: null }),
-  } satisfies Slice<'yourHouse'>,
+    initial: { yourHouse: null, houseHeard: false },
+    onFrame: { yourHouse: (_, frame) => ({ yourHouse: frame.yours, houseHeard: true }) },
+    onReset: forgottenWhenTakenOver({ yourHouse: null, houseHeard: false }),
+  } satisfies Slice<'yourHouse' | 'houseHeard'>,
 
   choice: {
     initial: { yourChoice: null },

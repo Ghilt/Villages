@@ -42,11 +42,21 @@ describe('the session, folded from what each mechanic folds', () => {
 
     expect(state.connection).toBe('open');
     expect(state.yourHouse?.house.name).toBe('Ravenscar');
+    expect(state.houseHeard).toBe(true);
     expect(state.yourChoice?.prompt).toBe('Where shall the house raise its seat?');
     expect(state.yourKeyFigures).toHaveLength(2);
     expect(state.yourHoldings).toHaveLength(3);
     expect(state.yourSight?.points).toHaveLength(4);
     expect(state.yourDialogues).toHaveLength(4);
+  });
+
+  it('tells a house not heard of yet from a player told they have none', () => {
+    expect(INITIAL_SESSION.houseHeard).toBe(false);
+
+    const none = foldFrame(foldFrame(INITIAL_SESSION, welcome), { type: 'yourHouse', yours: null });
+
+    expect(none.yourHouse).toBeNull();
+    expect(none.houseHeard).toBe(true);
   });
 
   it('closed, keeps what the house had on its cards and forgets the cells nobody is updating', () => {
@@ -78,6 +88,7 @@ describe('the session, folded from what each mechanic folds', () => {
 
     expect(takenOver.connection).toBe('takenOver');
     expect(cellsHeld(takenOver.onTheMap)).toEqual([]);
+    expect(takenOver.houseHeard).toBe(false);
     expect([
       takenOver.yourHouse,
       takenOver.yourChoice,
