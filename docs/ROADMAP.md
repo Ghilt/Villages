@@ -169,7 +169,7 @@ planned and not started.
   every kind of ground its cast, built in a run Adam picked that evening in three - the birds, the sea, and the dry
   and the high ground - is verified and on main, every kind of ground now with its cast: the plan's last step.
   Adam's notes of 2026-10-19 on the renders page - undergrowth under the woods' trees, and the odd animal trail through
-  the tufts - are built in a run on his word and wait on his eye.
+  the tufts - are built in a run on his word, verified and on main.
   Asked for by Adam on 2026-10-16.
 - **Ruined cities**: every town of 1790 a ruin on the map at the world's start, the bigger the town the more ground
   its ruins cover - ruin pieces in each place's culture laid out by the browser as a ruined city, the same for every
