@@ -1,7 +1,6 @@
 import { Application, Container, Rectangle } from 'pixi.js';
 
 import type { CameraView } from '../geometry/cameraMath';
-import { revealedAt } from '../fog/fogField';
 import type { FogField } from '../fog/fogField';
 import { createUncolouring } from '../fog/uncolouring';
 import { hangDevHandles } from './devHandles';
@@ -9,6 +8,7 @@ import { createCloudLayer } from './clouds/CloudLayer';
 import { createCritterLayer } from './critters/CritterLayer';
 import { createFogLayer } from './FogLayer';
 import { createGroundLayer, type GroundLayer } from './ground/GroundLayer';
+import { whereSceneryGrows } from './ground/growing';
 import { createLandLayer } from './land/LandLayer';
 import { soonest, type Layer } from './layer';
 import { buildMarkTextures } from './markTextures';
@@ -79,8 +79,6 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
    * fog changed, and not on every mark the gateway moves.
    */
   let groundField: FogField | null | undefined = undefined;
-  const groundOf = (field: FogField | null | undefined): ((x: number, y: number) => boolean) | null =>
-    field === undefined ? null : field === null ? () => false : (x, y) => revealedAt(field, x, y);
 
   let disposed = false;
   let unwatch: (() => void) | null = null;
@@ -212,7 +210,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     const field = next === null ? undefined : next.field;
     if (field !== groundField) {
       groundField = field;
-      scenery?.setGround(groundOf(field));
+      scenery?.setGround(whereSceneryGrows(field, scene.worked));
       // Only a house with revealed ground has any colour to take out, and the filter costs a pass.
       uncolouring?.show(field ?? null);
       world.filters = field === undefined || field === null ? null : [fog.uncolour];
@@ -246,6 +244,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     }
     if (was === null || next.worked !== was.worked) {
       ground?.setWorked(next.worked);
+      scenery?.setGround(whereSceneryGrows(groundField, next.worked));
     }
   }
 
@@ -284,7 +283,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       // Under everything, because it is the ground the rest stands on; drawn bending in the wind by the trees' layer.
       const trees = createTreesLayer(app.renderer, drawSoon);
       scenery = createSceneryLayer(trees.shaders);
-      scenery.setGround(groundOf(groundField));
+      scenery.setGround(whereSceneryGrows(groundField, scene.worked));
       // The land moving in the wind and the light, on the ground under everything that stands on it.
       const land = createLandLayer(app.renderer, () => scene.scenery.tilesRoot, drawSoon);
       // The ground worn bare under the buildings, over the land's motion and under all that stands on it.

@@ -166,7 +166,8 @@ same diamonds the ground is painted on: its footprint, the square its base cover
 that, thick against the walls and thinning to a few diamonds three out, its corners rounded off, the same shape on
 every screen. Its edges wander a little as the painter's boundaries do and soften where they meet the paint; the earth
 has a tint of its own a diamond and a fine grain, and lets a little of the paint through. A ruin's yard is thinner and
-broken, going back to grass. Nothing moves on it, and it comes and goes with the building: where a house has never
+broken, going back to grass. Nothing moves on it and no tree grows on it - a building raised in a wood stands in a
+clearing, the trees behind it standing - and it comes and goes with the building: where a house has never
 seen the building there is no yard, and on ground only revealed it loses its colour with it. It comes in with the
 buildings' pictures at zoom 7.5. The earth's colour and how much it covers are levers in the Structures section, to be
 settled by eye. See decision record 0105 and `docs/plans/worked-ground.md`.

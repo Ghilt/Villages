@@ -502,7 +502,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   the same way from the moment it is raised. Standing in for a story handing one over or a house
   taking it; closed with the instruments.
 - The ground worn bare under the buildings: at the foot of the **Structures** section, **worn ground under the
-  buildings** draws every building's yard or leaves the painted ground as before, **how much of the earth covers the
+  buildings** draws every building's yard, the trees cleared off it, or leaves the painted ground and the trees as
+  before, **how much of the earth covers the
   paint** is a slider from none to all of it, **the earth** is its colour, and **as it was** puts both back. The line
   under them says what is drawn: `85% earth, #806040`. They are the look's, Adam's to settle by eye at zoom 9 or 10
   over a few buildings, and are not kept across a reload. The yards come in at 7.5 with the buildings' pictures, and

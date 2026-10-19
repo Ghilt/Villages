@@ -157,9 +157,9 @@ export function createGroundLayer(renderer: Renderer, repaint: () => void): Grou
     },
 
     draw(view: CameraView): number | null {
-      const { on, strength, earth } = workedGroundStore.get();
+      const { strength, earth } = workedGroundStore.get();
       const fade = smoothstep(BECOMES_A_MARK_AT, BECOMES_A_MARK_AT + 0.5, view.zoom);
-      const at = on && fade > 0 && worked.size > 0 ? windowOfView(view) : null;
+      const at = fade > 0 && worked.size > 0 ? windowOfView(view) : null;
       if (at === null) {
         sprite.visible = false;
         return null;

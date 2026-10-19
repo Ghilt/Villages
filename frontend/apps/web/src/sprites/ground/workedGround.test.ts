@@ -6,7 +6,7 @@ import { onACorner } from '../../geometry/footing';
 import { WORLD_MASTER_WIDTH } from '../../geometry/world';
 import type { MapSprite } from '../SpriteRenderer';
 import { WORKED } from './worked';
-import { RING, diamondKey, diamondOf, workedGround, yardOf } from './workedGround';
+import { RING, diamondKey, diamondOf, rememberingWorkedGround, workedGround, yardOf } from './workedGround';
 import type { Yard } from './workedGround';
 
 const castle: Yard = { id: 'structure:castle', u: 1000, v: 400, side: 6, ruin: false };
@@ -78,6 +78,13 @@ describe('worked ground', () => {
     const standing = workedGround([castle]);
     expect(ruin.size).toBeLessThan(standing.size);
     expect(new Set(ruin.values())).toEqual(new Set([WORKED.ruinFootprint, WORKED.ruinRing]));
+  });
+
+  it('is the same map while the yards are the same, and a new one only when one changes', () => {
+    const work = rememberingWorkedGround();
+    const first = work([castle, mill]);
+    expect(work([{ ...castle }, { ...mill }])).toBe(first);
+    expect(work([castle, { ...mill, side: 3 }])).not.toBe(first);
   });
 
   it('keeps every diamond of the world apart in its key', () => {

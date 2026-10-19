@@ -9,11 +9,16 @@ import { note } from '../log/log';
 import { sessionStore } from '../net/gateway';
 import { focusOn } from '../map/focus';
 import { CrowdCard } from './CrowdCard';
-import { workedGround, yardOf } from './ground/workedGround';
+import { workedGroundStore } from './ground/settings';
+import type { Worked } from './ground/worked';
+import { rememberingWorkedGround, yardOf } from './ground/workedGround';
 import { cameraOf } from './mapCamera';
 import { createPixiSpriteRenderer } from './PixiSpriteRenderer';
 import type { MapSprite } from './SpriteRenderer';
 import { useStore } from '../store/useStore';
+
+/** The worked ground with its switch off. */
+const NOTHING_WORN: ReadonlyMap<number, Worked> = new Map();
 
 /** How a person's mark is told from a structure's: its id is theirs with this in front. See App.tsx. */
 const CHARACTER = 'character:';
@@ -75,8 +80,11 @@ export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick }: 
 
   // The ground worn bare under the buildings the page holds, worked out again only when they change, and said in the
   // log when how much of it there is changes. See docs/plans/worked-ground.md.
+  const [work] = useState(rememberingWorkedGround);
   const yards = useMemo(() => sprites.flatMap((sprite) => yardOf(sprite) ?? []), [sprites]);
-  const worked = useMemo(() => workedGround(yards), [yards]);
+  // With the switch off there is no worked ground at all: nothing drawn, and the trees grow back.
+  const wearing = useStore(workedGroundStore, (state) => state.on);
+  const worked = useMemo(() => (wearing ? work(yards) : NOTHING_WORN), [wearing, work, yards]);
   const said = useRef('');
   useEffect(() => {
     const now = `${worked.size} diamonds of worked ground under ${yards.length} buildings`;

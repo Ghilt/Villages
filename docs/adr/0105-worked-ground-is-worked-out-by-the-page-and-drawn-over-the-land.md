@@ -53,8 +53,11 @@ of the earth covers the paint and its colour are levers in the Structures sectio
   across and lets a little of the paint through, so the loss is small.
 - **Paths can be added as another kind of byte**, and later roads and a ruined city's old streets, by whatever works
   out where they are: the layer draws kinds, it does not decide them.
-- **Trees still grow through a yard** until the scenery is told where the worked ground is (step 6 of
-  `docs/plans/worked-ground.md`).
+- **No tree grows on worked ground.** The scenery's test of where it may grow, which the fog already gave it, is the
+  revealed ground and not a worn diamond (`sprites/ground/growing.ts`). The scenery sorts every cell in view again when
+  that test changes, so the worked ground keeps its identity while the yards hold still and changes only when a
+  building comes, goes or changes, not each time a person on the map moves. The switch in the Structures section takes
+  the worked ground away whole, the yards and the clearings with them.
 - **The pictures decide how well a building sits in its yard**: one painted from too low a view has a base flatter
   than its footprint. The guides for painting them in the map's own view are with the plan.
 

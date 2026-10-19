@@ -91,6 +91,22 @@ function keptAt(away: number): number {
 }
 
 /**
+ * `workedGround` that hands back the very map it handed back last while the yards are the same ones, so the ground
+ * is worked out, and the scenery sorted again round it, only when a building comes, goes or changes, and not each
+ * time a person on the map takes a step.
+ */
+export function rememberingWorkedGround(): (yards: readonly Yard[]) => ReadonlyMap<number, Worked> {
+  let last: { key: string; worked: Map<number, Worked> } | null = null;
+  return (yards) => {
+    const key = yards.map((yard) => `${yard.id} ${yard.u} ${yard.v} ${yard.side} ${yard.ruin}`).join('|');
+    if (last?.key !== key) {
+      last = { key, worked: workedGround(yards) };
+    }
+    return last.worked;
+  };
+}
+
+/**
  * Every diamond the yards wear, by `diamondKey`, and what it is. A footprint is worn whole, a ruin's mostly; round it
  * the ring, its diamonds kept by a roll of the structure's own. Built by taking the stronger wherever two yards meet,
  * so the order the buildings come in changes nothing.
