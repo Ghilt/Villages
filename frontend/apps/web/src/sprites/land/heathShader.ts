@@ -32,6 +32,7 @@ uniform float uHeathSize;
 uniform float uHeathDensity;
 uniform float uCotton;
 uniform float uStir;
+uniform float uHeathTrails;
 
 const int HEATH = ${channelOf('heath')};
 const int HEATH_LOOKS = ${KINDS.length};
@@ -81,6 +82,9 @@ vec4 heathHere(vec2 world) {
   ivec2 middle = ivec2(floor(reach));
   // The gust changes slowly over the ground, so it is read once for the cells about here.
   float blow = gustAt(reach * cell, uCarried) * uStir;
+  // The animal trails about here, where a clump is missing: trailShader.ts.
+  vec2 about = reach * cell;
+  vec4 trails = trailsAbout(about, uHeathTrails);
   float ink = 0.0;
   vec3 drawn = vec3(0.0);
   float inkAlpha = 0.0;
@@ -93,6 +97,10 @@ vec4 heathHere(vec2 world) {
       }
       int look = clamp(lookAt(rootWorld), 0, HEATH_LOOKS - 1);
       if (hash(at, 63) > HEATH_THICK[look] * uHeathDensity) {
+        continue;
+      }
+      // None grows on an animal trail.
+      if (onTrail(trails, about, rootWorld)) {
         continue;
       }
       vec2 root = screenOf(rootWorld);

@@ -28,6 +28,8 @@ export interface GrassTuning {
   brushSize: number;
   /** How many of the tufts there could be grow at all, nought to one. */
   density: number;
+  /** How many animal trails run through the grass, as so many times its own; none at nought. */
+  trails: number;
 }
 
 export const GRASS_DEFAULTS: GrassTuning = {
@@ -41,6 +43,7 @@ export const GRASS_DEFAULTS: GrassTuning = {
   tallHeight: 1.9,
   brushSize: 0.17,
   density: 1,
+  trails: 1,
 };
 
 const grass = createTuning('villages.grass.tuning', GRASS_DEFAULTS, 'grass');

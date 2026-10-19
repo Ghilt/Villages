@@ -14,6 +14,8 @@ export interface HeathTuning {
   cotton: number;
   /** How much a gust stirs them, as so many times their own. */
   stir: number;
+  /** How many animal trails run through them, as so many times their own; none at nought. */
+  trails: number;
 }
 
 export const HEATH_DEFAULTS: HeathTuning = {
@@ -21,6 +23,7 @@ export const HEATH_DEFAULTS: HeathTuning = {
   density: 1,
   cotton: 0.08,
   stir: 1,
+  trails: 1,
 };
 
 const heath = createTuning('villages.heath.tuning', HEATH_DEFAULTS, 'heath');

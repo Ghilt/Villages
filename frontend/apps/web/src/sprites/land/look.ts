@@ -147,6 +147,26 @@ export const LAND_LOOK = {
       wholePixels: 6,
     },
   },
+  /**
+   * The animal trails through the grass, the woods' undergrowth and the heath, Adam's word of 2026-10-19: the odd
+   * little trail, only an absence of tufts. A trail runs where a field over the ground, a wander this many world units
+   * across and a finer one this share of it, weighing this much, crosses its middle, and is this many world units to
+   * each side of the line at its widest. Trails run only in patches a field this many world units across opens:
+   * where it is more than `from`, less `by` for each step of the sliders' trails, opening over `soft` of it, the trail
+   * narrowing to nothing as it closes. A tuft this far from the line by the field read about it never reads the field
+   * at its own root.
+   */
+  trails: {
+    scale: 14,
+    fine: 0.3,
+    fineWeight: 0.35,
+    halfWidth: 0.26,
+    patchSize: 50,
+    from: 0.9,
+    by: 0.3,
+    soft: 0.08,
+    margin: 0.8,
+  },
   crops: CROPS_LOOK,
   heath: HEATH_LOOK,
   wet: WET_LOOK,

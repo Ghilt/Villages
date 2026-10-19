@@ -40,6 +40,7 @@ export function createMotionUniforms(duneShown?: () => { x: number; y: number } 
     uTallHeight: f32(1),
     uBrushSize: f32(0.17),
     uDensity: f32(1),
+    uGrassTrails: f32(1),
   });
   const crops = new UniformGroup({
     uFieldSize: f32(3.5),
@@ -55,6 +56,7 @@ export function createMotionUniforms(duneShown?: () => { x: number; y: number } 
     uHeathDensity: f32(1),
     uCotton: f32(0),
     uStir: f32(1),
+    uHeathTrails: f32(1),
   });
   const wet = new UniformGroup({
     uMist: f32(0),
@@ -97,6 +99,7 @@ export function createMotionUniforms(duneShown?: () => { x: number; y: number } 
       g.uTallHeight = grassly.tallHeight;
       g.uBrushSize = grassly.brushSize;
       g.uDensity = grassly.density;
+      g.uGrassTrails = grassly.trails;
       grass.update();
 
       const cropsly = cropsTuningStore.get();
@@ -118,6 +121,7 @@ export function createMotionUniforms(duneShown?: () => { x: number; y: number } 
       h.uHeathDensity = heathly.density;
       h.uCotton = heathly.cotton;
       h.uStir = heathly.stir;
+      h.uHeathTrails = heathly.trails;
       heath.update();
 
       const wetly = wetTuningStore.get();

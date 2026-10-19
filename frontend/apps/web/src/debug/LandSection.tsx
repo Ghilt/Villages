@@ -26,6 +26,7 @@ import type { SliderDef } from './Sliders';
  */
 
 const share = (value: number) => `${Math.round(value * 100)}%`;
+const times = (value: number) => `${value.toFixed(2)} times`;
 const units = (value: number) => `${value.toFixed(2)} world units`;
 
 const GRASS_SLIDERS: readonly SliderDef<keyof GrassTuning>[] = [
@@ -60,6 +61,7 @@ const GRASS_SLIDERS: readonly SliderDef<keyof GrassTuning>[] = [
   },
   { key: 'brushSize', label: 'How big a clump of brush is', min: 0.06, max: 0.4, step: 0.01, say: units },
   { key: 'density', label: 'How thickly the tufts grow', min: 0.1, max: 1, step: 0.01, say: share },
+  { key: 'trails', label: 'How many animal trails', min: 0, max: 2, step: 0.05, say: times },
 ];
 
 const CROPS_SLIDERS: readonly SliderDef<keyof CropsTuning>[] = [
@@ -71,13 +73,12 @@ const CROPS_SLIDERS: readonly SliderDef<keyof CropsTuning>[] = [
   { key: 'waves', label: 'How strongly the waves show', min: 0, max: 0.6, step: 0.01, say: share },
 ];
 
-const times = (value: number) => `${value.toFixed(2)} times`;
-
 const HEATH_SLIDERS: readonly SliderDef<keyof HeathTuning>[] = [
   { key: 'size', label: 'How big the clumps are', min: 0.5, max: 2, step: 0.05, say: times },
   { key: 'density', label: 'How thickly they grow', min: 0.1, max: 1, step: 0.01, say: share },
   { key: 'cotton', label: 'How much cotton grass on the tundra', min: 0, max: 1, step: 0.01, say: share },
   { key: 'stir', label: 'How much a gust stirs them', min: 0, max: 3, step: 0.05, say: times },
+  { key: 'trails', label: 'How many animal trails', min: 0, max: 2, step: 0.05, say: times },
 ];
 
 const WET_SLIDERS: readonly SliderDef<keyof WetTuning>[] = [

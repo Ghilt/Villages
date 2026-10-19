@@ -166,29 +166,31 @@ from the ground and lean with the gust, tall grass in patches with a paler straw
 a gust only nudges, and bare ground between. Under the woods' trees the same grass is their undergrowth: fewer tufts,
 a deeper green and green at the tip rather than straw, hardly any tall grass, a little more low brush, and the trees
 taking most of the gust, so it shows less of one; sparest on the needles and moss of the conifers' floor, and grassy
-under the open taiga's and the dry forest's trees. On the farmland the land is cut into fields, a patchwork of uneven
-shapes a few world units across with a bare track between them, each lying fallow or standing ripe or green, faintly
-washed in its own colour, its crops in rows running its own way; long slow waves roll through them down the wind, a
-band of light where the crops bend with a darker one behind it where they stand again, and close in each stalk leans
-as a wave passes. On heath, scrub and tundra a gust only stirs the low woody growth, far more gently than the grass:
-heather in small purple clumps close together, scrub in bigger grey-green bushes with bare ground between, the tundra
-a low khaki mat with here and there cotton grass nodding its white head. On the wet land open water lies among the
-growth, dark and catching the light where the wind ruffles it, the light running slowly over it and the little waves
-near every pool's edge following its shore, lapping in towards it, and now and then a ring spreads on it: reeds stand
-in clumps in the marsh, tufts on the floodplain and shoots in rows in the paddy's terraces, which are a sheet of
-water, all bending with the gusts, and over the marsh and the bog mist lies in long thin banks along the screen,
-streaked, rising and falling along their length and swaying slowly to and fro, thin enough to see through. On the
-salt flats points of light flash for a moment and are gone. Over the ice and the polar desert snow streams along the
-wind in faint streamers, cool grey on the white, and now and then a little swirl of it spins and drifts down the
-wind. The sand desert lies still but for a clump of dunes here and there, one, two or three of them and none touching
-another: two stand corner to corner, a little sand between them, and a third further off, straight behind one of them
-or beside it end to end. Each is whole and broad, a long ridge sweeping in curves, some bent as an S, or a crescent
-with its horns reaching down the wind, standing up the screen as the trees do, a long gentle slope up to each crest
-and a short steep slip face down the lee, lit and shaded by the one light so the slip faces fall dark, the sand
-rippled; and sand streams over the crests in thin pale ribbons along the screen, curling as it flows, running faster
-than the gusts and strongest where one blows. It is one layer for every kind of land, and the rest stands still as it
-is painted, on purpose: the water moves by its own shader, a wood by its trees, and bare stone not at all, on
-purpose. Every number is in `apps/web/src/sprites/land/look.ts`; see decision record 0102.
+under the open taiga's and the dry forest's trees. Here and there the odd animal trail winds through the grass, the
+undergrowth and the heath: a thin path a tuft or so wide where none grows, meeting and looping as such paths do,
+narrowing out at its ends. On the farmland the land is cut into fields, a patchwork of uneven shapes a few world
+units across with a bare track between them, each lying fallow or standing ripe or green, faintly washed in its own
+colour, its crops in rows running its own way; long slow waves roll through them down the wind, a band of light where
+the crops bend with a darker one behind it where they stand again, and close in each stalk leans as a wave passes. On
+heath, scrub and tundra a gust only stirs the low woody growth, far more gently than the grass: heather in small
+purple clumps close together, scrub in bigger grey-green bushes with bare ground between, the tundra a low khaki mat
+with here and there cotton grass nodding its white head. On the wet land open water lies among the growth, dark and
+catching the light where the wind ruffles it, the light running slowly over it and the little waves near every pool's
+edge following its shore, lapping in towards it, and now and then a ring spreads on it: reeds stand in clumps in the
+marsh, tufts on the floodplain and shoots in rows in the paddy's terraces, which are a sheet of water, all bending
+with the gusts, and over the marsh and the bog mist lies in long thin banks along the screen, streaked, rising and
+falling along their length and swaying slowly to and fro, thin enough to see through. On the salt flats points of
+light flash for a moment and are gone. Over the ice and the polar desert snow streams along the wind in faint
+streamers, cool grey on the white, and now and then a little swirl of it spins and drifts down the wind. The sand
+desert lies still but for a clump of dunes here and there, one, two or three of them and none touching another: two
+stand corner to corner, a little sand between them, and a third further off, straight behind one of them or beside it
+end to end. Each is whole and broad, a long ridge sweeping in curves, some bent as an S, or a crescent with its horns
+reaching down the wind, standing up the screen as the trees do, a long gentle slope up to each crest and a short
+steep slip face down the lee, lit and shaded by the one light so the slip faces fall dark, the sand rippled; and sand
+streams over the crests in thin pale ribbons along the screen, curling as it flows, running faster than the gusts and
+strongest where one blows. It is one layer for every kind of land, and the rest stands still as it is painted, on
+purpose: the water moves by its own shader, a wood by its trees, and bare stone not at all, on purpose. Every number
+is in `apps/web/src/sprites/land/look.ts`; see decision record 0102.
 
 **The scenery bends in the wind.** Close in, every tree, bush, reed and tuft leans down the wind as a gust passes
 and settles behind it, its foot where it stands and its shadow leaning with it, and its crown turns a little paler,

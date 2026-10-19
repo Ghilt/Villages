@@ -81,3 +81,15 @@ its channel, as many of twelve as it is woods (`strengthOf`), never below 242 of
 softened edges as the grassland's, and a tuft reads the world unit it is rooted in unblended (`rootedExactly`) and
 blends its numbers by it. A screen of meadow costs what it did, and a screen of taiga what a meadow does, 3.3 ms at
 the high level where it cost nothing before.
+
+## Amendment, 2026-10-19: the animal trails
+
+Adam asked for the odd little trail through the tuft-heavy land, only an absence of tufts, as an animal keeps a path
+open. The grass, the woods' undergrowth with it, and the heath leave out a tuft or a clump rooted on one
+(`trailShader.ts`): where a slow field over the ground, two octaves of noise, crosses its middle, a line a tuft or so
+wide that winds, meets and loops, in patches a slower field opens here and there, narrowing to nothing where its patch
+closes. Each motion has its own slider for how many, none at nought. A pixel reads the field and how fast it changes
+once about the tufts it looks at, so a tuft far from the line knows it is not on one from that alone, and only a tuft
+near the line reads the field at its own root; the field is a function of the ground, so a trail is the same in every
+pixel and every browser. Where a trail patch fills the screen it costs 0.8 ms of the graphics card a frame at the high
+level, 4.65 against 3.85 with none; elsewhere a read of the slower field a pixel.

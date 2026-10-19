@@ -428,18 +428,21 @@ projection backwards, reads what moves there from a mask of the flat tiles under
 (`landMask.ts`, from the table in `look.ts`), four in one texture and the fifth in one of its own, with beside it a
 byte a world unit, read unblended, saying which of its motion's looks the land there has; the grass under the woods
 is written a step or a few below full in its channel, by how much of their undergrowth it is (`strengthOf`), so a
-tuft knows it from the one look at the mask it takes anyway, and works out only those motions there, each a part of
-the shader of its own (`grassShader.ts`, `cropsShader.ts`, `heathShader.ts`, `wetShader.ts`, `iceShader.ts`), laid
-over one another where two meet, each reading its sliders from uniforms of its own (`motionUniforms.ts`). The sand's
-dunes (`duneShader.ts`) lie in clumps of one to three: the sand is cut into cells square to the wind, a share of them
-hold a clump laid wholly inside the cell, each of its dunes in a box of its own that meets no other, so a point asks
-only its own cell, and a pixel lays out its cell's clump once for its whole walk; they stand up the screen as the
-scenery does: a pixel walks down the screen from as high as a dune stands to the ground under it, and is drawn as the
-frontmost dune whose face reaches up to it. The crops' long waves, the wet land's ripples and the drift keep the wall
-clock on lattices of their own that come round with the world's width, as the gusts' does. The renders page,
-`/admin/inspect-renders`, draws the same land, trees and critters over a world of its own, a square of every kind of
-land: the land layer takes its class tiles from whoever makes it (`ClassTiles`), and the critters' layer the ground
-they come out of, so the page hands them its squares rather than the map's (`admin/renders/`).
+tuft knows it from the one look at the mask it takes anyway, and the grass and the heath leave out a tuft rooted on
+an animal trail, a line of a slow field over the ground in patches a slower one opens (`trailShader.ts`), read once a
+pixel about the tufts it looks at and at a tuft's own root only near the line, and works out only those motions
+there, each a part of the shader of its own (`grassShader.ts`, `cropsShader.ts`, `heathShader.ts`, `wetShader.ts`,
+`iceShader.ts`), laid over one another where two meet, each reading its sliders from uniforms of its own
+(`motionUniforms.ts`). The sand's dunes (`duneShader.ts`) lie in clumps of one to three: the sand is cut into cells
+square to the wind, a share of them hold a clump laid wholly inside the cell, each of its dunes in a box of its own
+that meets no other, so a point asks only its own cell, and a pixel lays out its cell's clump once for its whole
+walk; they stand up the screen as the scenery does: a pixel walks down the screen from as high as a dune stands to
+the ground under it, and is drawn as the frontmost dune whose face reaches up to it. The crops' long waves, the wet
+land's ripples and the drift keep the wall clock on lattices of their own that come round with the world's width, as
+the gusts' does. The renders page, `/admin/inspect-renders`, draws the same land, trees and critters over a world of
+its own, a square of every kind of land: the land layer takes its class tiles from whoever makes it (`ClassTiles`),
+and the critters' layer the ground they come out of, so the page hands them its squares rather than the map's
+(`admin/renders/`).
 **The critters are made up by the page** (0099): `sprites/critters/critterClock.ts` is a pure function of the place
 and the wall clock - a hash of a cell and a slot says whether a critter comes, out of which tree or bush of the
 scenery's own cells (`currentPointsOf`), which of the cast of the class under it (`casts.ts`), and how each bird

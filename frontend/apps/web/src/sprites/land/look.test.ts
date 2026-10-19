@@ -122,6 +122,21 @@ describe('the land', () => {
     expect(D.clumps.together.reduce((sum, one) => sum + one, 0)).toBeCloseTo(1);
   });
 
+  it('lays the animal trails thin, a tuft or so wide, here and there and not everywhere', () => {
+    const T = LAND_LOOK.trails;
+    // A trail is an absence of a tuft or two across, not a road.
+    expect(2 * T.halfWidth).toBeGreaterThanOrEqual(LAND_LOOK.grass.blades.cell);
+    expect(2 * T.halfWidth).toBeLessThanOrEqual(2 * LAND_LOOK.grass.blades.cell);
+    // At the sliders' one, their patches open where the slow field is above the middle, so some land has trails and
+    // most has none; at their most, a little more than all of it may.
+    const atOne = T.from - T.by;
+    expect(atOne).toBeGreaterThan(0.5);
+    expect(atOne + T.soft).toBeLessThan(1);
+    expect(T.from).toBeGreaterThanOrEqual(0.9);
+    // Far from the line a tuft knows it from the field read about it: the margin is more than the trail is wide.
+    expect(T.margin).toBeGreaterThan(T.halfWidth);
+  });
+
   it('leaves the water to the water shader and bare stone still', () => {
     expect(KINDS.filter((kind) => motionOf(kind) === 'water').sort()).toEqual([
       'lake',

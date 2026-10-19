@@ -35,6 +35,7 @@ uniform float uBrush;
 uniform float uTallHeight;
 uniform float uBrushSize;
 uniform float uDensity;
+uniform float uGrassTrails;
 
 const int GRASS = ${channelOf('grass')};
 const vec3 SHEEN = vec3(${colour(G.colour)});
@@ -131,6 +132,8 @@ vec4 grassHere(vec2 world) {
     vec2 east = fieldsAt(about + vec2(1.0, 0.0)) - fields;
     vec2 south = fieldsAt(about + vec2(0.0, 1.0)) - fields;
     float blow = gustAt(about, uCarried);
+    // The animal trails about here, where a tuft is missing: trailShader.ts.
+    vec4 trails = trailsAbout(about, uGrassTrails);
     float ink = 0.0;
     vec3 colour = vec3(0.0);
     float inkAlpha = 0.0;
@@ -150,6 +153,10 @@ vec4 grassHere(vec2 world) {
         odds.z = mix(odds.z, 1.0, UNDER_BRUSH * woods);
         // So many of the tufts there could be grow at all, fewer under the trees, and bare ground keeps only a few.
         if (hash(cell, 5) > uDensity * mix(1.0, UNDER_DENSITY, woods) * mix(1.0, BARE_LEFT, odds.x)) {
+          continue;
+        }
+        // None grows on an animal trail.
+        if (onTrail(trails, about, rootWorld)) {
           continue;
         }
         // Each tuft draws its kind: brush, tall grass, or the meadow's own.

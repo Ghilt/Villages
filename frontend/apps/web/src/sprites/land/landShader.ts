@@ -4,6 +4,7 @@ import { CROPS_GLSL } from './cropsShader';
 import { GRASS_GLSL } from './grassShader';
 import { HEATH_GLSL } from './heathShader';
 import { ICE_GLSL } from './iceShader';
+import { TRAIL_GLSL } from './trailShader';
 import { WET_GLSL } from './wetShader';
 
 /**
@@ -149,6 +150,7 @@ int lookAt(vec2 world) {
   }
   return int(texelFetch(uLooks, texel, 0).r * 255.0 + 0.5);
 }
+${TRAIL_GLSL}
 ${GRASS_GLSL}
 ${CROPS_GLSL}
 ${HEATH_GLSL}
