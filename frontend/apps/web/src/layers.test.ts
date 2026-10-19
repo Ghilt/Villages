@@ -13,18 +13,18 @@ import { describe, expect, it } from 'vitest';
 
 const ROWS: readonly (readonly string[])[] = [
   // What everything leans on, and which leans on nothing in the page: the ground's own measures and the
-  // camera's arithmetic among them, and the one way a component reads a store. The component library is the
-  // showcase's and the stage's: the stage dresses each tile in its container, and the panes in them take the
-  // library up a surface at a time.
-  ['ui', 'version', 'marks', 'log', 'geometry', 'store', 'shaders'],
+  // camera's arithmetic among them, the one way a component reads a store, and the work in hand the loading
+  // screen waits for. The component library is the showcase's and the stage's: the stage dresses each tile in
+  // its container, and the panes in them take the library up a surface at a time.
+  ['ui', 'version', 'marks', 'log', 'geometry', 'store', 'shaders', 'loading'],
   // The connection to the game server, and the stage the panes are laid out in.
   ['net', 'stage'],
   // The ground, drawn: the map and its paint, the fog over it, the desk under it, and the water moving on it.
   ['map', 'fog', 'desk', 'water'],
   // What stands on the ground, and the room around the desk.
   ['sprites', 'room'],
-  // The game's own surfaces: the panes and windows a player reads and presses.
-  ['house', 'figures', 'holdings', 'choice', 'dialogues', 'quests', 'areas', 'inspect'],
+  // The game's own surfaces: the panes and windows a player reads and presses, and the loading screen over them.
+  ['house', 'figures', 'holdings', 'choice', 'dialogues', 'quests', 'areas', 'inspect', 'startup'],
   // What puts it all together, and the instruments beside it.
   ['(root)', 'debug', 'admin'],
 ];
@@ -50,6 +50,8 @@ const SIDEWAYS: readonly (readonly [string, string])[] = [
   ['inspect', 'areas'],
   // A holding's details say what its window says.
   ['holdings', 'inspect'],
+  // Starting up puts the camera on the seat as close as the house's arrival comes.
+  ['startup', 'house'],
 ];
 
 /**
@@ -102,9 +104,9 @@ function rowOf(folder: string): number {
  * will: until one has, it draws its own controls and may not reach into `ui`. The choice roll was the first,
  * with its rarity cards and Take action (0083); the inspect window the second, with the tag beside a window's name
  * saying how fresh what it shows is (0089); later the quests, and the marks on the map with the card a crowd of them
- * opens into (0096).
+ * opens into (0096); and the loading screen the game starts up under.
  */
-const TAKEN_UP: readonly string[] = ['choice', 'inspect', 'holdings', 'quests', 'sprites'];
+const TAKEN_UP: readonly string[] = ['choice', 'inspect', 'holdings', 'quests', 'sprites', 'startup'];
 
 /** Whether the rows let one folder import another. */
 export function mayImport(from: string, to: string): boolean {

@@ -78,9 +78,11 @@ packages/world                               <-  apps/web
   the fonts and the world package's pure rules and types, which is what lets `/admin/inspect-ui-components` show every component with nothing running. See
   decision record 0068.
 - The rest of `apps/web` stands in rows, and a folder imports only the rows above it, and in its own row only what
-  the rule names: `ui`, `version`, `marks`, `log`, `geometry`, the ground's own measures, and `shaders`, how much
-  the map's shaders draw, which lean on nothing in the page; `net` and `stage`; the ground drawn, `map`, `fog`, `desk` and `water`; what stands on it,
-  `sprites` and `room`; the game's own surfaces, `house`, `figures`, `choice`, `dialogues`, `areas` and `inspect`;
+  the rule names: `ui`, `version`, `marks`, `log`, `geometry`, the ground's own measures, `shaders`, how much
+  the map's shaders draw, and `loading`, the work in hand the loading screen waits for, which lean on nothing in
+  the page; `net` and `stage`; the ground drawn, `map`, `fog`, `desk` and `water`; what stands on it,
+  `sprites` and `room`; the game's own surfaces, `house`, `figures`, `choice`, `dialogues`, `areas` and `inspect`,
+  and `startup`, the loading screen over them while the game starts;
   and what puts it all together, the root, `debug` and `admin`. No two files import each other, however far round.
   `src/layers.test.ts` holds it. The component library in the top row is imported by `admin`, which shows it,
   and by `stage`, which dresses each tile in a container (`stage/dress.ts`); no surface imports it yet. The

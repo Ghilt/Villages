@@ -2,6 +2,7 @@ import { spriteMapOf } from '@villages/world';
 import type { SpriteMap, SpriteMapFile } from '@villages/world';
 
 import { paintFile } from '../../geometry/terrainClasses';
+import { whileInHand } from '../../loading/inHand';
 
 /**
  * Fetching the sprite map a master was generated with.
@@ -34,7 +35,7 @@ export function spriteMap(tilesRoot: string, layer = 'biome'): Promise<SpriteMap
   const key = `${tilesRoot}/${layer}`;
   let already = maps.get(key);
   if (already === undefined) {
-    already = load(tilesRoot, layer);
+    already = whileInHand('the sprite map', load(tilesRoot, layer));
     maps.set(key, already);
   }
   return already;

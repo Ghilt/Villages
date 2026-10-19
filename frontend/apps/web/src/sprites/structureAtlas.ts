@@ -1,7 +1,7 @@
-import { ImageSource } from 'pixi.js';
 import type { StructureAtlasFile } from '@villages/world';
 
 import { note } from '../log/log';
+import { readAtlas } from './atlas';
 import type { StructurePictures } from './structurePictures';
 
 /** Where `world:structures` puts the atlas of structures' pictures, beside the scenery's. */
@@ -32,24 +32,16 @@ export function watchStructureArt(pictures: StructurePictures, painted: () => vo
 
 export async function loadStructureArt(pictures: StructurePictures): Promise<boolean> {
   try {
-    const listed = await fetch(`${ART}.json`, { cache: 'no-store' });
-    if (!listed.ok) {
+    const read = await readAtlas<StructureAtlasFile>(ART, "the structures' pictures");
+    if (read === null) {
       note(
         'structures',
         'no pictures of structures have been cut, so they are drawn in code: npm run world:structures --prefix frontend',
       );
       return false;
     }
-    const file = (await listed.json()) as StructureAtlasFile;
-    const picture = await fetch(`${ART}.webp?v=${file.version}`);
-    const bitmap = await createImageBitmap(await picture.blob(), { premultiplyAlpha: 'premultiply' });
-    const source = new ImageSource({
-      resource: bitmap,
-      alphaMode: 'premultiplied-alpha',
-      autoGenerateMipmaps: true,
-      scaleMode: 'linear',
-    });
-    pictures.paint(file, source);
+    const { file } = read;
+    pictures.paint(file, read.source);
     const frames = Object.entries(file.frames);
     const said = (which: typeof frames) => {
       const painted = which.filter(([, one]) => !one.placeholder).length;

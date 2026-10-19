@@ -7,6 +7,7 @@ import { WORLD_MASTER_WIDTH } from '../../geometry/world';
 import { note } from '../../log/log';
 import { SHADE_COLOUR, towardsTheLight } from '../../map/light';
 import { drawnAt, shadersStore } from '../../shaders/levels';
+import { readAtlas } from '../atlas';
 import type { Layer } from '../layer';
 
 import { critterCellOf, eventsAt, lastsFor, posesOf, ringsOf } from './critterClock';
@@ -95,8 +96,8 @@ export function createCritterLayer(
   async function loadArt(): Promise<void> {
     loading = true;
     try {
-      const listed = await fetch(`${ART}.json`, { cache: 'no-store' });
-      if (!listed.ok) {
+      const read = await readAtlas<CritterAtlasFile>(ART, "the critters' pictures");
+      if (read === null) {
         noArt = true;
         note(
           'critters',
@@ -104,15 +105,7 @@ export function createCritterLayer(
         );
         return;
       }
-      const file = (await listed.json()) as CritterAtlasFile;
-      const picture = await fetch(`${ART}.webp?v=${file.version}`);
-      const bitmap = await createImageBitmap(await picture.blob(), { premultiplyAlpha: 'premultiply' });
-      const source = new ImageSource({
-        resource: bitmap,
-        alphaMode: 'premultiplied-alpha',
-        autoGenerateMipmaps: true,
-        scaleMode: 'linear',
-      });
+      const { file, source } = read;
       frames = new Map(
         Object.entries(file.kinds).map(([kind, cut]) => [
           kind,

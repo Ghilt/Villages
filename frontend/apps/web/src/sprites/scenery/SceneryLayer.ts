@@ -3,6 +3,7 @@ import { Container, ImageSource, Matrix, Particle, ParticleContainer, Rectangle,
 import { note } from '../../log/log';
 import { WORLD_MASTER_WIDTH } from '../../geometry/world';
 import * as camera from '../../geometry/cameraMath';
+import { readAtlas } from '../atlas';
 import { LONGEST_STEP_MS, PRESENCE_MS, easeTowards, midTrade } from '../twoForms';
 import { biomeAt, cellOf, type ArtAtlasFile, type Kind, type ScatteredPoint } from '@villages/world';
 import type { SceneryShaders } from '../trees/TreesLayer';
@@ -132,34 +133,22 @@ export function createSceneryLayer(sway: SceneryShaders) {
   /**
    * The art, fetched once: the frames first, then the atlas they point into, by its version.
    *
-   * One texture for every kind, because a particle layer draws from one texture. The browser builds the
-   * mipmaps itself, which is what lets one picture 160 pixels tall be drawn at twenty without sparkling.
-   * Nothing is drawn until it is here, and nothing at all if it was never cut: a master without a
-   * sprite map draws no scenery either, and this is the same rule.
+   * One texture for every kind, because a particle layer draws from one texture. Nothing is drawn until
+   * it is here, and nothing at all if it was never cut: a master without a sprite map draws no scenery
+   * either, and this is the same rule.
    */
   async function loadArt(askForAFrame: () => void): Promise<void> {
     loadingArt = true;
     try {
-      const listed = await fetch(`${ART}.json`, { cache: 'no-store' });
-      if (!listed.ok) {
+      const read = await readAtlas<ArtAtlasFile>(ART, "the scenery's pictures");
+      if (read === null) {
         noArt = true;
         note('scenery', 'no art has been cut, so nothing grows. Run npm run world:art --prefix frontend');
         return;
       }
-      const file = (await listed.json()) as ArtAtlasFile;
-      const picture = await fetch(`${ART}.webp?v=${file.version}`);
-      // Premultiplied by the browser as it decodes, and said to be, so that nothing multiplies it twice
-      // or not at all. Left straight, the see-through pixels keep a colour, and a colour blended as if it
-      // were premultiplied draws every sprite on a faint box of whatever its transparent pixels held.
-      const bitmap = await createImageBitmap(await picture.blob(), { premultiplyAlpha: 'premultiply' });
       atlas?.destroy();
-      atlas = new ImageSource({
-        resource: bitmap,
-        alphaMode: 'premultiplied-alpha',
-        autoGenerateMipmaps: true,
-        scaleMode: 'linear',
-      });
-      artFile = file;
+      atlas = read.source;
+      artFile = read.file;
       frames = [];
       noArt = false;
       askForAFrame();

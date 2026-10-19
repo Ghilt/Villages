@@ -4,6 +4,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Villages</title>
+    <!-- The loading screen's colour until the page has drawn anything, rather than white while its scripts load. -->
+    <style>
+      html:not(:has(#root > *)) {
+        background: #27211a;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

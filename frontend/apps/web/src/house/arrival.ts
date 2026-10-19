@@ -11,6 +11,14 @@
  */
 
 /**
+ * How close the camera comes when the house arrives.
+ *
+ * Past 7.5, where everything on the map is drawn as itself rather than as its mark, so arriving at your own
+ * house lands on its seat standing there, not on a pin.
+ */
+export const FOUNDING_ZOOM = 8.5;
+
+/**
  * Whether a house has arrived: whether it is one this page has not been shown before. It remembers every
  * house it is shown, so the same house sent again, or sent again after a reconnect, has not arrived.
  */

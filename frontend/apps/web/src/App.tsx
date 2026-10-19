@@ -17,10 +17,12 @@ import { WaterClicks } from './inspect/WaterClicks';
 import { RippleAlongWater } from './inspect/RippleAlongWater';
 import { sessionStore, gateway } from './net/gateway';
 import { followMap } from './net/followMap';
-import { arriving } from './house/arrival';
+import { FOUNDING_ZOOM, arriving } from './house/arrival';
 import { startAtIn } from './net/startAt';
 import { InfluenceZone } from './areas/InfluenceZone';
 import { StoodDown } from './net/StoodDown';
+import { StartupScreen } from './startup/StartupScreen';
+import { startupStore, watchStartup } from './startup/startup';
 import { flyWith } from './map/focus';
 import { MapStrip } from './map/MapStrip';
 import { MapView } from './map/MapView';
@@ -46,14 +48,6 @@ import { setFlowView, waterStore } from './water/waterMode';
 import { candidatesOf, toCharacterSprite, toStructureSprite } from './mapSprites';
 import { useStructureCatalogue } from './net/structureCatalogue';
 import { useStore } from './store/useStore';
-
-/**
- * How close the camera comes when the house is founded.
- *
- * Past 7.5, where everything on the map is drawn as itself rather than as its mark, so arriving at your own
- * house lands on its seat standing there, not on a pin.
- */
-const FOUNDING_ZOOM = 8.5;
 
 /** What a development build adds to the page: the debug panel, its grips, and how the two are arranged. */
 export type DevTools = typeof DevToolsModule;
@@ -166,14 +160,18 @@ export function App({ master, devTools }: AppProps) {
   // The gateway follows the camera: the cells covering the view, at the view's own zoom.
   useEffect(() => (map === null ? undefined : followMap(map)), [map]);
 
+  // The loading screen, until the map is drawn where the player starts. See `startup/startup.ts`.
+  useEffect(() => (map === null ? undefined : watchStartup(map)), [map]);
+
   // When the house arrives, the camera goes to it and its window opens: founded a moment ago, or standing
   // when the page loads, and never because it was sent again, which it is whenever anything in it changes.
   // Asked once the map is there, so a house heard before the map was ready still arrives. See `arrival.ts`.
-  // A page opened by a map link stays where the link put it; the house's window opens all the same.
+  // A page opened by a map link stays where the link put it; the house's window opens all the same. Under the
+  // loading screen there is no flight: the startup puts the camera on the seat, and lifts once it is drawn there.
   useEffect(() => {
     if (map !== null && yours !== null && arriving(yours)) {
       const { seat } = yours;
-      if (startAtIn(globalThis.location.search) === null) {
+      if (startAtIn(globalThis.location.search) === null && startupStore.get().lifted) {
         note('camera', `flying to the seat at ${seat.lat.toFixed(3)}, ${seat.lon.toFixed(3)}`);
         map.flyTo({ center: [seat.lon, seat.lat], zoom: Math.max(map.getZoom(), FOUNDING_ZOOM) });
       }
@@ -349,7 +347,16 @@ export function App({ master, devTools }: AppProps) {
        * everything at once. A pane is handed the room it got and draws itself at that size; nothing here
        * knows which bay anything is in. See decision record 0040.
        */}
-      <Stage stage={box.stage} panes={panes} overlays={<StoodDown />} />
+      <Stage
+        stage={box.stage}
+        panes={panes}
+        overlays={
+          <>
+            <StoodDown />
+            <StartupScreen />
+          </>
+        }
+      />
 
       {devTools !== null && (
         <>

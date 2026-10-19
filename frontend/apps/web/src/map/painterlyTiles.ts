@@ -5,6 +5,8 @@ import { TILE } from '../geometry/world';
 import { PAINTED_MAX_ZOOM, PAINTED_TILE, type PaintReply, type PaintRequest } from './painterlyMessages';
 import { PaintQueue } from './paintQueue';
 import type { QueuedJob } from './paintQueue';
+import { forgetTally, requests, tally } from './paintTally';
+import type { PaintedTally } from './paintTally';
 
 /**
  * The painterly renderer's front door: a URL scheme MapLibre can ask for tiles on, a pool of workers that
@@ -88,29 +90,6 @@ let painters: Worker[] = [];
 const inFlight: number[] = [];
 let nextId = 1;
 
-/**
- * How well the looking ahead is working: of the tiles the map asked for, how many were already painted.
- *
- * Ready is the number that decides how this feels, because a tile that is not ready is a tile the eye
- * catches arriving. It does not show up in a profile, so it is counted here, read from a console with
- * `window.villagesPainterly()`, and said in the log the one time it matters - see `crowded` below.
- */
-const tally = { ready: 0, waited: 0, aheadPainted: 0, dropped: 0, painted: 0, terrainMs: 0, paintMs: 0 };
-
-export interface PaintedTally {
-  ready: number;
-  waited: number;
-  aheadPainted: number;
-  /** Tiles MapLibre asked for and gave up on before any painter had them, so they were never painted. */
-  dropped: number;
-  /** Tiles painted, wanted or not, and the painters' own time on them, summed across all of them. */
-  painted: number;
-  terrainMs: number;
-  paintMs: number;
-  /** How many painted tiles are being kept, against the cap. */
-  held: number;
-}
-
 export function paintedTally(): PaintedTally {
   return { ...tally, held: painted.size };
 }
@@ -136,13 +115,7 @@ let droppedSinceRest = 0;
 
 /** Starts the counting again, so a single movement can be measured on its own. */
 export function forgetPaintedTally(): void {
-  tally.ready = 0;
-  tally.waited = 0;
-  tally.aheadPainted = 0;
-  tally.dropped = 0;
-  tally.painted = 0;
-  tally.terrainMs = 0;
-  tally.paintMs = 0;
+  forgetTally();
   crowded = false;
 }
 
@@ -304,8 +277,10 @@ function dispatch(): void {
  */
 function wantPixels(request: PaintRequest, signal: AbortSignal): Promise<Pixels> {
   const key = addressOf(request);
+  requests.asked += 1;
   const held = painted.get(key);
   if (held !== undefined) {
+    requests.ended += 1;
     return Promise.resolve(held);
   }
 
@@ -326,6 +301,7 @@ function wantPixels(request: PaintRequest, signal: AbortSignal): Promise<Pixels>
         return false;
       }
       ended = true;
+      requests.ended += 1;
       signal.removeEventListener('abort', giveUp);
       return true;
     };

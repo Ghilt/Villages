@@ -4,6 +4,7 @@ import type * as maplibregl from 'maplibre-gl';
 import { sceneryStore } from './scenery/settings';
 import { circleOf, visionOf } from '../fog/circles';
 import { fieldOf } from '../fog/fogField';
+import { whileInHand } from '../loading/inHand';
 import { sessionStore } from '../net/gateway';
 import { focusOn } from '../map/focus';
 import { CrowdCard } from './CrowdCard';
@@ -78,7 +79,7 @@ export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick }: 
 
     const made = createPixiSpriteRenderer(cameraOf(map));
     setRenderer(made);
-    void made.mount(container, uncolouringRef.current ?? undefined);
+    void whileInHand('the sprite canvas', made.mount(container, uncolouringRef.current ?? undefined));
 
     return () => {
       setRenderer(null);

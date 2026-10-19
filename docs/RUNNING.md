@@ -13,6 +13,18 @@ stage alone, with none of the debug panel in it (decision record 0079).
 
 ## The debug panel and the game
 
+- The game starts up under the **loading screen**, which covers the stage from the page's first frame and leaves
+  the debug panel beside it free. Once the map has its style and the gateway has said whether the player has a
+  house, the camera is put on the seat, as close as a house's arrival comes, with no flight - or left where the
+  page opened when there is no house or a map link asked for somewhere; its meter fills as the map's painted
+  tiles there arrive, and it fades once the map has nothing left to draw and nothing else is in hand: the
+  scenery's, the structures' and the critters' pictures, the sprite map and the canvas the sprites stand on. It
+  waits no more than three seconds for a gateway that does not answer, and never stays past twelve seconds from
+  the page opening, whatever is still coming. It comes once a page load: a reconnect does not cover the game, and
+  a house founded while playing is flown to as before. The log says it under `startup`: *the camera put at the
+  seat at 41.219, -99.716, 1.8 s after the page opened*, then *the map was drawn 3.8 s after the page opened, 2.0 s
+  after the camera was put*, or what was still coming when the limit lifted it. `apps/web/src/startup/`; the
+  screen itself is the library's `LoadingScreen`.
 - Which world is drawn: the **Debug map** part of the debug panel, down the right-hand side. Its terrain dropdown
   is every PNG in `world/master/`, with each one's size, and it says whether this tree's world of it is current:
   each of its ten world steps is worked out from what it is made from, never from dates, and the panel says the
