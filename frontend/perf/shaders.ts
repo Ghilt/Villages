@@ -9,7 +9,7 @@ import { startServers } from './devServer.ts';
 import { instrument } from './instrument.ts';
 import { findSetters } from './levels.ts';
 import { cardNow, watchClocks } from './machine.ts';
-import { burst, goTo, liftFog, openGame, setLevels, warm } from './page.ts';
+import { burst, foundHouse, goTo, liftFog, openGame, setLevels, warm } from './page.ts';
 import { HELD_AT, placesNamed } from './places.ts';
 import type { Place } from './places.ts';
 import { combine, faster, readingOf, spreadOf } from './stats.ts';
@@ -169,25 +169,26 @@ try {
     string,
     { reading: Combined; rounds: number[]; settled: boolean; thrown: number; clocks: unknown }
   >();
+  /** One round's reading of a place the camera is over, the fastest round kept. */
+  const record = async (name: string, round: number, settled: boolean): Promise<void> => {
+    if (round === 1) await page.screenshot({ path: join(pictures, `${name}.png`) });
+    const clocks = watchClocks();
+    const { reading, thrown } = await readAt(page);
+    const watched = clocks.stop();
+    const was = readings.get(name);
+    readings.set(name, {
+      reading: was === undefined ? reading : faster(was.reading, reading),
+      rounds: [...(was?.rounds ?? []), reading.frame],
+      settled: settled && (was?.settled ?? true),
+      thrown: thrown + (was?.thrown ?? 0),
+      clocks: was !== undefined && was.reading.frame <= reading.frame ? was.clocks : watched,
+    });
+    console.log(
+      `  round ${round}, ${name}: ${reading.frame.toFixed(2)} ms${settled ? '' : ' (never settled)'}`,
+    );
+  };
   for (let round = 1; round <= rounds; round += 1) {
-    for (const place of places) {
-      const settled = await freshAt(place);
-      if (round === 1) await page.screenshot({ path: join(pictures, `${place.name}.png`) });
-      const clocks = watchClocks();
-      const { reading, thrown } = await readAt(page);
-      const watched = clocks.stop();
-      const was = readings.get(place.name);
-      readings.set(place.name, {
-        reading: was === undefined ? reading : faster(was.reading, reading),
-        rounds: [...(was?.rounds ?? []), reading.frame],
-        settled: settled && (was?.settled ?? true),
-        thrown: thrown + (was?.thrown ?? 0),
-        clocks: was !== undefined && was.reading.frame <= reading.frame ? was.clocks : watched,
-      });
-      console.log(
-        `  round ${round}, ${place.name}: ${reading.frame.toFixed(2)} ms${settled ? '' : ' (never settled)'}`,
-      );
-    }
+    for (const place of places) await record(place.name, round, await freshAt(place));
   }
 
   // The method's own check: the water's part, as timed, against what the frame loses when the water is turned off.
@@ -207,6 +208,34 @@ try {
     };
   }
 
+  // The fog, last, so that no place above was measured with a house in the world: a house founded from the first seat
+  // offered, on a fresh page, and the fog over everything it has not seen measured where the camera came to rest over
+  // its seat; then on fresh pages over the same seat, the house the player's still. The fog's own parts are
+  // `sprites:fog-of-war` and `sprites:fog-of-war-uncolour`.
+  let fog: (Place & { seat: string }) | null = null;
+  let fogMissed: string | null = flag('no-fog') ? 'not asked for' : null;
+  for (let round = 1; round <= rounds && fogMissed === null; round += 1) {
+    try {
+      if (fog === null) {
+        await openGame(page, server.url, async (opened) => {
+          const founded = await foundHouse(opened);
+          fog = {
+            name: 'fog',
+            what: `the fog of war over all but what the house at ${founded.seat} has seen, from its seat`,
+            ...founded,
+          };
+        });
+      } else {
+        await openGame(page, server.url);
+      }
+      await setLevels(page, setters, 'high');
+      await record('fog', round, await goTo(page, fog!, HELD_AT, quiet));
+    } catch (problem) {
+      fogMissed = `no house could be founded: ${String(problem).split('\n')[0]}`;
+    }
+  }
+  if (fogMissed !== null) console.log(`  the fog: not measured, ${fogMissed}`);
+
   const out = {
     measuredAt: new Date().toISOString(),
     tree,
@@ -219,7 +248,11 @@ try {
     levels,
     fogLifted,
     contexts,
-    places: places.map((place) => ({ ...place, ...readings.get(place.name)! })),
+    places: [...places, ...(fog !== null && readings.has('fog') ? [fog as Place] : [])].map((place) => ({
+      ...place,
+      ...readings.get(place.name)!,
+    })),
+    fogMissed,
     check,
   };
   const file = join(logs, `shaders-${stamp}.json`);

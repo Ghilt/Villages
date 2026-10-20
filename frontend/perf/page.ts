@@ -16,15 +16,25 @@ interface MapHandle {
   style?: { _loaded?: boolean };
   loaded(): boolean;
   areTilesLoaded(): boolean;
+  isMoving(): boolean;
   redraw(): void;
   resize(): void;
   jumpTo(options: { center: [number, number]; zoom: number }): void;
+  getCenter(): { lng: number; lat: number };
+  getZoom(): number;
   getCanvas(): HTMLCanvasElement;
 }
 type Window = { villagesMap?: MapHandle; __perf: Perf };
 
-/** Opens the game and readies it to be measured: the panes put away, the map's context named. */
-export async function openGame(page: Page, url: string): Promise<{ contexts: ReturnType<Perf['contexts']> }> {
+/**
+ * Opens the game and readies it to be measured: whatever `first` does to it while it is as a player first finds it,
+ * then the panes put away and the map's context named.
+ */
+export async function openGame(
+  page: Page,
+  url: string,
+  first?: (page: Page) => Promise<void>,
+): Promise<{ contexts: ReturnType<Perf['contexts']> }> {
   await page.goto(url);
   await page.waitForFunction(
     () => (globalThis as unknown as Window).villagesMap?.style?._loaded === true,
@@ -39,6 +49,7 @@ export async function openGame(page: Page, url: string): Promise<{ contexts: Ret
     null,
     { timeout: 60_000 },
   );
+  await first?.(page);
   return page.evaluate(async () => {
     const win = globalThis as unknown as Window;
     const press = (label: string) =>
@@ -103,6 +114,37 @@ export async function liftFog(page: Page): Promise<boolean> {
       return false;
     }
   });
+}
+
+/**
+ * Founds a house from the first seat the founding parchment offers, as a player does (and as the end-to-end test
+ * does), and waits for the camera to come to rest over it. Hands back the seat's words and where the camera rests.
+ */
+export async function foundHouse(
+  page: Page,
+): Promise<{ seat: string; lat: number; lon: number; zoom: number }> {
+  const offered = page.locator('button.parchment').first();
+  await offered.waitFor({ state: 'visible', timeout: 60_000 });
+  const seat = (await offered.innerText()).split('\n')[0]!.trim();
+  await offered.click();
+  await offered.waitFor({ state: 'detached', timeout: 60_000 }).catch(() => undefined);
+  // Still for a second running: the camera flies to the seat once the house is the player's.
+  await page.waitForFunction(
+    () => {
+      const win = globalThis as unknown as Window & { __stillSince?: number };
+      const map = win.villagesMap!;
+      if (map.isMoving()) win.__stillSince = undefined;
+      else win.__stillSince ??= performance.now();
+      return win.__stillSince !== undefined && performance.now() - win.__stillSince > 1_000;
+    },
+    null,
+    { timeout: 60_000, polling: 100 },
+  );
+  const at = await page.evaluate(() => {
+    const map = (globalThis as unknown as Window).villagesMap!;
+    return { ...map.getCenter(), zoom: map.getZoom() };
+  });
+  return { seat, lat: at.lat, lon: at.lng, zoom: at.zoom };
 }
 
 /** Puts the camera over a place with the wall clock held, and draws until the map has all it needs there. */

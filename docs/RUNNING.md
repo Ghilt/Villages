@@ -1037,7 +1037,11 @@ and `-- --drop` takes them off; by hand only.
   in one when it will not; sets every shader to high and lifts the fog, so the game server sends every stand; and
   measures eight places at 1920 by 1080 in the player's camera, each a screen of one kind of ground found in the flat
   tiles: tundra, bog, ice, sand, grassland, forest and a coast at zoom 10, and the clouds from zoom 6, where they are
-  drawn. At each place it waits until what is drawn stops changing, draws frames back to back so the card is at its
+  drawn. Then the fog, last, so no place above had a house in the world: it founds a house from the first seat the
+  parchment offers, as a player would, and measures the frame where the camera comes to rest over the seat with the
+  fog on, `sprites:fog-of-war` and `sprites:fog-of-war-uncolour` its own parts. The seat is whichever is offered first,
+  so the ground round it changes from run to run and only the fog's own parts compare; `--no-fog` leaves it out, and
+  a tree whose house cannot be founded is said not to have had its fog measured. At each place it waits until what is drawn stops changing, draws frames back to back so the card is at its
   working clock, and times every frame twice over in turn: as a whole, and run by run under the name of what drew,
   the map's style layer (`map:water`, `map:painterly`) or Pixi's program (`sprites:land`, `sprites:clouds`,
   `sprites:scenery`), each run its own query, whose small cost is worked out from the two and taken back out of the
