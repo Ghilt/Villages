@@ -24,6 +24,21 @@ The main checkout is `E:/Code/Villages`. Check it is clean with
 A session that cannot reach the main checkout, isolated in a worktree or refused by the harness, asks Adam once, plainly,
 rather than giving the commands.
 
+## Keep main's performance
+
+Once main holds the work, a point of what it costs is kept at main's tip (decision record 0106), from this tree, which is
+now at that tip, and the points are brought to main as a commit of their own, `docs: main's performance at <sha>`:
+
+- **Always** `node scripts/check.ts --record --why to-main`: how long the tests take.
+- **When the landed work changed the frontend** (`frontend/apps/`, `frontend/packages/`, `frontend/package-lock.json`, or
+  the world it serves): `npm run perf:shaders --prefix frontend -- --record --why to-main`, then `perf:startup` and
+  `perf:zoom` with the same two options. About twenty minutes in all, one after another, never side by side, because two
+  measures at once are each other's noise.
+- Then commit the lines as `docs: main's performance at <short sha>`, rebase again if main has moved, and fast-forward
+  main once more, as above. That second step is part of Adam's word to bring the work to main.
+- **When the card is refused** as busy, keep the tests' point, say which measures were not kept and why, and keep them at
+  the next landing; never `--anyway`.
+
 ## After it lands
 
 Delete this session's `.sessions/` note: the work has landed. Then offer the next steps as `CLAUDE.md` describes: two to four

@@ -6,7 +6,8 @@
  * one chart draws - is the shaders' reader's (`shaderPoints.ts`). See decision record 0106.
  */
 
-import { readLines } from './shaderPoints';
+// With its extension, because the performance tools in `frontend/perf/` run this on Node, which looks for no other.
+import { readLines } from './shaderPoints.ts';
 import type { Measured, Why } from './shaderPoints';
 
 /** A stretch of the start: its long tasks, its frames, the worst gap between two of them and the gaps a player sees. */

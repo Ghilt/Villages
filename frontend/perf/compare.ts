@@ -89,3 +89,29 @@ export function said(comparison: Comparison): string[] {
   if (comparison.gone.length > 0) lines.push(`measured then and not now: ${comparison.gone.join(', ')}`);
   return lines;
 }
+
+/** One number of a run beside the last point's: a start's or a zoom's, which are timed on the CPU and the network. */
+export interface Beside {
+  readonly name: string;
+  readonly then: number | null;
+  readonly now: number | null;
+  /** The least change called a move, in the number's own unit. */
+  readonly least: number;
+  readonly unit: string;
+}
+
+/**
+ * Numbers of a run beside the last point's, a line each, and `moved` on those that changed by more than a fifth of
+ * themselves and their least amount. The start and the zoom are timed on the CPU, the network and the dev server, and
+ * spread wider from run to run than the card's frames do: three runs of one tree's start agreed within a tenth
+ * (2026-10-20).
+ */
+export function besideSaid(rows: readonly Beside[], share = 0.2): string[] {
+  const shown = (value: number | null, unit: string) =>
+    value === null ? '-' : unit === 's' ? (value / 1000).toFixed(1) : String(Math.round(value));
+  return rows.map(({ name, then, now, least, unit }) => {
+    const moved =
+      then !== null && now !== null && Math.abs(now - then) > Math.max(least, share * Math.abs(then));
+    return `${moved ? 'moved ' : '      '}${name.padEnd(40)} ${shown(then, unit).padStart(7)} → ${shown(now, unit).padStart(7)} ${unit}`.trimEnd();
+  });
+}

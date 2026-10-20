@@ -4,11 +4,14 @@ import { join } from 'node:path';
 
 import type { Browser, Page } from '@playwright/test';
 
+import { readZoomPoints } from '../apps/web/src/admin/performance/zoomPoints.ts';
 import type { Pacing, ZoomPoint, Zoomed } from '../apps/web/src/admin/performance/zoomPoints.ts';
 import { HERE, argsOf } from './args.ts';
 import { chromeOnTheCard } from './chrome.ts';
+import { besideSaid } from './compare.ts';
+import type { Beside } from './compare.ts';
 import { startServers } from './devServer.ts';
-import { METHOD, codeOf, keep, keptFile } from './kept.ts';
+import { METHOD, codeOf, keep, keptFile, lastLike, readKept } from './kept.ts';
 import { findSetters } from './levels.ts';
 import { cardToMeasureOn } from './machine.ts';
 import { liftFog, readLevels } from './page.ts';
@@ -28,8 +31,10 @@ import type { Watched } from './startupWatch.ts';
  * 5 and then flown to 10 over four seconds, the way a few turns of the wheel take it, and watched three seconds more
  * while what came settles. See decision record 0106.
  *
- *   npm run perf:zoom --prefix frontend -- [--places forest,ice] [--rounds 3] [--tree <dir>] [--record]
+ *   npm run perf:zoom --prefix frontend -- [--places forest,ice] [--rounds 3] [--tree <dir>] [--compare] [--record]
  *     [--why to-main|history|by-hand] [--headed] [--anyway]
+ *
+ * `--compare` puts the run beside the last point kept that was measured alike, and says what moved.
  */
 
 const VIEWPORT = { width: 1920, height: 1080 };
@@ -151,6 +156,39 @@ async function zoomOnce(browser: Browser, url: string, place: Place): Promise<Zo
   };
 }
 
+/** The numbers of a zoom a run is put beside the last point by: the first zoom's stall, each place's stalls, stutters and CPU. */
+function zoomBeside(then: ZoomPoint, now: ZoomPoint): Beside[] {
+  const stalled = (zoom: Zoomed | undefined | null) =>
+    zoom === undefined || zoom === null ? null : zoom.during.longTasks.total + zoom.after.longTasks.total;
+  const janky = (zoom: Zoomed | undefined) =>
+    zoom === undefined ? null : zoom.during.janky + zoom.after.janky;
+  const first: Beside = {
+    name: 'the first zoom: long tasks',
+    then: stalled(then.firstZoom),
+    now: stalled(now.firstZoom),
+    // The driver's compile alone swings from 23 to 31 seconds between runs of one tree (2026-10-20).
+    least: 10_000,
+    unit: 's',
+  };
+  return [
+    first,
+    ...now.zooms.flatMap((zoom) => {
+      const was = then.zooms.find((each) => each.place === zoom.place);
+      return [
+        { name: `${zoom.place}: long tasks`, then: stalled(was), now: stalled(zoom), least: 100, unit: 'ms' },
+        { name: `${zoom.place}: stutters`, then: janky(was), now: janky(zoom), least: 2, unit: '' },
+        {
+          name: `${zoom.place}: CPU`,
+          then: was?.cpu.busy ?? null,
+          now: zoom.cpu.busy,
+          least: 200,
+          unit: 'ms',
+        },
+      ];
+    }),
+  ];
+}
+
 /** Of a place's zooms, the middle by how long the page was stalled while the camera came in. */
 function middleZoom(zooms: readonly Zoomed[]): Zoomed {
   const sorted = [...zooms].sort((a, b) => a.during.longTasks.total - b.during.longTasks.total);
@@ -220,6 +258,16 @@ try {
   );
   console.log(`the first zoom, cold: ${said(firstZoom)}\n`);
   for (const zoom of point.zooms) console.log(said(zoom));
+  if (flag('compare')) {
+    const then = lastLike(readZoomPoints(readKept('zoom')).points, point);
+    if (then === null) console.log('\nnothing kept to compare with, measured alike');
+    else {
+      console.log(
+        `\nagainst ${then.code.commit.slice(0, 7)}, "${then.code.subject}", measured ${then.measuredAt.slice(0, 10)}:`,
+      );
+      for (const line of besideSaid(zoomBeside(then, point))) console.log(`  ${line}`);
+    }
+  }
   if (flag('record')) {
     const kept = keptFile(HERE, 'zoom');
     keep(kept, point);

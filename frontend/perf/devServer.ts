@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { mkdirSync, openSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { join } from 'node:path';
@@ -31,7 +31,29 @@ export function freePort(): Promise<number> {
   });
 }
 
+/**
+ * Refuses a tree whose page cannot be told where its game server is: it would connect to 8080, the main checkout's,
+ * and the fog's measure would found a house in Adam's world. The page has read `VITE_GATEWAY_URL` since 2026-09-04.
+ */
+function refuseUnpointable(tree: string): void {
+  const found = spawnSync('git', [
+    '-C',
+    tree,
+    'grep',
+    '-q',
+    'VITE_GATEWAY_URL',
+    '--',
+    'frontend/apps/web/src',
+  ]);
+  if (found.status !== 0) {
+    throw new Error(
+      `the page of ${tree} does not read VITE_GATEWAY_URL, so it cannot be pointed at a game server of the tool's own`,
+    );
+  }
+}
+
 export async function startServers(tree: string, logs: string): Promise<Servers> {
+  refuseUnpointable(tree);
   const port = await freePort();
   const gamePort = await freePort();
   mkdirSync(logs, { recursive: true });

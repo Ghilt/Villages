@@ -16,6 +16,26 @@ must show there.
 A step that changed the master or anything the world is built from runs the `regenerate-world` skill now: it is the
 `regenerate` entry of the config. Stale output is worse than missing output, because it looks like evidence.
 
+## Measure
+
+What a step costs is measured at its hand-over, against the last point main kept, and said under "what moved"
+(decision record 0106, `docs/RUNNING.md`). It is the `measure` entry of the config. Nothing measured at a hand-over is
+kept: the logs and the `.json` in `.logs/perf/` are the evidence, and only a landing on main keeps a point.
+
+- **A step that changes what is drawn** - a shader, a layer of the map, the paint, the style, the scenery or what the
+  sprite canvas draws - runs `npm run perf:shaders --prefix frontend -- --compare`, about ten minutes, and says each place
+  that moved and by how much, or that nothing did beyond the noise.
+- **A step that changes the sprites, what the camera loads as it comes in, or anything the zoom runs** runs
+  `npm run perf:zoom --prefix frontend -- --compare`, about three minutes.
+- **A step that changes how the game starts** - what the page loads or runs before the loading screen lifts, a
+  dependency, Vite's settings - runs `npm run perf:startup --prefix frontend -- --compare`, about three minutes.
+- **A step that adds many tests or slow ones** says how long the check took against the last point in
+  `docs/experiments/performance/tests.jsonl`; `node scripts/check.ts` prints each part's time.
+- **A refusal is reported, not stepped round.** The tools refuse a graphics card more than a quarter busy: Adam is likely
+  playing. Say so in the presentation and measure later, never with `--anyway` for a reading that will be compared.
+- **What moved is the step's to explain.** A move the step meant is said with its reason; one it did not is a finding,
+  and Adam hears of it before anything else in the presentation.
+
 ## Leave the program running
 
 - **Start it with the quick start**, from the worktree root, its output to a file rather than a pipe (the servers hold a

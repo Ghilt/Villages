@@ -3,7 +3,8 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
 import { alike, readShaderPoints } from '../apps/web/src/admin/performance/shaderPoints.ts';
-import type { KeptPlace, Point } from '../apps/web/src/admin/performance/shaderPoints.ts';
+import { HERE } from './args.ts';
+import type { KeptPlace, Measured, Point } from '../apps/web/src/admin/performance/shaderPoints.ts';
 
 export type { KeptPlace, Point, Why } from '../apps/web/src/admin/performance/shaderPoints.ts';
 
@@ -62,6 +63,12 @@ export function pointsIn(text: string): Point[] {
   return readShaderPoints(text).points;
 }
 
+/** The text of one measure's points kept in this tree, or none. */
+export function readKept(measure: string): string {
+  const file = keptFile(HERE, measure);
+  return existsSync(file) ? readFileSync(file, 'utf8') : '';
+}
+
 export function readPoints(file: string): Point[] {
   return existsSync(file) ? pointsIn(readFileSync(file, 'utf8')) : [];
 }
@@ -71,8 +78,11 @@ export function keep(file: string, point: object): void {
   appendFileSync(file, `${JSON.stringify(point)}\n`);
 }
 
-/** The last point measured as this one is: by the same method, on the same card, at the same size. */
-export function lastLike(points: readonly Point[], like: Pick<Point, 'method' | 'machine'>): Point | null {
+/** The last point measured as this one is: by the same method, on the same card, at the same size, on the same CPU. */
+export function lastLike<P extends Measured>(
+  points: readonly P[],
+  like: Pick<Measured, 'method' | 'machine'>,
+): P | null {
   return [...points].reverse().find((point) => alike(point, like)) ?? null;
 }
 

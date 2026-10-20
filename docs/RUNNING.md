@@ -1092,8 +1092,9 @@ and `-- --drop` takes them off; by hand only.
   lifting and in the five seconds after, when a player is already looking; what was fetched, by kind; and where the
   CPU's time went, by module and by function, each its own time and not what it called, from a profile Chrome takes.
   A table and the CPU's lists printed, and the whole reading in `.logs/perf/startup-<time>.json`; `--record` keeps
-  it as a line of `docs/experiments/performance/startup.jsonl`, `--loads 5` takes the middle of five. About three
-  minutes, the build one of them.
+  it as a line of `docs/experiments/performance/startup.jsonl`, `--loads 5` takes the middle of five, and `--compare`
+  puts each load's seconds to ready, its long tasks and its stutters beside the last point kept and marks what moved
+  by more than a fifth. About three minutes, the build one of them.
 - **On the performance page**, the chapter "How long the game takes to start": the latest point's three loads in a
   table - seconds to ready, when the style and the sprites came, the long tasks and the worst gap up to ready, the
   long tasks, stutters and worst gap after it, the code and the tiles fetched, the CPU's busy time - then each load's
@@ -1115,11 +1116,23 @@ and `-- --drop` takes them off; by hand only.
   the game's programs yet, and the land's is compiled when the camera first comes inside zoom 8.5 - a stall of 26
   seconds on this machine (2026-10-20), what a player's first visit meets, and every visit after the land's shader
   changes. Then each place three times on fresh pages, the middle kept (`--rounds`); `--places forest,ice` measures
-  some. `--record` keeps it as a line of `docs/experiments/performance/zoom.jsonl`. About three minutes.
+  some. `--record` keeps it as a line of `docs/experiments/performance/zoom.jsonl`, and `--compare` puts the first
+  zoom's stall and each place's long tasks, stutters and CPU beside the last point kept and marks what moved by more
+  than a fifth; the first zoom's stall only beyond ten seconds, because the driver's compile alone swings from 23 to 31.
+  About three minutes.
 - **On the performance page**, the chapter "Zooming in, and what the sprites cost it": the first zoom and each
   place's in a table, each a link that opens the game there; each place's long tasks over its zoom point by point, and
   the first zoom's stall point by point, which is how long compiling the game's programs takes; and each place's CPU
   time by module side by side.
+
+## When the measures run
+
+A step that changes what is drawn, what the zoom loads or how the game starts runs the measure it touches with
+`--compare` at its hand-over, against the last point kept, and says what moved; nothing a hand-over measures is kept.
+Each time work reaches main, every measure is run with `--record --why to-main` at main's tip - the tests always, the
+shaders, the start and the zoom when the frontend changed - and the lines go to main as `docs: main's performance at
+<sha>`. The points of commits before 2026-10-20 were measured afterwards, `--why history`, by
+`node scripts/perf-history.ts`. `.claude/loop/hand-over.md` and `.claude/loop/to-main.md` are the agent's half.
 
 ## How long the tests take
 

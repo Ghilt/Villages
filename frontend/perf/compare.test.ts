@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { measureOf, said, whatMoved } from './compare';
+import { besideSaid, measureOf, said, whatMoved } from './compare';
 import { keptPlace, lastLike, pointsIn } from './kept';
 import type { KeptPlace, Point } from './kept';
 
@@ -102,5 +102,16 @@ describe('a point kept', () => {
     >;
     expect(lastLike(points, like)?.method).toBe(1);
     expect(lastLike(points, { ...like, method: 3 })).toBeNull();
+  });
+
+  it('puts a start or a zoom beside the last point, and says moved only beyond a fifth and the least amount', () => {
+    const lines = besideSaid([
+      { name: 'again: ready', then: 3300, now: 4500, least: 300, unit: 's' },
+      { name: 'again: long tasks', then: 100, now: 180, least: 150, unit: 'ms' },
+      { name: 'built: ready', then: null, now: 1500, least: 300, unit: 's' },
+    ]);
+    expect(lines[0]).toMatch(/^moved again: ready\s+3\.3 →\s+4\.5 s$/);
+    expect(lines[1]).toMatch(/^\s+again: long tasks\s+100 →\s+180 ms$/);
+    expect(lines[2]).toMatch(/^\s+built: ready\s+- →\s+1\.5 s$/);
   });
 });

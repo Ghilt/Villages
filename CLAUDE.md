@@ -76,6 +76,12 @@ has to be learnt once and then costs nothing, and a word costs nothing to learn 
 fitting - in a 44-pixel strip, in a column squeezed to 18rem, in a language nobody has thought about yet.
 Guessing wrong is cheap to fix and it is still drawing it twice. The same question, once, is not.
 
+**What a step costs is measured, and every landing keeps a point.** A step that changes what is drawn, what the
+zoom loads or how the game starts is measured at its hand-over against the last point main kept, and says what moved;
+each time work reaches main, a point of the shaders, the start, the zoom and the tests is kept at its tip and charted at
+`/admin/inspect-performance`. The tools measure from outside the game on this machine's Chrome and graphics card, and
+refuse a card that is busy: see decision record 0106, `.claude/loop/hand-over.md` and `.claude/loop/to-main.md`.
+
 **A component is seen at `/admin/inspect-ui-components` before it is used.** Whatever the player is shown
 is built from the component library in `frontend/apps/web/src/ui/`: a pane is a **container** named by a
 **recipe** - a border, a fill, its embellishments - and never a stylesheet of its own. A component the

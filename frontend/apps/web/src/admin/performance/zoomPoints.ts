@@ -6,7 +6,8 @@
  * 0106.
  */
 
-import { readLines } from './shaderPoints';
+// With its extension, because the performance tools in `frontend/perf/` run this on Node, which looks for no other.
+import { readLines } from './shaderPoints.ts';
 import type { Measured, Why } from './shaderPoints';
 import type { Compiled, Span, Spent } from './startupPoints';
 

@@ -28,6 +28,25 @@
     }
   ],
 
+  "measure": [
+    {
+      "when": "The step changed what is drawn: a shader, a layer of the map, the paint, the style, the scenery, or what the sprite canvas draws",
+      "run": "npm run perf:shaders --prefix frontend -- --compare, and say what moved"
+    },
+    {
+      "when": "The step changed the sprites, what the camera loads as it comes in, or anything the zoom runs",
+      "run": "npm run perf:zoom --prefix frontend -- --compare, and say what moved"
+    },
+    {
+      "when": "The step changed how the game starts: what the page loads or runs before the loading screen lifts, a dependency, Vite's settings",
+      "run": "npm run perf:startup --prefix frontend -- --compare, and say what moved"
+    },
+    {
+      "when": "Work reached main",
+      "run": "The to-main notes: keep a point of every measure at main's tip with --record --why to-main, and bring the points to main"
+    }
+  ],
+
   "architecture": {
     "question": "/admin/inspect-architecture, the page that draws how the world is set up and what the running game is made of; its source is frontend/apps/web/src/admin/architecture/",
     "askWhen": "A new running piece (a server, a store, a database, a queue, a connection between them), a new tool that bakes the world, a new kind of file it writes, a new part of the game that reads one, or a part that changed what it is responsible for. Not a fix, a pane, a mechanic inside the server or a document"

@@ -4,12 +4,15 @@ import { join } from 'node:path';
 
 import type { Browser } from '@playwright/test';
 
+import { readStartupPoints } from '../apps/web/src/admin/performance/startupPoints.ts';
 import type { Load, StartupPoint } from '../apps/web/src/admin/performance/startupPoints.ts';
 import { HERE, argsOf } from './args.ts';
 import { builtPage } from './builtPage.ts';
+import { besideSaid } from './compare.ts';
+import type { Beside } from './compare.ts';
 import { chromeOnTheCard } from './chrome.ts';
 import { startServers } from './devServer.ts';
-import { METHOD, codeOf, keep, keptFile } from './kept.ts';
+import { METHOD, codeOf, keep, keptFile, lastLike, readKept } from './kept.ts';
 import { cardToMeasureOn } from './machine.ts';
 import { compiledOf, middleOf, requestsByKind, spanOf, spentIn } from './startupStats.ts';
 import type { Profile } from './startupStats.ts';
@@ -24,8 +27,10 @@ import type { Watched } from './startupWatch.ts';
  * loading screen lifting and in the five seconds after, what was fetched, and where the CPU's time went by module and
  * by function. See decision record 0106.
  *
- *   npm run perf:startup --prefix frontend -- [--loads 3] [--no-built] [--tree <dir>] [--record]
+ *   npm run perf:startup --prefix frontend -- [--loads 3] [--no-built] [--tree <dir>] [--compare] [--record]
  *     [--why to-main|history|by-hand] [--headed] [--anyway]
+ *
+ * `--compare` puts the run beside the last point kept that was measured alike, and says what moved.
  */
 
 const VIEWPORT = { width: 1920, height: 1080 };
@@ -101,6 +106,32 @@ async function loadOnce(browser: Browser, url: string): Promise<Load> {
     afterFunctions: spentAfter.functions.slice(0, 8),
     compiles: compiledOf(watched, end + AFTER_MS),
   };
+}
+
+/** The numbers of a start a run is put beside the last point by: each load's seconds to ready, its stalls, its stutters. */
+function startupBeside(then: StartupPoint, now: StartupPoint): Beside[] {
+  return (['first', 'again', 'built'] as const).flatMap((key) => {
+    const was = then.loads[key];
+    const is = now.loads[key];
+    if (was === null && is === null) return [];
+    return [
+      { name: `${key}: ready`, then: was?.ready ?? null, now: is?.ready ?? null, least: 300, unit: 's' },
+      {
+        name: `${key}: long tasks up to ready`,
+        then: was?.before.longTasks.total ?? null,
+        now: is?.before.longTasks.total ?? null,
+        least: 150,
+        unit: 'ms',
+      },
+      {
+        name: `${key}: stutters after`,
+        then: was?.after.janky ?? null,
+        now: is?.after.janky ?? null,
+        least: 2,
+        unit: '',
+      },
+    ];
+  });
 }
 
 const seconds = (ms: number | null | undefined) =>
@@ -180,6 +211,16 @@ try {
     console.log(`  by module: ${list(middle.modules, 8)}`);
     console.log(`  by function: ${list(middle.functions, 8)}`);
     console.log(`  in the five seconds after, by module: ${list(middle.afterModules, 6)}`);
+  }
+  if (flag('compare')) {
+    const then = lastLike(readStartupPoints(readKept('startup')).points, point);
+    if (then === null) console.log('\nnothing kept to compare with, measured alike');
+    else {
+      console.log(
+        `\nagainst ${then.code.commit.slice(0, 7)}, "${then.code.subject}", measured ${then.measuredAt.slice(0, 10)}:`,
+      );
+      for (const line of besideSaid(startupBeside(then, point))) console.log(`  ${line}`);
+    }
   }
   if (flag('record')) {
     const kept = keptFile(HERE, 'startup');
