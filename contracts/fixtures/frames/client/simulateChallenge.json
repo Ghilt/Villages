@@ -1,0 +1,30 @@
+{
+  "type": "simulateChallenge",
+  "id": "run-1",
+  "a": [
+    {
+      "aspect": "diplomacy",
+      "power": 50,
+      "integrity": 50,
+      "summonCount": 3,
+      "effects": ["diplomacy.envoy", "diplomacy.parley"],
+      "slotted": {
+        "diplomacy.envoy": { "kind": "keyFigure", "name": "Ines", "stats": { "piety": 9, "reason": 11, "kindness": 14, "physical": 8 } }
+      }
+    }
+  ],
+  "b": [
+    {
+      "aspect": "holy",
+      "power": 40,
+      "integrity": 60,
+      "summonCount": 2,
+      "effects": ["holy.sanctuary"],
+      "slotted": {
+        "holy.sanctuary": { "kind": "building", "name": "Cathedral of Lund", "level": 2 }
+      }
+    }
+  ],
+  "progression": { "seconds": 30, "happenings": [["violence"], ["holy", "diplomacy"]] },
+  "seed": 20261020
+}

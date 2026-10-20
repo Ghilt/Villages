@@ -2,6 +2,7 @@ package villages.application
 
 import villages.application.fate.FateCatalogue
 import villages.domain.StructureCatalogue
+import villages.domain.challenge.ChallengeCatalogue
 import villages.domain.TakeOnCatalogue
 import villages.domain.isCatalogueName
 import java.security.MessageDigest
@@ -89,6 +90,9 @@ class Shelf(
 
     /** Every quest there is to offer, by its name, at the moment of asking. */
     val quests: Map<String, QuestTemplate> get() = inForce.quests
+
+    /** The challenge's effects, summons and kinds in force, at the moment of asking. */
+    val challenges: ChallengeCatalogue get() = inForce.challenges
 
     /** The fingerprint of each catalogue in force, by its name. */
     fun fingerprints(): Map<String, String> = texts.mapValues { (_, text) -> fingerprintOf(text) }

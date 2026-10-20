@@ -147,3 +147,8 @@ recorded over. See decision record 0037. What each one changed:
   with `worldWiped`; a save in `savesListed` says what of it this code cannot read, `unreadable`. See decision record 0101.
 - **56** - `listPlayers`, answered by `playersListed`: every player with a house in the world, by the house's name, for
   the debug panel to switch this browser to one. Instruments, refused while they are closed. See decision record 0101.
+- **57** - `stands` says which layer of the sprite map it carries, `layer`, so the ruined towns of 1790 come down the
+  same road as the scenery.
+- **58** - `simulateChallenge`, answered by `challengeSimulated`, every moment of a challenge the game server fought out
+  and what it came to, or by `simulationRefused`. Instruments, refused while they are closed; nothing is stored. See
+  decision record 0105.

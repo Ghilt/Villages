@@ -217,6 +217,9 @@ export function createSession(ports: SessionPorts): Session {
     cataloguesInForce: () => undefined,
     catalogueRevised: () => undefined,
     revisionRefused: () => undefined,
+    // A player's window never fights a challenge out; the challenges' inspect page does, with no session. See 0105.
+    challengeSimulated: () => undefined,
+    simulationRefused: () => undefined,
     // What saves there are: the panel's to say and show. See 0101.
     savesListed: () => undefined,
     playersListed: () => undefined,

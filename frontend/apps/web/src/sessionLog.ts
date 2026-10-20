@@ -221,6 +221,10 @@ export const sessionLog: GatewayListener = {
       case 'catalogueRevised':
       case 'revisionRefused':
         return;
+      // Nor fights a challenge out: the challenges' inspect page does, with no session (0105).
+      case 'challengeSimulated':
+      case 'simulationRefused':
+        return;
       case 'playersListed': // The panel's to show, in the World section's dropdown. See 0101.
         return;
       case 'savesListed': {

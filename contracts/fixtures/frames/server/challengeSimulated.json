@@ -1,0 +1,60 @@
+{
+  "type": "challengeSimulated",
+  "id": "run-1",
+  "seed": 20261020,
+  "catalogue": "60410b0ff25e88bec6f2e90dbd2f40773741438745cda4ae61123354e97442c4",
+  "progression": { "seconds": 30, "happenings": [["violence"], ["holy", "diplomacy"]] },
+  "outcome": {
+    "tug": -12.5,
+    "ended": "timeRanOut",
+    "second": 29,
+    "wonBy": "b",
+    "gains": [{ "side": "b", "resource": "piety", "amount": 5, "effect": "holy.sanctuary" }],
+    "losses": [{ "side": "b", "name": "Cathedral of Lund", "became": "damaged", "effectiveness": 10, "effect": "holy.sanctuary" }]
+  },
+  "moments": [
+    {
+      "second": 0,
+      "happening": 0,
+      "side": null,
+      "actor": "challenge",
+      "what": "happeningBegan",
+      "effect": null,
+      "target": null,
+      "amount": null,
+      "boosted": false,
+      "tugDelta": 0,
+      "tugAfter": 0,
+      "targetEffect": null
+    },
+    {
+      "second": 0,
+      "happening": 0,
+      "side": "a",
+      "actor": "a1",
+      "what": "lent",
+      "effect": "diplomacy.envoy",
+      "target": null,
+      "amount": 21,
+      "boosted": true,
+      "tugDelta": 21,
+      "tugAfter": 21,
+      "targetEffect": null
+    },
+    {
+      "second": 15,
+      "happening": 1,
+      "side": "b",
+      "actor": "#1",
+      "what": "arrived",
+      "effect": "holy.sanctuary",
+      "target": null,
+      "amount": 30,
+      "boosted": true,
+      "tugDelta": -30,
+      "tugAfter": -9,
+      "targetEffect": null
+    }
+  ],
+  "summons": [{ "serial": 1, "kind": "onTheLine", "called": "Cathedral of Lund" }]
+}

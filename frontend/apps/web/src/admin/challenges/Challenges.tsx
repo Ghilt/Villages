@@ -15,6 +15,7 @@ import { InspectPage } from '../frame/InspectPage';
 import { SaveBar, WholeFile } from '../frame/SaveBar';
 import { useCatalogueEditor } from '../frame/useCatalogueEditor';
 import type { CatalogueEditor, Path } from '../frame/useCatalogueEditor';
+import { Simulator } from './Simulator';
 
 type Editor = CatalogueEditor<Content>;
 
@@ -28,8 +29,8 @@ const PAIRS = ASPECTS.filter((_, at) => at % 2 === 0).map((aspect) => [aspect, a
  * The challenge's content, `world/catalogues/challenges.json`, to read and to change: every effect a slice can carry,
  * in the five pairs of aspects, with its name, its words and its numbers, the slot it brings and the summon it hires;
  * every summon; and the kinds of challenge a progression is drawn from. Every name, word and number is changed in
- * place and saved through the game server, which takes it on at once. The simulator, which runs the server's engine
- * on it, comes below in a later step. See docs/plans/challenges.md and decision record 0105.
+ * place and saved through the game server, which takes it on at once. Below, the simulator has the server's engine
+ * fight a challenge out on what is in force. See docs/plans/challenges.md and decision record 0105.
  */
 export function Challenges() {
   const editor = useCatalogueEditor('challenges.json', parseChallenges);
@@ -59,6 +60,7 @@ export function Challenges() {
           <Kinds editor={editor} content={content} />
         </>
       )}
+      <Simulator />
       <WholeFile editor={editor} />
     </InspectPage>
   );

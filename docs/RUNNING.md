@@ -896,8 +896,12 @@ and `-- --drop` takes them off; by hand only.
   that is not there, a slot that neither lends nor puts on the line - naming where, as it does every catalogue, said
   once in the debug panel's faults and the server's log. The numbers of a challenge's rules that belong to no one
   effect are the balance's `challenge` group, at `/admin/inspect-balance`: the aspect boost, how far the tug runs,
-  what a building on the line brings, what it loses killed, and the slice every house starts with. The plan is
-  `docs/plans/challenges.md`, and the simulator comes below the content in a later step of it.
+  what a building on the line brings, what it loses killed, and the slice every house starts with. Below the content
+  is the simulator, which needs the game server: **run the sample** has the server's engine fight Violence against
+  Diplomacy out with the catalogue in force - not edits not yet saved - from a seed it draws, and the page says what it
+  came to: the seed, how it ended and in which second, the tug toward the side it favours, who won, and how many
+  moments it had. It asks with `simulateChallenge`, one of Adam's instruments, on a connection that says no hello, and
+  a server with its instruments closed refuses it; nothing is stored. The plan is `docs/plans/challenges.md`.
 - **`/admin/inspect-story`** is the world's history as a timeline, `docs/STORY.md` drawn, and needs nothing else
   running. Time runs down the page from the first box to the present, where the line ends at the compass: each
   box's day to the left of a gilt line and the box to the right, what happened in the library's `card.event`, a

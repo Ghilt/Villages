@@ -276,6 +276,7 @@ internal class Rig(
                 ) { Catalogues(RIG_CATALOGUE, RIG_BALANCE, RIG_FATE, RIG_NAMES, ABBOT_DIALOGUES + ("letter" to RIG_LETTER), mapOf("abbot" to ABBOT)) },
                 questRows,
             ),
+            challengesInTheRig(),
         ),
     )
 
