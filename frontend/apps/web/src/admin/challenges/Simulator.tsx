@@ -1,22 +1,37 @@
 import { useState } from 'react';
 
-import { SAMPLE, towardSaid } from './setup';
+import { parseBalance } from '@villages/world';
+import type { Challenges } from '@villages/world';
+
+import { useCatalogue } from '../frame/useCatalogue';
+import { MomentsTable } from './MomentsTable';
+import { ProgressionEditor } from './ProgressionEditor';
+import { SideBuilder } from './SideBuilder';
+import { FIRST_SLICE, SAMPLE, askedOf, seedReads, towardSaid, tugBySecond } from './setup';
+import type { Draft } from './setup';
+import { TugChart } from './TugChart';
 import { useSimulator } from './useSimulator';
 import type { Answer } from './useSimulator';
 
 /**
- * The simulator: the game server's engine fights a challenge out and the page shows what it came to. For now one
- * sample, Violence against Diplomacy, fought from a seed the server draws; the sides, the progression and the moments
- * come in the plan's next step. Words rather than marks, as every inspect page's controls are. See decision record 0105.
+ * The simulator: a challenge built here - each side's slices with stand-ins in their slots, a progression written by
+ * hand, a seed or none - fought out by the game server's engine on the catalogue in force, and every moment of it shown:
+ * what it came to, the tug drawn second by second, and the moments as a table. The same seed fights the same challenge,
+ * so a strange one can be fought again and read. Words rather than marks, as every inspect page's controls are. 0105.
  */
-export function Simulator() {
+export function Simulator({ content }: { content: Challenges | null }) {
   const simulator = useSimulator();
-  const [answer, setAnswer] = useState<Answer | null>(null);
+  const balance = useCatalogue('balance.json', parseBalance);
+  const rules = balance.state === 'read' ? balance.shelved.value.challenge : null;
+  const start = rules?.slice ?? FIRST_SLICE;
+  const [draft, setDraft] = useState<Draft>(SAMPLE);
+  const [fought, setFought] = useState<{ answer: Answer; draft: Draft } | null>(null);
   const [running, setRunning] = useState(false);
   const run = () => {
     setRunning(true);
-    void simulator.simulate(SAMPLE).then((answered) => {
-      setAnswer(answered);
+    const asked = draft;
+    void simulator.simulate(askedOf(asked)).then((answer) => {
+      setFought({ answer, draft: asked });
       setRunning(false);
     });
   };
@@ -24,44 +39,121 @@ export function Simulator() {
     <section className="inspect-group" aria-label="simulator">
       <h2 className="inspect-group__title">simulator</h2>
       <p className="inspect-said">
-        The game server fights the sample out with the catalogue in force, not edits not yet saved: Violence,
-        with Sellswords and No Quarter, against Diplomacy, with Trusted Envoy and Ines in its slot, and
-        Sweeter Terms, over thirty seconds of Violence, Diplomacy, then both.
+        Build two sides and a progression, and the game server fights them out with the catalogue in force -
+        not edits not yet saved - from the seed given, or from one it draws. The same seed fights the same
+        challenge again.
       </p>
-      <button
-        type="button"
-        className="inspect-button"
-        disabled={simulator.state !== 'open' || running}
-        onClick={run}
-      >
-        run the sample
-      </button>{' '}
-      <span className={simulator.state === 'closed' ? 'inspect-note inspect-problem' : 'inspect-note'}>
-        {simulator.state === 'closed'
-          ? 'the game server is not running: start it to fight'
-          : simulator.state === 'connecting'
-            ? 'asking the game server'
-            : ''}
-      </span>
-      {answer !== null && <Answered answer={answer} />}
+      {content === null ? (
+        <p className="inspect-quiet">the simulator builds slices from the catalogue, which is not read yet</p>
+      ) : (
+        <div className="challenges-sides">
+          <SideBuilder
+            side="a"
+            slices={draft.a}
+            content={content}
+            start={start}
+            onChange={(a) => setDraft({ ...draft, a })}
+          />
+          <SideBuilder
+            side="b"
+            slices={draft.b}
+            content={content}
+            start={start}
+            onChange={(b) => setDraft({ ...draft, b })}
+          />
+        </div>
+      )}
+      <ProgressionEditor
+        progression={draft.progression}
+        onChange={(progression) => setDraft({ ...draft, progression })}
+      />
+      <div className="challenges-run inspect-each">
+        <label>
+          <span className="inspect-key">seed</span>{' '}
+          <input
+            className={`inspect-field${seedReads(draft.seed) ? '' : ' is-wrong'}`}
+            aria-label="seed, empty to draw one"
+            placeholder="drawn"
+            value={draft.seed}
+            size={18}
+            onChange={(event) => setDraft({ ...draft, seed: event.target.value })}
+          />
+        </label>
+        <button
+          type="button"
+          className="inspect-button"
+          disabled={simulator.state !== 'open' || running || !seedReads(draft.seed)}
+          onClick={run}
+        >
+          run
+        </button>
+        <span className={simulator.state === 'closed' ? 'inspect-note inspect-problem' : 'inspect-note'}>
+          {simulator.state === 'closed'
+            ? 'the game server is not running: start it to fight'
+            : simulator.state === 'connecting'
+              ? 'asking the game server'
+              : running
+                ? 'fighting'
+                : ''}
+        </span>
+      </div>
+      {fought !== null && (
+        <Fought
+          answer={fought.answer}
+          draft={fought.draft}
+          content={content}
+          ends={rules?.tugEnds ?? 100}
+          onAgain={(seed) => setDraft({ ...draft, seed: String(seed) })}
+        />
+      )}
     </section>
   );
 }
 
-function Answered({ answer }: { answer: Answer }) {
-  if (!answer.fought)
+function Fought({
+  answer,
+  draft,
+  content,
+  ends,
+  onAgain,
+}: {
+  answer: Answer;
+  draft: Draft;
+  content: Challenges | null;
+  ends: number;
+  onAgain: (seed: number) => void;
+}) {
+  if (!answer.fought) {
     return (
       <p className="inspect-problem">
         refused, {answer.code}: {answer.reason}
       </p>
     );
-  const { outcome, seed, moments } = answer.challenge;
+  }
+  const { outcome, seed, moments, progression } = answer.challenge;
   const ended = outcome.ended === 'pulled' ? 'pulled to the end' : 'time ran out';
   const won = outcome.wonBy === null ? 'won by nobody' : `won by ${outcome.wonBy.toUpperCase()}`;
   return (
-    <p className="challenges-outcome">
-      seed <span className="inspect-key">{seed}</span>: {ended} in second {outcome.second}, the tug{' '}
-      {towardSaid(outcome.tug)}, {won}; {moments.length} moments
-    </p>
+    <div className="challenges-fought">
+      <p className="challenges-outcome">
+        seed <span className="inspect-key">{seed}</span>{' '}
+        <button type="button" className="inspect-button" onClick={() => onAgain(seed)}>
+          keep this seed
+        </button>{' '}
+        {ended} in second {outcome.second}, the tug {towardSaid(outcome.tug)}, {won}; {moments.length} moments
+      </p>
+      {outcome.gains.map((gain, at) => (
+        <p key={`gain-${at}`} className="inspect-note">
+          gained: {gain.side.toUpperCase()} {gain.amount} {gain.resource}, by {gain.effect}
+        </p>
+      ))}
+      {outcome.losses.map((loss, at) => (
+        <p key={`loss-${at}`} className="inspect-note">
+          lost: {loss.side.toUpperCase()} {loss.name} {loss.became}, {loss.effectiveness}% effectiveness
+        </p>
+      ))}
+      <TugChart tugs={tugBySecond(moments, progression.seconds)} progression={progression} ends={ends} />
+      <MomentsTable challenge={answer.challenge} draft={draft} content={content} />
+    </div>
   );
 }

@@ -897,11 +897,17 @@ and `-- --drop` takes them off; by hand only.
   once in the debug panel's faults and the server's log. The numbers of a challenge's rules that belong to no one
   effect are the balance's `challenge` group, at `/admin/inspect-balance`: the aspect boost, how far the tug runs,
   what a building on the line brings, what it loses killed, and the slice every house starts with. Below the content
-  is the simulator, which needs the game server: **run the sample** has the server's engine fight Violence against
-  Diplomacy out with the catalogue in force - not edits not yet saved - from a seed it draws, and the page says what it
-  came to: the seed, how it ended and in which second, the tug toward the side it favours, who won, and how many
-  moments it had. It asks with `simulateChallenge`, one of Adam's instruments, on a connection that says no hello, and
-  a server with its instruments closed refuses it; nothing is stored. The plan is `docs/plans/challenges.md`.
+  is the simulator, which needs the game server to fight. Each side is one to three slices - an aspect, power,
+  integrity and summon count, two at most of its aspect's effects, and a stand-in in the slot of each that has one, a
+  key figure of four stats or a building of a level, made up there - and the progression is written by hand: its
+  seconds, and its happenings, one aspect or two each, beginning where the engine spaces them. It opens on a sample,
+  Violence against Diplomacy. **run** has the server's engine fight it out with the catalogue in force - not edits not
+  yet saved - from the seed typed, or from one it draws when the box is empty, and shows what it came to: the seed,
+  with **keep this seed** to fight the same challenge again, how it ended and in which second, the tug toward the side
+  it favours, who won, what was gained and lost; the tug drawn second by second, side A up, each happening marked; and
+  every moment as a table, a side or a kind of moment kept alone, a boosted amount marked ×. It asks with
+  `simulateChallenge`, one of Adam's instruments, on a connection that says no hello, and a server with its instruments
+  closed refuses it; nothing is stored. The plan is `docs/plans/challenges.md`.
 - **`/admin/inspect-story`** is the world's history as a timeline, `docs/STORY.md` drawn, and needs nothing else
   running. Time runs down the page from the first box to the present, where the line ends at the compass: each
   box's day to the left of a gilt line and the box to the right, what happened in the library's `card.event`, a

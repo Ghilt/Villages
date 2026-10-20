@@ -2,7 +2,6 @@ import './challenges.css';
 
 import { ASPECTS, antiOf, filledIn, parseChallenges } from '@villages/world';
 import type {
-  Aspect,
   ChallengeEffect,
   ChallengeKind,
   ChallengeSlot,
@@ -15,12 +14,10 @@ import { InspectPage } from '../frame/InspectPage';
 import { SaveBar, WholeFile } from '../frame/SaveBar';
 import { useCatalogueEditor } from '../frame/useCatalogueEditor';
 import type { CatalogueEditor, Path } from '../frame/useCatalogueEditor';
+import { said } from './setup';
 import { Simulator } from './Simulator';
 
 type Editor = CatalogueEditor<Content>;
-
-/** An aspect as the page says it: `Violence`. */
-export const said = (aspect: Aspect) => aspect.charAt(0).toUpperCase() + aspect.slice(1);
 
 /** The five pairs, each an aspect and its anti-aspect, in the catalogue's order. */
 const PAIRS = ASPECTS.filter((_, at) => at % 2 === 0).map((aspect) => [aspect, antiOf(aspect)] as const);
@@ -60,7 +57,7 @@ export function Challenges() {
           <Kinds editor={editor} content={content} />
         </>
       )}
-      <Simulator />
+      <Simulator content={content} />
       <WholeFile editor={editor} />
     </InspectPage>
   );
