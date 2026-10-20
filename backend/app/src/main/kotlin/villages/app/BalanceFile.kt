@@ -4,6 +4,8 @@ import tools.jackson.databind.JsonNode
 import tools.jackson.databind.json.JsonMapper
 import villages.application.Balance
 import villages.domain.Rarity
+import villages.domain.challenge.ChallengeRules
+import villages.domain.challenge.SliceStart
 
 /**
  * `world/catalogues/balance.json` read into the balance the game decides by: strict, so a number it cannot read
@@ -20,6 +22,8 @@ object BalanceFile {
         val omens = group(root, "omens")
         val islands = group(root, "islands")
         val newcomers = group(root, "newcomers")
+        val challenge = group(root, "challenge")
+        val slice = group(challenge, "slice")
         return Balance(
             roll = Balance.Roll(
                 price = whole(roll, "roll.price"),
@@ -42,10 +46,33 @@ object BalanceFile {
                 youngest = whole(newcomers, "newcomers.youngest").toInt(),
                 oldest = whole(newcomers, "newcomers.oldest").toInt(),
             ),
+            challenge = ruled("challenge") {
+                ChallengeRules(
+                    boost = number(challenge, "challenge.boost"),
+                    tugEnds = number(challenge, "challenge.tugEnds"),
+                    buildingArrives = number(challenge, "challenge.buildingArrives"),
+                    pullShare = number(challenge, "challenge.pullShare"),
+                    integrityShare = number(challenge, "challenge.integrityShare"),
+                    effectivenessLost = number(challenge, "challenge.effectivenessLost"),
+                    slice = SliceStart(
+                        power = number(slice, "challenge.slice.power"),
+                        integrity = number(slice, "challenge.slice.integrity"),
+                        summonCount = whole(slice, "challenge.slice.summonCount").toInt(),
+                    ),
+                )
+            },
         )
     }
 
     private fun group(node: JsonNode, name: String): JsonNode = node[name]?.takeIf { it.isObject } ?: refuse(name)
+
+    /** What [make] makes, or the rule its numbers broke, said with the group: `challenge: the boost grows ...`. */
+    private fun <T> ruled(group: String, make: () -> T): T = try {
+        make()
+    } catch (broken: IllegalArgumentException) {
+        if (broken.message?.startsWith("world/catalogues/") == true) throw broken
+        throw IllegalArgumentException("world/catalogues/balance.json: $group: ${broken.message}")
+    }
 
     private fun number(group: JsonNode, at: String): Double =
         group[at.substringAfterLast('.')]?.takeIf { it.isNumber }?.asDouble() ?: refuse(at)

@@ -2,15 +2,23 @@ package villages.application
 
 import villages.domain.Choice
 import villages.domain.Rarity
+import villages.domain.challenge.ChallengeRules
 
 /**
  * The numbers that belong to no one entry of a catalogue, `world/catalogues/balance.json`, Adam's to tune: what a roll
- * costs and deals, when an omen is read, how small an island is, how old a newcomer can be. Each is read at the moment
+ * costs and deals, when an omen is read, how small an island is, how old a newcomer can be, and a challenge's rules. Each is read at the moment
  * it decides something, and what it decided is written into the event, so a retune changes what happens next and
  * never what happened. A number folded from a stored event rather than written into it - a founding's wealth - is not
  * here, because retuning it would rewrite the past. See decision record 0097.
  */
-data class Balance(val roll: Roll, val omens: Omens, val islands: Islands, val newcomers: Newcomers) {
+data class Balance(
+    val roll: Roll,
+    val omens: Omens,
+    val islands: Islands,
+    val newcomers: Newcomers,
+    /** A challenge's numbers that belong to no one effect, which its own type holds to its rules. */
+    val challenge: ChallengeRules,
+) {
     /**
      * A choice roll: what it costs in wealth, how many options it deals, the chance out of a hundred of each rarity,
      * which nothing moves, and what an action of each rarity grants of its resource.

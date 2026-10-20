@@ -8,6 +8,8 @@ import villages.domain.StructureCatalogue
 import villages.domain.StructureSpec
 import villages.domain.StructureType
 import villages.domain.Resource
+import villages.domain.challenge.ChallengeRules
+import villages.domain.challenge.SliceStart
 
 /**
  * The balance the application's tests play by: the first draft's numbers, which `world/catalogues/balance.json` began
@@ -32,6 +34,7 @@ val TEST_BALANCE = Balance(
     ),
     islands = Balance.Islands(smallerThanKm2 = 4_000_000.0),
     newcomers = Balance.Newcomers(youngest = 18, oldest = 50),
+    challenge = ChallengeRules(1.5, 100.0, 10.0, 0.2, 0.5, 10.0, SliceStart(50.0, 50.0, 3)),
 )
 
 /** A fate catalogue the shelf's tests can take on: three grants of every rarity, in Hearth. */

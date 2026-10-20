@@ -890,9 +890,14 @@ and `-- --drop` takes them off; by hand only.
   passive, what it does in words with its numbers filled in, the slot it brings and the summon it hires; every summon,
   its aspect and what it does; and the kinds of challenge, how long each lasts, how many happenings it has, how often
   one has two aspects and what each aspect weighs. It reads the file through the dev server and again whenever it
-  changes on disk. The game server reads the same file and refuses one it cannot read, naming where, as it does every
-  catalogue, said once in the debug panel's faults and the server's log. The plan is `docs/plans/challenges.md`, and
-  the simulator comes below the content in a later step of it.
+  changes on disk. Every name, word and number is a field, and whether a slot puts what is in it on the line a box;
+  changed in place, they are saved through the game server as every catalogue's page saves, and taken on at once. The
+  game server reads the same file and refuses one it cannot read, or one that breaks a rule of the content - a summon
+  that is not there, a slot that neither lends nor puts on the line - naming where, as it does every catalogue, said
+  once in the debug panel's faults and the server's log. The numbers of a challenge's rules that belong to no one
+  effect are the balance's `challenge` group, at `/admin/inspect-balance`: the aspect boost, how far the tug runs,
+  what a building on the line brings, what it loses killed, and the slice every house starts with. The plan is
+  `docs/plans/challenges.md`, and the simulator comes below the content in a later step of it.
 - **`/admin/inspect-story`** is the world's history as a timeline, `docs/STORY.md` drawn, and needs nothing else
   running. Time runs down the page from the first box to the present, where the line ends at the compass: each
   box's day to the left of a gilt line and the box to the right, what happened in the library's `card.event`, a

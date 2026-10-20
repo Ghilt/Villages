@@ -1,7 +1,7 @@
 /**
  * The balance, `world/catalogues/balance.json`, as the page and its inspect page read it: the numbers that belong to
  * no one entry of a catalogue - what a roll costs and deals, when an omen is read, how small an island is, how old a
- * newcomer can be - each group with the words that say what its numbers do. Strict as the server's reader is: one it
+ * newcomer can be, a challenge's rules - each group with the words that say what its numbers do. Strict as the server's reader is: one it
  * cannot read refuses the file, naming where. Held to the server's reader by `contracts/fixtures/balance.json`. See
  * decision record 0097.
  */
@@ -29,6 +29,15 @@ export interface Balance {
   };
   readonly islands: { readonly smallerThanKm2: number };
   readonly newcomers: { readonly youngest: number; readonly oldest: number };
+  readonly challenge: {
+    readonly boost: number;
+    readonly tugEnds: number;
+    readonly buildingArrives: number;
+    readonly pullShare: number;
+    readonly integrityShare: number;
+    readonly effectivenessLost: number;
+    readonly slice: { readonly power: number; readonly integrity: number; readonly summonCount: number };
+  };
   /** What each group's numbers do, in its own words, by the group's name; and the file's own, under `''`. */
   readonly said: Readonly<Record<string, string>>;
 }
@@ -70,6 +79,8 @@ export function parseBalance(text: string): Balance {
   const omens = group(file, 'omens');
   const islands = group(file, 'islands');
   const newcomers = group(file, 'newcomers');
+  const challenge = group(file, 'challenge');
+  const slice = group(challenge, 'slice');
   const comment = (node: Node) => (typeof node.$comment === 'string' ? node.$comment : '');
   return {
     roll: {
@@ -93,12 +104,26 @@ export function parseBalance(text: string): Balance {
       youngest: number(newcomers, 'newcomers.youngest', true),
       oldest: number(newcomers, 'newcomers.oldest', true),
     },
+    challenge: {
+      boost: number(challenge, 'challenge.boost'),
+      tugEnds: number(challenge, 'challenge.tugEnds'),
+      buildingArrives: number(challenge, 'challenge.buildingArrives'),
+      pullShare: number(challenge, 'challenge.pullShare'),
+      integrityShare: number(challenge, 'challenge.integrityShare'),
+      effectivenessLost: number(challenge, 'challenge.effectivenessLost'),
+      slice: {
+        power: number(slice, 'challenge.slice.power'),
+        integrity: number(slice, 'challenge.slice.integrity'),
+        summonCount: number(slice, 'challenge.slice.summonCount', true),
+      },
+    },
     said: {
       '': comment(file),
       roll: comment(roll),
       omens: comment(omens),
       islands: comment(islands),
       newcomers: comment(newcomers),
+      challenge: comment(challenge),
     },
   };
 }

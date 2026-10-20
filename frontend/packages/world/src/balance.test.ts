@@ -29,6 +29,16 @@ describe('the balance', () => {
     });
     expect(balance.islands.smallerThanKm2).toBe(3_500_000);
     expect(balance.newcomers).toEqual({ youngest: 16, oldest: 60 });
+    expect(balance.challenge).toEqual({
+      boost: 2,
+      tugEnds: 80,
+      buildingArrives: 12,
+      pullShare: 0.25,
+      integrityShare: 0.4,
+      effectivenessLost: 15,
+      slice: { power: 40, integrity: 60, summonCount: 2 },
+    });
+    expect(balance.said.challenge).toBe('A challenge.');
     expect(balance.said.roll).toBe('A roll.');
   });
 

@@ -26,5 +26,15 @@
     "$comment": "The youngest and the oldest a newcomer can be, in whole years: grown, and with years left.",
     "youngest": 18,
     "oldest": 50
+  },
+  "challenge": {
+    "$comment": "A challenge, not in the game yet: the aspect boost, which grows what a slice or a summon does while the happening has its aspect or its anti-aspect, half as much again; how far the tug runs either way from the middle; what a building put on the line pays as it arrives, for each of its levels, and the shares of that it pulls a second and adds to its slice's integrity, a person's lent stat standing in for it when one is put on the line; the effectiveness out of a hundred a building or a person loses when killed on the line; and the slice every house starts with, which the simulator begins a new slice at.",
+    "boost": 1.5,
+    "tugEnds": 100,
+    "buildingArrives": 10,
+    "pullShare": 0.2,
+    "integrityShare": 0.5,
+    "effectivenessLost": 10,
+    "slice": { "power": 50, "integrity": 50, "summonCount": 3 }
   }
 }

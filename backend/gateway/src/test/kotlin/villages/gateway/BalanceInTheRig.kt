@@ -3,6 +3,8 @@ package villages.gateway
 import villages.application.Balance
 import villages.application.CharacterNames
 import villages.domain.Rarity
+import villages.domain.challenge.ChallengeRules
+import villages.domain.challenge.SliceStart
 
 /**
  * The rig's balance: the first draft's numbers, which `world/catalogues/balance.json` began from on 2026-10-16. Its
@@ -27,6 +29,7 @@ internal val RIG_BALANCE = Balance(
     ),
     islands = Balance.Islands(smallerThanKm2 = 4_000_000.0),
     newcomers = Balance.Newcomers(youngest = 18, oldest = 50),
+    challenge = ChallengeRules(1.5, 100.0, 10.0, 0.2, 0.5, 10.0, SliceStart(50.0, 50.0, 3)),
 )
 
 /** The names the rig's newcomers are given: a woman of eighteen is Agnes Achterberg, as she always was. */

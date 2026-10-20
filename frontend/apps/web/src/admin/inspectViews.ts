@@ -107,7 +107,7 @@ export const INSPECT_VIEWS: readonly InspectView[] = [
     path: '/admin/inspect-challenges',
     title: 'Challenges',
     what: 'Every effect a slice can carry, in the five pairs of aspects, the summons they bring, and the kinds of challenge.',
-    needs: 'nothing to read',
+    needs: 'nothing to read, the game server to save',
     load: () => import('./challenges/Challenges').then((page) => page.Challenges),
     catalogue: 'challenges',
   },

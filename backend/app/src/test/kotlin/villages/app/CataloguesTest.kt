@@ -100,6 +100,10 @@ class BalanceFileTest {
         assertEquals(villages.application.Balance.Omens(365, 80, 0.2, 300.0, 120.0, 2, 100.0, 1), balance.omens)
         assertEquals(3_500_000.0, balance.islands.smallerThanKm2)
         assertEquals(16..60, balance.newcomers.ages)
+        assertEquals(
+            villages.domain.challenge.ChallengeRules(2.0, 80.0, 12.0, 0.25, 0.4, 15.0, villages.domain.challenge.SliceStart(40.0, 60.0, 2)),
+            balance.challenge,
+        )
     }
 
     @Test
@@ -116,6 +120,14 @@ class BalanceFileTest {
 
         val refused = org.junit.jupiter.api.assertThrows<IllegalArgumentException> { BalanceFile.parse(text) }
         assertEquals("world/catalogues/balance.json: no roll.hand the server can read", refused.message)
+    }
+
+    @Test
+    fun `a challenge's number that breaks its rule refuses the file, naming the group and the rule`() {
+        val text = java.io.File("../../contracts/fixtures/balance.json").readText().replace("\"boost\": 2", "\"boost\": 0.5")
+
+        val refused = org.junit.jupiter.api.assertThrows<IllegalArgumentException> { BalanceFile.parse(text) }
+        assertEquals("world/catalogues/balance.json: challenge: the boost grows what it boosts, so it is one or more, not 0.5", refused.message)
     }
 
     @Test
