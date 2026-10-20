@@ -156,7 +156,7 @@ function Latest({ point }: { point: StartupPoint }) {
                 </td>
                 <td>
                   {seconds(load.ready)}
-                  {load.readyBy === 'drawn' ? ' (map drawn)' : ''}
+                  {load.readyBy === 'drawn' ? ' (map drawn)' : load.readyBy === 'tiles' ? ' (last tile)' : ''}
                 </td>
                 <td>{seconds(load.at['style'])}</td>
                 <td>{seconds(load.at['sprites'])}</td>

@@ -55,21 +55,25 @@ async function loadOnce(browser: Browser, url: string): Promise<Load> {
   });
   const asked = Date.now();
   await page.goto(url, { waitUntil: 'commit' });
-  // Done when the loading screen has lifted; before there was a screen, when the map had drawn.
-  const readyDoc = await page
+  // Done when the loading screen has lifted; before there was a screen, when the map had drawn; and on a built page
+  // from then, which hides the map's handle, when its last tile came.
+  const readyAt = await page
     .waitForFunction(
       () => {
         const seen = (globalThis as unknown as { __startup?: Watched }).__startup?.at;
         if (seen === undefined) return null;
-        return document.querySelector('.ui-loading') === null
-          ? (seen['drawn'] ?? null)
-          : (seen['lifted'] ?? null);
+        if (document.querySelector('.ui-loading') !== null)
+          return seen['lifted'] === undefined ? null : { ms: seen['lifted'], by: 'lifted' };
+        if ('villagesMap' in globalThis)
+          return seen['drawn'] === undefined ? null : { ms: seen['drawn'], by: 'drawn' };
+        return seen['tiles'] === undefined ? null : { ms: seen['tiles'], by: 'tiles' };
       },
       null,
       { timeout: 60_000, polling: 50 },
     )
-    .then((handle) => handle.jsonValue() as Promise<number>)
+    .then((handle) => handle.jsonValue() as Promise<{ ms: number; by: 'lifted' | 'drawn' | 'tiles' }>)
     .catch(() => null);
+  const readyDoc = readyAt?.ms ?? null;
   const origin = await page.evaluate(() => performance.timeOrigin);
   const before = ((await cdp.send('Profiler.stop')) as { profile: Profile }).profile;
   await cdp.send('Profiler.start');
@@ -93,7 +97,7 @@ async function loadOnce(browser: Browser, url: string): Promise<Load> {
   const at = Object.fromEntries(Object.entries(watched.at).map(([mark, ms]) => [mark, Math.round(ms)]));
   return {
     ready: readyDoc === null ? null : Math.round(origin + readyDoc - asked),
-    readyBy: readyDoc === null ? null : watched.at['lifted'] !== undefined ? 'lifted' : 'drawn',
+    readyBy: readyAt?.by ?? null,
     reloads: Math.max(0, reloads),
     at,
     before: spanOf(watched.longTasks, watched.frames, 0, end),
@@ -141,7 +145,7 @@ function said(name: string, load: Load | null): string {
   if (load === null) return `${name.padEnd(12)} not measured`;
   const { before, after } = load;
   return (
-    `${name.padEnd(12)} ready ${seconds(load.ready)}${load.readyBy === 'drawn' ? ' (map drawn)' : ''}` +
+    `${name.padEnd(12)} ready ${seconds(load.ready)}${load.readyBy === 'drawn' ? ' (map drawn)' : load.readyBy === 'tiles' ? ' (last tile)' : ''}` +
     `${load.reloads > 0 ? `, ${load.reloads} reload${load.reloads > 1 ? 's' : ''}` : ''}; ` +
     `style ${seconds(load.at['style'])}, sprites ${seconds(load.at['sprites'])}; ` +
     `before: ${before.longTasks.count} long tasks ${Math.round(before.longTasks.total)} ms, worst gap ${Math.round(before.worstGap)} ms; ` +

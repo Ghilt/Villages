@@ -38,7 +38,7 @@ export interface Load {
    * there was one, the map drawn; null when never.
    */
   readonly ready: number | null;
-  readonly readyBy: 'lifted' | 'drawn' | null;
+  readonly readyBy: 'lifted' | 'drawn' | 'tiles' | null;
   /** Times the page loaded itself again before it was ready, as the dev server makes it the first time. */
   readonly reloads: number;
   /** When each mark of the start was first seen: map, style, sprites, drawn, screen, lifted. */

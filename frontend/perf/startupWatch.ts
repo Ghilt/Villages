@@ -2,9 +2,9 @@
  * What the start's measure hangs on the page before anything of it runs, handed to Playwright's `addInitScript` whole,
  * so it may use nothing from outside itself. It notes, in milliseconds since the page opened, when each mark of the
  * start is first seen - the map's canvas, its style, the sprite canvas, the map drawn, the loading screen up and
- * lifted - every long task the browser reports, and every animation frame, so the gaps between frames say where the
- * start stuttered. It reads only what a built page has as well (the DOM), and the map's handle where a development
- * build has it.
+ * lifted, and when the last of the map's tiles came once nothing more did for a second - every long task the browser
+ * reports, and every animation frame, so the gaps between frames say where the start stuttered. It reads only what a
+ * built page has as well (the DOM, what was fetched), and the map's handle where a development build has it.
  */
 export function watchStartup(): void {
   const at: Record<string, number> = {};
@@ -19,6 +19,21 @@ export function watchStartup(): void {
     }).observe({ type: 'longtask', buffered: true });
   } catch {
     // A browser without long tasks says nothing of them.
+  }
+  // When the last of the map's tiles came, and when anything last did: a built page from before the loading screen
+  // hides the map's handle, and is taken as drawn when its last tile came and nothing more has for a second.
+  let lastTile: number | null = null;
+  let lastAny = 0;
+  try {
+    new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) {
+        const end = (entry as PerformanceResourceTiming).responseEnd;
+        lastAny = Math.max(lastAny, end);
+        if (/\/tiles\/\d+\//.test(entry.name)) lastTile = Math.max(lastTile ?? 0, end);
+      }
+    }).observe({ type: 'resource', buffered: true });
+  } catch {
+    // A browser without resource timing leaves the mark unset.
   }
   const tick = (now: number) => {
     frames.push(now);
@@ -69,6 +84,8 @@ export function watchStartup(): void {
     if (at['style'] !== undefined && map !== undefined && map.loaded() && map.areTilesLoaded()) mark('drawn');
     if (document.querySelector('.ui-loading') !== null) mark('screen');
     if (document.querySelector('.ui-loading--lifted') !== null) mark('lifted');
+    if (at['map'] !== undefined && lastTile !== null && performance.now() - lastAny > 1000)
+      at['tiles'] ??= lastTile;
   }, 16);
   (globalThis as unknown as { __startup: unknown }).__startup = { at, longTasks, frames, compiles };
 }
