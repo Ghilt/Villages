@@ -128,7 +128,9 @@ const PARTS: readonly Part[] = [
     steps: record
       ? [gradle('compile', 'testClasses'), gradle('check', 'cleanTest', 'check')]
       : [gradle('check', 'check')],
-    absent: () => (existsSync(join(root, 'backend')) ? null : 'no backend in this tree'),
+    // By its settings, not its folder: a newer commit's build output can be left in the folder of an older one.
+    absent: () =>
+      existsSync(join(root, 'backend', 'settings.gradle.kts')) ? null : 'no backend in this tree',
     said: (_, stoppedAt, since) => {
       const tally = readJUnit(
         backendReports(root, stoppedAt === null ? 0 : since).map((report) => report.xml),
@@ -159,7 +161,7 @@ const PARTS: readonly Part[] = [
           : ` and ${tally.tests} tests${tally.failed === 0 ? '' : `, ${tally.failed} failed`}`;
       return stoppedAt === null
         ? `typecheck, lint, format${tests}`
-        : `stopped at ${lastStep(log) ?? 'its first step'}${tests}`;
+        : `stopped at ${stoppedAt === 'check' ? (lastStep(log) ?? 'its first step') : stoppedAt}${tests}`;
     },
     failures: (log) => readVitest(log)?.failures ?? [],
     kept: (log) => ({
@@ -322,6 +324,7 @@ async function runAll(
 ): Promise<{ stoppedAt: string | null; steps: Took[] }> {
   const out = openSync(log, 'w');
   const ran: Took[] = [];
+  let stoppedAt: string | null = null;
   try {
     for (const step of steps) {
       const began = Date.now();
@@ -337,9 +340,11 @@ async function runAll(
         child.on('close', (status) => done(status ?? 1));
       });
       ran.push({ name: step.what, ms: Date.now() - began });
-      if (code !== 0) return { stoppedAt: step.what, steps: ran };
+      // Recorded, every step runs, so that one that fails does not leave the rest untimed.
+      if (code !== 0 && !record) return { stoppedAt: step.what, steps: ran };
+      if (code !== 0) stoppedAt ??= step.what;
     }
-    return { stoppedAt: null, steps: ran };
+    return { stoppedAt, steps: ran };
   } finally {
     closeSync(out);
   }
