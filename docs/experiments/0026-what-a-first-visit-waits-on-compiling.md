@@ -50,16 +50,30 @@ them until it is compiled (`shaders/compileAhead.ts`), the same loads:
   in 1.3 to 1.5 s, side by side with the start's other work, 0.10 to 0.16 s before the lift each time. The sky goes
   without them only under the loading screen.
 
+**The water linked ahead** as well, its three programs handed to the driver as the map starts and drawn with once
+linked (`linkProgramAhead`, `shaders/webgl.ts`), the same loads again:
+
+| | long tasks before the lift, built page | lifted, built page | long tasks before the lift, dev server |
+|---|---|---|---|
+| compiled ahead, the clouds | 1.53, 1.17 s | 3.2, 2.8 s | 1.45, 1.57 s |
+| and the water linked ahead | 0.56, 0.85 s | 2.5, 4.2 s | 0.98, 0.85 s |
+
+- **No load waits on a program of more than 70 ms.** What is left are the relief's, the fog's and Pixi's own, 20 to
+  70 ms each.
+- **The water is linked before the screen lifts**: two cold loads had the realistic water's program in 1.0 and 1.2 s
+  and the other two in 0.3 s, before the lift each time; brought in to zoom 10 over the coast the water drew, 0.4
+  ms a frame. It is drawn only from zoom 8.5 in, so at the start nobody was looking at it: the first visit had waited
+  on a program it was not drawing.
+
 ## Result
 
-**Confirmed.** A first visit waited about 1.4 s on two compiles, the water's and the clouds'; the clouds' is
-compiled ahead now and comes before the screen lifts, and the first visit's long tasks are about half a second
-shorter.
+**Confirmed.** A first visit waited about 1.4 s on two compiles, the water's and the clouds'. Both are compiled ahead
+now and ready before the screen lifts, and a cold built page's long tasks before the lift went from about 1.9 s to
+under 0.9.
 
 ## Consequences
 
 - The clouds are compiled ahead (the amendment to decision record 0098 of 2026-10-20).
-- The water's 0.7 s is the one large wait left on a first visit. Its program is the map's own, in MapLibre's
-  context, and could be compiled ahead the same way, the sea drawn as painted until it is ready.
+- The water's programs are linked ahead (the amendment to decision record 0081 of 2026-10-20).
 - `perf:startup`'s built page is loaded where the programs are already compiled, so a player's first visit is in no
   measure; a built page in a browser of its own would put it there.

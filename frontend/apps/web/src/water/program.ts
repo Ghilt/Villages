@@ -1,6 +1,6 @@
 import type * as maplibregl from 'maplibre-gl';
 
-import { linkProgram, unitQuad } from '../shaders/webgl';
+import { linkProgram, linkProgramAhead, unitQuad } from '../shaders/webgl';
 
 import { VERTEX } from './glsl';
 
@@ -42,9 +42,12 @@ export function weightsOf(
   return weights;
 }
 
+/** The uniforms every water shader has, besides its own. */
+const COMMON = ['uMatrix', 'uTile', 'uTexRect', 'uMask', 'uTime', 'uScale', 'uFade'];
+
 /**
  * A fragment shader with the water's vertex shader, or another, and where the uniforms every water shader has are,
- * besides its own.
+ * besides its own. It waits on the driver: for a program as small as the low level's picture.
  */
 export function link(
   gl: WebGL2RenderingContext,
@@ -52,8 +55,21 @@ export function link(
   uniforms: readonly string[],
   vertex = VERTEX,
 ): Program {
-  const common = ['uMatrix', 'uTile', 'uTexRect', 'uMask', 'uTime', 'uScale', 'uFade'];
-  return linkProgram(gl, vertex, fragment, [...common, ...uniforms], 'water');
+  return linkProgram(gl, vertex, fragment, [...COMMON, ...uniforms], 'water');
+}
+
+/**
+ * The same, once the browser says it is linked, so that the page never waits on the driver for it, or null
+ * when `stop` came first.
+ */
+export function linkAhead(
+  gl: WebGL2RenderingContext,
+  fragment: string,
+  uniforms: readonly string[],
+  stop: AbortSignal,
+  vertex = VERTEX,
+): Promise<Program | null> {
+  return linkProgramAhead(gl, vertex, fragment, [...COMMON, ...uniforms], 'water', stop);
 }
 
 /** A texture of RGBA bytes so many texels a side, filtered, and clamped at its edges. */

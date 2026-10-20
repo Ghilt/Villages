@@ -95,8 +95,11 @@ stage alone, with none of the debug panel in it (decision record 0079).
   eight sliders: how fast, how far apart the crests are, how far the middle runs ahead, how thin and how
   bright the crests are, the specks, and how much of the sea's waves and caustics a river keeps. They are
   remembered in that browser, `reset` puts them back, and once a slider stops the log says all eight under
-  `water` as `rivers tuned: …`, which is the line to hand over when a setting should become the default. Every
-  other number of the water is in `apps/web/src/water/look.ts`. See `docs/adr/0081`.
+  `water` as `rivers tuned: …`, which is the line to hand over when a setting should become the default. Its
+  programs are handed to the graphics driver as the map starts and drawn with once they are linked, the sea as painted
+  until then, so the page never waits on the driver for them; the log says once under `water`, `every program linked
+  ahead, the page never waiting: wavelets 0.3, flow 0.3, realistic 1.0 s`, or that the browser cannot. Every other
+  number of the water is in `apps/web/src/water/look.ts`. See `docs/adr/0081`.
 - The ground is shaded by its slope, the whole world, at every zoom, over the paint and under the water, lit
   from the upper right as the scenery's shadows are, from the height tiles `world:height` cuts. It is the
   **Relief** part of the Shaders section (0090): `off`, `low` (faint) or `high` (strong) in its bar, high at every

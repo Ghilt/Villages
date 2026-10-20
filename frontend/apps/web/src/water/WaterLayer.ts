@@ -17,7 +17,7 @@ import { WATER_LOOK } from './look';
 import { createMaskTiles } from './maskTiles';
 import { createPicture } from './picture';
 import type { Picture } from './picture';
-import { begin, link, quadOf, smoothstep, textureOf, weightsOf } from './program';
+import { begin, linkAhead, quadOf, smoothstep, textureOf, weightsOf } from './program';
 import type { Program } from './program';
 import { REALISTIC, REALISTIC_UNIFORMS } from './realisticShader';
 import { riverStore } from './riverTuning';
@@ -61,8 +61,18 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
   const measured = new Set<ShaderLevel>();
   let lastLevel: ShaderLevel | null = null;
   const started = performance.now();
+  /** Stops waiting for the programs once the layer is taken off the map. */
+  const removed = new AbortController();
 
   const repaint = () => map?.triggerRepaint();
+  /** Says once in the log when the water's programs were linked, or that the browser waited for them. */
+  const sayLinked = (linked: readonly string[]) =>
+    note(
+      'water',
+      gl?.getExtension('KHR_parallel_shader_compile') === null
+        ? 'this browser cannot link the water ahead, so its first sea waits on the driver'
+        : `every program linked ahead, the page never waiting: ${linked.join(', ')} s`,
+    );
   const flow = flowFilesOf(worldRoot);
   const tiles = createMaskTiles(worldRoot, flow, repaint);
   const flowView = createFlowView(flow, repaint);
@@ -144,9 +154,30 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
     onAdd(added, context) {
       map = added;
       gl = context as WebGL2RenderingContext;
-      realistic = link(gl, REALISTIC, REALISTIC_UNIFORMS);
-      wavelets = link(gl, WAVELETS, ['uWeights']);
-      flowProgram = link(gl, FLOW, ['uFlow', 'uCell', 'uMarch']);
+      // Each program handed to the driver now and drawn with once it is linked, the sea as painted until then, so the
+      // page never waits on the driver: the realistic water's took 0.7 s on a first visit (experiment 0026).
+      const asked = performance.now();
+      const linked: string[] = [];
+      const ahead = (
+        name: string,
+        fragment: string,
+        uniforms: readonly string[],
+        ready: (program: Program) => void,
+      ) =>
+        void linkAhead(gl!, fragment, uniforms, removed.signal).then((program) => {
+          if (program === null) return;
+          if (removed.signal.aborted) {
+            gl?.deleteProgram(program.program);
+            return;
+          }
+          ready(program);
+          linked.push(`${name} ${((performance.now() - asked) / 1000).toFixed(1)}`);
+          if (linked.length === 3) sayLinked(linked);
+          repaint();
+        });
+      ahead('realistic', REALISTIC, REALISTIC_UNIFORMS, (program) => (realistic = program));
+      ahead('wavelets', WAVELETS, ['uWeights'], (program) => (wavelets = program));
+      ahead('flow', FLOW, ['uFlow', 'uCell', 'uMarch'], (program) => (flowProgram = program));
       still = textureOf(gl, new Uint8Array([128, 128, 0, 255]), 1);
       quad = quadOf(gl);
       picture = createPicture(gl);
@@ -248,6 +279,7 @@ export function createWaterLayer(worldRoot: string): maplibregl.CustomLayerInter
     },
 
     onRemove() {
+      removed.abort();
       if (nextFrame !== null) {
         clearTimeout(nextFrame);
       }

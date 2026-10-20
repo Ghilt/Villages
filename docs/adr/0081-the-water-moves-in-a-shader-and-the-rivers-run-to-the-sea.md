@@ -89,3 +89,13 @@ a picture of its own half the map's width and height and laid over the map, at f
 on Adam's machine it costs between a fifth and a third of what high does a second. The first time it is drawn at
 a level the log says once what that costs the graphics card, timed there. A shader added later gets a part of its
 own, with the same three levels.
+
+## Amendment, 2026-10-20: linked ahead
+
+A browser that had compiled nothing waited 0.7 s on the driver linking the realistic water's program as the map
+started, under the loading screen, though the water is drawn only from zoom 8.5 in (experiment 0026). So its three
+programs, the realistic water, the wavelets and the flow view, are handed to the driver as the layer is added and
+asked after through `KHR_parallel_shader_compile` (`linkProgramAhead`, `shaders/webgl.ts`), and the water is drawn
+once its program is linked, the sea as painted until then: within a second or so, before the screen lifts. A browser
+without the extension links them at once, and waits, as before. The low level's picture keeps linking at once: its
+program is too small to wait on.
