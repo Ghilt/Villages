@@ -1,3 +1,6 @@
+import { existsSync, linkSync, mkdirSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
+
 /**
  * Which commits `perf-history.ts` measures, and what each needs before it can be: main's landings read from its
  * reflog, a few spread evenly over a stretch of them, the world steps a commit's own quick start runs, and what is
@@ -153,4 +156,29 @@ export function minutesFor(points: readonly HistoryPoint[]): number {
       point.measures.reduce((each, measure) => each + MINUTES[measure], 0),
     0,
   );
+}
+
+/** Hard links in `to` to every file of `from` it lacks: no copy, and nothing a removal of `to` can take from `from`. */
+export function linkMissing(from: string, to: string): void {
+  if (!existsSync(from)) return;
+  mkdirSync(to, { recursive: true });
+  for (const entry of readdirSync(from, { withFileTypes: true })) {
+    const source = join(from, entry.name);
+    const target = join(to, entry.name);
+    if (entry.isDirectory()) linkMissing(source, target);
+    else if (entry.isFile() && !existsSync(target)) linkSync(source, target);
+  }
+}
+
+/**
+ * The world tool's `links.ts` from before 2026-10-18, made to wait up to about three minutes for the virus scanner
+ * instead of about six seconds, as 1c82c414 made it; null for a file that is not that one.
+ */
+export function withLongerScannerWait(text: string): string | null {
+  const short = 'attempt >= 6 ||';
+  const step = 'Atomics.wait(sleeper, 0, 0, 50 * 2 ** attempt);';
+  if (!text.includes(short) || !text.includes(step)) return null;
+  return text
+    .replace(short, 'attempt >= 95 ||')
+    .replace(step, 'Atomics.wait(sleeper, 0, 0, Math.min(50 * 2 ** attempt, 2_000));');
 }

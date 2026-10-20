@@ -1,7 +1,15 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { keptHistory, landingsOf, minutesFor, planOf, spread, worldStepsOf } from '../lib/history.ts';
+import {
+  keptHistory,
+  landingsOf,
+  minutesFor,
+  planOf,
+  spread,
+  withLongerScannerWait,
+  worldStepsOf,
+} from '../lib/history.ts';
 import type { Landing } from '../lib/history.ts';
 
 const sha = (n: number) => String(n).padStart(40, 'a');
@@ -85,5 +93,16 @@ describe('the history to measure', () => {
       ],
     );
     assert.equal(minutesFor(points.slice(0, 1)), 3 + 5);
+  });
+
+  it("lengthens an old world tool's wait for the virus scanner, and leaves any other file alone", () => {
+    const old = [
+      'if (attempt >= 6 || (code !== "EBUSY")) throw error;',
+      'Atomics.wait(sleeper, 0, 0, 50 * 2 ** attempt);',
+    ].join('\n');
+    const longer = withLongerScannerWait(old);
+    assert.match(longer ?? '', /attempt >= 95 \|\|/);
+    assert.match(longer ?? '', /Math\.min\(50 \* 2 \*\* attempt, 2_000\)/);
+    assert.equal(withLongerScannerWait('export function patiently() {}'), null);
   });
 });

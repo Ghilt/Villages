@@ -1,19 +1,19 @@
 import { spawn, spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import {
-  appendFileSync,
-  existsSync,
-  linkSync,
-  mkdirSync,
-  readFileSync,
-  readdirSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs';
+import { appendFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 
-import { MEASURES, keptHistory, landingsOf, minutesFor, planOf, worldStepsOf } from './lib/history.ts';
+import {
+  MEASURES,
+  keptHistory,
+  landingsOf,
+  linkMissing,
+  minutesFor,
+  planOf,
+  withLongerScannerWait,
+  worldStepsOf,
+} from './lib/history.ts';
 import type { HistoryPoint, Measure } from './lib/history.ts';
 
 const HELP = `
@@ -27,7 +27,7 @@ measures the commits that came before: landings of main spread evenly in time, e
 in a tree of its own, its world made by the world steps its own quick start names, and measured
 by this tree's tools - the shaders, the zoom and the start since the world drawn now, the tests
 for those and for a few before - each point kept as history in this tree's
-docs/experiments/performance/, the newest first.
+docs/experiments/performance/, the oldest first, so no commit meets files a newer one made.
 
   --dry-run          say which commits it would measure, what each is owed and about how long,
                      and stop.
@@ -79,6 +79,8 @@ const tree = resolve(values.tree ?? join(mainRoot, '.claude', 'worktrees', 'perf
 const logs = join(here, '.logs', 'perf-history');
 const BUSY_WAIT_MS = 10 * 60_000;
 const BUSY_TRIES = 12;
+/** The world tool's file whose wait for the virus scanner the history's tree lengthens while it makes a world. */
+const SCANNER_WAIT_FILE = 'frontend/packages/world/bin/lib/links.ts';
 
 if (values.help || (!values['dry-run'] && !values.run)) console.log(HELP);
 else process.exitCode = await backfill(values.run);
@@ -90,8 +92,8 @@ async function backfill(run: boolean): Promise<number> {
     console.error(`there is no measure called ${unknown.join(' or ')}; they are ${MEASURES.join(', ')}`);
     return 1;
   }
-  const points = pointsOwed(measures).sort((a, b) => Date.parse(b.landing.at) - Date.parse(a.landing.at));
-  console.log(`\n${points.length} commits of main owed a measure, the newest first:\n`);
+  const points = pointsOwed(measures).sort((a, b) => Date.parse(a.landing.at) - Date.parse(b.landing.at));
+  console.log(`\n${points.length} commits of main owed a measure, the oldest first:\n`);
   for (const point of points) {
     console.log(
       `  ${point.landing.at.slice(0, 16)}  ${short(point.landing.sha)}  ${point.measures.join(', ')}`,
@@ -116,15 +118,22 @@ async function backfill(run: boolean): Promise<number> {
       continue;
     }
     const drawn = point.measures.filter((measure) => measure !== 'tests');
+    const fresh = !installedFrom('frontend');
     const ready =
       install('frontend', name) &&
       (!point.measures.includes('tests') || install('scripts', name)) &&
-      step(name, 'compile', gradle(':app:classes'), join(tree, 'backend'));
+      // The game server compiled first, so it answers within its time when a measure starts it; the check of the
+      // tests compiles for itself, and the first commits had no server to compile.
+      (drawn.length === 0 || step(name, 'compile', gradle(':app:classes'), join(tree, 'backend')));
     if (!ready) {
       said.push(`${name}: its packages or its server did not build; see ${logs}`);
       continue;
     }
-    const world = drawn.length > 0 && makeWorld(name);
+    const world = drawn.length > 0 && (await makeWorld(name));
+    // A first load right after the packages were installed waits on the virus scanner reading every new file and on
+    // Vite's first look at them - 60 to 80 seconds against 4 (2026-10-20) - which is the install's and not the game's.
+    // One such load is let go by first, so a start measured here is a dev server's first after a restart.
+    if (world && fresh && point.measures.includes('startup')) await letAFirstLoadGoBy(name);
     for (const measure of point.measures) {
       if (measure !== 'tests' && !world) {
         said.push(`${name} ${measure}: not measured, its world was not made; see ${logOf(name, 'world')}`);
@@ -201,31 +210,80 @@ function ownTree(): boolean {
  * frontend's, and the scripts' for the check of the tests. A folder with no lock file needs nothing.
  */
 function install(folder: 'frontend' | 'scripts', name: string): boolean {
+  if (installedFrom(folder)) return true;
   const lock = join(tree, folder, 'package-lock.json');
-  if (!existsSync(lock)) return true;
   const hash = createHash('sha1').update(readFileSync(lock)).digest('hex');
   const stamp = join(tree, folder, 'node_modules', '.perf-history-lock');
-  if (existsSync(stamp) && readFileSync(stamp, 'utf8') === hash) return true;
   console.log(`  installing the ${folder === 'frontend' ? "frontend's" : "scripts'"} packages`);
   const ok = step(name, `install-${folder}`, npm('ci', '--no-audit', '--no-fund'), join(tree, folder));
   if (ok) writeFileSync(stamp, hash);
   return ok;
 }
 
+/** Whether a folder's packages are installed from its lock file as it is now, or it has none to install. */
+function installedFrom(folder: 'frontend' | 'scripts'): boolean {
+  const lock = join(tree, folder, 'package-lock.json');
+  if (!existsSync(tree) || !existsSync(lock)) return existsSync(tree);
+  const hash = createHash('sha1').update(readFileSync(lock)).digest('hex');
+  const stamp = join(tree, folder, 'node_modules', '.perf-history-lock');
+  return existsSync(stamp) && readFileSync(stamp, 'utf8') === hash;
+}
+
+/** One start of the tree's dev server and one load of the game, measured and kept nowhere. */
+async function letAFirstLoadGoBy(name: string): Promise<void> {
+  const args = ['run', 'perf:startup', '--prefix', join(here, 'frontend'), '--', '--tree', tree];
+  await runAsync('npm', [...args, '--loads', '0', '--no-built', '--anyway'], here, logOf(name, 'warming'));
+}
+
 /**
  * The commit's world, made by the world steps its own quick start names, each run directly and never the quick
  * start, which would start servers and stop others; with world/source hard-linked from the main checkout first.
  */
-function makeWorld(name: string): boolean {
+async function makeWorld(name: string): Promise<boolean> {
   linkMissing(join(mainRoot, 'world', 'source'), join(tree, 'world', 'source'));
   const quickStart = join(tree, 'debug-quick-start.ps1');
   const steps = existsSync(quickStart) ? worldStepsOf(readFileSync(quickStart, 'utf8')) : [];
   console.log(`  making its world: ${steps.map((each) => each.script).join(', ')}`);
+  const patient = waitLongerForTheScanner(name);
   for (const each of steps) {
     const args = each.args.length === 0 ? [] : ['--', ...each.args];
-    if (!step(name, 'world', npm('run', each.script, ...args), join(tree, 'frontend'))) return false;
+    // Tried three times: Windows can refuse a rename while the virus scanner reads what was just written.
+    let made = false;
+    for (let tries = 1; tries <= 3 && !made; tries += 1) {
+      if (tries > 1) await new Promise((done) => setTimeout(done, 30_000));
+      made = step(name, 'world', npm('run', each.script, ...args), join(tree, 'frontend'));
+    }
+    if (!made) break;
   }
-  return steps.length > 0;
+  if (patient) run('git', ['-C', tree, 'checkout', '--', SCANNER_WAIT_FILE], tree, logOf(name, 'world'));
+  return steps.length > 0 && ownTree() && !dirtyTree();
+}
+
+/**
+ * Lengthens the world tool's wait for the virus scanner from about six seconds to about three minutes, as 1c82c414
+ * did on 2026-10-18, in a commit from before it: on a fresh tree Windows refuses to move a folder of thousands of
+ * newly linked tiles until the scanner has read them, and the commits of 2026-10-12 to 10-17 gave up first, every
+ * try. It changes how long the tool waits, not what it makes; the file is put back before anything is measured.
+ */
+function waitLongerForTheScanner(name: string): boolean {
+  const file = join(tree, SCANNER_WAIT_FILE);
+  if (!existsSync(file)) return false;
+  const longer = withLongerScannerWait(readFileSync(file, 'utf8'));
+  if (longer === null) return false;
+  writeFileSync(file, longer);
+  appendFileSync(
+    logOf(name, 'world'),
+    'the world tool waits up to three minutes for the virus scanner, as 1c82c414\n',
+  );
+  return true;
+}
+
+/** Whether the tree has changes beyond its commit, which would mark every point measured in it. */
+function dirtyTree(): boolean {
+  const said = spawnSync('git', ['-C', tree, 'status', '--porcelain', '--untracked-files=no'], {
+    encoding: 'utf8',
+  });
+  return said.stdout.trim() !== '';
 }
 
 /**
@@ -259,18 +317,6 @@ async function measured(name: string, measure: Measure, world: boolean): Promise
     return `failed, nothing kept; see ${log}`;
   }
   return 'not measured, the graphics card stayed busy for two hours';
-}
-
-/** Hard links in `to` to every file of `from` it lacks: no copy, and nothing a removal of `to` can take from `from`. */
-function linkMissing(from: string, to: string): void {
-  if (!existsSync(from)) return;
-  mkdirSync(to, { recursive: true });
-  for (const entry of readdirSync(from, { withFileTypes: true })) {
-    const source = join(from, entry.name);
-    const target = join(to, entry.name);
-    if (entry.isDirectory()) linkMissing(source, target);
-    else if (entry.isFile() && !existsSync(target)) linkSync(source, target);
-  }
 }
 
 /**

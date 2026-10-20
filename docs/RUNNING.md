@@ -1140,8 +1140,9 @@ shaders, the start and the zoom when the frontend changed - and the lines go to 
   when its lock file changed, `world/source` hard links to the main checkout's, and its world made by the world steps
   that commit's own quick start names, run directly, never its quick start. Then this tree's tools measure it with
   `--tree` and `--root`, and keep the points here. A measure that finds the graphics card busy is tried again every
-  ten minutes for two hours. `--dry-run` lists the commits and about how long; `--run` measures them, the newest
-  first, and carries on where a stopped run was, because what is already kept as history is passed over;
+  ten minutes for two hours. `--dry-run` lists the commits and about how long; `--run` measures them, the oldest
+  first, because the tree keeps what each commit made and an older commit's checks trip on a newer one's files, and
+  carries on where a stopped run was, because what is already kept as history is passed over;
   `--commits a,b` measures those. The tree is removed once nothing is owed. About seven hours from nothing.
 
 ## How long the tests take
