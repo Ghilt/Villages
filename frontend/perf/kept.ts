@@ -110,7 +110,10 @@ export function codeOf(tree: string): Point['code'] {
     commit,
     subject: git('log', '-1', '--format=%s'),
     landedAt: landedAt(tree, commit),
-    dirty: git('status', '--porcelain', '--untracked-files=no') !== '',
+    // The points kept are the measures' own output, written as a run goes, and say nothing of the code measured.
+    dirty:
+      git('status', '--porcelain', '--untracked-files=no', '--', '.', ':!docs/experiments/performance') !==
+      '',
   };
 }
 

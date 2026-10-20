@@ -38,6 +38,13 @@ now at that tip, and the points are brought to main as a commit of their own, `d
   main once more, as above. That second step is part of Adam's word to bring the work to main.
 - **When the card is refused** as busy, keep the tests' point, say which measures were not kept and why, and keep them at
   the next landing; never `--anyway`.
+- **On a tree with nothing changed beyond main's tip.** Work begun since is set aside first, or every point is marked as
+  measured on changed code; the points files themselves do not count.
+- **On a quiet machine, and read before kept.** The start and the zoom are timed on the CPU and the dev server, and other
+  sessions' builds and servers slow them: on 2026-10-20 the same code as main's tip read a load again 4.7 s against
+  2.8 and a zoom's CPU a quarter higher, with only the built page unchanged. Wait for other sessions' measures to end,
+  and when the start or the zoom moves while the built page and the code did not, keep neither and say so: a false
+  point is worse than a missing one, because the next hand-over compares against it.
 
 ## After it lands
 
