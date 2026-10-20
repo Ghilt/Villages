@@ -114,4 +114,25 @@ describe('a point kept', () => {
     expect(lines[1]).toMatch(/^\s+again: long tasks\s+100 →\s+180 ms$/);
     expect(lines[2]).toMatch(/^\s+built: ready\s+- →\s+1\.5 s$/);
   });
+
+  it('compares with the point of the newest code main held, whatever order the points were kept in', () => {
+    const point = (commit: string, landedAt: string | null) =>
+      JSON.stringify({
+        method: 1,
+        machine: { gpu: 'RTX 3070', viewport: '1920x1080' },
+        places: [],
+        code: { commit, landedAt },
+      });
+    const like = { method: 1, machine: { gpu: 'RTX 3070', viewport: '1920x1080' } } as Pick<
+      Point,
+      'method' | 'machine'
+    >;
+    const kept = [
+      point('tip', '2026-10-19T21:55:59+02:00'),
+      point('older', '2026-10-04T11:54:00+02:00'),
+      point('by hand', null),
+    ];
+    expect(lastLike(pointsIn(kept.join('\n')), like)?.code.commit).toBe('tip');
+    expect(lastLike(pointsIn(kept[2]!), like)?.code.commit).toBe('by hand');
+  });
 });

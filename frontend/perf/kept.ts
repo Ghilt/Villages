@@ -78,12 +78,22 @@ export function keep(file: string, point: object): void {
   appendFileSync(file, `${JSON.stringify(point)}\n`);
 }
 
-/** The last point measured as this one is: by the same method, on the same card, at the same size, on the same CPU. */
+/**
+ * The point a run is compared with: of the points measured as this one is - by the same method, on the same card, at
+ * the same size, on the same CPU - the one of the newest code main has held, by when main came to hold it; and when
+ * none of them was ever on main, the last kept. Not simply the last line: the history's points are kept after newer
+ * ones.
+ */
 export function lastLike<P extends Measured>(
   points: readonly P[],
   like: Pick<Measured, 'method' | 'machine'>,
 ): P | null {
-  return [...points].reverse().find((point) => alike(point, like)) ?? null;
+  const alikes = points.filter((point) => alike(point, like));
+  const onMain = alikes.filter((point) => point.code.landedAt !== null);
+  if (onMain.length === 0) return alikes.at(-1) ?? null;
+  return onMain.reduce((newest, point) =>
+    Date.parse(point.code.landedAt!) > Date.parse(newest.code.landedAt!) ? point : newest,
+  );
 }
 
 /** Where a tree keeps one measure's points: `shaders`, `startup`, `zoom`, `tests`. */
