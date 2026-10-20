@@ -884,6 +884,15 @@ and `-- --drop` takes them off; by hand only.
   those; a box that keeps only the lines with a word in them. `copy` copies what is shown as the panel copies its
   log, and `clear` forgets every line so far. It keeps two thousand lines of a window, where the panel keeps two
   hundred, and what a closed window said. Nothing leaves the browser.
+- **`/admin/inspect-challenges`** is the challenge, which is not in the game yet: its content, from
+  `world/catalogues/challenges.json`, and needs nothing else running to read. Every effect a slice can carry, in the
+  five pairs of aspects, an aspect and its anti-aspect side by side, each effect's name, whether it is a trigger or a
+  passive, what it does in words with its numbers filled in, the slot it brings and the summon it hires; every summon,
+  its aspect and what it does; and the kinds of challenge, how long each lasts, how many happenings it has, how often
+  one has two aspects and what each aspect weighs. It reads the file through the dev server and again whenever it
+  changes on disk. The game server reads the same file and refuses one it cannot read, naming where, as it does every
+  catalogue, said once in the debug panel's faults and the server's log. The plan is `docs/plans/challenges.md`, and
+  the simulator comes below the content in a later step of it.
 - **`/admin/inspect-story`** is the world's history as a timeline, `docs/STORY.md` drawn, and needs nothing else
   running. Time runs down the page from the first box to the present, where the line ends at the compass: each
   box's day to the left of a gilt line and the box to the right, what happened in the library's `card.event`, a

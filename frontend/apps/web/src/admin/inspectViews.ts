@@ -104,6 +104,14 @@ export const INSPECT_VIEWS: readonly InspectView[] = [
     catalogue: 'quests',
   },
   {
+    path: '/admin/inspect-challenges',
+    title: 'Challenges',
+    what: 'Every effect a slice can carry, in the five pairs of aspects, the summons they bring, and the kinds of challenge.',
+    needs: 'nothing to read',
+    load: () => import('./challenges/Challenges').then((page) => page.Challenges),
+    catalogue: 'challenges',
+  },
+  {
     path: '/admin/inspect-story',
     title: 'Story',
     what: "The world's history as a timeline, docs/STORY.md drawn: the gods, the ritual, and the day the houses begin.",

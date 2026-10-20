@@ -2,6 +2,7 @@ package villages.application
 
 import villages.application.fate.FateCatalogue
 import villages.domain.StructureCatalogue
+import villages.domain.challenge.ChallengeCatalogue
 
 /**
  * Every catalogue the game reads, read and checked: what the shelf holds in force, a field a catalogue. A new kind of
@@ -16,6 +17,8 @@ data class Catalogues(
     val dialogues: Map<String, DialogueTemplate> = emptyMap(),
     /** Every quest there is to offer, by its name in `quests/`: `abbot` for `quests/abbot.json`. */
     val quests: Map<String, QuestTemplate> = emptyMap(),
+    /** The challenge's effects, summons and kinds: the simulator's content, not in the game yet. */
+    val challenges: ChallengeCatalogue = ChallengeCatalogue.NONE,
 ) {
     /**
      * What must hold between catalogues, as one more check before the shelf takes them on: every name one of them
@@ -48,6 +51,9 @@ data class Catalogues(
 
         /** The quests' folder, `world/catalogues/quests/`: a quest a file, naming the dialogues it offers. */
         const val QUESTS = "quests"
+
+        /** The challenge's, `world/catalogues/challenges.json`: the effects a slice carries, the summons, the kinds. */
+        const val CHALLENGES = "challenges"
     }
 }
 

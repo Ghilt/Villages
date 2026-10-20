@@ -71,6 +71,16 @@ export { CULTURES, STRUCTURE_RESOURCES, parseStructureCatalogue } from './struct
 export { RARITIES, parseBalance } from './balance.ts';
 export type { Balance, BalanceRarity } from './balance.ts';
 export { FATE_RESOURCES, dealFrom, opensOn, parseFate } from './fate.ts';
+export { ASPECTS, LENT_STATS, antiOf, filledIn, parseChallenges } from './challenges.ts';
+export type {
+  Aspect,
+  ChallengeEffect,
+  ChallengeKind,
+  ChallengeSlot,
+  ChallengeSummon,
+  Challenges,
+  LentStat,
+} from './challenges.ts';
 export { parseCharacterNames } from './characterNames.ts';
 export { parseDialogue } from './dialogue.ts';
 export { parseQuest } from './quest.ts';

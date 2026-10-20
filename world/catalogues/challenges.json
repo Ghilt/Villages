@@ -1,0 +1,256 @@
+{
+  "$comment": "The challenge's content, Adam's to change: the effects a slice carries, the summons they bring, and the kinds of challenge progressions are drawn from. A first draft, planned with Adam on 2026-10-20, every name and number in it to be tuned. Not in the game yet: the simulator on /admin/inspect-challenges runs the server's engine on what is here, and shows and edits it; the game server takes on a change while it runs. The numbers that belong to no one entry are the balance's. See docs/plans/challenges.md and decision record 0105.",
+  "effects": {
+    "$comment": "Each aspect's effects by their ids, three to an aspect, of which a slice of that aspect carries two. A trigger fires each time a happening puts its slice on stage; a passive works for as long as it stays there. An effect's words name its numbers in braces, which the page fills in; one that summons names the summon, whose own numbers are below; one with a slot fits a keyFigure, lending one of their stats, or a structure, and one whose slot is onTheLine puts what is in it into the challenge as a summon. The aspect boost, half as much again, grows what an effect does and never a chance or a cost. The names are a first draft for Adam to change.",
+    "violence": {
+      "sellswords": { "name": "Sellswords", "fires": "trigger", "words": "Hires a Mercenary, who pulls for this side every second.", "summons": "mercenary" },
+      "noQuarter": {
+        "name": "No Quarter",
+        "fires": "passive",
+        "words": "Each Mercenary act has a {chance}% chance to kill an enemy summon it can beat as well.",
+        "numbers": { "chance": 25 }
+      },
+      "spoils": {
+        "name": "Spoils of the Field",
+        "fires": "passive",
+        "words": "+{amount} to the tug when the happening changes away from Violence.",
+        "numbers": { "amount": 30 }
+      }
+    },
+    "diplomacy": {
+      "envoy": {
+        "name": "Trusted Envoy",
+        "fires": "trigger",
+        "words": "Adds the envoy's kindness to the tug.",
+        "slot": { "fits": "keyFigure", "lends": "kindness", "onTheLine": false }
+      },
+      "sweeterTerms": {
+        "name": "Sweeter Terms",
+        "fires": "trigger",
+        "words": "Each enemy summon turns to this side: {strong}% when this slice's power beats its integrity, {weak}% when it does not. One that finds no room deserts.",
+        "numbers": { "strong": 50, "weak": 20 }
+      },
+      "parley": {
+        "name": "Endless Parley",
+        "fires": "passive",
+        "words": "+{perSecond} to the tug every second; while the tug favours the opponent, their power is {power} lower.",
+        "numbers": { "perSecond": 2, "power": 5 }
+      }
+    },
+    "holy": {
+      "rebuke": {
+        "name": "Divine Rebuke",
+        "fires": "passive",
+        "words": "Each time an enemy summon acts, a {chance}% chance that every enemy slice loses {integrity} integrity.",
+        "numbers": { "chance": 20, "integrity": 10 }
+      },
+      "ordination": { "name": "Ordination", "fires": "trigger", "words": "Ordains a Priest, who pulls by how far this side's integrity stands above the enemy's.", "summons": "priest" },
+      "sanctuary": {
+        "name": "Sanctuary",
+        "fires": "passive",
+        "words": "Puts the building on the line the first time the slice comes on stage; +{piety} piety if the challenge is won.",
+        "slot": { "fits": "structure", "onTheLine": true },
+        "numbers": { "piety": 5 }
+      }
+    },
+    "reason": {
+      "counsel": {
+        "name": "Learned Counsel",
+        "fires": "trigger",
+        "words": "Adds the counsellor's reason to the tug.",
+        "slot": { "fits": "keyFigure", "lends": "reason", "onTheLine": false }
+      },
+      "refutation": {
+        "name": "Refutation",
+        "fires": "passive",
+        "words": "A {chance}% chance to cancel each enemy trigger.",
+        "numbers": { "chance": 20 }
+      },
+      "seenThrough": {
+        "name": "Seen Through",
+        "fires": "passive",
+        "words": "Each time an enemy summon acts, a {chance}% chance of +{amount} to the tug.",
+        "numbers": { "chance": 20, "amount": 5 }
+      }
+    },
+    "authority": {
+      "watch": { "name": "Raise the Watch", "fires": "trigger", "words": "Raises an Enforcer, who costs this side every second and silences the enemy summon pulling hardest.", "summons": "enforcer" },
+      "decree": {
+        "name": "By Decree",
+        "fires": "passive",
+        "words": "A {chance}% chance to stop each act of an enemy summon whose integrity this slice's power beats.",
+        "numbers": { "chance": 25 }
+      },
+      "firmHand": {
+        "name": "The Firm Hand",
+        "fires": "passive",
+        "words": "While the tug favours this side, the opponent's power is {power} lower.",
+        "numbers": { "power": 5 }
+      }
+    },
+    "freedom": {
+      "commons": { "name": "Raise the Commons", "fires": "trigger", "words": "Raises a Rebel, who pulls harder while this side is behind.", "summons": "rebel" },
+      "againstTheGrain": {
+        "name": "Against the Grain",
+        "fires": "passive",
+        "words": "+{amount} to the tug when this slice comes on stage by the draw, matching neither the happening's aspects nor their anti-aspects.",
+        "numbers": { "amount": 20 }
+      },
+      "ownWill": { "name": "Will of One's Own", "fires": "passive", "words": "Once in a challenge, at a change of happening, this slice stays on stage whatever the new aspects." }
+    },
+    "greed": {
+      "countingHouse": {
+        "name": "Counting House",
+        "fires": "trigger",
+        "words": "Puts the building on the line when the slice comes on stage; +{wealth} wealth if the challenge is won.",
+        "slot": { "fits": "structure", "onTheLine": true },
+        "numbers": { "wealth": 5 }
+      },
+      "farmTaxes": { "name": "Farm the Taxes", "fires": "trigger", "words": "Hires a Collector, who costs this side every second and fills a coffer that pours into the tug at the next change of happening, or at the end.", "summons": "collector" },
+      "pickBones": {
+        "name": "Pick the Bones",
+        "fires": "passive",
+        "words": "+{amount} to the tug whenever an enemy summon is killed.",
+        "numbers": { "amount": 10 }
+      }
+    },
+    "generosity": {
+      "patron": {
+        "name": "Open-Handed Patron",
+        "fires": "trigger",
+        "words": "Adds the patron's kindness to the tug.",
+        "slot": { "fits": "keyFigure", "lends": "kindness", "onTheLine": false }
+      },
+      "alms": { "name": "Give Alms", "fires": "trigger", "words": "Sends out a Benefactor, who pulls harder while this side is behind.", "summons": "benefactor" },
+      "remembered": {
+        "name": "Remembered Kindness",
+        "fires": "passive",
+        "words": "+{amount} to the tug whenever a summon of this side is killed.",
+        "numbers": { "amount": 15 }
+      }
+    },
+    "nature": {
+      "wildHunt": { "name": "The Wild Hunt", "fires": "trigger", "words": "Looses a Predator, who pulls, or now and then kills an enemy summon it can beat instead.", "summons": "predator" },
+      "teeming": {
+        "name": "Teeming Wilds",
+        "fires": "passive",
+        "words": "Each time an enemy summon acts, a {chance}% chance a Creature comes to this side.",
+        "summons": "creature",
+        "numbers": { "chance": 20 }
+      },
+      "wildRemembers": {
+        "name": "The Wild Remembers",
+        "fires": "passive",
+        "words": "+{amount} to the tug when the happening changes away from Nature.",
+        "numbers": { "amount": 30 }
+      }
+    },
+    "industry": {
+      "engines": { "name": "Raise the Engines", "fires": "trigger", "words": "Builds a Machine, which pulls for this side every second.", "summons": "machine" },
+      "works": {
+        "name": "Works and Forges",
+        "fires": "trigger",
+        "words": "Puts the building on the line when the slice comes on stage.",
+        "slot": { "fits": "structure", "onTheLine": true }
+      },
+      "wellOiled": {
+        "name": "Well-Oiled",
+        "fires": "passive",
+        "words": "Each time a summon of this side acts, a {chance}% chance it pulls {amount} more.",
+        "numbers": { "chance": 20, "amount": 5 }
+      }
+    }
+  },
+  "summons": {
+    "$comment": "Each summon by its id: what it is called, its aspect, which its boost is judged by, and its numbers, which its words name. A summon acts once a second from the second after it arrives, until it is killed, turned or the challenge ends; its integrity is its slice's at the moment it was summoned. A building or a person put on the line is a summon too, made by the balance's rule rather than listed here.",
+    "mercenary": {
+      "name": "Mercenary",
+      "aspect": "violence",
+      "words": "Pulls {pulls} a second.",
+      "numbers": { "pulls": 10 }
+    },
+    "priest": {
+      "name": "Priest",
+      "aspect": "holy",
+      "words": "Pulls as much as its side's slice on stage has integrity above the enemy's, times {share}, and never less than nothing.",
+      "numbers": { "share": 1 }
+    },
+    "enforcer": {
+      "name": "Enforcer",
+      "aspect": "authority",
+      "words": "Costs its side {costs} a second; each act silences the enemy summon pulling hardest for {silences} seconds.",
+      "numbers": { "costs": 5, "silences": 3 }
+    },
+    "rebel": {
+      "name": "Rebel",
+      "aspect": "freedom",
+      "words": "Pulls {pulls} a second, {behind} while its side is behind.",
+      "numbers": { "pulls": 5, "behind": 10 }
+    },
+    "collector": {
+      "name": "Collector",
+      "aspect": "greed",
+      "words": "Costs its side {costs} a second and puts {deposits} in its coffer each act; the coffer pours into the tug at the next change of happening or at the end, and is lost with the Collector.",
+      "numbers": { "costs": 3, "deposits": 6 }
+    },
+    "benefactor": {
+      "name": "Benefactor",
+      "aspect": "generosity",
+      "words": "Pulls {pulls} a second, {behind} while its side is behind.",
+      "numbers": { "pulls": 5, "behind": 10 }
+    },
+    "predator": {
+      "name": "Predator",
+      "aspect": "nature",
+      "words": "Pulls {pulls} a second, or with a {kills}% chance kills an enemy summon it can beat instead.",
+      "numbers": { "pulls": 5, "kills": 20 }
+    },
+    "creature": {
+      "name": "Creature",
+      "aspect": "nature",
+      "words": "Pulls {pulls} a second.",
+      "numbers": { "pulls": 3 }
+    },
+    "machine": {
+      "name": "Machine",
+      "aspect": "industry",
+      "words": "Pulls {pulls} a second.",
+      "numbers": { "pulls": 10 }
+    }
+  },
+  "kinds": {
+    "$comment": "Each challenge kind by its id: the seconds a challenge of it lasts and the happenings it has, each the least and the most, the chance out of a hundred that a happening has a second aspect, and how much each aspect weighs when a happening's aspects are drawn. A kind never has more happenings than the fewest seconds it lasts, so each begins on a second of its own.",
+    "battle": {
+      "name": "Battle",
+      "words": "Armies in the field.",
+      "seconds": [30, 90],
+      "happenings": [3, 6],
+      "twoAspects": 20,
+      "weights": { "violence": 8, "diplomacy": 2, "holy": 1, "reason": 1, "authority": 3, "freedom": 2, "greed": 1, "generosity": 0, "nature": 2, "industry": 2 }
+    },
+    "debate": {
+      "name": "Debate",
+      "words": "Scholars arguing a point before an audience.",
+      "seconds": [20, 60],
+      "happenings": [2, 5],
+      "twoAspects": 15,
+      "weights": { "violence": 0, "diplomacy": 3, "holy": 4, "reason": 8, "authority": 2, "freedom": 2, "greed": 1, "generosity": 1, "nature": 1, "industry": 1 }
+    },
+    "tradeWar": {
+      "name": "Trade war",
+      "words": "Merchants and their princes fighting over a market.",
+      "seconds": [40, 120],
+      "happenings": [3, 7],
+      "twoAspects": 25,
+      "weights": { "violence": 1, "diplomacy": 3, "holy": 0, "reason": 1, "authority": 2, "freedom": 1, "greed": 8, "generosity": 3, "nature": 1, "industry": 5 }
+    },
+    "sermon": {
+      "name": "Sermon",
+      "words": "A preacher winning a crowd, or losing it.",
+      "seconds": [15, 45],
+      "happenings": [2, 4],
+      "twoAspects": 10,
+      "weights": { "violence": 0, "diplomacy": 1, "holy": 8, "reason": 3, "authority": 2, "freedom": 2, "greed": 1, "generosity": 4, "nature": 1, "industry": 0 }
+    }
+  }
+}

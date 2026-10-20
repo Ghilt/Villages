@@ -1,0 +1,58 @@
+{
+  "$comment": "A challenge catalogue filed as world/catalogues/challenges.json files one, written by hand, small: the server's ChallengesFile and the world package's parseChallenges both read it, and are held to what it says.",
+  "effects": {
+    "$comment": "Three aspects, an effect of every shape.",
+    "violence": {
+      "sellswords": { "name": "Sellswords", "fires": "trigger", "words": "Hires a Mercenary.", "summons": "mercenary" },
+      "noQuarter": {
+        "name": "No Quarter",
+        "fires": "passive",
+        "words": "{chance}% to kill as well.",
+        "numbers": { "chance": 25 }
+      }
+    },
+    "reason": {
+      "counsel": {
+        "name": "Learned Counsel",
+        "fires": "trigger",
+        "words": "Adds the counsellor's reason.",
+        "slot": { "fits": "keyFigure", "lends": "reason", "onTheLine": false }
+      }
+    },
+    "holy": {
+      "sanctuary": {
+        "name": "Sanctuary",
+        "fires": "passive",
+        "words": "+{piety} piety if won.",
+        "slot": { "fits": "structure", "onTheLine": true },
+        "numbers": { "piety": 5 }
+      }
+    }
+  },
+  "summons": {
+    "$comment": "Two summons.",
+    "mercenary": {
+      "name": "Mercenary",
+      "aspect": "violence",
+      "words": "Pulls {pulls} a second.",
+      "numbers": { "pulls": 10 }
+    },
+    "collector": {
+      "name": "Collector",
+      "aspect": "greed",
+      "words": "Costs {costs}, puts {deposits} by.",
+      "numbers": { "costs": 3, "deposits": 6.5 }
+    }
+  },
+  "kinds": {
+    "$comment": "One kind, weighing two aspects.",
+    "battle": {
+      "name": "Battle",
+      "words": "Armies in the field.",
+      "seconds": [30, 90],
+      "happenings": [3, 6],
+      "twoAspects": 20,
+      "weights": { "violence": 8, "holy": 1 }
+    }
+  }
+}

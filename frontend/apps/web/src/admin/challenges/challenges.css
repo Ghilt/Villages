@@ -1,0 +1,31 @@
+/*
+ * The challenges' page (Challenges.tsx): the effects in their five pairs, an aspect and its anti-aspect side by side,
+ * one under the other on a narrow page.
+ */
+
+.challenges-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 2rem;
+  max-width: 72rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--parchment-edge);
+}
+
+@media (max-width: 40rem) {
+  .challenges-pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.challenges-effect {
+  margin: 0 0 0.7rem;
+  line-height: 1.4;
+}
+
+.challenges-fires {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+}
