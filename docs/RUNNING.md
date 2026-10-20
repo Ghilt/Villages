@@ -1113,7 +1113,7 @@ and `-- --drop` takes them off; by hand only.
   the worst gap and the slowest twentieth's, the long tasks while the camera came in and after, the CPU's time by
   module and by function, how many sprites the scenery drew once settled, and the programs the page waited on the
   graphics driver to compile. The run's first zoom, over the first place, is kept apart: Chrome has compiled none of
-  the game's programs yet, and the land's is compiled when the camera first comes inside zoom 8.5 - a stall of 26
+  the game's programs yet, and the land's is compiled when the camera first comes inside zoom 8.5 - a stall of 22 to 31
   seconds on this machine (2026-10-20), what a player's first visit meets, and every visit after the land's shader
   changes. Then each place three times on fresh pages, the middle kept (`--rounds`); `--places forest,ice` measures
   some. `--record` keeps it as a line of `docs/experiments/performance/zoom.jsonl`, and `--compare` puts the first
@@ -1152,7 +1152,7 @@ shaders, the start and the zoom when the frontend changed - and the lines go to 
   `docs/experiments/performance/tests.jsonl`. So that the time is the tests' and every one of them runs, a recorded
   run compiles the backend first, timed apart, and then runs its tests whether or not anything they test changed
   (`cleanTest check`), and runs the frontend's check a step at a time - the typecheck, the linter, the formatter and
-  the unit tests - asking Vitest for its JSON report besides. Where the time went is kept too: the backend's modules
+  the unit tests - each even when one before it failed, asking Vitest for its JSON report besides. Where the time went is kept too: the backend's modules
   by the time their specs took and its slowest specs, from Gradle's reports; the frontend's slowest test files, and
   Vitest's own account of its time, transform, import and tests, each summed over its workers. Whether Docker was
   running is kept with it, because without it the backend's tests that need it are skipped. `--root <tree>` checks

@@ -412,7 +412,7 @@ Commands are added here as the increments land:
   tasks, stutters, what was fetched and where the CPU's time went; `--record` keeps it in
   `docs/experiments/performance/startup.jsonl`.
 - How smoothly the camera comes in: `npm run perf:zoom --prefix frontend`, zoom 5 to 10 over the forest, the grassland
-  and the ice, the run's first zoom apart (the graphics driver compiling the game's programs, the land's 26 s on this
+  and the ice, the run's first zoom apart (the graphics driver compiling the game's programs, the land's 22 to 31 s on this
   machine); frames, stutters, long tasks, the CPU by module and the compiles waited on; `--record` keeps it in
   `docs/experiments/performance/zoom.jsonl`.
 

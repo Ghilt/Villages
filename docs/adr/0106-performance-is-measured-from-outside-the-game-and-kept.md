@@ -77,7 +77,7 @@ thick with foliage less pleasant (2026-10-20): the camera flown from zoom 5 to 1
 the bare ice, each on a fresh page, its frames, stutters, long tasks and the CPU by module, so that what the sprites
 cost a zoom is the forest's against the ice's. It found the one large stall there is: the first time a page needs
 the land layer, when the camera comes inside zoom 8.5, it waits on the graphics driver to compile the land's program,
-26 to 31 seconds on this machine with nothing cached (`getProgramParameter`, ANGLE on Direct3D 11). Chrome keeps compiled
+22 to 31 seconds on this machine with nothing cached (`getProgramParameter`, ANGLE on Direct3D 11). Chrome keeps compiled
 programs on disk, so a player meets it on a first visit and Adam after every change to the land's shader. Every
 measure now times each program the page waited on, by its name, and the zoom keeps the run's first zoom apart, cold,
 so how long the land's program takes to compile is a line of its own. Once compiled, the forest's 4,600 sprites cost
@@ -89,6 +89,11 @@ specs, the frontend's slowest test files and Vitest's own account. Recorded, the
 apart, because what Gradle's cache already holds decides that, and its tests are run whether or not anything changed,
 because Gradle would otherwise keep a module's last results; the frontend's check is run a step at a time. A tests
 point names the CPU and not the card, and compares with the points of the same CPU.
+
+**The history was measured afterwards** by `node scripts/perf-history.ts`, which checks old commits out in a tree of
+its own and measures them by today's tools: experiment 0024, from the first commits of 2026-09-02 to main's tip of
+2026-10-19. It found where each cost came from - the grass sprites on 10-04, the clouds by 10-16, the land on 10-18
+and 10-19, and with the land the first zoom's wait on the graphics driver, 0.4 s before it and 22 s after.
 
 ## Consequences
 
