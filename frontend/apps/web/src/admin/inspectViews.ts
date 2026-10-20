@@ -127,7 +127,7 @@ export const INSPECT_VIEWS: readonly InspectView[] = [
   {
     path: '/admin/inspect-performance',
     title: 'Performance',
-    what: 'How many players one game server carries before it bends, run by run, from the history the bot swarm writes.',
+    what: 'What the game costs to run, as it is built: what the shaders cost the graphics card at fixed places, and how many players one game server carries before it bends.',
     needs: 'nothing',
     load: () => import('./performance/Performance').then((page) => page.Performance),
   },

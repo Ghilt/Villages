@@ -85,8 +85,15 @@
 
 .perf-chart__legend {
   display: flex;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
   color: var(--ink-soft);
+}
+
+.perf-chart__tip em {
+  max-width: 24rem;
+  color: var(--ink-soft);
+  white-space: normal;
 }
 
 .perf-chart__legend i,
@@ -133,4 +140,28 @@
 
 .perf-table__warm {
   color: var(--ink-soft);
+}
+
+/* A chapter of the page, folded under its title: the server, the shaders, the start, the zoom, the tests. */
+.perf-fold {
+  max-width: 72rem;
+  margin: 0 0 1.75rem;
+}
+
+.perf-fold > summary {
+  cursor: pointer;
+}
+
+.perf-fold > summary .inspect-group__title {
+  display: inline;
+}
+
+.perf-fold__aside {
+  margin-left: 0.6rem;
+  font-size: 0.85em;
+  color: var(--ink-soft);
+}
+
+.perf-table td.perf-table__none {
+  color: var(--parchment-edge);
 }

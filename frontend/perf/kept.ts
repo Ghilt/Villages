@@ -2,6 +2,11 @@ import { execFileSync } from 'node:child_process';
 import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
+import { alike, readShaderPoints } from '../apps/web/src/admin/performance/shaderPoints.ts';
+import type { KeptPlace, Point } from '../apps/web/src/admin/performance/shaderPoints.ts';
+
+export type { KeptPlace, Point, Why } from '../apps/web/src/admin/performance/shaderPoints.ts';
+
 /**
  * A point kept: one line of `docs/experiments/performance/shaders.jsonl` for one run of the measure, in the tree the
  * tool runs from whatever tree it measured, so the history of every commit gathers in one file that travels to main.
@@ -12,50 +17,6 @@ import { dirname, join } from 'node:path';
 
 /** The method a point was measured by. Raised whenever what a reading means changes, so points of two never mix. */
 export const METHOD = 1;
-
-export type Why = 'to-main' | 'history' | 'by-hand';
-
-export interface KeptPlace {
-  readonly name: string;
-  readonly lat: number;
-  readonly lon: number;
-  readonly zoom: number;
-  readonly frame: number;
-  readonly p50: number;
-  readonly p80: number;
-  readonly cpu: number;
-  /** Milliseconds by what drew, those under 0.005 left out. */
-  readonly keys: Readonly<Record<string, number>>;
-  /** How many draws a frame each thing made, clears among them: the sprites' cost is as much in how many as in each. */
-  readonly draws: Readonly<Record<string, number>>;
-  readonly settled: boolean;
-  /** The founded house's seat, for the fog. */
-  readonly seat?: string;
-}
-
-export interface Point {
-  readonly method: number;
-  readonly why: Why;
-  readonly measuredAt: string;
-  readonly code: {
-    readonly commit: string;
-    readonly subject: string;
-    /** When main came to hold the commit, from main's reflog; null for a commit main has never held. */
-    readonly landedAt: string | null;
-    readonly dirty: boolean;
-  };
-  readonly machine: {
-    readonly gpu: string;
-    readonly driver: string;
-    readonly chrome: string;
-    readonly viewport: string;
-    readonly dpr: number;
-  };
-  readonly master: string | null;
-  readonly levels: { readonly applied: Record<string, string>; readonly defaults: Record<string, string> };
-  readonly places: readonly KeptPlace[];
-  readonly fogMissed: string | null;
-}
 
 const rounded = (ms: number) => Math.round(ms * 1000) / 1000;
 
@@ -96,19 +57,9 @@ export function keptPlace(place: {
   };
 }
 
-/** The points in a file, in the order they were kept; lines that are not points are let go by. */
+/** The points in a file's text, lines that are not points let go by: the page's reading of them. */
 export function pointsIn(text: string): Point[] {
-  return text
-    .split(/\r?\n/)
-    .filter((line) => line.trim() !== '')
-    .flatMap((line) => {
-      try {
-        const point = JSON.parse(line) as Point;
-        return typeof point.method === 'number' && Array.isArray(point.places) ? [point] : [];
-      } catch {
-        return [];
-      }
-    });
+  return readShaderPoints(text).points;
 }
 
 export function readPoints(file: string): Point[] {
@@ -122,16 +73,7 @@ export function keep(file: string, point: Point): void {
 
 /** The last point measured as this one is: by the same method, on the same card, at the same size. */
 export function lastLike(points: readonly Point[], like: Pick<Point, 'method' | 'machine'>): Point | null {
-  return (
-    [...points]
-      .reverse()
-      .find(
-        (point) =>
-          point.method === like.method &&
-          point.machine.gpu === like.machine.gpu &&
-          point.machine.viewport === like.machine.viewport,
-      ) ?? null
-  );
+  return [...points].reverse().find((point) => alike(point, like)) ?? null;
 }
 
 /** Where a tree's points are kept. */

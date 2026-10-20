@@ -1017,7 +1017,7 @@ and `-- --drop` takes them off; by hand only.
   included, and its log is `.logs/swarm-server.log`. `--args="--stages=100,500 --hold=20"` makes a short run, and
   `--warm-up=0` leaves the warm-up out. `--histogram` saves what the server's heap holds by class after each stage, in
   `.logs/swarm-histogram-<players>.txt`, which is how a player's cost is found. It is minutes long and loads the whole machine, so no check runs it.
-- **The performance page**, `/admin/inspect-performance`, charts the history of runs written down below: the latest run's players carried and
+- **The performance page**, `/admin/inspect-performance`, its chapter "Players one server carries", charts the history of runs written down below: the latest run's players carried and
   where it bent, then run by run the players each carried and the slowest twentieth of each round trip at the largest
   load every run carried, so a step that cost something shows as a drop; then one run, picked by its commit and time,
   stage by stage, with the server's heap after a collection and a table of every number. A `*` after a commit is a
@@ -1066,6 +1066,15 @@ and `-- --drop` takes them off; by hand only.
   main came to hold it, why it was measured (`--why to-main`, `history` or `by-hand`, the last unless told), the card,
   the method, and each place's frame, its spread, the CPU's part, its parts and how many draws a frame each made. The
   file is committed with the work, so the history travels to main.
+- **On the performance page**, `/admin/inspect-performance`, the chapter "What the shaders cost", folded under its
+  title as every chapter of the page is: the latest point's places in a table, each with its frame, how its frames
+  spread, the CPU's part, what drew gathered into families (the land, the water, the clouds, the fog, the scenery,
+  the sprites, the relief, the painted map, the clears) and its draws a frame, a place's name a link that opens the game
+  there; then each place's frame point by point, and one place, picked, by family point by point, the commit's subject
+  under the pointer; and, folded, every thing the latest point timed by its own name. Only points measured as the
+  latest was - one method, one card, one size - are drawn as a line; the others are counted beside the title. The
+  families are worked out when the page reads the points (`admin/performance/shaderPoints.ts`), so a new grouping
+  regroups old points without measuring them again.
 - **The game's own cost lines**, the ones the log says once a level for the water, the land, the clouds and the
   trees, stay as a quick look: they are timed at the layer's own frame rate, on a card that has idled down, and read
   two to three times what the measure does. The measure is the number to compare.

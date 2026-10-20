@@ -24,17 +24,19 @@ function step(most: number): number {
 /**
  * A line chart on the paper of an inspect page: points evenly along the x axis, each named by `labels`, one or more
  * series over them, and a dashed line for a threshold. Hovering anywhere over a point's column shows every series'
- * value there. Kept plain on purpose - a recessive grid, two-pixel lines, eight-pixel points - so that the numbers
- * and not the drawing are what is read.
+ * value there, and the point's `captions` when it has them - a commit's subject, say. Kept plain on purpose - a
+ * recessive grid, two-pixel lines, eight-pixel points - so that the numbers and not the drawing are what is read.
  */
 export function LineChart({
   labels,
+  captions,
   series,
   unit,
   threshold,
   label,
 }: {
   labels: readonly string[];
+  captions?: readonly string[];
   series: readonly Series[];
   unit: string;
   threshold?: { readonly value: number; readonly words: string };
@@ -143,6 +145,7 @@ export function LineChart({
       {hover !== null && (
         <div className="perf-chart__tip" style={{ left: `${(x(hover) / WIDTH) * 100}%` }}>
           <strong>{labels[hover]}</strong>
+          {captions?.[hover] !== undefined && <em>{captions[hover]}</em>}
           {series.map((each) => (
             <span key={each.name}>
               {series.length > 1 && <i style={{ background: each.colour }} />} {each.name}{' '}
