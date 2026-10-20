@@ -90,7 +90,5 @@ enum class What {
     POURED,
     COFFER_LOST,
 
-    /** An effect of the catalogue whose behaviour is not built yet was asked to act. */
-    NOT_BUILT,
     ENDED,
 }

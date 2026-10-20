@@ -639,7 +639,7 @@ every second, an enemy summon about to act or having acted, a friend's acting, a
 aura on the other side's power, keeping its slice on stage - and answers with the changes it asks for, never touching
 the contest itself; `Contest` lands them. The shelf refuses a catalogue naming an effect the code has no behaviour
 for, or not giving a number a behaviour reads, and `ChallengeBehavioursTest` holds the other way, code no entry
-names. An effect whose behaviour is not built yet is `Unbuilt`, and says so in the moments.
+names.
 
 Three things follow for the architecture:
 

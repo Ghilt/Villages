@@ -109,10 +109,6 @@ class ChallengeSpec : StringSpec({
         fight(IDLE, IDLE, 2, Happening(DIPLOMACY)).saying(What.EMPTY_SLOT).size shouldBe 2
     }
 
-    "an effect whose behaviour is not built yet says so whenever its slice comes on stage" {
-        fight(listOf(slice(Aspect.INDUSTRY, "industry.engines")), IDLE, 2, Happening(Aspect.INDUSTRY)).saying(What.NOT_BUILT).single().effect shouldBe "industry.engines"
-    }
-
     "the same seed fights the same challenge, and the changes of its moments add up to its tug" {
         val a = listOf(slice(VIOLENCE, "violence.sellswords", "violence.noQuarter"), slice(DIPLOMACY, "diplomacy.parley"))
         val b = listOf(slice(DIPLOMACY, "diplomacy.sweeterTerms", "diplomacy.parley"), slice(VIOLENCE, "violence.sellswords", "violence.spoils"))

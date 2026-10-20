@@ -135,7 +135,6 @@ export const WHAT_SAID: Readonly<Record<string, string>> = {
   banked: 'filled its coffer',
   poured: 'coffer poured',
   cofferLost: 'coffer lost',
-  notBuilt: 'not built yet',
   ended: 'ended',
 };
 

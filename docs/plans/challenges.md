@@ -205,8 +205,8 @@ In `backend/domain/src/main/kotlin/villages/domain/challenge/`, every file well 
 - `Summons.kt` - the cap, kills, turning, deserting, silences, things on the line;
 - `Behaviours.kt` - the hooks an effect may hang on (activated, happeningChanged, everySecond, beforeEnemyActs,
   enemyActed, friendActed, enemyTriggered, summonKilled, aura, keepsStage), and `ChallengeBehaviours`, which
-  holds the catalogue and the code to each other both ways; an effect not built yet is `Unbuilt` and says so in
-  the log;
+  holds the catalogue and the code to each other both ways; until the last pair was built, an effect not built
+  yet was `Unbuilt` and said so in the log;
 - `Shared.kt` - the behaviours several effects share: hiring, a slot asked for, a pull as the happening changes
   away, a summon's flat pull and its pull while behind;
 - one file a pair: `ViolenceDiplomacy.kt`, `HolyReason.kt`, `AuthorityFreedom.kt`, `GreedGenerosity.kt`,

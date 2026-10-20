@@ -3,8 +3,7 @@ package villages.domain.challenge
 import villages.domain.Stat
 
 /**
- * The content the engine's specs fight with: the pairs built so far as the first draft has them, one effect not
- * built yet, and the first draft's rules. Its own here, so a retune of `world/catalogues/` never moves a spec.
+ * The content the engine's specs fight with: every pair as the first draft has it, and the first draft's rules. Its own here, so a retune of `world/catalogues/` never moves a spec.
  */
 val TEST_CATALOGUE = ChallengeCatalogue(
     effects = listOf(
@@ -32,7 +31,12 @@ val TEST_CATALOGUE = ChallengeCatalogue(
         ChallengeEffect("generosity.patron", Aspect.GENEROSITY, Fires.TRIGGER, slot = ChallengeSlot(Fits.KEY_FIGURE, Stat.KINDNESS)),
         ChallengeEffect("generosity.alms", Aspect.GENEROSITY, Fires.TRIGGER, summons = "benefactor"),
         ChallengeEffect("generosity.remembered", Aspect.GENEROSITY, Fires.PASSIVE, mapOf("amount" to 15.0)),
+        ChallengeEffect("nature.wildHunt", Aspect.NATURE, Fires.TRIGGER, summons = "predator"),
+        ChallengeEffect("nature.teeming", Aspect.NATURE, Fires.PASSIVE, mapOf("chance" to 20.0), summons = "creature"),
+        ChallengeEffect("nature.wildRemembers", Aspect.NATURE, Fires.PASSIVE, mapOf("amount" to 30.0)),
         ChallengeEffect("industry.engines", Aspect.INDUSTRY, Fires.TRIGGER, summons = "machine"),
+        ChallengeEffect("industry.works", Aspect.INDUSTRY, Fires.TRIGGER, slot = ChallengeSlot(Fits.STRUCTURE, onTheLine = true)),
+        ChallengeEffect("industry.wellOiled", Aspect.INDUSTRY, Fires.PASSIVE, mapOf("chance" to 20.0, "amount" to 5.0)),
     ),
     summons = mapOf(
         "mercenary" to SummonSpec(Aspect.VIOLENCE, mapOf("pulls" to 10.0)),
@@ -42,11 +46,18 @@ val TEST_CATALOGUE = ChallengeCatalogue(
         "collector" to SummonSpec(Aspect.GREED, mapOf("costs" to 3.0, "deposits" to 6.0)),
         "benefactor" to SummonSpec(Aspect.GENEROSITY, mapOf("pulls" to 5.0, "behind" to 10.0)),
         "machine" to SummonSpec(Aspect.INDUSTRY, mapOf("pulls" to 10.0)),
+        "predator" to SummonSpec(Aspect.NATURE, mapOf("pulls" to 5.0, "kills" to 20.0)),
+        "creature" to SummonSpec(Aspect.NATURE, mapOf("pulls" to 3.0)),
     ),
     kinds = emptyMap(),
 )
 
 val TEST_RULES = ChallengeRules(1.5, 100.0, 10.0, 0.2, 0.5, 10.0, SliceStart(50.0, 50.0, 3))
+
+/** The test catalogue with one of a summon's numbers changed. */
+fun ChallengeCatalogue.withSummon(summon: String, number: String, value: Double): ChallengeCatalogue = copy(
+    summons = summons.mapValues { (id, spec) -> if (id == summon) spec.copy(numbers = spec.numbers + (number to value)) else spec },
+)
 
 /** The test catalogue with one of its numbers changed: a chance made certain, so a spec need not hunt for a seed. */
 fun ChallengeCatalogue.with(effect: String, number: String, value: Double): ChallengeCatalogue = copy(

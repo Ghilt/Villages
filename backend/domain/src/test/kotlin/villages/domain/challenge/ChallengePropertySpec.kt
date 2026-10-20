@@ -11,7 +11,7 @@ import kotlin.random.Random
  * The rules that must always hold, over hundreds of challenges made up at random from the test content: the tug ends
  * within its ends, and at one when pulled there; the changes add up to it; the same seed fights the same challenge;
  * time only runs forward; and no side ever has more summons than its slices let it have, which the engine itself
- * checks as each one comes.
+ * checks as each one comes. Every effect is in the test content, and most slots have a stand-in in them.
  */
 class ChallengePropertySpec : StringSpec({
 
@@ -36,11 +36,14 @@ private val EFFECTS = TEST_CATALOGUE.effects.groupBy { it.aspect }
 private fun sideOf(random: Random): List<ChallengeSlice> = List(random.nextInt(1, 4)) {
     val aspect = EFFECTS.keys.random(random)
     val effects = EFFECTS.getValue(aspect).map { it.id }.shuffled(random).take(random.nextInt(0, 3))
-    val slotted = if ("diplomacy.envoy" in effects && random.nextBoolean()) {
-        mapOf("diplomacy.envoy" to StandIn.KeyFigure("Ines", mapOf(Stat.KINDNESS to random.nextInt(1, 21))))
-    } else {
-        emptyMap()
-    }
+    val slotted = effects.mapNotNull { id -> TEST_CATALOGUE.effect(id)?.slot?.let { id to it } }
+        .filter { random.nextInt(4) > 0 }
+        .associate { (id, slot) ->
+            id to when (slot.fits) {
+                Fits.KEY_FIGURE -> StandIn.KeyFigure("Ines", Stat.entries.associateWith { random.nextInt(1, 21) })
+                Fits.STRUCTURE -> StandIn.Building("Lund", random.nextInt(1, 4))
+            }
+        }
     slice(aspect, *effects.toTypedArray(), power = random.nextInt(0, 101).toDouble(), integrity = random.nextInt(0, 101).toDouble(), summonCount = random.nextInt(0, 5), slotted = slotted)
 }
 

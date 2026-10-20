@@ -176,26 +176,17 @@ sealed interface Change {
     ) : Change
 }
 
-/** An effect whose behaviour is not built yet: it says so whenever its slice comes on stage, and does nothing else. */
-object Unbuilt : EffectBehaviour {
-    override fun activated(scene: Scene): List<Change> = listOf(Change.Say(What.NOT_BUILT, scene.side, scene.actor, scene.effect))
-}
-
 /**
  * Every effect's and summon's behaviour, by its id. The catalogue and the code are held to each other: every effect in
- * the catalogue has a behaviour here, built or [Unbuilt], with the numbers it reads; every summon a built effect brings
- * has its own; and every behaviour here has its entry in the real catalogue, which `ChallengeBehavioursSpec` holds.
+ * the catalogue has a behaviour here with the numbers it reads, and every summon an effect brings has its own, which the
+ * shelf holds as it takes a catalogue on; and every behaviour here has its entry in the real catalogue, which
+ * `ChallengeBehavioursTest` holds.
  */
 object ChallengeBehaviours {
-    /** The effects of the plan's later steps, each built in its own. */
-    private val UNBUILT = listOf(
-        "nature.wildHunt", "nature.teeming", "nature.wildRemembers",
-        "industry.engines", "industry.works", "industry.wellOiled",
-    )
+    val effects: Map<String, EffectBehaviour> = violenceAndDiplomacy + holyAndReason + authorityAndFreedom + greedAndGenerosity + natureAndIndustry
 
-    val effects: Map<String, EffectBehaviour> = violenceAndDiplomacy + holyAndReason + authorityAndFreedom + greedAndGenerosity + UNBUILT.associateWith { Unbuilt }
-
-    val summons: Map<String, SummonBehaviour> = violenceAndDiplomacySummons + holyAndReasonSummons + authorityAndFreedomSummons + greedAndGenerositySummons
+    val summons: Map<String, SummonBehaviour> =
+        violenceAndDiplomacySummons + holyAndReasonSummons + authorityAndFreedomSummons + greedAndGenerositySummons + natureAndIndustrySummons
 
     /** What [catalogue] asks of the code that the code lacks, a line a lack; none when the code has all of it. */
     fun unmatched(catalogue: ChallengeCatalogue): List<String> = buildList {
@@ -206,12 +197,10 @@ object ChallengeBehaviours {
                 return@forEach
             }
             (behaviour.reads - effect.numbers.keys).forEach { add("${effect.id} gives no number '$it', which its behaviour reads") }
-            val summon = effect.summons
-            if (summon != null && behaviour !== Unbuilt) {
-                val spec = catalogue.summons.getValue(summon)
-                val acts = summons[summon]
-                if (acts == null) add("$summon has no behaviour in the code") else (acts.reads - spec.numbers.keys).forEach { add("$summon gives no number '$it', which its behaviour reads") }
-            }
+            val summon = effect.summons ?: return@forEach
+            val spec = catalogue.summons.getValue(summon)
+            val acts = summons[summon]
+            if (acts == null) add("$summon has no behaviour in the code") else (acts.reads - spec.numbers.keys).forEach { add("$summon gives no number '$it', which its behaviour reads") }
         }
     }
 }
