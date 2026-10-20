@@ -2,6 +2,7 @@ package villages.application
 
 import villages.application.fate.FateCatalogue
 import villages.domain.StructureCatalogue
+import villages.domain.challenge.ChallengeBehaviours
 import villages.domain.challenge.ChallengeCatalogue
 
 /**
@@ -30,6 +31,7 @@ data class Catalogues(
         characterNames.check()
         dialogues.forEach { (name, dialogue) -> dialogue.check(name) }
         quests.forEach { (name, quest) -> quest.check(name, dialogues, structures) }
+        ChallengeBehaviours.unmatched(challenges).firstOrNull()?.let { throw CatalogueRefused(CHALLENGES, it) }
         return this
     }
 

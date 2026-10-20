@@ -1,0 +1,31 @@
+  s  h side who          what            effect                 target          amount  change     tug
+  0  0      -            happening began                                                             0
+  0  0 A    a1           on stage                                                                    0
+  0  0 B    b2           on stage                                                                    0
+  0  0 A    a1           summoned        violence.sellswords    #1 mercenary                         0
+  0  0 B    b2           summoned        violence.sellswords    #2 mercenary                         0
+  1  0 A    #1 mercenary pulled           ×                                         15      15      15
+  1  0 B    #2 mercenary pulled           ×                                         15     -15       0
+  2  0 A    #1 mercenary pulled           ×                                         15      15      15
+  2  0 B    #2 mercenary pulled           ×                                         15     -15       0
+  2  0 A    #1 mercenary killed          violence.noQuarter     #2 mercenary                         0
+  3  0 A    #1 mercenary pulled           ×                                         15      15      15
+  4  0 A    #1 mercenary pulled           ×                                         15      15      30
+  5  0 A    #1 mercenary pulled           ×                                         15      15      45
+  6  1      -            happening began                                                            45
+  6  1 A    a1           on stage                                                                   45
+  6  1 B    b1           on stage                                                                   45
+  6  1 B    b2           pulled          violence.spoils ×                          45     -45       0
+  6  1 B    b1           lent            diplomacy.envoy ×                          18     -18     -18
+  6  1 A    a1           summoned        violence.sellswords    #3 mercenary                       -18
+  6  1 A    #1 mercenary pulled           ×                                         15      15      -3
+  7  1 A    #1 mercenary pulled           ×                                         15      15      12
+  7  1 A    #3 mercenary pulled           ×                                         15      15      27
+  8  1 A    #1 mercenary pulled           ×                                         15      15      42
+  8  1 A    #3 mercenary pulled           ×                                         15      15      57
+  9  1 A    #1 mercenary pulled           ×                                         15      15      72
+  9  1 A    #3 mercenary pulled           ×                                         15      15      87
+ 10  1 A    #1 mercenary pulled           ×                                         15      15     102
+ 10  1 A    #3 mercenary pulled           ×                                         15      15     117
+ 10  1 A    -            ended                                                             -17     100
+ended pulled in second 10, the tug 100, won by A

@@ -14,3 +14,8 @@ dependencies {
 
 // The catalogue test holds the events to the table in docs/EVENTS.md.
 testsRead("docs/EVENTS.md")
+
+tasks.test {
+    // Writing a challenge's golden log afresh is a deliberate act, and the switch has to reach the test's own JVM.
+    systemProperty("challenge.record", providers.systemProperty("challenge.record").getOrElse("false"))
+}

@@ -614,6 +614,47 @@ Two things follow for the architecture:
 A rolled option can name a thing that does not exist yet. Because play is chronological, that thing is
 simply created going forward - there is nothing to reconcile with the past, and no constraint solver.
 
+## The challenge engine
+
+It is here because it is a part of the program; `MECHANICS.md` says what a challenge is, and
+`docs/plans/challenges.md` is the order it is built in. Decision record 0105 is the shape.
+
+The **challenge engine** fights a challenge out at once: `Challenge.resolve(setup, seed, catalogue, rules)`, in the
+domain's package `villages.domain.challenge`, is a pure function of what each side brings, a seed, the catalogue in
+force and the balance's rules, and gives every **moment** of the challenge and its **outcome**. It runs second by
+second:
+
+1. **A happening begins**, when one is due: the passives of the slices still on stage say what changes away, coffers
+   pour, each side puts a slice on stage - one of the happening's aspect, else of its anti-aspect, else one drawn -
+   and the triggers of the slices on stage fire, unless the other side cancels one. What they asked for lands, and
+   the tug is looked at.
+2. **Every summon acts**, and every passive that works each second does, all of them reading the state the moment
+   began with, so a summon killed in a second still acts in it. What they asked for lands - the tug and the coffers
+   moving first, then the dead, then whatever turns, comes or is worn - and the tug is looked at again. Pulled to an
+   end, the challenge stops in that second.
+
+An effect's behaviour is code, keyed by its id; its words and numbers are the catalogue,
+`world/catalogues/challenges.json`. A behaviour hangs on hooks - its slice coming on stage, the happening changing,
+every second, an enemy summon about to act or having acted, a friend's acting, an enemy trigger, a summon killed, an
+aura on the other side's power, keeping its slice on stage - and answers with the changes it asks for, never touching
+the contest itself; `Contest` lands them. The shelf refuses a catalogue naming an effect the code has no behaviour
+for, or not giving a number a behaviour reads, and `ChallengeBehavioursTest` holds the other way, code no entry
+names. An effect whose behaviour is not built yet is `Unbuilt`, and says so in the moments.
+
+Three things follow for the architecture:
+
+- **The luck is the seed's alone.** The engine draws every chance from one SplitMix64, written out in the domain and
+  pinned by its published values, so a seed fights the same challenge on every version of Kotlin. Choosing the seed
+  is the luck, and it is the application's (0083): the simulator's page gives one, as an instrument may; the world
+  will draw one, never from anything a client sends.
+- **Nothing is stored in this iteration.** When challenges reach the game, one event records one challenge on a
+  stream of its own, carrying its setup, its seed, the catalogue's version, the engine's - `Challenge.ENGINE` - and
+  its outcome, which is the truth: the spectacle is the moments fought again from the rest, the same only while the
+  engine is. Its five events' names are agreed in 0105.
+- **What must hold is held inside the run**: the tug within its ends, one slice on stage a side, no side past the sum
+  of its slices' summon counts - checked as each summon comes - and a thing on the line on it once. A property spec
+  fights hundreds of challenges made up at random against them, and a golden log keeps one challenge as a table.
+
 ## What the setting asks of the architecture
 
 `SETTING.md` describes a world; two of its demands are not yet met, and are recorded here so that the first

@@ -1231,5 +1231,8 @@ so the player sees what happened and why, the way a report card shows the scorin
 ### Where it stands
 
 Planned on 2026-10-20 and not in the game: its first iteration is an engine on the server and a simulator on
-`/admin/inspect-challenges`, and nothing is built yet. Decision record 0105 is the shape and
-`docs/plans/challenges.md` the rules as settled and the steps, one commit each.
+`/admin/inspect-challenges`. The content - thirty effects, nine summons, four kinds - is a catalogue that page shows
+and edits, and the rules' own numbers are the balance's. The engine fights a challenge out on the server, second by
+second, with Violence's and Diplomacy's effects; the rest say they are not built yet. Nothing reaches it from the page
+yet. Decision record 0105 is the shape and `docs/plans/challenges.md` the rules as settled and the steps, one commit
+each.

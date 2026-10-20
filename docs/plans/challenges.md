@@ -63,17 +63,20 @@ target is drawn at random among the enemy summons the kill can beat (Adam).
 **A passive that holds *while* something is true is an aura**: a modifier that does not stack, for as long as
 the condition holds (Adam). Two different effects' auras add.
 
-**Seconds are simultaneous** (Adam). Everything in a second reads the state as the second began, and it all
-lands together at its end, so a summon killed in a second still acts in it. Within a second:
+**Seconds are simultaneous** (Adam). Everything in a moment reads the state the moment began with, and what it
+asked for lands together at its end, so a summon killed in a second still acts in it. A second has two moments:
 
 1. A happening due begins: *changes away* passives fire and coffers pour out, judged against the new
    happening; each side chooses its active slice; both sides' triggers fire, Refutation able to cancel an
-   enemy's.
+   enemy's. What they asked for lands, and the tug is looked at.
 2. Every summon acts and every per-second passive fires; what reacts to an act - Divine Rebuke, Seen Through,
-   By Decree, Teeming Wilds, Well-Oiled - is judged in the same second against the same state.
-3. It all lands: two kills on one target kill it once, and killed beats turned.
+   By Decree, Teeming Wilds, Well-Oiled - is judged in the same moment against the same state. What they asked
+   for lands, and the tug is looked at again.
 
-The tug is checked after the first and the third. A new summon first acts the second after it arrives.
+A moment lands in three passes: the tug and the coffers move first; then the dead fall, two kills on one target
+killing it once, and killed beating turned; then summons turn and come, things come on the line, slices are worn
+and summons silenced. So a summon turned as a happening begins acts for its new side in that second's second moment.
+A new summon first acts the second after it arrives.
 
 **Things on the line** (Adam). A slotted thing whose slot puts it on the line enters as a summon, once in a
 challenge: it arrives paying an amount A, pulls A/5 a second, and has its slice's integrity and A/2 more. It is
@@ -189,8 +192,9 @@ SplitMix64, pinned by its reference values, so a seed gives the same run on ever
 In `backend/domain/src/main/kotlin/villages/domain/challenge/`, every file well under the ceiling:
 
 - `Aspect.kt` - the aspects and their anti-aspects, and `Side`;
-- `ChallengeCatalogue.kt` - `ChallengeEffect`, `ChallengeSlot`, `SummonSpec`, `ChallengeKind`, its own rules
-  `require`d as `StructureCatalogue` does;
+- `ChallengeCatalogue.kt` - `ChallengeEffect`, `ChallengeSlot` and what it `Fits` (a key figure or a structure;
+  `Takes` is the structure slots' word), `SummonSpec`, `ChallengeKind`, its own rules `require`d as
+  `StructureCatalogue` does;
 - `ChallengeRules.kt` - the balance numbers;
 - `ChallengeSetup.kt` - `ChallengeSlice`, the stand-ins, `Happening`, `Progression`, and what refuses a setup;
 - `Rng.kt` - SplitMix64;
@@ -203,6 +207,8 @@ In `backend/domain/src/main/kotlin/villages/domain/challenge/`, every file well 
   enemyActed, friendActed, enemyTriggered, summonKilled, aura, keepsStage), and `ChallengeBehaviours`, which
   holds the catalogue and the code to each other both ways; an effect not built yet is `Unbuilt` and says so in
   the log;
+- `Shared.kt` - the behaviours several effects share: hiring, a slot asked for, a pull as the happening changes
+  away, a summon's flat pull and its pull while behind;
 - one file a pair: `ViolenceDiplomacy.kt`, `HolyReason.kt`, `AuthorityFreedom.kt`, `GreedGenerosity.kt`,
   `NatureIndustry.kt`;
 - `Progressions.kt` - a progression drawn from a kind.
