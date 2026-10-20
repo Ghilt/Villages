@@ -155,6 +155,13 @@ by thread, and found where it could be made to fail.
 In 1785 the gods gathered, and the ritual began. Every one of them gave something to the working, and it rose over
 the world like weather: a pressure every living mind would feel as a longing for the soil, the seasons and the wild.
 
+### 1785 · Those who felt it
+
+Nearly all who felt the working felt only a longing, and took it for their own. But in every faith there were a few
+who had spent their lives learning the weight of their own thoughts - in cloisters and lodges and mountain hermitages, in
+silence kept for years - and they felt it for what it was: a weight laid upon them from outside. They could not have
+said whose. They knew only that it was not theirs.
+
 ### 1785 · The sabotage
 
 At the height of the working the three pulled on the threads they had laid in it, and they succeeded: not one mind
@@ -202,6 +209,31 @@ People have learnt to shun the ruins of the towns and cities of old, and the gre
 plate and coin, libraries, strongrooms no one came back for - and there are always some who go to fetch them. Not all
 return; and of those who do, some come home wanting things they never wanted, and are no longer sure which of their
 thoughts are their own.
+
+### 1786–1789 · What rose into the gap
+
+Every great body of the old world had kept its head in a city - the Curia and the Porte, the Companies' courts in
+London and Amsterdam, the academies, the courts of the crowns - and when the cities fell, the heads fell with them.
+But the bodies had never lived in the cities. The abbeys in their valleys, the fleets at sea, the stewards on the
+estates and the couriers on the roads were spared, for the weight had lain lightest where minds were few; and each
+grew a new head in open country, and found the others along the old roads and sea lanes. They rose faster than
+anything made by people rises, and it was not only people who raised them.
+
+### 1786–1789 · The chains knotted
+
+Every faith had kept hidden chains of teaching, passed hand to hand from master to pupil, and some were underground
+already: the Jesuits, suppressed in 1773; the Illuminati of Bavaria, banned in the very year of the ritual; the Sufi
+lodges, the Rosicrucians, the White Lotus. Those who had felt the weight were in them, and in the years after the
+fall they found one another by letter and by sign, faith reaching across to faith, because each had felt the same
+thing. What they knotted together had never had a head that anyone could see, and so it had none to lose.
+
+### Lore · The Vigil
+
+The Vigil is no faith, and it lives inside every one: a brotherhood with a lodge by every great ruin, a province over
+every stretch of the world and the Seven over all, each circle knowing the one above it only by secret names. It
+quarrels over what its founders felt - a judgement to atone for, holy places to walk again, or something from
+outside that was not God at all. It does not know what feeds it: the gods of holy dread, who have their dark again
+in the ruins, and who would rather the Vigil did not look too closely at what it felt.
 
 ### 1785–1790 · What clung to the families
 

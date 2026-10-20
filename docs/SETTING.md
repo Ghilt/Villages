@@ -8,8 +8,9 @@ It records what Adam has described so that it is not lost between conversations,
 and what is not. Where it speaks in his terms — house-spirit, key figure, power state — those are the words,
 and they are in the glossary.
 
-Reviewed 2026-10-17, when the house was found to be one of the energies itself, the gods alien, and the guides
-described. Reviewed 2026-10-16, when the story was told in order for the first time, in `STORY.md`, and settled who broke the
+Reviewed 2026-10-20, when the factions were given a reason to be everywhere, the gods a reason to feed them, and
+the first of them, the Vigil, was described. Reviewed 2026-10-17, when the house was found to be one of the
+energies itself, the gods alien, and the guides described. Reviewed 2026-10-16, when the story was told in order for the first time, in `STORY.md`, and settled who broke the
 gods' plan. Reviewed 2026-09-20, when the age and the gods were written down for the first time. Reviewed 2026-09-19. Three things this document used to assert are gone, and the rest of the repository has
 been corrected to match: play is chronological, so a session is no longer a visit to a chosen century; there
 are no pins, so nothing obliges the past to have been a particular way; and the roll engine, renamed the
@@ -44,6 +45,86 @@ chosen.
 
 To everyone living through it this is a calamity with no author. A bad century. A run of failures. Judgement,
 or somebody's fault, or the weather. Every explanation the world offers is wrong.
+
+## The factions
+
+**Where the order broke, factions rose into the gap, and they are everywhere.** There are five, one for each of
+the five things a house can have - wealth, domain, influence, reason and piety - and each is an NPC power with a
+history of its own, the same body the whole world over, its face changing with the ground it stands on as a
+structure's does. Settled on 2026-10-20 with the first of them, the Vigil; the other four are sketches. What a
+house does with a faction is `MECHANICS.md`'s.
+
+### Why they are everywhere
+
+**The head fell, the body walked on.** Every great body of the old world kept its head in a city: the Curia in
+Rome, the Porte in Constantinople, the Companies' courts in London and Amsterdam, the academies, the courts of the
+crowns. When the cities fell, the heads fell with them. But the bodies had never lived in the cities. They were
+the abbeys in their valleys, the fleets at sea, the stewards on the estates, the correspondents in their country
+houses and the couriers on the roads, and the ritual weighed least where minds were few, so the bodies were
+spared. Each grew a new head in open country, and found the others along the lines that had always joined them:
+the sea lanes, the pilgrim roads, the post.
+
+That is why a faction is a thing of the whole world when nothing else in 1790 is. The cities fell everywhere at
+once, so the same gap opened everywhere at once, and everywhere the same five kinds of survivor stood at its
+edge. It had happened before, smaller: when the Carolingian order came apart about the year 1000, it was Cluny's
+web of abbeys and the Peace of God that held the countryside together. Why they rose so fast is the gods' doing,
+and a secret: *What feeds the factions*, below.
+
+### The five
+
+Proposed on 2026-10-20, and only the last is more than a sketch. Each is designed in its own turn.
+
+- **Wealth: the Company.** The fleets that were at sea in 1785 came home to burning ports and were the only thing
+  left that could move grain from where it grew to where it was wanted, so they pooled their hulls and their
+  debts. Drawn from the East India Companies, the Hanse's kontors, the Armenian traders of New Julfa and the
+  Hokkien junk trade.
+- **Domain: the stewards.** The estates, their granaries and the improving societies that fed the countryside
+  when the towns could not. Not yet named.
+- **Influence: the courts in exile.** Kings without capitals keeping court in the country, and the posts that
+  carry their letters and so decide what any of them knows. Drawn from the émigré courts of the French
+  Revolution and Thurn und Taxis's imperial post.
+- **Reason: the Republic of Letters.** The correspondents on their country estates, the observatories on their
+  hills and the academies scattered when their cities fell, writing to each other still.
+- **Piety: the Vigil**, a secret society behind every faith.
+
+### The Vigil
+
+**Piety's faction is a secret society, and not a faith.** The faiths themselves are not factions. They are the
+ground the Vigil stands in: real, every one of them, headless now and scattered, their holy cities shunned ruins
+like every other city, their village priests and imams and monks carrying on as they can. Piety is still piety as
+the age understands it, observance and standing with one's church. The Vigil is the hand inside that glove: a
+brotherhood hidden in every faith, which no faith knows the whole of and none would own, and which no player begins
+knowing is there: it finds them. **No faith is the faction, and none is judged.** Adam's word of 2026-10-20. *The Vigil* is a working name; *the Wakeful* and *the Silence*
+were the others.
+
+**It was underground before the fall, which is why the fall could not take its head.** It is knotted from the
+hidden chains every faith already kept in 1785: the Jesuits, suppressed in 1773 and living on in Russia and
+Prussia; the Illuminati of Bavaria, banned in 1785, the year of the ritual, who gave their members and their
+cities secret names; the Gold- und Rosenkreuzer; the Sufi orders' chains of teaching, hand to hand from master to
+pupil, and the Naqshbandi's silent remembrance; the White Lotus in China, which already believed the age was
+ending; the hidden Christians of Japan. Its shape it takes from them, and from two old beliefs that the world is
+held up by a hierarchy nobody sees: the Sufis' Pole, Pillars and Substitutes, the Substitutes seven in many
+tellings and named for being replaced when one dies, and the thirty-six hidden righteous of the Jews.
+
+**What it shares is what its founders felt in 1785**: a weight laid on their minds from outside, which nobody
+else alive noticed (*What feeds the factions* says why). That is the Vigil's own secret, and nobody outside it
+knows it.
+
+**How it is ordered.** A **lodge** by every great ruin, a **province** over each stretch of the world, and **the
+Seven** over all of it; a lodge is what a Sufi order and a masonic one both call their house, and the Vigil means
+both. Its members know the brothers and sisters of their own circle by their faces and the circle above only by
+secret names, and the Seven are known to nobody below them. It recruits by sign and by letter, and never invites
+a house it has not long watched. Its places are held by houses, as the protection of an abbey or a bishopric was
+held by a noble family in the old world, with a key figure of the house sitting in it. It holds nothing in its
+own name: whatever the Vigil commands, its houses hold.
+
+**It quarrels**, over what the weight was. Three wings, a first draft:
+
+- **The Penitents**: it was a judgement. Atone, and keep the faithful from the ruins.
+- **The Pilgrims**: the holy places must be walked again. They lead the faithful into the ruins, and some come
+  home changed.
+- **The Listeners**: it came from outside, and it was not God. Find out what it was. The other two call it
+  heresy, and it is the nearest to the truth.
 
 ## The gods
 
@@ -119,6 +200,32 @@ temperaments were proposed, each a storyline on the same want:
 - **The Lost**, a god that has forgotten what it is and asks the house to help it remember: the player's own
   secret, mirrored.
 
+### What feeds the factions
+
+**The factions rose faster than anything made by people rises, because the gods raised them.** Withered, their
+ritual broken, each party of them clings now to the body of people that does what it is, and feeds it: a faction
+is what a god has instead of the plan it lost. Those of holy dread hold the Vigil; those of the soil and the
+seasons, the stewards, which makes them the gods' green creed in human form; Merrin, which loves words passed
+between strangers, the Republic of Letters. Which gods hold the Company and the courts in exile is not decided.
+Adam's word of 2026-10-20.
+
+**That is why no faction stays weak for long.** When one is pushed down, the gods who cling to it pour into it
+what little they have, and the world sees a revival, a run of omens, a winter that fills the chapels. When one
+rises too high it overreaches, into a schism or a scandal. The world explains both its own way, and the contest
+between the factions is the gods' quarrel fought by proxy, which nobody in the world knows.
+
+**And it is why a house will not stay at the top of one.** A house is an energy too, and one sitting at a god's
+own table is drinking from its well. How a house comes down, and what its spirit keeps of what it drank, is not
+designed yet: tabled on 2026-10-20, so that it never feels bad for the player who climbed. The reason is here,
+ready for it.
+
+**The Vigil is the sharpest case.** The gods of holy dread watched the dark of the cathedral lit until nothing was
+left to tremble at; they have their dark back now, in the ruins, and they feed the one body on Earth whose
+founders felt the ritual. Those few felt it for what it was because they had spent their lives learning the
+weight of their own thoughts: in cloisters and lodges and mountain hermitages, in silence kept for years. The gods
+steer the Vigil toward the ruins, through the Pilgrims, and starve the Listeners. So the only people who suspect
+the calamity had an author are fed by its authors.
+
 ### What the player knows, and when
 
 A player begins knowing none of the above. What they meet is a world that has stopped working and a set of
@@ -126,6 +233,9 @@ explanations that are all wrong. That the calamity has an author at all is a **d
 through storylines over a long time, and it is the discovery the whole setting is arranged around. Behind it
 stand two more: that the figure guiding the house is one of those authors, and that the house itself is the same
 kind of thing. And past those, for a server event far ahead, where the gods came from.
+
+**Rising in the Vigil is one road toward the first discovery.** Its first circle may say nothing of the weight;
+each circle above says a little more, in the words of the wing that holds it, and none of them says it right.
 
 **So nothing in the interface may state any of it.** Piety is piety as the age understands it - observance, standing
 with the church, what a house owes and is owed - and never a wire to a god. A resource, a mechanic or a line
@@ -192,7 +302,9 @@ record 0055.
 
 NPC factions and famous characters have streams of their own: a decision AI plays them, and they work
 roughly as human players do — but as a more constant force, some of them more the shape of the landscape
-than a figure in it. An NPC house is a house; the difference is who issues its commands.
+than a figure in it. An NPC house is a house; the difference is who issues its commands. Adam's word for one is
+a **house bot**: when the world opens, every place in every faction is held by one, and players rise into those
+places as they are made ready to.
 
 ## Not decided
 
@@ -218,3 +330,9 @@ than a figure in it. An NPC house is a house; the difference is who issues its c
 - **What comes from the nebula** when Oriel's energy passes it, and what it wants.
 - **How far into the enlightenment the world opens**, and how much of the interruption has already happened
   when a player founds their first seat.
+- **The four factions besides the Vigil**: their names, how each is ordered, and which gods hold the Company and
+  the courts in exile.
+- **The Vigil's names**, its own and its wings', and whether three wings is the right number.
+- **What the Listeners can learn**, and whether the Vigil can ever find out what feeds it.
+- **How a house comes down from the top of a faction**, and what its spirit keeps: tabled on 2026-10-20, so that
+  it never feels bad for the player who climbed.
