@@ -57,12 +57,33 @@ export const NOW = Date.UTC(2026, 9, 16, 15, 0, 0) / 1000;
 /** A corner of those cells, for the tests that fill every cell's every slot. */
 export const CORNER = { fromX: 2000, toX: 2020, fromY: 1000, toY: 1015 };
 
+/**
+ * The default wood's hours, by density: the clock is a function of where and when and nothing else, so the same hour
+ * is the same critters every time, and the tests that ask for it - eleven of them across the critters' files - share
+ * one working-out a file rather than each spending most of a second on its own (2026-10-20). Only read, never changed.
+ */
+const hours = new Map<number, Map<string, CritterEvent>>();
+
 /** Every critter of the cells over an hour, or as many seconds as said, by its key. */
 export function anHour(
   density: number,
-  ground = wood(),
+  ground?: Ground,
   seconds = 3600,
   cells = CELLS,
+): ReadonlyMap<string, CritterEvent> {
+  if (ground !== undefined || seconds !== 3600 || cells !== CELLS) {
+    return critters(density, ground ?? wood(), seconds, cells);
+  }
+  const hour = hours.get(density) ?? critters(density, wood(), seconds, cells);
+  hours.set(density, hour);
+  return hour;
+}
+
+function critters(
+  density: number,
+  ground: Ground,
+  seconds: number,
+  cells: typeof CELLS,
 ): Map<string, CritterEvent> {
   const events = new Map<string, CritterEvent>();
   for (let slot = slotOf(NOW); slot < slotOf(NOW + seconds); slot += 1) {
