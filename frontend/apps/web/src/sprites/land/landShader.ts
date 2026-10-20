@@ -2,24 +2,31 @@ import { COVER_VERTEX, GROUND_GLSL } from '../../shaders/groundGlsl';
 import { GUSTS_GLSL } from '../wind';
 
 import { CROPS_GLSL } from './cropsShader';
+import { FIELDS_GLSL } from './fieldsShader';
 import { GRASS_GLSL } from './grassShader';
 import { HEATH_GLSL } from './heathShader';
 import { ICE_GLSL } from './iceShader';
+import { CHANNELS_IN_FIRST, DRAWN, channelOf } from './landMask';
+import type { DrawnMotion } from './landMask';
 import { TRAIL_GLSL } from './trailShader';
 import { WET_GLSL } from './wetShader';
 
 /**
  * The land, worked out a pixel at a time over the whole screen, as the fog is: one triangle that covers it, and for
  * each pixel the ground under it, found by the sprites' own projection backwards, and what moves on the land there,
- * from the mask (`landMask.ts`). Each pixel works out only the motions of the land under it, each a part of its own
- * - the grass, `grassShader.ts`, the crops, `cropsShader.ts`, the heath, `heathShader.ts`, the wet land,
- * `wetShader.ts`, and the ice, the salt and the sand, `iceShader.ts` - laid over one another where two meet, so a screen of rock costs almost
- * nothing and a screen of grass what the grass costs. Every number is in `look.ts`.
+ * from the mask (`landMask.ts`). Each motion is a pass of its own over the screen - the grass, `grassShader.ts`, the
+ * crops, `cropsShader.ts`, the heath, `heathShader.ts`, the wet land, `wetShader.ts`, and the ice, the salt and the
+ * sand, `iceShader.ts` - drawn only while its land is under the view, working out its motion only where its land
+ * is, and laid over the passes before it where two meet, so a screen of rock costs almost nothing and a screen of
+ * grass what the grass costs. A program for each motion rather than one for them all, because Direct3D's compiler
+ * takes far longer over one large program than over its parts: 25 s for the one, 6 s for the five side by side
+ * (experiment 0025). Every number is in `look.ts`.
  */
 
 export const LAND_VERTEX = COVER_VERTEX;
 
-export const LAND_FRAGMENT = `#version 300 es
+/** What every pass of the land shares: the screen, the mask and how it is read, the wind, the ground's projection. */
+const LAND_SHARED = `#version 300 es
 precision highp float;
 precision highp int;
 in vec2 vScreen;
@@ -37,11 +44,8 @@ uniform vec2 uMaskOrigin;
 uniform vec2 uMaskSize;
 // Which of its motion's looks the land of each world unit has, a byte each, read as it is: landMask.ts.
 uniform sampler2D uLooks;
-// The fifth motion's channel, in a texture of its own, and whether it is drawn.
+// The fifth motion's channel, in a texture of its own.
 uniform sampler2D uMaskMore;
-uniform float uShownMore;
-// Which of the mask's motions are drawn, one or nought each: the boxes of the Land part's folds.
-uniform vec4 uShown;
 out vec4 fragColor;
 
 const float TAU = 6.2831853;
@@ -81,11 +85,7 @@ vec4 rootedIn(sampler2D mask, vec2 world) {
   return texture(mask, at);
 }
 
-// The first four motions, softened and unsoftened.
-vec4 landAt(vec2 world) {
-  return softenedIn(uMask, world);
-}
-
+// The first four motions, unsoftened.
 vec4 rootsAt(vec2 world) {
   return rootedIn(uMask, world);
 }
@@ -108,41 +108,40 @@ int lookAt(vec2 world) {
   }
   return int(texelFetch(uLooks, texel, 0).r * 255.0 + 0.5);
 }
-${TRAIL_GLSL}
-${GRASS_GLSL}
-${CROPS_GLSL}
-${HEATH_GLSL}
-${WET_GLSL}
-${ICE_GLSL}
+`;
 
+/** The parts of the shader each motion's pass is made of, besides what they all share, and what it asks of them. */
+const PARTS: Record<DrawnMotion, { glsl: string; here: string }> = {
+  grass: { glsl: TRAIL_GLSL + GRASS_GLSL, here: 'grassHere' },
+  crops: { glsl: FIELDS_GLSL + CROPS_GLSL, here: 'cropsHere' },
+  heath: { glsl: TRAIL_GLSL + HEATH_GLSL, here: 'heathHere' },
+  wet: { glsl: FIELDS_GLSL + WET_GLSL, here: 'wetHere' },
+  'ice-salt-sand': { glsl: ICE_GLSL, here: 'iceHere' },
+};
+
+/**
+ * One motion's pass: its land under each pixel, softened, and where there is any, the motion there, premultiplied and
+ * weighed by how much of it there is, to be laid over the passes before it.
+ */
+export function landFragment(motion: DrawnMotion): string {
+  const channel = channelOf(motion)!;
+  const amount =
+    channel < CHANNELS_IN_FIRST ? `softenedIn(uMask, world)[${channel}]` : 'softenedIn(uMaskMore, world).r';
+  const { glsl, here } = PARTS[motion];
+  return `${LAND_SHARED}${glsl}
 void main() {
   vec2 world = groundUnder(vScreen);
-  vec4 land = landAt(world) * uShown * uFade;
-  float more = softenedIn(uMaskMore, world).r * uShownMore * uFade;
-  if (max(max(max(land.r, land.g), max(land.b, land.a)), more) <= 0.002) {
+  float amount = ${amount} * uFade;
+  if (amount <= 0.002) {
     discard;
   }
-  vec4 drawn = vec4(0.0);
-  if (land[GRASS] > 0.002) {
-    vec4 grass = grassHere(world) * land[GRASS];
-    drawn = grass + drawn * (1.0 - grass.a);
-  }
-  if (land[CROPS] > 0.002) {
-    vec4 crops = cropsHere(world) * land[CROPS];
-    drawn = crops + drawn * (1.0 - crops.a);
-  }
-  if (land[HEATH] > 0.002) {
-    vec4 heath = heathHere(world) * land[HEATH];
-    drawn = heath + drawn * (1.0 - heath.a);
-  }
-  if (land[WET] > 0.002) {
-    vec4 wet = wetHere(world) * land[WET];
-    drawn = wet + drawn * (1.0 - wet.a);
-  }
-  if (more > 0.002) {
-    vec4 ice = iceHere(world) * more;
-    drawn = ice + drawn * (1.0 - ice.a);
-  }
-  fragColor = drawn;
+  fragColor = ${here}(world) * amount;
 }
 `;
+}
+
+/** Every motion's pass, in the order they are laid one over another: the mask's. */
+export const LAND_PASSES: readonly { motion: DrawnMotion; fragment: string }[] = DRAWN.map((motion) => ({
+  motion,
+  fragment: landFragment(motion),
+}));

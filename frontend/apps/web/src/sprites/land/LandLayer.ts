@@ -1,5 +1,6 @@
 import {
   BufferImageSource,
+  Container,
   Geometry,
   GlProgram,
   Mesh,
@@ -21,10 +22,10 @@ import type { ShaderLevel } from '../../shaders/levels';
 import type { Layer } from '../layer';
 import { gustsCarried, windTime } from '../wind';
 
-import { CHANNELS_IN_FIRST, DRAWN, channelOf, landMaskOf, sameRange, tilesUnder } from './landMask';
+import { DRAWN, channelOf, landMaskOf, sameRange, tilesUnder } from './landMask';
 import type { TileRange } from './landMask';
 import { landStore } from './landMode';
-import { LAND_FRAGMENT, LAND_VERTEX } from './landShader';
+import { LAND_PASSES, LAND_VERTEX } from './landShader';
 import { LAND_LOOK, lookOf, motionOf, strengthOf } from './look';
 import { createMotionUniforms } from './motionUniforms';
 
@@ -32,8 +33,9 @@ import { createMotionUniforms } from './motionUniforms';
  * The land moving in the wind and the light, one layer for every kind of land, as a layer of the sprite canvas:
  * under the scenery and the marks, and in the container the fog takes the colour out of, so it is hazed and loses
  * its colour exactly as the trees on it do. What moves on each kind of land is the table in `look.ts`; the mask says
- * which world unit has which (`landMask.ts`), and the shader works out only those motions there (`landShader.ts`).
- * See decision record 0102.
+ * which world unit has which (`landMask.ts`), and each motion is a pass of its own that works out its motion only
+ * there (`landShader.ts`), drawn only while its land is under the view and laid over the passes before it. See
+ * decision record 0102.
  *
  * It is worked out into a picture of its own at its level's share of the screen's size, then laid over the whole
  * screen: low is a half across and down, a quarter of the pixels, high is all of them. It asks for frames at its
@@ -97,8 +99,6 @@ export function createLandLayer(
     uPixel: { value: 1, type: 'f32' },
     uMaskOrigin: { value: new Float32Array(2), type: 'vec2<f32>' },
     uMaskSize: { value: new Float32Array([1, 1]), type: 'vec2<f32>' },
-    uShown: { value: new Float32Array(4), type: 'vec4<f32>' },
-    uShownMore: { value: 0, type: 'f32' },
   });
   const motions = createMotionUniforms(duneShown);
   const empty = new BufferImageSource({
@@ -120,28 +120,32 @@ export function createLandLayer(
     height: 1,
     format: 'r8unorm',
   });
-  const shader = new Shader({
-    glProgram: GlProgram.from({
-      vertex: LAND_VERTEX,
-      fragment: LAND_FRAGMENT,
-      name: 'land',
-      // World units run to 32768, which a medium-precision float cannot place to within a unit.
-      preferredFragmentPrecision: 'highp',
-    }),
-    resources: {
-      landUniforms: uniforms,
-      ...motions.groups,
-      uMask: empty,
-      uMaskMore: noMore,
-      uLooks: noLooks,
-    },
+  // The one triangle every pass covers the screen with.
+  const geometry = new Geometry({
+    attributes: { aPosition: { buffer: COVER, format: 'float32x2', stride: 8, offset: 0 } },
   });
-  const mesh = new Mesh({
-    geometry: new Geometry({
-      attributes: { aPosition: { buffer: COVER, format: 'float32x2', stride: 8, offset: 0 } },
-    }),
-    shader,
+  // A pass for each motion, in the order they are laid one over another, each premultiplied over those before.
+  const passes = LAND_PASSES.map(({ motion, fragment }) => {
+    const shader = new Shader({
+      glProgram: GlProgram.from({
+        vertex: LAND_VERTEX,
+        fragment,
+        name: `land-${motion}`,
+        // World units run to 32768, which a medium-precision float cannot place to within a unit.
+        preferredFragmentPrecision: 'highp',
+      }),
+      resources: {
+        landUniforms: uniforms,
+        motionUniforms: motions.groups[motion],
+        uMask: empty,
+        uMaskMore: noMore,
+        uLooks: noLooks,
+      },
+    });
+    return { motion, shader, mesh: new Mesh({ geometry, shader }) };
   });
+  const land = new Container();
+  for (const pass of passes) land.addChild(pass.mesh);
   const target = RenderTexture.create({ width: 1, height: 1, dynamic: true, scaleMode: 'linear' });
   const sprite = new Sprite(target);
   sprite.visible = false;
@@ -221,9 +225,11 @@ export function createLandLayer(
     });
     const previous = mask;
     mask = { range, root, source, more: moreSource, looks: lookSource, counts: built.counts };
-    shader.resources.uMask = source;
-    shader.resources.uMaskMore = moreSource;
-    shader.resources.uLooks = lookSource;
+    for (const { shader } of passes) {
+      shader.resources.uMask = source;
+      shader.resources.uMaskMore = moreSource;
+      shader.resources.uLooks = lookSource;
+    }
     previous?.source.destroy();
     previous?.more.destroy();
     previous?.looks.destroy();
@@ -299,10 +305,8 @@ export function createLandLayer(
       u.uCarried = still ? 0 : gustsCarried(wall);
       u.uFade = fade;
       u.uPixel = 1 / (levelLook.resolution * resolution);
-      for (let channel = 0; channel < CHANNELS_IN_FIRST; channel += 1)
-        u.uShown[channel] = moving[channel] === true ? 1 : 0;
-      u.uShownMore = moving[CHANNELS_IN_FIRST] === true ? 1 : 0;
       uniforms.update();
+      for (const pass of passes) pass.mesh.visible = moving[channelOf(pass.motion)!] === true;
       motions.tune(wall, still);
 
       const width = Math.max(1, Math.ceil(view.width * levelLook.resolution));
@@ -311,7 +315,7 @@ export function createLandLayer(
         target.resize(width, height, resolution);
       }
       const measuring = meter.start();
-      renderer.render({ container: mesh, target, clear: true, clearColor: [0, 0, 0, 0] });
+      renderer.render({ container: land, target, clear: true, clearColor: [0, 0, 0, 0] });
       if (measuring) meter.stop(true);
       sprite.visible = true;
       sprite.width = view.width;
@@ -326,8 +330,12 @@ export function createLandLayer(
       meter.dispose();
       sprite.destroy();
       target.destroy(true);
-      mesh.destroy();
-      shader.destroy();
+      for (const pass of passes) {
+        pass.mesh.destroy();
+        pass.shader.destroy();
+      }
+      land.destroy();
+      geometry.destroy();
       mask?.source.destroy();
       mask?.more.destroy();
       mask?.looks.destroy();

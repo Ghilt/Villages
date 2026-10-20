@@ -132,8 +132,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   sand desert lies still but for a clump of one, two or three dunes here and there, none touching another, two corner
   to corner and a third further off, long sweeping ridges, some bent as an S, and crescents, each whole and broad,
   standing up the screen, lit and shaded by the one light, with sand streaming over their crests in thin curling
-  ribbons along the screen. It is one layer for every kind of land, the **Land** part of the Shaders section (decision
-  record 0102): `off`, `low` or `high` in its bar, low at every load, low a quarter of the screen's pixels at fifteen
+  ribbons along the screen. It is one layer for every kind of land, each motion a program of its own drawn only while
+  its land is on the screen, the **Land** part of the Shaders section (decision record 0102): `off`, `low` or `high` in its bar, low at every load, low a quarter of the screen's pixels at fifteen
   frames a second and high all of them at thirty, asked for only while some land that moves is on the screen; the
   first time it is drawn at a level the log says once under `land` what that costs the graphics card. What moves on
   every kind of land is the table in `apps/web/src/sprites/land/look.ts`; every kind of land moves but the water,
@@ -1113,9 +1113,10 @@ and `-- --drop` takes them off; by hand only.
   the worst gap and the slowest twentieth's, the long tasks while the camera came in and after, the CPU's time by
   module and by function, how many sprites the scenery drew once settled, and the programs the page waited on the
   graphics driver to compile. The run's first zoom, over the first place, is kept apart: Chrome has compiled none of
-  the game's programs yet, and the land's is compiled when the camera first comes inside zoom 8.5 - a stall of 22 to 31
-  seconds on this machine (2026-10-20), what a player's first visit meets, and every visit after the land's shader
-  changes. Then each place three times on fresh pages, the middle kept (`--rounds`); `--places forest,ice` measures
+  the game's programs yet, and a motion of the land's is compiled when the camera first comes inside zoom 8.5 over
+  its land - over the forest the grass's and the wet land's, a stall of 1.5 s on this machine, which was 22 to 31 s
+  while the land was one program (experiment 0025), what a player's first visit meets, and every visit after the
+  land's shader changes. Then each place three times on fresh pages, the middle kept (`--rounds`); `--places forest,ice` measures
   some. `--record` keeps it as a line of `docs/experiments/performance/zoom.jsonl`, and `--compare` puts the first
   zoom's stall and each place's long tasks, stutters and CPU beside the last point kept and marks what moved by more
   than a fifth; the first zoom's stall only beyond ten seconds, because the driver's compile alone swings from 23 to 31.

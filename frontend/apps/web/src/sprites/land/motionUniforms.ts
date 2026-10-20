@@ -6,17 +6,18 @@ import { cropsTuningStore } from './cropsTuning';
 import { grassTuningStore } from './grassTuning';
 import { heathTuningStore } from './heathTuning';
 import { iceTuningStore } from './iceTuning';
+import type { DrawnMotion } from './landMask';
 import { LAND_LOOK } from './look';
 import { wetTuningStore } from './wetTuning';
 
 /**
  * Each land motion's own uniforms, the ones its part of the land shader reads beside the land's: its sliders, and for
  * the crops' waves, the wet land's ripples and the drift where the wall clock has carried them, on lattices that come round with the
- * world's width as the gusts' does. Handed to the shader as resources of their own, set every frame by `tune`; a
+ * world's width as the gusts' does. Handed to the motion's pass as a resource of its own, set every frame by `tune`; a
  * slider moved asks for a frame through `watch`, so it shows even where nothing else moves the map.
  */
 export interface MotionUniforms {
-  groups: Record<string, UniformGroup>;
+  groups: Record<DrawnMotion, UniformGroup>;
   tune(wall: number, still: boolean): void;
   watch(repaint: () => void): () => void;
 }
@@ -78,13 +79,7 @@ export function createMotionUniforms(duneShown?: () => { x: number; y: number } 
   });
 
   return {
-    groups: {
-      grassUniforms: grass,
-      cropsUniforms: crops,
-      heathUniforms: heath,
-      wetUniforms: wet,
-      iceUniforms: ice,
-    },
+    groups: { grass, crops, heath, wet, 'ice-salt-sand': ice },
 
     tune(wall, still) {
       const grassly = grassTuningStore.get();

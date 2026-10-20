@@ -93,3 +93,21 @@ once about the tufts it looks at, so a tuft far from the line knows it is not on
 near the line reads the field at its own root; the field is a function of the ground, so a trail is the same in every
 pixel and every browser. Where a trail patch fills the screen it costs 0.8 ms of the graphics card a frame at the high
 level, 4.65 against 3.85 with none; elsewhere a read of the slower field a pixel.
+
+## Amendment, 2026-10-20: a program for each motion
+
+The first time a page needed the land, the camera inside zoom 8.5, it waited 22 to 31 s on the graphics driver
+compiling the land's one program (experiment 0024): Direct3D's compiler takes far longer over one large program than
+over its parts, 25 s for the land's against 7.5 s for its five motions as programs of their own, which compile side by
+side in 6 (experiment 0025). Adam's word: do it as recommended, for a player opening the page while a server runs.
+
+So the land is still one layer reading one mask, and each motion is a pass of its own: a program of the parts it needs
+(`landShader.ts`), drawn only while its land is under the view, working out its motion only where its land is and laid
+over the passes before it in the mask's order, premultiplied, which is what the one program did inside itself. A screen
+of one kind of land draws one pass; where two meet, two. And a frame costs less, not more: the one program cost every pixel a share of
+every motion's code, and a pass only its own, so the land's part of a frame at high fell from 3.5 to 1.3 ms at the
+tundra, 4.1 to 1.5 at the grassland, 2.6 to 0.6 at the ice and 3.4 to 2.1 at the bog. The picture is the one program's but for a pixel here and
+there at a tuft's edge, which the compiler rounds differently (89 of 5.1 million on the renders page, by 22 of 255 at
+the most). This takes back the consequence that a motion is never a pass of its own: it is not a layer of its own,
+and its land is still known from the one mask. The crops' fields are a part of their own (`fieldsShader.ts`), since
+the paddy's terraces are cut by them too.
