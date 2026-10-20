@@ -132,6 +132,7 @@ function Latest({ point }: { point: StartupPoint }) {
             <th>code fetched</th>
             <th>tiles fetched</th>
             <th>CPU busy before ms</th>
+            <th>waited on compiling, ms</th>
           </tr>
         </thead>
         <tbody>
@@ -141,7 +142,7 @@ function Latest({ point }: { point: StartupPoint }) {
               return (
                 <tr key={key}>
                   <td title={what}>{words}</td>
-                  <td colSpan={11} className="perf-table__none">
+                  <td colSpan={12} className="perf-table__none">
                     not measured
                   </td>
                 </tr>
@@ -175,6 +176,7 @@ function Latest({ point }: { point: StartupPoint }) {
                   {load.requests['tiles']?.count ?? 0}, {mb(load.requests['tiles']?.kb)} MB
                 </td>
                 <td>{Math.round(load.cpu.busy)}</td>
+                <td>{(load.compiles ?? []).map((each) => `${each.name} ${each.ms}`).join(', ') || '-'}</td>
               </tr>
             );
           })}

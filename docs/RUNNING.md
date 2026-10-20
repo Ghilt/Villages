@@ -1101,3 +1101,22 @@ and `-- --drop` takes them off; by hand only.
   up to ready and in the five seconds after, by module and by function. A development build's own costs - React's
   development runtime, the dev server's hundreds of files - are in the first two loads and not in the built page,
   which is what a player meets.
+
+## Zooming in, and what the sprites cost it
+
+- **The zoom's measure**, `npm run perf:zoom --prefix frontend`: on the same Chrome and servers of its own, the game
+  opened on a fresh page, the fog lifted and the shaders as a player has them, settled at zoom 5 over a place and
+  then flown to zoom 10 over four seconds, the way a few turns of the wheel take it, and watched three seconds more
+  while what came settles: over the forest, thick with trees, the grassland, and the bare ice, so that what the
+  sprites cost a zoom is the forest's against the ice's. For each: frames a second, stutters (gaps of 50 ms or more),
+  the worst gap and the slowest twentieth's, the long tasks while the camera came in and after, the CPU's time by
+  module and by function, how many sprites the scenery drew once settled, and the programs the page waited on the
+  graphics driver to compile. The run's first zoom, over the first place, is kept apart: Chrome has compiled none of
+  the game's programs yet, and the land's is compiled when the camera first comes inside zoom 8.5 - a stall of 26
+  seconds on this machine (2026-10-20), what a player's first visit meets, and every visit after the land's shader
+  changes. Then each place three times on fresh pages, the middle kept (`--rounds`); `--places forest,ice` measures
+  some. `--record` keeps it as a line of `docs/experiments/performance/zoom.jsonl`. About three minutes.
+- **On the performance page**, the chapter "Zooming in, and what the sprites cost it": the first zoom and each
+  place's in a table, each a link that opens the game there; each place's long tasks over its zoom point by point, and
+  the first zoom's stall point by point, which is how long compiling the game's programs takes; and each place's CPU
+  time by module side by side.

@@ -24,6 +24,12 @@ export interface Spent {
   readonly ms: number;
 }
 
+/** A program the page waited on the graphics driver to compile, by its name, for so many milliseconds. */
+export interface Compiled {
+  readonly name: string;
+  readonly ms: number;
+}
+
 /** One load of the game, from the page opening. */
 export interface Load {
   /**
@@ -47,6 +53,11 @@ export interface Load {
   readonly functions: readonly Spent[];
   readonly afterModules: readonly Spent[];
   readonly afterFunctions: readonly Spent[];
+  /**
+   * The programs compiled up to five seconds after ready that the page waited on, the longest first; absent from points
+   * kept before compiles were watched (2026-10-20).
+   */
+  readonly compiles?: readonly Compiled[];
 }
 
 export interface StartupPoint extends Measured {

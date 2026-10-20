@@ -72,6 +72,17 @@ by module and by function. A built page is served by the tool, the build first a
 the world's tiles are not copied for it. The first point (2026-10-20): 5.8 s for the first load, 3.3 s again, 1.6 s
 built; up to ready on a load again, React's development runtime and MapLibre a third of a second each.
 
+**The zoom is measured the same way** (`npm run perf:zoom`, `zoom.jsonl`), because Adam found zooming into ground
+thick with foliage less pleasant (2026-10-20): the camera flown from zoom 5 to 10 over the forest, the grassland and
+the bare ice, each on a fresh page, its frames, stutters, long tasks and the CPU by module, so that what the sprites
+cost a zoom is the forest's against the ice's. It found the one large stall there is: the first time a page needs
+the land layer, when the camera comes inside zoom 8.5, it waits on the graphics driver to compile the land's program,
+26 to 31 seconds on this machine with nothing cached (`getProgramParameter`, ANGLE on Direct3D 11). Chrome keeps compiled
+programs on disk, so a player meets it on a first visit and Adam after every change to the land's shader. Every
+measure now times each program the page waited on, by its name, and the zoom keeps the run's first zoom apart, cold,
+so how long the land's program takes to compile is a line of its own. Once compiled, the forest's 4,600 sprites cost
+a zoom about a quarter of a second of the CPU over seven and a stutter or two against the bare ice.
+
 ## Consequences
 
 - What the shaders cost is a number that means the same thing from one commit to the next, and a history of it

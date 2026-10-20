@@ -11,7 +11,7 @@ import { chromeOnTheCard } from './chrome.ts';
 import { startServers } from './devServer.ts';
 import { METHOD, codeOf, keep, keptFile } from './kept.ts';
 import { cardToMeasureOn } from './machine.ts';
-import { middleOf, requestsByKind, spanOf, spentIn } from './startupStats.ts';
+import { compiledOf, middleOf, requestsByKind, spanOf, spentIn } from './startupStats.ts';
 import type { Profile } from './startupStats.ts';
 import { watchStartup } from './startupWatch.ts';
 import type { Watched } from './startupWatch.ts';
@@ -99,6 +99,7 @@ async function loadOnce(browser: Browser, url: string): Promise<Load> {
     functions: spentBefore.functions,
     afterModules: spentAfter.modules.slice(0, 8),
     afterFunctions: spentAfter.functions.slice(0, 8),
+    compiles: compiledOf(watched, end + AFTER_MS),
   };
 }
 
@@ -116,7 +117,8 @@ function said(name: string, load: Load | null): string {
     `after: ${after.longTasks.count} long tasks ${Math.round(after.longTasks.total)} ms, ${after.janky} stutters, worst gap ${Math.round(after.worstGap)} ms; ` +
     `fetched ${Object.entries(load.requests)
       .map(([kind, { count, kb }]) => `${kind} ${count} (${(kb / 1024).toFixed(1)} MB)`)
-      .join(', ')}`
+      .join(', ')}` +
+    `${(load.compiles ?? []).length === 0 ? '' : `; waited on compiling ${(load.compiles ?? []).map((each) => `${each.name} ${each.ms} ms`).join(', ')}`}`
   );
 }
 

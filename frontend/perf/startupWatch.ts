@@ -25,6 +25,41 @@ export function watchStartup(): void {
     requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);
+
+  // How long the page waited on the graphics driver to compile each program: the first question asked of a program
+  // that needs it linked blocks until it is, and the land's took 27 s on a fresh profile (2026-10-20). Named as Pixi
+  // names them, `#define SHADER_NAME land-fragment`; the map's programs by their first words.
+  const compiles: { at: number; ms: number; name: string }[] = [];
+  const sources = new WeakMap<WebGLShader, string>();
+  const attached = new WeakMap<WebGLProgram, WebGLShader[]>();
+  const asked = new WeakSet<WebGLProgram>();
+  const gl2 = WebGL2RenderingContext.prototype;
+  const shaderSource = gl2.shaderSource;
+  gl2.shaderSource = function (this: WebGL2RenderingContext, shader: WebGLShader, source: string) {
+    sources.set(shader, source);
+    shaderSource.call(this, shader, source);
+  };
+  const attachShader = gl2.attachShader;
+  gl2.attachShader = function (this: WebGL2RenderingContext, program: WebGLProgram, shader: WebGLShader) {
+    attached.set(program, [...(attached.get(program) ?? []), shader]);
+    attachShader.call(this, program, shader);
+  };
+  const nameOf = (program: WebGLProgram): string => {
+    const text = (attached.get(program) ?? []).map((shader) => sources.get(shader) ?? '').join('\n');
+    const named = /#define SHADER_NAME (\S+)/.exec(text)?.[1]?.replace(/-(fragment|vertex)(-\d+)?$/, '');
+    return named ?? text.replace(/\s+/g, ' ').trim().slice(0, 40);
+  };
+  const getProgramParameter = gl2.getProgramParameter;
+  gl2.getProgramParameter = function (this: WebGL2RenderingContext, program: WebGLProgram, which: number) {
+    const began = performance.now();
+    const value: unknown = getProgramParameter.call(this, program, which);
+    const ms = performance.now() - began;
+    if (!asked.has(program)) {
+      asked.add(program);
+      if (ms >= 20) compiles.push({ at: began, ms, name: nameOf(program) });
+    }
+    return value;
+  };
   type MapHandle = { style?: { _loaded?: boolean }; loaded(): boolean; areTilesLoaded(): boolean };
   setInterval(() => {
     const map = (globalThis as unknown as { villagesMap?: MapHandle }).villagesMap;
@@ -35,7 +70,7 @@ export function watchStartup(): void {
     if (document.querySelector('.ui-loading') !== null) mark('screen');
     if (document.querySelector('.ui-loading--lifted') !== null) mark('lifted');
   }, 16);
-  (globalThis as unknown as { __startup: unknown }).__startup = { at, longTasks, frames };
+  (globalThis as unknown as { __startup: unknown }).__startup = { at, longTasks, frames, compiles };
 }
 
 /** What `watchStartup` hangs on the page, as the tool reads it. */
@@ -43,4 +78,6 @@ export interface Watched {
   at: Record<string, number>;
   longTasks: { at: number; ms: number }[];
   frames: number[];
+  /** The programs whose compiling the page waited on 20 ms or more, when and for how long. */
+  compiles: { at: number; ms: number; name: string }[];
 }

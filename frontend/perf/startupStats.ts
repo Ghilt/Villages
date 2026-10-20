@@ -136,6 +136,17 @@ export function spentIn(profile: Profile): {
   };
 }
 
+/** The programs the page waited on compiling up to a moment, the longest first, to the millisecond. */
+export function compiledOf(
+  watched: { compiles?: readonly { at: number; ms: number; name: string }[] },
+  until: number,
+): { name: string; ms: number }[] {
+  return (watched.compiles ?? [])
+    .filter((compile) => compile.at <= until)
+    .sort((a, b) => b.ms - a.ms)
+    .map((compile) => ({ name: compile.name, ms: Math.round(compile.ms) }));
+}
+
 /** The load whose start was the middle one of several, which stands for them. */
 export function middleOf<L extends { ready: number | null }>(loads: readonly L[]): L | null {
   const ready = loads.filter((load) => load.ready !== null).sort((a, b) => a.ready! - b.ready!);

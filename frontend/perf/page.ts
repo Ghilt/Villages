@@ -102,6 +102,28 @@ export async function setLevels(
   );
 }
 
+/** The level each shader the tree has is at, as found, setting none. */
+export async function readLevels(
+  page: Page,
+  setters: readonly LevelSetter[],
+): Promise<Record<string, string>> {
+  return page.evaluate(
+    async (setters) => {
+      const loaded = performance.getEntriesByType('resource').map((entry) => entry.name);
+      const addressOf = (module: string) =>
+        loaded.find((name) => new URL(name).pathname === module) ?? module;
+      const levels: Record<string, string> = {};
+      for (const { module, setter, store } of setters) {
+        const found = (await import(/* @vite-ignore */ addressOf(module))) as Record<string, unknown>;
+        const held = store === null ? undefined : (found[store] as { get(): { level?: string } } | undefined);
+        levels[setter] = held?.get().level ?? '?';
+      }
+      return levels;
+    },
+    setters.map((setter) => ({ ...setter })),
+  );
+}
+
 /** Lifts the fog of war, where the tree has one to lift. */
 export async function liftFog(page: Page): Promise<boolean> {
   return page.evaluate(async () => {
