@@ -66,7 +66,7 @@ export function readPoints(file: string): Point[] {
   return existsSync(file) ? pointsIn(readFileSync(file, 'utf8')) : [];
 }
 
-export function keep(file: string, point: Point): void {
+export function keep(file: string, point: object): void {
   mkdirSync(dirname(file), { recursive: true });
   appendFileSync(file, `${JSON.stringify(point)}\n`);
 }
@@ -76,9 +76,9 @@ export function lastLike(points: readonly Point[], like: Pick<Point, 'method' | 
   return [...points].reverse().find((point) => alike(point, like)) ?? null;
 }
 
-/** Where a tree's points are kept. */
-export function shadersFile(tree: string): string {
-  return join(tree, 'docs', 'experiments', 'performance', 'shaders.jsonl');
+/** Where a tree keeps one measure's points: `shaders`, `startup`, `zoom`, `tests`. */
+export function keptFile(tree: string, measure: string): string {
+  return join(tree, 'docs', 'experiments', 'performance', `${measure}.jsonl`);
 }
 
 /** What a tree is at: its commit, the commit's subject, when main came to hold it, and whether it has changes beyond. */

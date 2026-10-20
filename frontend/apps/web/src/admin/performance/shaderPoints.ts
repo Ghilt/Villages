@@ -53,25 +53,16 @@ export interface Point {
 
 /** The points of a file, in the order they were kept, and how many lines were not points. */
 export function readShaderPoints(text: string): { points: Point[]; unreadable: number } {
-  const points: Point[] = [];
-  let unreadable = 0;
-  for (const line of text.split(/\r?\n/)) {
-    if (line.trim() === '') continue;
-    try {
-      const point = JSON.parse(line) as Point;
-      if (typeof point.method === 'number' && Array.isArray(point.places)) points.push(point);
-      else unreadable += 1;
-    } catch {
-      unreadable += 1;
-    }
-  }
-  return { points, unreadable };
+  return readLines<Point>(text, (value) => {
+    const point = value as Partial<Point> | null;
+    return typeof point?.method === 'number' && Array.isArray(point.places);
+  });
 }
 
 /** Whether two points were measured alike - by one method, on one card, at one size - and so compare. */
 export function alike(
-  one: Pick<Point, 'method' | 'machine'>,
-  other: Pick<Point, 'method' | 'machine'>,
+  one: Pick<Measured, 'method' | 'machine'>,
+  other: Pick<Measured, 'method' | 'machine'>,
 ): boolean {
   return (
     one.method === other.method &&
@@ -80,21 +71,54 @@ export function alike(
   );
 }
 
+/** What every point kept has, whatever it measured: the shaders, the start, the zoom. */
+export interface Measured {
+  readonly method: number;
+  readonly measuredAt: string;
+  readonly code: {
+    readonly commit: string;
+    readonly subject: string;
+    readonly landedAt: string | null;
+    readonly dirty: boolean;
+  };
+  readonly machine: { readonly gpu: string; readonly viewport: string };
+}
+
 /** When a point's code was the game's: when main came to hold it, or when it was measured when main never did. */
-export function whenOf(point: Point): string {
+export function whenOf(point: Measured): string {
   return point.code.landedAt ?? point.measuredAt;
 }
 
 /** A point's name on an axis: its commit and the day. */
-export function pointName(point: Point): string {
+export function pointName(point: Measured): string {
   return `${point.code.commit.slice(0, 7)}${point.code.dirty ? '*' : ''} ${whenOf(point).slice(5, 10)}`;
 }
 
 /** The points measured alike the latest kept, in the order their code was the game's: what one line charts. */
-export function lineOf(points: readonly Point[]): Point[] {
+export function lineOf<P extends Measured>(points: readonly P[]): P[] {
   const latest = points.at(-1);
   if (latest === undefined) return [];
   return points.filter((point) => alike(point, latest)).sort((a, b) => whenOf(a).localeCompare(whenOf(b)));
+}
+
+/** The lines of a history that are what `is` says a point is, in the order they were kept, and how many were not. */
+export function readLines<P>(
+  text: string,
+  is: (value: unknown) => boolean,
+): { points: P[]; unreadable: number } {
+  const points: P[] = [];
+  let unreadable = 0;
+  for (const line of text.split(/\r?\n/)) {
+    if (line.trim() === '') continue;
+    try {
+      const value: unknown = JSON.parse(line);
+      if (is(value)) points.push(value as P);
+      else unreadable += 1;
+    } catch {
+      unreadable += 1;
+    }
+  }
+  return { points, unreadable };
 }
 
 /**

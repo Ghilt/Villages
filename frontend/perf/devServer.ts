@@ -14,6 +14,8 @@ import { answers, startGame, stopGame, stopListening, until } from '../e2e/serve
  */
 export interface Servers {
   readonly url: string;
+  /** The game server's port, for a built page told where it is. */
+  readonly gamePort: number;
   stop(): Promise<void>;
 }
 
@@ -52,6 +54,7 @@ export async function startServers(tree: string, logs: string): Promise<Servers>
   return {
     // The gateway lets in a page from localhost only (WebSocketConfig.kt), whatever address the dev server is on.
     url: `http://localhost:${port}/`,
+    gamePort,
     stop: async () => {
       await stopListening(port, 'the dev server');
       await stopGame(gamePort);

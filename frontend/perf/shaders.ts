@@ -1,17 +1,17 @@
-import { execFileSync } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join } from 'node:path';
 
-import { chromium } from '@playwright/test';
-import type { Browser, Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
+import { HERE, argsOf } from './args.ts';
+import { chromeOnTheCard } from './chrome.ts';
 import { said, whatMoved } from './compare.ts';
 import { startServers } from './devServer.ts';
 import { instrument } from './instrument.ts';
-import { METHOD, codeOf, keep, keptPlace, lastLike, masterOf, readPoints, shadersFile } from './kept.ts';
-import type { Point, Why } from './kept.ts';
+import { METHOD, codeOf, keep, keptFile, keptPlace, lastLike, masterOf, readPoints } from './kept.ts';
+import type { Point } from './kept.ts';
 import { findSetters } from './levels.ts';
-import { cardNow, watchClocks } from './machine.ts';
+import { cardToMeasureOn, watchClocks } from './machine.ts';
 import { burst, foundHouse, goTo, liftFog, openGame, setLevels, warm } from './page.ts';
 import type { Arrived } from './page.ts';
 import { HELD_AT, placesNamed } from './places.ts';
@@ -32,65 +32,18 @@ import type { Combined, Frame } from './stats.ts';
  * It prints a table and leaves the whole reading, and a picture of every place, in .logs/perf/.
  */
 
-const HERE = resolve(import.meta.dirname, '..', '..');
 const VIEWPORT = { width: 1920, height: 1080 };
 const BURSTS = 5;
 const FRAMES = 60;
 /** The first frames of every burst, let go by: the card is still coming up to its clock. */
 const LET_GO = 5;
 
-const args = process.argv.slice(2);
-const option = (name: string): string | undefined => {
-  const at = args.indexOf(`--${name}`);
-  return at === -1 ? undefined : args[at + 1];
-};
-const flag = (name: string): boolean => args.includes(`--${name}`);
-
-const tree = resolve(option('tree') ?? HERE);
-const why = option('why') ?? 'by-hand';
-if (!['to-main', 'history', 'by-hand'].includes(why))
-  throw new Error(`--why is to-main, history or by-hand, not ${why}`);
+const { option, flag, tree, why, stamp } = argsOf(process.argv.slice(2));
 const places = placesNamed((option('places') ?? '').split(',').filter(Boolean));
 // Three pages a place, the fastest kept: one page draws a place up to a sixth slower than the next, and keeps to it.
 const rounds = Number(option('rounds') ?? 3);
-const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
 const logs = join(HERE, '.logs', 'perf');
 const pictures = join(logs, stamp);
-
-const git = (...command: string[]) =>
-  execFileSync('git', ['-C', tree, ...command], { encoding: 'utf8' }).trim();
-
-/** Chrome on this machine's graphics card, headless when it will draw there with the card's timer, else a window. */
-async function chromeOnTheCard(): Promise<{ browser: Browser; renderer: string; headless: boolean }> {
-  const launch = (headless: boolean) =>
-    chromium.launch({
-      channel: 'chrome',
-      headless,
-      args: ['--use-angle=d3d11', '--ignore-gpu-blocklist', '--enable-gpu'],
-    });
-  for (const headless of flag('headed') ? [false] : [true, false]) {
-    const browser = await launch(headless);
-    const page = await browser.newPage();
-    const { renderer, timer } = await page.evaluate(() => {
-      const gl = document.createElement('canvas').getContext('webgl2');
-      const info = gl?.getExtension('WEBGL_debug_renderer_info');
-      return {
-        renderer:
-          gl === null || gl === undefined
-            ? 'no WebGL 2'
-            : String(gl.getParameter(info?.UNMASKED_RENDERER_WEBGL ?? gl.RENDERER)),
-        timer: gl?.getExtension('EXT_disjoint_timer_query_webgl2') !== null,
-      };
-    });
-    await page.close();
-    if (timer && !/swiftshader|software|no WebGL/i.test(renderer)) return { browser, renderer, headless };
-    console.log(
-      `${headless ? 'headless' : 'a window'}: ${renderer}${timer ? '' : ', no timer'} - not the card`,
-    );
-    await browser.close();
-  }
-  throw new Error('no Chrome on this machine draws on the graphics card with its timer');
-}
 
 /**
  * Draws this place until the card has come up to its working clock: until two bursts in a row, timed as a whole, come
@@ -126,18 +79,10 @@ async function readAt(page: Page): Promise<{ reading: Combined; thrown: number }
   return { reading: combine(readingOf(whole), readingOf(parts)), thrown };
 }
 
-const card = cardNow();
-if (card !== null && card.busy > 25) {
-  const said = `the graphics card is ${card.busy}% busy before starting: something else is drawing on it, and every time would carry it`;
-  if (!flag('anyway')) {
-    console.log(`${said}. Close it, or measure --anyway.`);
-    process.exit(1);
-  }
-  console.log(`${said}; measuring anyway`);
-}
+const card = cardToMeasureOn(flag('anyway'));
 
 const server = await startServers(tree, logs);
-const { browser, renderer, headless } = await chromeOnTheCard();
+const { browser, renderer, headless } = await chromeOnTheCard(flag('headed'));
 try {
   const context = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 1 });
   await context.addInitScript(instrument);
@@ -278,11 +223,7 @@ try {
   const out = {
     measuredAt: new Date().toISOString(),
     tree,
-    code: {
-      commit: git('rev-parse', 'HEAD'),
-      subject: git('log', '-1', '--format=%s'),
-      dirty: git('status', '--porcelain', '--untracked-files=no') !== '',
-    },
+    code: codeOf(tree),
     machine: { renderer, card, chrome: browser.version(), headless, viewport: VIEWPORT, dpr: 1 },
     levels,
     fogLifted,
@@ -320,9 +261,9 @@ try {
   // The run as a point: compared with the last point kept that was measured alike, and kept itself when asked.
   const point: Point = {
     method: METHOD,
-    why: why as Why,
+    why,
     measuredAt: out.measuredAt,
-    code: codeOf(tree),
+    code: out.code,
     machine: {
       gpu: card?.name ?? renderer,
       driver: card?.driver ?? '',
@@ -335,7 +276,7 @@ try {
     places: out.places.map(keptPlace),
     fogMissed,
   };
-  const kept = shadersFile(HERE);
+  const kept = keptFile(HERE, 'shaders');
   if (flag('compare')) {
     const then = lastLike(readPoints(kept), point);
     if (then === null) {

@@ -27,6 +27,23 @@ export function cardNow(): Card | null {
   return { name: name ?? '', driver: driver ?? '', busy: Number(busy) };
 }
 
+/**
+ * The card as a run starts: refused when something else has it more than a quarter busy, because whatever else is
+ * drawing would be in every time, unless the run was told to measure `anyway`.
+ */
+export function cardToMeasureOn(anyway: boolean): Card | null {
+  const card = cardNow();
+  if (card !== null && card.busy > 25) {
+    const said = `the graphics card is ${card.busy}% busy before starting: something else is drawing on it, and every time would carry it`;
+    if (!anyway) {
+      console.log(`${said}. Close it, or measure --anyway.`);
+      process.exit(1);
+    }
+    console.log(`${said}; measuring anyway`);
+  }
+  return card;
+}
+
 /** The card's clocks while something runs: started, then stopped with its middle readings. */
 export interface ClockWatch {
   stop(): { graphicsMhz: number; memoryMhz: number; busy: number } | null;
