@@ -67,7 +67,11 @@ Commands are filled in here as the increments land.
 - Backend: `cd backend` then `./gradlew check`, from 0.5. Modules that do not depend on each other build and test side
   by side (`backend/gradle.properties`), so their lines interleave in the output; `--no-parallel` runs them one at a
   time.
-- Frontend: `cd frontend` then `npm run check`, from 0.10
+- Frontend: `cd frontend` then `npm run check`, from 0.10. Its typecheck is `tools/typecheck.ts`, every project's
+  compiler at once, each incremental; the linter and the formatter keep caches; all three under
+  `node_modules/.cache/`, so a check after a small change takes seconds where it took half a minute: 33 s of the three
+  before, 11 s warm (2026-10-20). A cache is read by each file's content, so a file broken is found broken whatever
+  was cached; `tools/typecheck.test.ts` fails for a tsconfig the typecheck does not list.
 - End to end: `cd frontend` then `npm run e2e`, from 0.13; the check script's fourth part runs it too. It starts a dev
   server and a game server of its own, on this tree's ports a thousand up, the page pointed at its game server, and
   keeps its world in a MongoDB database of its own, `villages-e2e-<tree>`, emptied before and dropped after, carried

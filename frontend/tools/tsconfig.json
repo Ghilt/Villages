@@ -1,9 +1,10 @@
 {
-  "$comment": "The repository's own checks: they read the whole tree off the disk, so they run on Node and type against it.",
+  "$comment": "The repository's own checks: they read the whole tree off the disk, so they run on Node and type against it. The typecheck's runner is run by Node itself, which takes an import only with its extension.",
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "lib": ["ES2023"],
-    "types": ["node"]
+    "types": ["node"],
+    "allowImportingTsExtensions": true
   },
   "include": ["."]
 }

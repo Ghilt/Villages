@@ -363,7 +363,8 @@ Commands are added here as the increments land:
   a different starting point.
 - Frontend, look at it: `npm run dev --prefix frontend`, then open the address it prints. That is
   http://localhost:5173 in the main checkout and a port of its own in each worktree; see decision 0031.
-- Frontend, checks: `npm run check --prefix frontend` (typecheck, lint, format, unit tests)
+- Frontend, checks: `npm run check --prefix frontend` (typecheck, lint, format, unit tests). The typecheck runs every
+  project at once and each incrementally, and the linter and formatter keep caches, all in `node_modules/.cache/`.
 - End to end: `npm run e2e --prefix frontend`: the game in Chrome on servers and a world of the test's own - the map
   painted, a house founded, another window seeing it, an action taken, a restart that forgets nothing. Under a
   minute. It needs this tree's world cut, MongoDB up for the restart, and RabbitMQ to carry it. See
