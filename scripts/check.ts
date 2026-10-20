@@ -128,6 +128,7 @@ const PARTS: readonly Part[] = [
     steps: record
       ? [gradle('compile', 'testClasses'), gradle('check', 'cleanTest', 'check')]
       : [gradle('check', 'check')],
+    absent: () => (existsSync(join(root, 'backend')) ? null : 'no backend in this tree'),
     said: (_, stoppedAt, since) => {
       const tally = readJUnit(
         backendReports(root, stoppedAt === null ? 0 : since).map((report) => report.xml),
@@ -147,6 +148,7 @@ const PARTS: readonly Part[] = [
   {
     name: 'frontend',
     steps: npmSteps(join(root, 'frontend'), 'check'),
+    absent: () => (existsSync(join(root, 'frontend', 'package.json')) ? null : 'no frontend in this tree'),
     missing: () =>
       existsSync(frontendTools) ? null : 'npm install --prefix frontend, once, from the repository root',
     said: (log, stoppedAt) => {
