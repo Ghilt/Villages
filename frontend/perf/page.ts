@@ -147,8 +147,14 @@ export async function foundHouse(
   return { seat, lat: at.lat, lon: at.lng, zoom: at.zoom };
 }
 
+/** Where the camera came to rest: whether everything there was in, and how many draws a frame each thing made. */
+export interface Arrived {
+  readonly settled: boolean;
+  readonly draws: Readonly<Record<string, number>>;
+}
+
 /** Puts the camera over a place with the wall clock held, and draws until the map has all it needs there. */
-export async function goTo(page: Page, place: Place, heldAt: number, quiet: () => boolean): Promise<boolean> {
+export async function goTo(page: Page, place: Place, heldAt: number, quiet: () => boolean): Promise<Arrived> {
   await page.evaluate(
     ({ lat, lon, zoom, heldAt }) => {
       const win = globalThis as unknown as Window;
@@ -164,6 +170,7 @@ export async function goTo(page: Page, place: Place, heldAt: number, quiet: () =
   // fetching what it paints ahead of the camera for the way out (`paintTheWayOut`) long after this place is drawn.
   const began = Date.now();
   const giveUp = began + 60_000;
+  let drawn: Record<string, number> = {};
   let last = '';
   let same = 0;
   while (Date.now() < giveUp) {
@@ -179,9 +186,10 @@ export async function goTo(page: Page, place: Place, heldAt: number, quiet: () =
     const said = JSON.stringify(Object.entries(counts).sort());
     same = said === last && tiles && (quiet() || Date.now() - began > 3_000) ? same + 1 : 0;
     last = said;
-    if (same >= 12) return true;
+    drawn = Object.fromEntries(Object.entries(counts).map(([key, n]) => [key, n / 5]));
+    if (same >= 12) return { settled: true, draws: drawn };
   }
-  return false;
+  return { settled: false, draws: drawn };
 }
 
 /** Draws frames back to back, untimed, so the card is at its working clock before anything is timed. */

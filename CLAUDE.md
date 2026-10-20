@@ -395,8 +395,10 @@ Commands are added here as the increments land:
 
 - What the shaders cost: `npm run perf:shaders --prefix frontend`, the game in this machine's Chrome on the graphics
   card, on servers of its own, every shader at high at eight fixed places on the map, each frame timed as a whole and
-  by what drew; a table, and the reading and a picture of each place in `.logs/perf/`. A card busy with something
-  else is refused, `--anyway` to measure regardless. See `docs/RUNNING.md` and `docs/plans/performance-history.md`.
+  by what drew; a table, and the reading and a picture of each place in `.logs/perf/`. `--compare` says what moved
+  against the last point kept, `--record` keeps the run as a line of `docs/experiments/performance/shaders.jsonl`. A
+  card busy with something else is refused, `--anyway` to measure regardless. See `docs/RUNNING.md` and decision
+  record 0106.
 
 The dev server is also registered in `.claude/launch.json` under the name `web`, so the preview tooling can start
 it directly while working; a hand-over uses the quick-start instead, as the `hand-over` skill says. Restart

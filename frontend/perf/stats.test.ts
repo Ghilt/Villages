@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { combine, faster, percentile, readingOf, spreadOf, wholeOf } from './stats';
+import { combine, percentile, readingOf, spreadOf, wholeOf } from './stats';
 
 const frame = (land: number, map: number, cpu = 1) => ({
   cpu,
@@ -38,16 +38,10 @@ describe('a run of frames', () => {
     expect(readingOf([frame(1, 0, 1), frame(1, 0, 9), frame(1, 0, 2)]).cpu).toBe(2);
   });
 
-  it('picks the faster of two rounds', () => {
-    const slow = readingOf([frame(2, 1)]);
-    const quick = readingOf([frame(1, 1)]);
-    expect(faster(slow, quick)).toBe(quick);
-    expect(faster(quick, slow)).toBe(quick);
-  });
-
-  it('takes what timing the parts cost back out of them, by their runs', () => {
+  it('scales the parts to add up to the whole, each keeping its share', () => {
     const whole = readingOf([{ cpu: 1, keys: { 'map:whole': 1, 'sprites:whole': 2 } }]);
-    // Timed run by run the parts come to 3.6: 0.6 more, over six runs, 0.1 a run.
+    // Timed run by run the parts come to 3.6, a fifth over the whole: each loses a sixth of itself. Had it all been
+    // the queries' cost, that is 0.1 a run over six runs.
     const parts = readingOf([
       {
         cpu: 1,

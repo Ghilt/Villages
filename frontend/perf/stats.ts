@@ -71,7 +71,7 @@ export function readingOf(frames: readonly Frame[], fastShare = 0.2): Reading {
 
 /** A place's reading: the frame as a whole, and its parts with what timing them cost taken back out. */
 export interface Combined extends Reading {
-  /** What one query cost the frame, in milliseconds: the parts' sum over the whole, shared out over the runs. */
+  /** What one query cost the frame, in milliseconds, had the parts' excess over the whole been only that. */
   readonly perRun: number;
   /** The parts as timed, before that is taken out, over the whole. */
   readonly partsOverWhole: number;
@@ -79,28 +79,22 @@ export interface Combined extends Reading {
 
 /**
  * The frame's cost from bursts timed as a whole, one query a canvas a frame; what drew from bursts timed run by run,
- * taken alternately with them. Each run's query costs the card a little of its own, so the parts add up to more than
- * the whole: that excess is shared out over the runs, and each part loses its runs' share. A part never goes below
- * nought.
+ * taken alternately with them, scaled to add up to the whole. Each run's query costs the card a microsecond or two of
+ * its own, but the parts can also come out a sixth over or under the whole when the two kinds of burst caught the card
+ * at different paces (2026-10-20, the ice); taking a cost a run out of them then puts the difference in the wrong
+ * parts, where scaling them keeps each part's share of the frame whichever it was. What a run's query cost, had the
+ * whole difference been that, is kept beside it.
  */
 export function combine(whole: Reading, parts: Reading): Combined {
   const runs = Object.values(parts.runs).reduce((sum, n) => sum + n, 0);
-  const perRun = runs > 0 ? Math.max(0, parts.frame - whole.frame) / runs : 0;
-  const keys = Object.fromEntries(
-    Object.entries(parts.keys).map(([key, ms]) => [key, Math.max(0, ms - perRun * (parts.runs[key] ?? 0))]),
-  );
+  const scale = parts.frame > 0 ? whole.frame / parts.frame : 1;
   return {
     ...whole,
-    keys,
+    keys: Object.fromEntries(Object.entries(parts.keys).map(([key, ms]) => [key, ms * scale])),
     runs: parts.runs,
-    perRun,
+    perRun: runs > 0 ? Math.max(0, parts.frame - whole.frame) / runs : 0,
     partsOverWhole: whole.frame > 0 ? parts.frame / whole.frame : 1,
   };
-}
-
-/** Of two readings of one place, the faster: a round the card spent in its slower step says less about the code. */
-export function faster<R extends Reading>(one: R, other: R): R {
-  return other.frame < one.frame ? other : one;
 }
 
 /** How far apart the largest and the smallest of some readings are, as a share of their middle. */

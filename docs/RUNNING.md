@@ -1054,11 +1054,18 @@ and `-- --drop` takes them off; by hand only.
   to its clock. It holds the wall clock while it measures, so the clouds and the wind are where they were the last
   time. It prints a line a place - the frame, its spread, the CPU's part, how far apart the two rounds came out, and
   the five costliest parts - and leaves the whole reading in `.logs/perf/shaders-<time>.json` and a picture of every
-  place beside it. `--places tundra,bog` measures some, `--rounds 1` once each, `--check` also measures the coast with the
-  water off to see the water's part agree, `--tree <dir>` measures another checkout. It refuses a card that is more
-  than a quarter busy before it starts, because whatever else is drawing would be in every time; `--anyway` measures
-  all the same. About four minutes, and a minute more the first time, while the game server compiles. See
-  `docs/plans/performance-history.md`.
+  place beside it. `--places tundra,bog` measures some, `--rounds 1` once each, `--level water=low` puts a shader at
+  another level than high, `--check` also measures the coast with the water off to see the water's part agree,
+  `--tree <dir>` measures another checkout. It refuses a card that is more than a quarter busy before it starts,
+  because whatever else is drawing would be in every time; `--anyway` measures all the same. About five minutes, and
+  a minute more the first time, while the game server compiles. See decision record 0106.
+- **Points kept, and what moved.** `--compare` says what moved against the last point kept that was measured alike -
+  by the same method, on the same card, at the same size - a line a place: a frame that changed by more than ten in a
+  hundred or 0.1 ms, or a part by more than ten in a hundred or 0.05 ms, with the parts that moved; or that nothing
+  did. `--record` keeps the run as a point, one line of `docs/experiments/performance/shaders.jsonl`: the commit, when
+  main came to hold it, why it was measured (`--why to-main`, `history` or `by-hand`, the last unless told), the card,
+  the method, and each place's frame, its spread, the CPU's part, its parts and how many draws a frame each made. The
+  file is committed with the work, so the history travels to main.
 - **The game's own cost lines**, the ones the log says once a level for the water, the land, the clouds and the
   trees, stay as a quick look: they are timed at the layer's own frame rate, on a card that has idled down, and read
   two to three times what the measure does. The measure is the number to compare.
