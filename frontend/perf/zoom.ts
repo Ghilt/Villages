@@ -167,8 +167,9 @@ function zoomBeside(then: ZoomPoint, now: ZoomPoint): Beside[] {
     name: 'the first zoom: long tasks',
     then: stalled(then.firstZoom),
     now: stalled(now.firstZoom),
-    // The driver's compile alone swings from 23 to 31 seconds between runs of one tree (2026-10-20).
-    least: 10_000,
+    // Nothing the first zoom needs is compiled while it waits since the land's programs are compiled ahead, so a
+    // second more is a program waited on again; it swung from 23 to 31 seconds when the land's was (experiment 0025).
+    least: 1_000,
     unit: 's',
   };
   return [

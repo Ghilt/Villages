@@ -1123,8 +1123,7 @@ and `-- --drop` takes them off; by hand only.
   Then each place three times on fresh pages, the middle kept (`--rounds`); `--places forest,ice` measures some.
   `--record` keeps it as a line of `docs/experiments/performance/zoom.jsonl`, and `--compare` puts the first zoom's
   stall and each place's long tasks, stutters and CPU beside the last point kept and marks what moved by more than a
-  fifth; the first zoom's stall only beyond ten seconds, because the driver's compile alone swings from 23 to 31.
-  About three minutes.
+  fifth; the first zoom's stall beyond a second, which is a program waited on again. About three minutes.
 - **On the performance page**, the chapter "Zooming in, and what the sprites cost it": the first zoom and each
   place's in a table, each a link that opens the game there; each place's long tasks over its zoom point by point, and
   the first zoom's stall point by point, which is how long compiling the game's programs takes; and each place's CPU
