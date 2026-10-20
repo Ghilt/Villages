@@ -5,6 +5,7 @@ import { groundTilt, pixelsPerWorldUnit, toMercatorExact } from '../../geometry/
 import type { CameraView } from '../../geometry/cameraMath';
 import { WORLD_MASTER_WIDTH } from '../../geometry/world';
 import { note } from '../../log/log';
+import { compileAhead } from '../../shaders/compileAhead';
 import { createCostMeter } from '../../shaders/costMeter';
 import { drawnAt, sayLevel, shadersStore } from '../../shaders/levels';
 import type { ShaderLevel } from '../../shaders/levels';
@@ -29,6 +30,10 @@ import { CLOUD_LOOK } from './look';
  * the same sky. It asks for frames at its level's rate while some cloud is on the screen and for none otherwise, so
  * the sprite canvas redraws for it and the map does not; still for anyone who has asked for less motion. The first
  * time it is drawn at a level it says once in the log what that costs the graphics card.
+ *
+ * Its program is handed to the graphics driver as the layer is made, under the loading screen, and the clouds are drawn
+ * only once it is compiled, so that a first visit does not wait on the driver for them (`compileAhead`, experiment
+ * 0026).
  */
 
 /** One triangle that covers the screen, in clip space, so the fragment shader runs once for every pixel. */
@@ -87,6 +92,23 @@ export function createCloudLayer(
   const target = RenderTexture.create({ width: 1, height: 1, dynamic: true, scaleMode: 'linear' });
   const sprite = new Sprite(target);
   sprite.visible = false;
+  const gl = (renderer as WebGLRenderer).gl as WebGL2RenderingContext | undefined;
+
+  // Pixi keeps a program's sources, preprocessed, until it is destroyed, and these were made just now.
+  const { vertex, fragment } = shader.glProgram;
+  let compiled = false;
+  const stopCompiling = new AbortController();
+  void compileAhead(gl, { vertex: vertex!, fragment: fragment! }, stopCompiling.signal).then((ms) => {
+    if (stopCompiling.signal.aborted) return;
+    compiled = true;
+    note(
+      'clouds',
+      ms === null
+        ? 'this browser cannot compile the clouds ahead, so its first sky waits on the driver'
+        : `compiled ahead in ${(ms / 1000).toFixed(1)} s, the page never waiting`,
+    );
+    repaint();
+  });
 
   const still = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   // A still sky is the sky as it was when the page opened.
@@ -102,7 +124,7 @@ export function createCloudLayer(
   let drifts = paces(cloudTuningStore.get()).map(sharedDrift);
 
   // What each level costs, measured on the graphics card where it will say, and said once a level.
-  const meter = createCostMeter((renderer as WebGLRenderer).gl as WebGL2RenderingContext | undefined);
+  const meter = createCostMeter(gl);
   const measured = new Set<ShaderLevel>();
   let lastLevel: ShaderLevel | null = null;
 
@@ -129,7 +151,8 @@ export function createCloudLayer(
       const tuning = cloudTuningStore.get();
       const band = cloudBandAt(view.zoom, tuning);
       readClouds(band.name, level === 'off' ? 0 : band.clouds);
-      if (level === 'off' || band.clouds <= 0) {
+      // Until the driver has compiled the clouds' program the sky goes without them, rather than the page waiting.
+      if (level === 'off' || band.clouds <= 0 || !compiled) {
         sprite.visible = false;
         return null;
       }
@@ -204,6 +227,7 @@ export function createCloudLayer(
       stopWatching();
       stopWatchingShaders();
       stopWatchingTuning();
+      stopCompiling.abort();
       meter.dispose();
       sprite.destroy();
       target.destroy(true);

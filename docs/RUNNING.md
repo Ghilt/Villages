@@ -245,7 +245,10 @@ stage alone, with none of the debug panel in it (decision record 0079).
   to hand over when a setting should become the default; `reset` puts them back. A browser whose sliders are not
   where they started draws a sky of its own; a new speed carries the sky on from where it stands rather than
   jumping, and the speed it started at gives the shared sky back. The first time the clouds are drawn at a level the
-  log says under `clouds` what that costs the graphics card. Every other number of them is in
+  log says under `clouds` what that costs the graphics card. Their program is handed to the graphics driver as the
+  sprite canvas is made, under the loading screen, and the sky is drawn without them until it is compiled, about a
+  second and a half, so the page never waits on it; the log says once under `clouds`, `compiled ahead in 1.3 s, the
+  page never waiting`, or that the browser cannot. Every other number of them is in
   `apps/web/src/sprites/clouds/look.ts`, and the sliders' are `cloudTuning.ts`. See `docs/adr/0098`.
 - What the program thinks is happening: the debug panel, one space docked down the right-hand side
   holding everything that helps during development, which minimises to a badge and remembers that,

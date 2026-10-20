@@ -112,3 +112,12 @@ from noise laid along the wind and carried by the wall clock.**
   because the clouds only ever move along it.
 - **The page's own clock, as the water's and the grass's.** Each window would draw a sky of its own, and the
   clouds over a place would depend on when the page was opened.
+
+## Amendment, 2026-10-20: compiled ahead
+
+A browser that had compiled nothing waited 0.6 to 0.8 s on the driver compiling the clouds' program, under the
+loading screen, the first time the sky was drawn: one of the two compiles a player's first visit waited on, the
+water's the other (experiment 0026). So the program is handed to the driver as the layer is made, through
+`shaders/compileAhead.ts` as the land's are (the amendment to 0102 of the same day), and the clouds are drawn only
+once it is compiled: in a second and a half, a tenth of a second or so before the screen lifts, so the sky goes
+without them only under the screen. A first visit's long tasks before the screen lifts fell by about half a second.
