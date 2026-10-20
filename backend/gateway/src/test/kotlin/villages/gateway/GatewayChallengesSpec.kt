@@ -71,6 +71,18 @@ class GatewayChallengesSpec : StringSpec({
         fought.outcome.tug shouldBe 40.0
     }
 
+    "a batch is answered with its sums, and the moments of its first run" {
+        val (page, sent) = Rig().page()
+
+        page.receive(simulating("violence", "violence.sellswords", ""","seed":42,"runs":20"""))
+
+        val fought = sent.single() as ChallengeSimulated
+        fought.batch!!.runs shouldBe 20
+        fought.batch!!.wonByA shouldBe 20
+        fought.seed shouldBe 42L
+        fought.moments.isNotEmpty() shouldBe true
+    }
+
     "a server with its instruments closed refuses it" {
         val (page, sent) = Rig(instrumentsOpen = false).page()
 

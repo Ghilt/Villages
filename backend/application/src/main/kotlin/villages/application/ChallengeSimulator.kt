@@ -7,7 +7,11 @@ import villages.domain.challenge.ChallengeRules
 import villages.domain.challenge.ChallengeSetup
 import villages.domain.challenge.ChallengeSlice
 import villages.domain.challenge.Progression
+import villages.domain.challenge.Ending
+import villages.domain.challenge.Outcome
 import villages.domain.challenge.Progressions
+import villages.domain.challenge.Rng
+import villages.domain.challenge.Side
 
 /**
  * The challenge fought for Adam's simulator: the engine on the catalogue and the rules in force at the moment of
@@ -22,24 +26,64 @@ class ChallengeSimulator(
 ) {
     /**
      * Each side's slices fought out on [progression], or on one drawn from the challenge kind [kind], from [seed] or
-     * from one drawn; throws [SetupRefused] with every reason it cannot be.
+     * from one drawn; throws [SetupRefused] with every reason it cannot be. With more than one of [runs], the same
+     * sides are fought that many times and what they came to is summed: the first run is the seed's, whose moments are
+     * kept, and each after it is fought from a seed worked out from the one before, on a progression of its own when
+     * drawn from a kind and on the same one when written by hand.
      */
-    fun simulate(a: List<ChallengeSlice>, b: List<ChallengeSlice>, progression: Progression?, kind: String?, seed: Long?): Fought {
+    fun simulate(
+        a: List<ChallengeSlice>,
+        b: List<ChallengeSlice>,
+        progression: Progression?,
+        kind: String?,
+        seed: Long?,
+        runs: Int = 1,
+    ): Fought {
+        if (runs !in 1..MOST_RUNS) throw SetupRefused(listOf("a batch is 1 to $MOST_RUNS runs, not $runs"))
         val content = catalogue()
-        val luck = seed ?: seeds.draw()
-        val fought = progression ?: when (kind) {
-            null -> throw SetupRefused(listOf("a challenge has a progression written by hand, or a kind to draw one from"))
-            else -> Progressions.draw(content.kinds[kind] ?: throw SetupRefused(listOf("there is no challenge kind '$kind'")), luck)
+        val first = seed ?: seeds.draw()
+        val fight = { luck: Long ->
+            val fought = progression ?: when (kind) {
+                null -> throw SetupRefused(listOf("a challenge has a progression written by hand, or a kind to draw one from"))
+                else -> Progressions.draw(content.kinds[kind] ?: throw SetupRefused(listOf("there is no challenge kind '$kind'")), luck)
+            }
+            val setup = ChallengeSetup(a, b, fought)
+            val refused = setup.refusals(content)
+            if (refused.isNotEmpty()) throw SetupRefused(refused)
+            Fought(setup, Challenge.resolve(setup, luck, content, rules()))
         }
-        val setup = ChallengeSetup(a, b, fought)
-        val refused = setup.refusals(content)
-        if (refused.isNotEmpty()) throw SetupRefused(refused)
-        return Fought(setup, Challenge.resolve(setup, luck, content, rules()))
+        val shown = fight(first)
+        if (runs == 1) return shown
+        val after = Rng(first)
+        val outcomes = listOf(shown.result.outcome) + List(runs - 1) { fight(after.nextLong() and Seeds.MOST).result.outcome }
+        return shown.copy(batch = Batch.of(outcomes))
+    }
+
+    companion object {
+        const val MOST_RUNS = 1000
     }
 }
 
-/** A challenge fought: the setup it was fought on, its progression drawn when it was, and what it came to. */
-data class Fought(val setup: ChallengeSetup, val result: ChallengeResult)
+/** A challenge fought: the setup it was fought on, its progression drawn when it was, what it came to, and its batch. */
+data class Fought(val setup: ChallengeSetup, val result: ChallengeResult, val batch: Batch? = null)
+
+/**
+ * What a batch of challenges came to: how many were fought, how many each side won and how many ended even, how many
+ * each side pulled to the end, and the mean of where the tug ended, toward side A.
+ */
+data class Batch(val runs: Int, val wonByA: Int, val wonByB: Int, val even: Int, val pulledByA: Int, val pulledByB: Int, val meanTug: Double) {
+    companion object {
+        fun of(outcomes: List<Outcome>): Batch = Batch(
+            runs = outcomes.size,
+            wonByA = outcomes.count { it.wonBy == Side.A },
+            wonByB = outcomes.count { it.wonBy == Side.B },
+            even = outcomes.count { it.wonBy == null },
+            pulledByA = outcomes.count { it.ended == Ending.PULLED && it.wonBy == Side.A },
+            pulledByB = outcomes.count { it.ended == Ending.PULLED && it.wonBy == Side.B },
+            meanTug = outcomes.sumOf { it.tug } / outcomes.size,
+        )
+    }
+}
 
 /** Where a challenge's seed comes from when nobody gives one: a whole number a page can type back. */
 fun interface Seeds {

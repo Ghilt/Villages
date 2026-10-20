@@ -3,5 +3,6 @@
   "id": "run-2",
   "a": [{ "aspect": "violence", "power": 50, "integrity": 50, "summonCount": 3, "effects": ["violence.sellswords"], "slotted": {} }],
   "b": [{ "aspect": "diplomacy", "power": 50, "integrity": 50, "summonCount": 3, "effects": ["diplomacy.parley"], "slotted": {} }],
-  "kind": "battle"
+  "kind": "battle",
+  "runs": 100
 }

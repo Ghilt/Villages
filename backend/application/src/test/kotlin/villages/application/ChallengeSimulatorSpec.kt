@@ -39,6 +39,19 @@ class ChallengeSimulatorSpec : StringSpec({
         simulator.simulate(hiring, idle, null, "skirmish", 7) shouldBe once
     }
 
+    "a batch fights the same sides many times and sums what they came to, its first run the seed's own" {
+        val single = simulator.simulate(hiring, idle, null, "skirmish", 11)
+        val batch = simulator.simulate(hiring, idle, null, "skirmish", 11, runs = 50)
+
+        batch.result shouldBe single.result
+        batch.batch!!.runs shouldBe 50
+        (batch.batch!!.wonByA + batch.batch!!.wonByB + batch.batch!!.even) shouldBe 50
+        batch.batch!!.wonByA shouldBe 50
+        simulator.simulate(hiring, idle, null, "skirmish", 11, runs = 50).batch shouldBe batch.batch
+        shouldThrow<SetupRefused> { simulator.simulate(hiring, idle, byHand, null, 1, runs = 1001) }.reasons shouldBe
+            listOf("a batch is 1 to 1000 runs, not 1001")
+    }
+
     "a setup that cannot be fought is refused with every reason it cannot be" {
         shouldThrow<SetupRefused> { simulator.simulate(emptyList(), idle, byHand, null, 1) }.reasons shouldBe
             listOf("side A brings 1 to 3 slices, not 0")

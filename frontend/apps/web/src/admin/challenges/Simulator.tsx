@@ -15,9 +15,10 @@ import type { Answer } from './useSimulator';
 
 /**
  * The simulator: a challenge built here - each side's slices with stand-ins in their slots, a progression written by
- * hand, a seed or none - fought out by the game server's engine on the catalogue in force, and every moment of it shown:
- * what it came to, the tug drawn second by second, and the moments as a table. The same seed fights the same challenge,
- * so a strange one can be fought again and read. Words rather than marks, as every inspect page's controls are. 0105.
+ * hand or drawn from a kind, a seed or none - fought out by the game server's engine on the catalogue in force, and
+ * every moment of it shown: what it came to, the tug drawn second by second, and the moments as a table. The same seed
+ * fights the same challenge, so a strange one can be fought again and read; a batch of a hundred or a thousand says how
+ * often each side wins. Words rather than marks, as every inspect page's controls are. 0105.
  */
 export function Simulator({ content }: { content: Challenges | null }) {
   const simulator = useSimulator();
@@ -25,16 +26,18 @@ export function Simulator({ content }: { content: Challenges | null }) {
   const rules = balance.state === 'read' ? balance.shelved.value.challenge : null;
   const start = rules?.slice ?? FIRST_SLICE;
   const [draft, setDraft] = useState<Draft>(SAMPLE);
-  const [fought, setFought] = useState<{ answer: Answer; draft: Draft } | null>(null);
+  const [fought, setFought] = useState<{ answer: Answer; draft: Draft; took: number } | null>(null);
   const [running, setRunning] = useState(false);
-  const run = () => {
+  const run = (runs: number) => {
     setRunning(true);
     const asked = draft;
-    void simulator.simulate(askedOf(asked)).then((answer) => {
-      setFought({ answer, draft: asked });
+    const began = performance.now();
+    void simulator.simulate({ ...askedOf(asked), ...(runs > 1 ? { runs } : {}) }).then((answer) => {
+      setFought({ answer, draft: asked, took: Math.round(performance.now() - began) });
       setRunning(false);
     });
   };
+  const blocked = simulator.state !== 'open' || running || !seedReads(draft.seed);
   return (
     <section className="inspect-group" aria-label="simulator">
       <h2 className="inspect-group__title">simulator</h2>
@@ -82,14 +85,17 @@ export function Simulator({ content }: { content: Challenges | null }) {
             onChange={(event) => setDraft({ ...draft, seed: event.target.value })}
           />
         </label>
-        <button
-          type="button"
-          className="inspect-button"
-          disabled={simulator.state !== 'open' || running || !seedReads(draft.seed)}
-          onClick={run}
-        >
-          run
-        </button>
+        {[1, 100, 1000].map((runs) => (
+          <button
+            key={runs}
+            type="button"
+            className="inspect-button"
+            disabled={blocked}
+            onClick={() => run(runs)}
+          >
+            {runs === 1 ? 'run' : `run ${runs}`}
+          </button>
+        ))}
         <span className={simulator.state === 'closed' ? 'inspect-note inspect-problem' : 'inspect-note'}>
           {simulator.state === 'closed'
             ? 'the game server is not running: start it to fight'
@@ -104,6 +110,7 @@ export function Simulator({ content }: { content: Challenges | null }) {
         <Fought
           answer={fought.answer}
           draft={fought.draft}
+          took={fought.took}
           content={content}
           ends={rules?.tugEnds ?? 100}
           onAgain={(seed) => setDraft({ ...draft, seed: String(seed) })}
@@ -116,12 +123,14 @@ export function Simulator({ content }: { content: Challenges | null }) {
 function Fought({
   answer,
   draft,
+  took,
   content,
   ends,
   onAgain,
 }: {
   answer: Answer;
   draft: Draft;
+  took: number;
   content: Challenges | null;
   ends: number;
   onAgain: (seed: number) => void;
@@ -133,11 +142,18 @@ function Fought({
       </p>
     );
   }
-  const { outcome, seed, moments, progression } = answer.challenge;
+  const { outcome, seed, moments, progression, batch } = answer.challenge;
   const ended = outcome.ended === 'pulled' ? 'pulled to the end' : 'time ran out';
   const won = outcome.wonBy === null ? 'won by nobody' : `won by ${outcome.wonBy.toUpperCase()}`;
   return (
     <div className="challenges-fought">
+      {batch !== undefined && (
+        <p className="challenges-outcome">
+          {batch.runs} runs, in {took} ms: A won {batch.wonByA}, B won {batch.wonByB}, even {batch.even};
+          pulled to the end by A {batch.pulledByA} and by B {batch.pulledByB}; the mean end tug{' '}
+          {towardSaid(batch.meanTug)}. The first run, below, is the seed's.
+        </p>
+      )}
       <p className="challenges-outcome">
         seed <span className="inspect-key">{seed}</span>{' '}
         <button type="button" className="inspect-button" onClick={() => onAgain(seed)}>

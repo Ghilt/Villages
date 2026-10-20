@@ -906,7 +906,11 @@ and `-- --drop` takes them off; by hand only.
   yet saved - from the seed typed, or from one it draws when the box is empty, and shows what it came to: the seed,
   with **keep this seed** to fight the same challenge again, how it ended and in which second, the tug toward the side
   it favours, who won, what was gained and lost; the tug drawn second by second, side A up, each happening marked; and
-  every moment as a table, a side or a kind of moment kept alone, a boosted amount marked ×. It asks with
+  every moment as a table, a side or a kind of moment kept alone, a boosted amount marked ×. **run 100** and **run
+  1000** fight the same sides that many times and say how often each side won, how many ended even, how many each
+  pulled to the end, the mean end tug and how long the batch took; the first run is the seed's, and its moments are the
+  ones shown, each run after it fought from a seed worked out from the one before, on a progression of its own when drawn
+  from a kind. It asks with
   `simulateChallenge`, one of Adam's instruments, on a connection that says no hello, and a server with its instruments
   closed refuses it; nothing is stored. The plan is `docs/plans/challenges.md`.
 - **`/admin/inspect-story`** is the world's history as a timeline, `docs/STORY.md` drawn, and needs nothing else

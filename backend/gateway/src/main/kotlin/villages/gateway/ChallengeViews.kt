@@ -10,6 +10,7 @@ import villages.domain.challenge.Happening
 import villages.domain.challenge.Progression
 import villages.domain.challenge.Side
 import villages.domain.challenge.StandIn
+import villages.protocol.BatchView
 import villages.protocol.ChallengeSimulated
 import villages.protocol.GainView
 import villages.protocol.LossView
@@ -86,6 +87,7 @@ internal fun Fought.toFrame(id: String, catalogue: String): ChallengeSimulated {
             )
         },
         summons = summons,
+        batch = batch?.let { BatchView(it.runs, it.wonByA, it.wonByB, it.even, it.pulledByA, it.pulledByB, it.meanTug) },
     )
 }
 

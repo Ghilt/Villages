@@ -40,6 +40,7 @@ export const simulateChallengeSchema = z.object({
   progression: progressionViewSchema.optional(),
   kind: z.string().optional(),
   seed: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).optional(),
+  runs: z.number().int().min(1).max(1000).optional(),
 });
 
 const sideSchema = z.enum(['a', 'b']);
@@ -90,6 +91,17 @@ export const challengeSimulatedSchema = z.object({
   outcome: outcomeViewSchema,
   moments: z.array(momentViewSchema),
   summons: z.array(z.object({ serial: z.number().int(), kind: z.string(), called: z.string().nullable() })),
+  batch: z
+    .object({
+      runs: z.number().int(),
+      wonByA: z.number().int(),
+      wonByB: z.number().int(),
+      even: z.number().int(),
+      pulledByA: z.number().int(),
+      pulledByB: z.number().int(),
+      meanTug: z.number(),
+    })
+    .optional(),
 });
 
 /** A challenge not fought: `invalidSetup`, saying why, or `instrumentsClosed`. */

@@ -23,6 +23,8 @@ data class SimulateChallenge(
     val progression: ProgressionView? = null,
     val kind: String? = null,
     val seed: Long? = null,
+    /** How many times to fight it, a batch summed, from 1 to 1000; none is once. */
+    val runs: Int? = null,
 ) : ClientFrame
 
 /** A slice as the page builds it: its aspect by its name, `violence`, and what stands in its effects' slots. */
@@ -63,7 +65,12 @@ data class ChallengeSimulated(
     val outcome: OutcomeView,
     val moments: List<MomentView>,
     val summons: List<SummonSeenView>,
+    /** What a batch came to, when more than one run was asked for; the moments are its first run's. */
+    @get:JsonInclude(JsonInclude.Include.NON_NULL) val batch: BatchView? = null,
 ) : ServerFrame
+
+/** A batch: how many runs, each side's wins, the even ends, each side's pulls to the end, and the mean end tug toward A. */
+data class BatchView(val runs: Int, val wonByA: Int, val wonByB: Int, val even: Int, val pulledByA: Int, val pulledByB: Int, val meanTug: Double)
 
 /** What a challenge came to: the tug toward side A, `pulled` or `timeRanOut`, the second, `a`, `b` or none who won. */
 data class OutcomeView(
