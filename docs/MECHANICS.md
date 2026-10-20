@@ -1003,7 +1003,8 @@ other and takes the same bays.
   daughter is freed* - were proposed and are out of scope for now.
 - **Building one**: what it costs, how long it takes, where a house may raise it.
 - **Taking one**: by force, by purchase, by inheritance, and what a garrison does about it.
-- **Factions** as holders, and the structures standing in the world of 1790 before any house arrives.
+- **Factions** as holders, all but the Vigil, which holds nothing in its own name (see *Faction*), and the
+  structures standing in the world of 1790 before any house arrives.
 - **Upkeep**: whether holding costs as well as pays.
 - **How a seatless house names another**, and what it lacks until it does.
 - **The words**: every type's word in each culture is a first draft.
@@ -1240,3 +1241,138 @@ both sides and a progression, or has one drawn from a challenge kind, has the en
 it, the tug drawn, and what it came to; a seed fights the same challenge again, and a batch of a hundred or ten
 thousand says how often each side wins. Decision record 0107 is the shape and
 `docs/plans/challenges.md` the rules as settled and the steps, one commit each.
+
+---
+
+## Faction
+
+An NPC power of the world, one for each of the five resources: a quest giver with a screen of its own and its own
+ways to win its favour, whose places are held by houses. Adam's own, described on 2026-10-20: a force in the world
+"based on real things", with "hierarchy and power", its places held by houses - house bots at first - and a player
+who climbs it and "even one day might become on its highest council". Why the factions are everywhere, the five of
+them and what feeds them is the fiction, `SETTING.md`'s. Designed on 2026-10-20 with the first of them, the
+**Vigil**, the faction of piety; the other four follow it one at a time.
+
+### What it is
+
+**Every faction stands on one frame**, and what makes one different from another is mostly its door.
+
+- **Circles.** A faction is ordered in circles, each above the last:
+  - its **friends**, any house it favours, holding nothing;
+  - the **first circle**, one by every great ruin, about five chairs: the same places the guides gather;
+  - the **second circle**, one in each **province**, about nine chairs;
+  - the **third circle**, one for the whole world, about seven chairs.
+
+  Each faction names its circles and sizes them its own way.
+- **Chairs.** A place in a circle, held by one house at a time, with one of the house's key figures sitting in
+  it. A house holds one chair in a faction, and rising to the circle above gives up the one below. Not a
+  **seat**, which is the house's own; and the top circle is never called a council, which is the gods'.
+- **Favour.** How a house stands with one faction: earned in that faction's own ways, mostly its quests and the
+  resource it stands for, and lost in them. Each faction has its own word for it.
+- **The door.** How a faction fills an empty chair, and the one thing every faction does its own way: the Company
+  sells stakes, the Republic of Letters elects for a work, the courts in exile appoint, the stewards seat whoever
+  holds the land, and the Vigil has a sponsor, an ordeal and a black ball. All but the Vigil's are sketches.
+- **House bots.** When the world opens, every chair is held by a house bot, so every circle is full from the
+  first day. **A bot never stands in a player's way for long**: a bot in a chair steps aside for a house that
+  passes the door.
+- **The oath.** A house may be a friend of every faction and hold a first-circle chair in several. Above the
+  first circle it holds chairs in one faction only.
+- **Quests.** The head of a first circle gives quests, which are **Quest**s as they are, offered by the faction.
+  They are most of how favour is earned.
+
+**The contest.** The five contend in every province for **sway**, a share of how far the province leans their
+way; the five shares make the whole.
+
+- **A house moves it** by its quests for a faction, which push that faction's sway in the house's province.
+- **What sway does is each faction's own.** Where the Vigil is strong, piety yields more and its lodges offer more.
+- **It is held to a rubber band, tightly, behind the scenes.** Every share is pulled back toward an even share,
+  the harder the further it has gone, and never crosses a floor or a ceiling. So no faction is weak for long and
+  none ever wins. A player moves sway only by playing, never by a lever. It is a rate, as a resource is, so it
+  moves with nothing written down until something changes it.
+- **The player never sees a number.** Sway is told as rumour: a revival here, a schism there, a winter that filled
+  the chapels. The world explains it its own way, as `SETTING.md` says it must.
+
+**The Vigil**, the first faction, as a house meets it:
+
+- **It is invisible until it finds the house.**
+  1. *Watched.* A pious house that does what the Vigil values is noticed by the lodge by its ruin: a relic kept in
+     a cathedral's reliquary, a pledge of piety kept, an abbey held. The house sees only signs: a rare action dealt
+     from Faith, a stranger making a sign it does not know; a mark scratched on its seat's gate.
+  2. *The letter.* An unsigned letter, a **Dialogue**, asks the house a question, and the answer opens the ordeal,
+     a quest.
+  3. *Sworn.* The ordeal walked, the house is a friend of the Vigil and is given a secret name, and only now is the
+     Vigil's screen there.
+- **Its circles**: a lodge by every great ruin, five chairs; a province, nine; the Seven, over the world.
+- **Its masks.** A house knows the houses of its own circles, and the circle above only by their secret names. The
+  Seven are known to nobody below them. It is a fog of war over the hierarchy, lifted by rising.
+- **Its door, at every circle:**
+  1. A chair-holder of the circle sponsors the house. **The Vigil comes to the house, which never applies**: a
+     letter arrives when the house's favour is enough and a chair is empty.
+  2. The house walks an ordeal, a quest, harder at each circle.
+  3. The circle consents unless one of it casts **a black ball**, as a masonic lodge votes. A quest for the one who
+     cast it can win it back.
+  4. A bot in the chair steps aside: the old brother goes to a hermitage.
+- **Its favour is trust.** It is earned by pledging piety and by the lodge's quests: carrying a relic out of a
+  ruin, hiding a hunted teacher in a slot, putting a brother into an abbey's abbot slot or a cathedral's bishop
+  slot, delivering wealth to a hidden house, holding an abbey on an island, sponsoring another house. It is lost by
+  failing an ordeal, breaking a pledge, or sitting above the first circle of another faction.
+- **Its wings.** Every chair-holder leans to the Penitents, the Pilgrims or the Listeners, and the wing that holds
+  most of the Seven sets the Vigil's course for a while: what its lodges ask, and what they reward.
+- **It holds nothing in its own name.** Every structure it commands is held by one of its houses, so it is the one
+  faction that is never a structure's holder.
+- **Each circle says a little more** about what its founders felt, in the words of the wing that holds it, and none
+  of it right. The first says nothing. It is one road to the discovery `SETTING.md` keeps.
+
+### What it is for
+
+**Somewhere to rise to.** A house's power state rises and falls across the centuries, and a faction is a ladder
+for it: chairs by every great ruin at the bottom, seven at the top, each circle harder to reach than the last.
+
+**Somewhere for quests to come from**, which the **Quest** entry leaves open: a faction is one answer, with a
+reason for every quest it gives.
+
+**Something for a resource to be for.** Favour is earned with the resource the faction stands for, which is
+what `ROADMAP.md`'s *Later* asks for.
+
+**A world that moves without anyone.** The contest goes on whether anybody plays, and the rubber band keeps it
+from ever settling.
+
+**Saying what the house stands for.** Which faction a house swears to above the first circle is a statement, which
+is the question `VISION.md` asks of a house.
+
+### Look and feel
+
+As diegetic as the rest: a faction's screen is what a house in it would keep on its desk. The Vigil's is a book of
+ciphers and a case of letters, its circles a ring of seals, with a secret name under each seal the house cannot
+see into. A faction's face changes with the ground, as a structure's word does: the Vigil's lodge meets in an
+abbey's library on European ground and in a Sufi lodge on Islamic ground. Sway is told in rumours and never drawn
+as a number or a bar. Every picture is a placeholder until it is Adam's.
+
+### UI
+
+Sketched, not designed. Each faction a house is a friend of has a pane of its own, which arrives the first time it
+is: so the Vigil's arrives only when the house is sworn. It shows where the house stands and its favour; its
+circle's chairs, with who holds them or their secret names; the quests its circle offers; and the rumours of its
+sway. Which bay it takes, and whether the factions share one pane behind tabs, is decided when it is built, from
+the component library first.
+
+### Not decided
+
+- **How a house comes down from the top circle**, and what its spirit keeps of it: tabled on 2026-10-20, so that
+  it never feels bad for the player who climbed. `SETTING.md` has the reason ready.
+- **When players hold every chair of a circle**, what the next house does. It must not make a faction
+  player-versus-player first.
+- **What a house bot is**, beyond holding a chair and casting a ball: a concept of its own.
+- **The other four factions**: their names, circles, doors and favour.
+- **How sway is counted**, what each faction's does, and where the floor and the ceiling stand.
+- **The provinces**: how many, and where their lines run - the cultures, the named regions, or lines of their own.
+- **Which key figure sits in a chair**, and what becomes of the chair when they die.
+- **The oath's edges**: whether a house can leave a faction, and what it costs.
+- **Every name and number**: the Vigil's, its wings', the circles' sizes.
+
+### Where it stands
+
+Designed on 2026-10-20 and not built: nothing of it is in the source. A faction will be a history of its own and a
+second kind of structure holder, which `StructureEvent` already expects, with a catalogue under `world/catalogues/`
+and an inspect page of its own. Building it is planned first, its events named with Adam before anything is
+written, in `docs/plans/factions.md` when that is the step chosen.
