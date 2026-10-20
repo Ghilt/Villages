@@ -165,3 +165,11 @@
 .perf-table td.perf-table__none {
   color: var(--parchment-edge);
 }
+
+/* Two lists side by side where the page is wide enough, one above the other where it is not. */
+.perf-side {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  align-items: flex-start;
+}

@@ -19,6 +19,7 @@
     "e2e": "playwright test -c e2e/playwright.config.ts",
     "check": "npm run typecheck && npm run lint && npm run format && npm run test",
     "perf:shaders": "node perf/shaders.ts",
+    "perf:startup": "node perf/startup.ts",
     "world:fetch": "npm run fetch --workspace @villages/world --",
     "world:build": "npm run build --workspace @villages/world --",
     "world:master": "npm run master --workspace @villages/world --",

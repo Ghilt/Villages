@@ -63,6 +63,15 @@ they were measured by the same method on the same card at the same size: `METHOD
 whenever what a reading means changes. Something has moved when a place's frame changes by more than ten in a hundred
 or 0.1 ms, or a part by more than ten in a hundred or 0.05 ms.
 
+**The start is measured the same way** (`npm run perf:startup`, `startup.jsonl`), because Adam found the start slow
+and janky: three loads, each in a browser of its own with nothing cached - the first load after the dev server
+started, a load again, and the page as it is built - each from asking for the page to the loading screen lifting
+(the map drawn, before there was a screen) and five seconds on. What is kept is when each mark of the start came,
+the long tasks and the gaps between frames over the two stretches, what was fetched, and where the CPU's time went
+by module and by function. A built page is served by the tool, the build first and the public folder behind it, so
+the world's tiles are not copied for it. The first point (2026-10-20): 5.8 s for the first load, 3.3 s again, 1.6 s
+built; up to ready on a load again, React's development runtime and MapLibre a third of a second each.
+
 ## Consequences
 
 - What the shaders cost is a number that means the same thing from one commit to the next, and a history of it

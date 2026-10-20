@@ -1078,3 +1078,26 @@ and `-- --drop` takes them off; by hand only.
 - **The game's own cost lines**, the ones the log says once a level for the water, the land, the clouds and the
   trees, stay as a quick look: they are timed at the layer's own frame rate, on a card that has idled down, and read
   two to three times what the measure does. The measure is the number to compare.
+
+## How long the game takes to start
+
+- **The start's measure**, `npm run perf:startup --prefix frontend`: on the same Chrome and servers of its own as the
+  shaders' measure, the game opened in a browser of its own each time, nothing cached, three ways - the first load
+  after its dev server started, when the dev server works out every file anew; the game loaded again on it, three
+  times, the middle kept; and the page as it is built for a player, built by the tree's own Vite settings into
+  `.logs/perf/built` and served by the tool beside the public folder, three times, the middle kept (`--no-built`
+  leaves it out). For each: the seconds from asking for the page to the loading screen lifting (before there was a
+  screen, to the map drawn); when the map's style loaded and the sprite canvas was made; the long tasks - the stretches
+  the page could do nothing else - and the gaps between frames, a stutter being one of 50 ms or more, up to the screen
+  lifting and in the five seconds after, when a player is already looking; what was fetched, by kind; and where the
+  CPU's time went, by module and by function, each its own time and not what it called, from a profile Chrome takes.
+  A table and the CPU's lists printed, and the whole reading in `.logs/perf/startup-<time>.json`; `--record` keeps
+  it as a line of `docs/experiments/performance/startup.jsonl`, `--loads 5` takes the middle of five. About three
+  minutes, the build one of them.
+- **On the performance page**, the chapter "How long the game takes to start": the latest point's three loads in a
+  table - seconds to ready, when the style and the sprites came, the long tasks and the worst gap up to ready, the
+  long tasks, stutters and worst gap after it, the code and the tiles fetched, the CPU's busy time - then each load's
+  seconds to ready point by point, and its long tasks after ready; and, for the load again, where the CPU's time went
+  up to ready and in the five seconds after, by module and by function. A development build's own costs - React's
+  development runtime, the dev server's hundreds of files - are in the first two loads and not in the built page,
+  which is what a player meets.

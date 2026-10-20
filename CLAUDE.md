@@ -399,6 +399,10 @@ Commands are added here as the increments land:
   against the last point kept, `--record` keeps the run as a line of `docs/experiments/performance/shaders.jsonl`. A
   card busy with something else is refused, `--anyway` to measure regardless. See `docs/RUNNING.md` and decision
   record 0106.
+- How long the game takes to start: `npm run perf:startup --prefix frontend`, the first load after a dev server of its
+  own started, a load again and the built page, each to the loading screen lifting and five seconds after: long
+  tasks, stutters, what was fetched and where the CPU's time went; `--record` keeps it in
+  `docs/experiments/performance/startup.jsonl`.
 
 The dev server is also registered in `.claude/launch.json` under the name `web`, so the preview tooling can start
 it directly while working; a hand-over uses the quick-start instead, as the `hand-over` skill says. Restart
