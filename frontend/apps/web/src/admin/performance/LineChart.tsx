@@ -13,6 +13,8 @@ const LEFT = 52;
 const RIGHT = 16;
 const TOP = 26;
 const BOTTOM = 34;
+/** About how wide a point's name is under the axis, a commit and a day. */
+const LABEL_WIDTH = 95;
 
 /** A round step for the y axis that gives about four lines across the height. */
 function step(most: number): number {
@@ -54,6 +56,11 @@ export function LineChart({
   const y = (value: number) => TOP + down - (value / top) * down;
   const ticks = Array.from({ length: Math.round(top / by) + 1 }, (_, index) => index * by);
   const column = labels.length <= 1 ? across : across / (labels.length - 1);
+  // Every few points named under the axis, so that the names never run into each other; hovering names each one.
+  const every = Math.max(1, Math.ceil(labels.length / Math.max(1, Math.floor(across / LABEL_WIDTH))));
+  const last = labels.length - 1;
+  const named = (index: number) =>
+    index % every === 0 || (index === last && last % every >= Math.ceil(every / 2));
 
   return (
     <figure className="perf-chart">
@@ -74,17 +81,20 @@ export function LineChart({
         <text className="perf-chart__unit" x={LEFT - 6} y={10} textAnchor="end">
           {unit}
         </text>
-        {labels.map((words, index) => (
-          <text
-            key={words}
-            className="perf-chart__tick"
-            x={x(index)}
-            y={HEIGHT - BOTTOM + 18}
-            textAnchor="middle"
-          >
-            {words}
-          </text>
-        ))}
+        {labels.map(
+          (words, index) =>
+            named(index) && (
+              <text
+                key={index}
+                className="perf-chart__tick"
+                x={x(index)}
+                y={HEIGHT - BOTTOM + 18}
+                textAnchor="middle"
+              >
+                {words}
+              </text>
+            ),
+        )}
         {threshold !== undefined && (
           <g>
             <line
@@ -121,9 +131,9 @@ export function LineChart({
             </g>
           );
         })}
-        {labels.map((words, index) => (
+        {labels.map((_, index) => (
           <rect
-            key={words}
+            key={index}
             className="perf-chart__hit"
             x={x(index) - column / 2}
             y={TOP}
