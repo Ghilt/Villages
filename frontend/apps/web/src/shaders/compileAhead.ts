@@ -23,14 +23,14 @@ const ASKED_EVERY = 50;
  * Hands a program's sources to the driver now. Settles with the milliseconds from now until it was compiled, or with
  * null when this browser cannot compile ahead, the context is lost, or `stop` is signalled first.
  */
-export function compileAhead(
+export async function compileAhead(
   gl: WebGL2RenderingContext | null | undefined,
   sources: ProgramSources,
   stop?: AbortSignal,
 ): Promise<number | null> {
   const parallel = gl?.getExtension('KHR_parallel_shader_compile') ?? null;
   if (gl === null || gl === undefined || parallel === null || stop?.aborted === true) {
-    return Promise.resolve(null);
+    return null;
   }
   const began = performance.now();
   const shaders = [
@@ -40,29 +40,44 @@ export function compileAhead(
   const program = gl.createProgram();
   for (const shader of shaders) gl.attachShader(program, shader);
   gl.linkProgram(program);
-  // Deleted once compiled: Chrome keeps what it linked, and this copy is never drawn with.
-  const letGo = () => {
-    gl.deleteProgram(program);
-    for (const shader of shaders) gl.deleteShader(shader);
-  };
+  const linked = await whenLinked(gl, parallel, program, stop);
+  // Let go once compiled: Chrome keeps what it linked, and this copy is never drawn with.
+  gl.deleteProgram(program);
+  for (const shader of shaders) gl.deleteShader(shader);
+  return linked ? performance.now() - began : null;
+}
+
+/**
+ * Settles true once the browser says a program handed to it is linked, asking without waiting; false when the context
+ * is lost or `stop` is signalled first. For a context the extension was asked of, which `parallel` is.
+ */
+export function whenLinked(
+  gl: WebGL2RenderingContext,
+  parallel: KHR_parallel_shader_compile,
+  program: WebGLProgram,
+  stop?: AbortSignal,
+): Promise<boolean> {
   return new Promise((resolve) => {
     let asking: ReturnType<typeof setTimeout> | undefined;
-    const end = (ms: number | null) => {
+    const end = (linked: boolean) => {
       clearTimeout(asking);
       stop?.removeEventListener('abort', stopped);
-      letGo();
-      resolve(ms);
+      resolve(linked);
     };
-    const stopped = () => end(null);
+    const stopped = () => end(false);
     const ask = () => {
       if (gl.isContextLost()) {
-        end(null);
+        end(false);
       } else if (gl.getProgramParameter(program, parallel.COMPLETION_STATUS_KHR) === true) {
-        end(performance.now() - began);
+        end(true);
       } else {
         asking = setTimeout(ask, ASKED_EVERY);
       }
     };
+    if (stop?.aborted === true) {
+      end(false);
+      return;
+    }
     stop?.addEventListener('abort', stopped);
     asking = setTimeout(ask, ASKED_EVERY);
   });
