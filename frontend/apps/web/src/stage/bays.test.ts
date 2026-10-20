@@ -6,6 +6,11 @@ import { MAP_PANE, NAVIGATION_PANE, sizeAsked, spreadWants } from './panes';
 import { KEY_FIGURES_PANE } from '../figures/pane';
 import { HOUSE_PANE } from '../house/pane';
 import type { Subject } from '../inspect/subjects';
+// Read once as the file loads and never used here: what `fresh()` configures the manager with is the whole game,
+// every pane's drawing with the gateway and the protocol behind it, and compiling that inside the first test
+// took all of its five seconds on a busy machine. Compiled here, before any test's clock starts, each fresh
+// copy after it costs tens of milliseconds.
+import '../panes';
 
 /**
  * The bay manager: what is where, and how the stage is divided between the two of them.

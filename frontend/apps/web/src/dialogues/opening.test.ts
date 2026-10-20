@@ -6,6 +6,8 @@ import { MAP_PANE } from '../stage/panes';
 import { DIALOGUE_PANE } from './pane';
 import { HOUSE_PANE } from '../house/pane';
 import { arrivals } from './opening';
+// Compiled as the file loads, so that the first `fresh()` does not; see `stage/bays.test.ts`.
+import '../panes';
 
 function dialogue(id: string, ending: DialogueView['ending'] = { kind: 'open' }): DialogueView {
   return {

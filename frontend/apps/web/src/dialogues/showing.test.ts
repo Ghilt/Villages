@@ -6,6 +6,8 @@ import { MAP_PANE } from '../stage/panes';
 import { DIALOGUE_PANE } from './pane';
 import type { Room } from '../stage/panes';
 import { type Beside, newlyReached } from './showing';
+// Compiled as the file loads, so that the first `fresh()` does not; see `stage/bays.test.ts`.
+import '../panes';
 
 /**
  * The dialogues pane stands only while the house has been offered a dialogue, and the bay manager gives a bay

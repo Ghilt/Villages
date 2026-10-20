@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { KEY_FIGURES_PANE } from '../figures/pane';
 import { HOUSE_PANE } from '../house/pane';
 import { MAP_PANE } from './panes';
+// Compiled as the file loads, so that the first `fresh()` does not; see `bays.test.ts`.
+import '../panes';
 
 /**
  * Something arriving on a phone: a pane already standing in a bay stays in it, and only one standing in neither
