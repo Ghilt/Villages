@@ -60,7 +60,10 @@ Commands are filled in here as the increments land.
 - Everything: `scripts/check.ps1` or `scripts/check.sh`, from 0.14: the backend, the frontend, `scripts/`'s own
   tests, types and format, and the end-to-end test, one after another rather than side by side, because two at once on a busy machine make
   tests time out that pass alone. One line a part, what failed by name, and each part's whole output in
-  `.logs/check-<part>.log`; `--only <part>` runs one.
+  `.logs/check-<part>.log`; `--only <part>` runs one. `--record` keeps how long each part and each of its steps took,
+  how many tests each ran and where their time went, as a line of `docs/experiments/performance/tests.jsonl`, charted
+  on the performance page; recorded, the backend's tests run whether or not anything changed, after a compile timed
+  apart. `--root <tree>` checks another tree. See decision record 0106.
 - Backend: `cd backend` then `./gradlew check`, from 0.5. Modules that do not depend on each other build and test side
   by side (`backend/gradle.properties`), so their lines interleave in the output; `--no-parallel` runs them one at a
   time.

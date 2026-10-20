@@ -127,7 +127,7 @@ export const INSPECT_VIEWS: readonly InspectView[] = [
   {
     path: '/admin/inspect-performance',
     title: 'Performance',
-    what: 'What the game costs to run, as it is built: what the shaders cost the graphics card at fixed places, how long the game takes to start and where that time goes, how smoothly the camera zooms in and what the sprites cost it, and how many players one game server carries before it bends.',
+    what: 'What the game costs to run, as it is built: what the shaders cost the graphics card at fixed places, how long the game takes to start and where that time goes, how smoothly the camera zooms in and what the sprites cost it, how long the tests take, and how many players one game server carries before it bends.',
     needs: 'nothing',
     load: () => import('./performance/Performance').then((page) => page.Performance),
   },

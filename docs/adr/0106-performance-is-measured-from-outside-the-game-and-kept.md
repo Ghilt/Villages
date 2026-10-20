@@ -83,6 +83,13 @@ measure now times each program the page waited on, by its name, and the zoom kee
 so how long the land's program takes to compile is a line of its own. Once compiled, the forest's 4,600 sprites cost
 a zoom about a quarter of a second of the CPU over seven and a stutter or two against the bare ice.
 
+**The tests are kept by the check that runs them** (`node scripts/check.ts --record`, `tests.jsonl`): how long each
+part took and each of its steps, how many tests it ran, and where the time went - the backend's modules and slowest
+specs, the frontend's slowest test files and Vitest's own account. Recorded, the backend is compiled first and timed
+apart, because what Gradle's cache already holds decides that, and its tests are run whether or not anything changed,
+because Gradle would otherwise keep a module's last results; the frontend's check is run a step at a time. A tests
+point names the CPU and not the card, and compares with the points of the same CPU.
+
 ## Consequences
 
 - What the shaders cost is a number that means the same thing from one commit to the next, and a history of it

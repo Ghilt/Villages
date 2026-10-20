@@ -59,7 +59,10 @@ export function readShaderPoints(text: string): { points: Point[]; unreadable: n
   });
 }
 
-/** Whether two points were measured alike - by one method, on one card, at one size - and so compare. */
+/**
+ * Whether two points were measured alike - by one method, on one card, at one size, on one CPU, as far as each says
+ * which - and so compare. A point of the shaders names no CPU, and one of the tests no card.
+ */
 export function alike(
   one: Pick<Measured, 'method' | 'machine'>,
   other: Pick<Measured, 'method' | 'machine'>,
@@ -67,11 +70,12 @@ export function alike(
   return (
     one.method === other.method &&
     one.machine.gpu === other.machine.gpu &&
-    one.machine.viewport === other.machine.viewport
+    one.machine.viewport === other.machine.viewport &&
+    one.machine.cpu === other.machine.cpu
   );
 }
 
-/** What every point kept has, whatever it measured: the shaders, the start, the zoom. */
+/** What every point kept has, whatever it measured: the shaders, the start, the zoom, the tests. */
 export interface Measured {
   readonly method: number;
   readonly measuredAt: string;
@@ -81,7 +85,8 @@ export interface Measured {
     readonly landedAt: string | null;
     readonly dirty: boolean;
   };
-  readonly machine: { readonly gpu: string; readonly viewport: string };
+  /** What it was measured on, as far as it matters to what it measured: the card and the size, the CPU. */
+  readonly machine: { readonly gpu?: string; readonly viewport?: string; readonly cpu?: string };
 }
 
 /** When a point's code was the game's: when main came to hold it, or when it was measured when main never did. */

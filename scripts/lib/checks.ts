@@ -1,3 +1,6 @@
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { join } from 'node:path';
+
 /**
  * Reading what each of the repository's checks said, for `check.ts`: how many tests ran, passed, failed and were
  * skipped, and which ones failed, from the backend's test reports, Vitest's summary and Node's test runner.
@@ -32,6 +35,27 @@ export function readJUnit(reports: readonly string[]): Tally {
     }
   }
   return { tests, failed, skipped, failures };
+}
+
+/**
+ * Every module's test reports in a tree's backend, each with its module, as Gradle left them, written since `since`: everything when the check passed,
+ * because a module whose tests did not need running keeps its last and they are still true; and only what this
+ * run wrote when it failed, so that a build that broke before any test ran is not counted as the last one's.
+ */
+export function backendReports(root: string, since: number): { module: string; xml: string }[] {
+  const backend = join(root, 'backend');
+  return readdirSync(backend, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => ({
+      module: entry.name,
+      folder: join(backend, entry.name, 'build', 'test-results', 'test'),
+    }))
+    .filter(({ folder }) => existsSync(folder))
+    .flatMap(({ module, folder }) =>
+      readdirSync(folder)
+        .filter((file) => file.endsWith('.xml') && statSync(join(folder, file)).mtimeMs >= since)
+        .map((file) => ({ module, xml: readFileSync(join(folder, file), 'utf8') })),
+    );
 }
 
 /** Vitest's last summary, `Tests  1376 passed | 1 failed (1377)`, and every test it marked failed. */

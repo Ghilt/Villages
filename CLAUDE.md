@@ -392,6 +392,8 @@ Commands are added here as the increments land:
   backend's check, the frontend's, `scripts/`'s own and the end-to-end test, one after another, each part's whole output in
   `.logs/check-<part>.log` and one line a part said, with what failed. About five minutes; `--only frontend`
   runs one part. It needs `npm install` once in `frontend/` and in `scripts/`, and says so when it is missing.
+  `--record` keeps how long each part and step took and how many tests each ran, as a line of
+  `docs/experiments/performance/tests.jsonl`, charted on the performance page; `--root <tree>` checks another tree.
 
 - What the shaders cost: `npm run perf:shaders --prefix frontend`, the game in this machine's Chrome on the graphics
   card, on servers of its own, every shader at high at eight fixed places on the map, each frame timed as a whole and

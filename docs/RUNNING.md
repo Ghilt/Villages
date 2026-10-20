@@ -1120,3 +1120,21 @@ and `-- --drop` takes them off; by hand only.
   place's in a table, each a link that opens the game there; each place's long tasks over its zoom point by point, and
   the first zoom's stall point by point, which is how long compiling the game's programs takes; and each place's CPU
   time by module side by side.
+
+## How long the tests take
+
+- **Kept by the check**, `node scripts/check.ts --record`: every check, one part after another as always, with how
+  long each part and each of its steps took and how many tests it ran kept as a line of
+  `docs/experiments/performance/tests.jsonl`. So that the time is the tests' and every one of them runs, a recorded
+  run compiles the backend first, timed apart, and then runs its tests whether or not anything they test changed
+  (`cleanTest check`), and runs the frontend's check a step at a time - the typecheck, the linter, the formatter and
+  the unit tests - asking Vitest for its JSON report besides. Where the time went is kept too: the backend's modules
+  by the time their specs took and its slowest specs, from Gradle's reports; the frontend's slowest test files, and
+  Vitest's own account of its time, transform, import and tests, each summed over its workers. Whether Docker was
+  running is kept with it, because without it the backend's tests that need it are skipped. `--root <tree>` checks
+  another tree, an old commit's, and keeps the line in this one; a part that tree does not have yet is said and passed
+  over. About six minutes.
+- **On the performance page**, the chapter "How long the tests take": the latest point's parts in a table, each with
+  its steps' seconds and its tests counted, failed and skipped; each part's seconds point by point, the backend's
+  compile left out because what Gradle's cache already held decides it, and its tests counted point by point; and
+  where the time went, side by side.
