@@ -3,7 +3,7 @@ package villages.domain.challenge
 import villages.domain.Stat
 
 /**
- * The content the engine's specs fight with: the Violence-Diplomacy pair as the first draft has it, one effect not
+ * The content the engine's specs fight with: the pairs built so far as the first draft has them, one effect not
  * built yet, and the first draft's rules. Its own here, so a retune of `world/catalogues/` never moves a spec.
  */
 val TEST_CATALOGUE = ChallengeCatalogue(
@@ -15,8 +15,17 @@ val TEST_CATALOGUE = ChallengeCatalogue(
         ChallengeEffect("diplomacy.sweeterTerms", Aspect.DIPLOMACY, Fires.TRIGGER, mapOf("strong" to 50.0, "weak" to 20.0)),
         ChallengeEffect("diplomacy.parley", Aspect.DIPLOMACY, Fires.PASSIVE, mapOf("perSecond" to 2.0, "power" to 5.0)),
         ChallengeEffect("holy.rebuke", Aspect.HOLY, Fires.PASSIVE, mapOf("chance" to 20.0, "integrity" to 10.0)),
+        ChallengeEffect("holy.ordination", Aspect.HOLY, Fires.TRIGGER, summons = "priest"),
+        ChallengeEffect("holy.sanctuary", Aspect.HOLY, Fires.PASSIVE, mapOf("piety" to 5.0), slot = ChallengeSlot(Fits.STRUCTURE, onTheLine = true)),
+        ChallengeEffect("reason.counsel", Aspect.REASON, Fires.TRIGGER, slot = ChallengeSlot(Fits.KEY_FIGURE, Stat.REASON)),
+        ChallengeEffect("reason.refutation", Aspect.REASON, Fires.PASSIVE, mapOf("chance" to 20.0)),
+        ChallengeEffect("reason.seenThrough", Aspect.REASON, Fires.PASSIVE, mapOf("chance" to 20.0, "amount" to 5.0)),
+        ChallengeEffect("authority.decree", Aspect.AUTHORITY, Fires.PASSIVE, mapOf("chance" to 25.0)),
     ),
-    summons = mapOf("mercenary" to SummonSpec(Aspect.VIOLENCE, mapOf("pulls" to 10.0))),
+    summons = mapOf(
+        "mercenary" to SummonSpec(Aspect.VIOLENCE, mapOf("pulls" to 10.0)),
+        "priest" to SummonSpec(Aspect.HOLY, mapOf("share" to 1.0)),
+    ),
     kinds = emptyMap(),
 )
 

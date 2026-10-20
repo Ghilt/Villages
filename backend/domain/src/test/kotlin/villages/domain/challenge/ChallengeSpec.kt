@@ -110,7 +110,7 @@ class ChallengeSpec : StringSpec({
     }
 
     "an effect whose behaviour is not built yet says so whenever its slice comes on stage" {
-        fight(listOf(slice(HOLY, "holy.rebuke")), IDLE, 2, Happening(HOLY)).saying(What.NOT_BUILT).single().effect shouldBe "holy.rebuke"
+        fight(listOf(slice(Aspect.AUTHORITY, "authority.decree")), IDLE, 2, Happening(Aspect.AUTHORITY)).saying(What.NOT_BUILT).single().effect shouldBe "authority.decree"
     }
 
     "the same seed fights the same challenge, and the changes of its moments add up to its tug" {
