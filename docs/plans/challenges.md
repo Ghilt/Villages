@@ -116,12 +116,12 @@ active. Adam asked for flavourful names; these are a first draft for him to chan
 | Reason | **Learned Counsel** (T, figure) | + the figure's reason |
 | | **Refutation** (P) | 20% to cancel an enemy trigger |
 | | **Seen Through** (P) | An enemy summon acts: 20% to give +5 |
-| Authority | **Raise the Watch** (T) | Summon an Enforcer: costs its own side 5 a second; each act silences the enemy summon pulling hardest for 3 seconds, a silence refreshed rather than stacked |
+| Authority | **Raise the Watch** (T) | Summon an Enforcer: costs its own side 5 a second; each act silences the enemy summon pulling hardest for 3 seconds - boosted, and cut to whole seconds - a silence refreshed rather than stacked |
 | | **By Decree** (P) | 25% to stop each enemy summon's act, if power is above that summon's integrity |
 | | **The Firm Hand** (P) | Aura: the opponent's power -5 while the tug favours you |
 | Freedom | **Raise the Commons** (T) | Summon a Rebel: +5 a second, +10 while behind |
 | | **Against the Grain** (P) | +20 when its slice is activated by the draw, matching neither aspect nor anti-aspect |
-| | **Will of One's Own** (P) | Once in a challenge, at a change, its slice stays active whatever the new aspects |
+| | **Will of One's Own** (P) | Once in a challenge, at a change that would not keep its slice for its aspect, the slice stays active anyway; it is not spent on a change that boosts it, and a slice kept by it is not on stage by the draw |
 | Greed | **Counting House** (T, building on the line) | The building enters on activation; +5 wealth if won |
 | | **Farm the Taxes** (T) | Summon a Collector: costs its own side 3 a second and puts 6 an act into its **coffer**, which pours into the tug at the next change or at the end, and is lost if the Collector is killed |
 | | **Pick the Bones** (P) | +10 whenever an enemy summon is killed |

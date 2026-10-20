@@ -189,17 +189,15 @@ object Unbuilt : EffectBehaviour {
 object ChallengeBehaviours {
     /** The effects of the plan's later steps, each built in its own. */
     private val UNBUILT = listOf(
-        "authority.watch", "authority.decree", "authority.firmHand",
-        "freedom.commons", "freedom.againstTheGrain", "freedom.ownWill",
         "greed.countingHouse", "greed.farmTaxes", "greed.pickBones",
         "generosity.patron", "generosity.alms", "generosity.remembered",
         "nature.wildHunt", "nature.teeming", "nature.wildRemembers",
         "industry.engines", "industry.works", "industry.wellOiled",
     )
 
-    val effects: Map<String, EffectBehaviour> = violenceAndDiplomacy + holyAndReason + UNBUILT.associateWith { Unbuilt }
+    val effects: Map<String, EffectBehaviour> = violenceAndDiplomacy + holyAndReason + authorityAndFreedom + UNBUILT.associateWith { Unbuilt }
 
-    val summons: Map<String, SummonBehaviour> = violenceAndDiplomacySummons + holyAndReasonSummons
+    val summons: Map<String, SummonBehaviour> = violenceAndDiplomacySummons + holyAndReasonSummons + authorityAndFreedomSummons
 
     /** What [catalogue] asks of the code that the code lacks, a line a lack; none when the code has all of it. */
     fun unmatched(catalogue: ChallengeCatalogue): List<String> = buildList {
