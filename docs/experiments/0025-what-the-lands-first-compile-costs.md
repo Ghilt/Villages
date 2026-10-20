@@ -1,7 +1,8 @@
 # 0025. What the land's first compile costs
 
-- Status: open
+- Status: closed
 - Started: 2026-10-20
+- Closed: 2026-10-20
 
 ## Hypothesis
 
@@ -78,11 +79,39 @@ while another session's work kept it busy, so beside each other rather than besi
   parent, 2,172, 2,138 and 1,741 for this. Beside the history's quiet point of main's tip the CPU reads a third higher
   for both, which is the busy machine's.
 
+**The land's programs compiled ahead** (the second step). Each motion's program handed to the driver once the loading
+screen lifts, or the first time its land is wanted if that is sooner, and a motion drawn only once the browser says
+its program is compiled. Handed over as the layer was made, under the loading screen, the start of a first load read
+7.1 s against the parent's 6.5 in one run each, the clouds' compile 1.2 s against 0.7: the land's five programs
+compete with the start's own for the browser's compile threads. So they wait for the lift. Then, the parent and this
+measured one after the other on the same machine, seconds to ready:
+
+| | first load | load again | built page |
+|---|---|---|---|
+| one program | 9.2 | 4.8 | 1.7 |
+| compiled ahead after the lift | 9.1 | 4.7 | 1.7 |
+
+- **The start does not move**, and after ready neither shows a long task. Both read slower than the history's quiet
+  point of the morning, 5.2, 2.8 and 1.5, which is the machine's: another session's work kept it busy all afternoon.
+- **Every motion's program is compiled within seconds of the lift**: on that busy machine the grass's in 1.5 s, the
+  crops' 0.4, the heath's 0.8, the wet land's 1.7 and the ice's 11.1, the page never waiting.
+- **The first zoom of a fresh browser waits 0.1 s, not 40.** `perf:zoom`, the parent and this one after the other: the
+  parent waited 40.2 s on compiling the land, the machine being busier than in the morning's 22; this waited on no
+  program of the land's, only the scenery's, 35 ms, and Pixi's own link of each land program found it in Chrome's
+  cache. The zooms after it cost the same CPU for both, 2,645, 2,833 and 2,076 ms over the forest, the grassland and
+  the ice for the parent, 2,671, 2,777 and 2,047 for this.
+
 ## Result
 
-Open: the land drawn as a program for each motion, then compiled ahead from the start (`docs/plans/land-first-compile.md`).
+**Confirmed.** The one program was most of the wait and of the frame: the land as a program for each motion compiles
+in a quarter of the time, side by side, and costs half or less a frame at most places, and compiled ahead after the start the page
+never waits on it. A player's first close zoom went from 22 to 40 s held to a tenth of a second, with the start as it
+was.
 
 ## Consequences
 
-- The land is a program for each motion, drawn one over another (the amendment to decision record 0102 of
-  2026-10-20).
+- The land is a program for each motion, drawn one over another, each compiled ahead once the game has started (the
+  amendments to decision record 0102 of 2026-10-20).
+- `shaders/compileAhead.ts` compiles any program ahead of its first use, for the next shader that grows large.
+- The dune walk is still the sand's 5 s: shortening it is the plan's third step, now worth less, since nothing waits
+  on it.

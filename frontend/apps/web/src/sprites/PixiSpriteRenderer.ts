@@ -67,6 +67,9 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   /** The marks and the ring, once there is a canvas to draw them on; the scene waits for them until then. */
   let layers: { marks: MarksLayer; ring: RingLayer; trees: TreesLayer; drawn: readonly Layer[] } | null =
     null;
+  /** Settled once the game has started: what is kept off the start, so as not to slow it, waits on it. */
+  let hasStarted = () => {};
+  const started = new Promise<void>((resolve) => (hasStarted = resolve));
   /** The ground worn bare under the buildings, once there is a canvas to draw it on. */
   let ground: GroundLayer | null = null;
   /** What is on the map: the last scene handed in, which a renderer mounted late is given whole. */
@@ -320,6 +323,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       // Whatever was handed over before the canvas was ready - the seats a founding choice offers always are,
       // since they arrive with the first frames - is given now, whole.
       apply(null, scene);
+      void started.then(() => land.compileAhead());
 
       // One clock. The map draws, then this draws, from the camera the map just used, into the same
       // browser frame. Drawing on an animation frame of its own read the camera at a different instant,
@@ -344,6 +348,8 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     groupOf(leader: string): readonly string[] {
       return layers?.marks.groupOf(leader) ?? [];
     },
+
+    afterStart: () => hasStarted(),
 
     setScene(next: Scene): void {
       const was = scene;

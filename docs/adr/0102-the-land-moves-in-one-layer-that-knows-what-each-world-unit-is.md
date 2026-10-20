@@ -111,3 +111,16 @@ there at a tuft's edge, which the compiler rounds differently (89 of 5.1 million
 the most). This takes back the consequence that a motion is never a pass of its own: it is not a layer of its own,
 and its land is still known from the one mask. The crops' fields are a part of their own (`fieldsShader.ts`), since
 the paddy's terraces are cut by them too.
+
+## Amendment, 2026-10-20: compiled ahead, once the game has started
+
+Even as a program for each motion, the first time a page needed a motion it waited on the driver for it, Pixi asking at
+once whether a program had linked: over the forest 1.5 s, at the first sand 5. So each motion's program is handed to
+the driver ahead of its first use (`shaders/compileAhead.ts`), from Pixi's own sources, and asked after through
+`KHR_parallel_shader_compile`, which answers without waiting; Chrome keeps what it linked, so Pixi's own link of the
+same sources later finds it there in milliseconds. A motion is drawn only once its program is compiled, its land
+standing as painted until then. It is handed over once the loading screen has lifted, which the app tells the sprite
+canvas (`afterStart`), or the first time the land is wanted if that is sooner: handed over under the loading screen,
+the five competed with the start's own programs for the browser's compile threads, and a first load read 0.6 s
+longer. A browser without the extension draws the land as before, and waits as before. The first close zoom of a
+fresh browser waits 0.1 s, against 22 to 40 (experiment 0025).

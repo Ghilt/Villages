@@ -98,6 +98,8 @@ export function App({ master, devTools }: AppProps) {
   const yourDialogues = useStore(sessionStore, (state) => state.yourDialogues);
   const arrangement = devTools?.stageStore ?? NO_PANEL;
   const mode = useStore(arrangement, (state) => state.mode);
+  // Whether the loading screen has lifted, which the sprite canvas waits on to begin what it keeps off the start.
+  const started = useStore(startupStore, (state) => state.lifted);
   const shut = useStore(arrangement, (state) => state.shut);
   const log = useStore(arrangement, (state) => state.log);
   const window = useWindow();
@@ -300,6 +302,7 @@ export function App({ master, devTools }: AppProps) {
               worldRoot={worldRoot}
               picked={marked}
               onPick={inspect}
+              started={started}
             />
           )}
         </Room>
@@ -322,7 +325,7 @@ export function App({ master, devTools }: AppProps) {
         {along !== null && room.size === 'strip' && <MapStrip room={room} />}
       </>
     ),
-    [map, yours, worldRoot, sprites, camera.latticeTurn, open, marked, zone],
+    [map, yours, worldRoot, sprites, camera.latticeTurn, open, marked, zone, started],
   );
   const panes = useMemo(() => panesOn(up, open, drawMap), [up, open, drawMap]);
 

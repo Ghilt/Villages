@@ -16,6 +16,7 @@ import type { CameraView } from '../../geometry/cameraMath';
 import { classesOfTile, terrainPalette } from '../../geometry/terrainClasses';
 import { FLAT_MAX_ZOOM, TILE, WORLD_MASTER_WIDTH } from '../../geometry/world';
 import { note } from '../../log/log';
+import { compileAhead } from '../../shaders/compileAhead';
 import { createCostMeter } from '../../shaders/costMeter';
 import { drawnAt, sayLevel, shadersStore } from '../../shaders/levels';
 import type { ShaderLevel } from '../../shaders/levels';
@@ -23,7 +24,7 @@ import type { Layer } from '../layer';
 import { gustsCarried, windTime } from '../wind';
 
 import { DRAWN, channelOf, landMaskOf, sameRange, tilesUnder } from './landMask';
-import type { TileRange } from './landMask';
+import type { DrawnMotion, TileRange } from './landMask';
 import { landStore } from './landMode';
 import { LAND_PASSES, LAND_VERTEX } from './landShader';
 import { LAND_LOOK, lookOf, motionOf, strengthOf } from './look';
@@ -43,6 +44,11 @@ import { createMotionUniforms } from './motionUniforms';
  * it and the map does not. The first time it is drawn at a level it says once in the log what that costs the
  * graphics card, measured rather than guessed. Its level is in the bar of the Land part of the debug panel's Shaders
  * section, under the switch over all of them, and each motion's box in a fold of its own inside it.
+ *
+ * Each motion's program is handed to the graphics driver once the game has started, so as not to slow the start, or
+ * the first time its land is wanted if that is sooner, and a motion is drawn only once the driver has compiled it, so
+ * that the page never waits on the driver for the land: where a motion's program is not ready yet, its land stands as
+ * painted a moment longer (`compileAhead`, experiment 0025).
  */
 
 /** One triangle that covers the screen, in clip space, so the fragment shader runs once for every pixel. */
@@ -56,6 +62,8 @@ const smoothstep = (from: number, to: number, value: number): number => {
 export interface LandLayer extends Layer {
   /** The land as it is drawn: a picture the size of the screen, to go under the scenery. */
   sprite: Sprite;
+  /** Hands each motion's program to the graphics driver now, if it has not been already. */
+  compileAhead(): void;
 }
 
 /**
@@ -78,6 +86,19 @@ interface Mask {
   looks: BufferImageSource;
   /** How many world units of the mask have each channel's motion. */
   counts: readonly number[];
+}
+
+/** Says once in the log how long the driver took over each motion's program, or that this browser cannot compile ahead. */
+function sayCompiled(times: readonly { motion: DrawnMotion; ms: number | null }[]): void {
+  if (times.every((time) => time.ms === null)) {
+    note(
+      'land',
+      "this browser cannot compile the land's programs ahead, so its first close zoom waits on the driver",
+    );
+    return;
+  }
+  const each = times.map((time) => `${time.motion} ${time.ms === null ? '-' : (time.ms / 1000).toFixed(1)}`);
+  note('land', `every motion's program compiled ahead, the page never waiting: ${each.join(', ')} s`);
 }
 
 /** `duneShown` says where a page that shows one dune asks for it, in world units: the renders page's. */
@@ -146,6 +167,31 @@ export function createLandLayer(
   });
   const land = new Container();
   for (const pass of passes) land.addChild(pass.mesh);
+  const gl = (renderer as WebGLRenderer).gl as WebGL2RenderingContext | undefined;
+  // Which passes the driver has compiled, by the mask's channel, as the passes are ordered.
+  const compiled = passes.map(() => false);
+  const stopCompiling = new AbortController();
+  let compiling = false;
+
+  function compileAll(): void {
+    if (compiling || stopCompiling.signal.aborted) {
+      return;
+    }
+    compiling = true;
+    void Promise.all(
+      passes.map(async (pass, channel) => {
+        // Pixi keeps a program's sources, preprocessed, until it is destroyed, and these were made with the layer.
+        const { vertex, fragment } = pass.shader.glProgram;
+        const ms = await compileAhead(gl, { vertex: vertex!, fragment: fragment! }, stopCompiling.signal);
+        compiled[channel] = true;
+        repaint();
+        return { motion: pass.motion, ms };
+      }),
+    ).then((times) => {
+      if (!stopCompiling.signal.aborted) sayCompiled(times);
+    });
+  }
+
   const target = RenderTexture.create({ width: 1, height: 1, dynamic: true, scaleMode: 'linear' });
   const sprite = new Sprite(target);
   sprite.visible = false;
@@ -160,7 +206,7 @@ export function createLandLayer(
   let strengths: number[] | null = null;
 
   // What each level costs, measured on the graphics card where it will say, and said once a level.
-  const meter = createCostMeter((renderer as WebGLRenderer).gl as WebGL2RenderingContext | undefined);
+  const meter = createCostMeter(gl);
   const measured = new Set<ShaderLevel>();
   let lastLevel: ShaderLevel | null = null;
 
@@ -260,6 +306,7 @@ export function createLandLayer(
 
   return {
     sprite,
+    compileAhead: compileAll,
 
     draw(view: CameraView): number | null {
       const { level: own, shown } = landStore.get();
@@ -277,7 +324,12 @@ export function createLandLayer(
       const fade = smoothstep(LAND_LOOK.fromZoom - 0.5, LAND_LOOK.fromZoom + 0.5, view.zoom);
       const held = fade > 0 && level !== 'off' ? maskFor(view) : null;
       // Only the motions shown that the land under the view has: with none, nothing is drawn or asked for.
-      const moving = DRAWN.map((motion, channel) => shown[motion] && (held?.counts[channel] ?? 0) > 0);
+      const present = DRAWN.map((motion, channel) => shown[motion] && (held?.counts[channel] ?? 0) > 0);
+      // Wanted before the game has started - a page with no loading screen, or a camera that starts close in - their
+      // programs are asked for now.
+      if (present.includes(true)) compileAll();
+      // A motion whose program the driver is still compiling waits for it, rather than the page waiting.
+      const moving = present.map((on, channel) => on && compiled[channel] === true);
       if (level === 'off' || held === null || !moving.includes(true)) {
         sprite.visible = false;
         return null;
@@ -306,7 +358,7 @@ export function createLandLayer(
       u.uFade = fade;
       u.uPixel = 1 / (levelLook.resolution * resolution);
       uniforms.update();
-      for (const pass of passes) pass.mesh.visible = moving[channelOf(pass.motion)!] === true;
+      passes.forEach((pass, channel) => (pass.mesh.visible = moving[channel] === true));
       motions.tune(wall, still);
 
       const width = Math.max(1, Math.ceil(view.width * levelLook.resolution));
@@ -327,6 +379,7 @@ export function createLandLayer(
       stopWatching();
       stopWatchingShaders();
       stopWatchingMotions();
+      stopCompiling.abort();
       meter.dispose();
       sprite.destroy();
       target.destroy(true);

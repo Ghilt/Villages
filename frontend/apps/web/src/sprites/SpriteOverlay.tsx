@@ -46,13 +46,15 @@ interface SpriteOverlayProps {
     { kind: 'house' | 'area' | 'character' | 'structure' | 'river' | 'lake' | 'sea'; id: string } | undefined;
   /** A person or a structure clicked on the map, which opens a window on it. */
   onPick: (thing: { kind: 'character' | 'structure'; id: string }) => void;
+  /** Whether the game has started, its loading screen lifted: handed in, as the startup is the app's. */
+  started: boolean;
 }
 
 /**
  * Holds the renderer for as long as the map lives, and hands it whatever should be on the map. The
  * renderer type is the only thing this file knows about Pixi, so swapping it is a one-line change here.
  */
-export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick }: SpriteOverlayProps) {
+export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick, started }: SpriteOverlayProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const uncolouringRef = useRef<HTMLCanvasElement | null>(null);
   // Held in state, so that a renderer made after a switch was thrown is handed it the moment it exists.
@@ -121,6 +123,10 @@ export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick }: 
   useEffect(() => {
     renderer?.setScene(scene);
   }, [renderer, scene]);
+
+  useEffect(() => {
+    if (started) renderer?.afterStart();
+  }, [renderer, started]);
 
   /**
    * Picking a structure or a person, which opens an **inspect window** on them.

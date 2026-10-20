@@ -58,6 +58,11 @@ export interface SpriteRenderer {
    * house has only revealed; see `fog/uncolouring.ts` and decision record 0065.
    */
   mount(container: HTMLElement, uncolouring?: HTMLCanvasElement): Promise<void>;
+  /**
+   * The game has started, its loading screen lifted: what was kept off the start so as not to slow it may begin, the
+   * land's programs handed to the graphics driver (decision record 0102).
+   */
+  afterStart(): void;
   /** What is on the map now. The renderer works out what changed since the last, and draws once. */
   setScene(scene: Scene): void;
   /**
