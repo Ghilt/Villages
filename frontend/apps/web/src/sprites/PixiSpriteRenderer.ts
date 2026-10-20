@@ -9,6 +9,7 @@ import { createCritterLayer } from './critters/CritterLayer';
 import { createFogLayer } from './FogLayer';
 import { createGroundLayer, type GroundLayer } from './ground/GroundLayer';
 import { whereSceneryGrows } from './ground/growing';
+import { createHazeLayer } from './hazeLayer';
 import { createLandLayer } from './land/LandLayer';
 import { soonest, type Layer } from './layer';
 import { buildMarkTextures } from './markTextures';
@@ -23,9 +24,6 @@ import { LONGEST_STEP_MS } from './twoForms';
 
 /** What the dev server says when it has cut the art again, `vite/artApi.ts`. */
 const ART_CUT = 'villages:art-cut';
-
-/** Twelve frames a second: all a haze moving about a unit a second needs, and a fifth of what a display draws. */
-const UNDULATION_MS = 83;
 
 /** Nothing on the map yet: what the renderer holds until the first scene is handed it. */
 const NOTHING: Scene = {
@@ -94,8 +92,6 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
    * motion. See step 7 of docs/plans/fog-of-war.md.
    */
   let undulation: ReturnType<typeof setTimeout> | null = null;
-  const stillHaze =
-    typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /**
    * Asks for one frame, however often it is asked before the frame comes: what every change here does - a
@@ -132,17 +128,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   let unpaint: (() => void) | null = null;
 
   /** The fog, and the haze's clock with it. */
-  const hazeLayer: Layer = {
-    draw(view: CameraView, now: number): number | null {
-      fog.follow(view);
-      if (stillHaze) {
-        return null;
-      }
-      fog.setTime(now / 1000);
-      return fog.undulates(view) ? UNDULATION_MS : null;
-    },
-    destroy: () => fog.destroy(),
-  };
+  const hazeLayer = createHazeLayer(fog);
 
   /** The colour taken out of the map, on the canvas beneath this one. */
   const uncolouringLayer: Layer = {
