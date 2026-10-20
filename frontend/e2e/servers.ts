@@ -75,18 +75,23 @@ export interface Keeping {
 }
 
 /**
- * Starts the game server on `port`, keeping its world as told, and resolves once it answers. Its output goes to
- * .logs/e2e-game.log. It is Gradle's bootRun, which builds what has changed first, so the first start can take
- * a minute.
+ * Starts the game server of the tree at `root` on `port`, keeping its world as told, and resolves once it answers.
+ * Its output goes to `log` under this repository's .logs. It is Gradle's bootRun, which builds what has changed first,
+ * so the first start can take a minute.
  */
-export async function startGame(port: number, { store, broker, database }: Keeping): Promise<void> {
+export async function startGame(
+  port: number,
+  { store, broker, database }: Keeping,
+  root = ROOT,
+  log = 'e2e-game.log',
+): Promise<void> {
   mkdirSync(join(ROOT, '.logs'), { recursive: true });
-  const out = openSync(join(ROOT, '.logs', 'e2e-game.log'), 'a');
+  const out = openSync(join(ROOT, '.logs', log), 'a');
   const args = `--server.port=${port} --villages.store=${store} --villages.broker=${broker} --villages.mongo.database=${database}`;
   // Named whole: a shell told not to look in its own folder for commands finds no gradlew.bat otherwise.
-  const gradlew = windows ? `"${join(ROOT, 'backend', 'gradlew.bat')}"` : './gradlew';
+  const gradlew = windows ? `"${join(root, 'backend', 'gradlew.bat')}"` : './gradlew';
   spawn(`${gradlew} --console=plain :app:bootRun "--args=${args}"`, {
-    cwd: join(ROOT, 'backend'),
+    cwd: join(root, 'backend'),
     shell: true,
     stdio: ['ignore', out, out],
     detached: !windows,
@@ -99,11 +104,16 @@ export async function startGame(port: number, { store, broker, database }: Keepi
  * a process of Gradle's own that outlives the command that started it.
  */
 export async function stopGame(port: number): Promise<void> {
+  await stopListening(port, 'the game server');
+}
+
+/** Stops whatever listens on `port`, the processes under it too, and resolves once nothing answers there. */
+export async function stopListening(port: number, what: string): Promise<void> {
   for (const pid of listeners(port)) {
     if (windows) spawnSync('taskkill', ['/PID', String(pid), '/T', '/F'], { stdio: 'ignore' });
     else spawnSync('kill', ['-9', String(pid)], { stdio: 'ignore' });
   }
-  await until(async () => !(await answers(port)), 30_000, `the game server on ${port} to stop`);
+  await until(async () => !(await answers(port)), 30_000, `${what} on ${port} to stop`);
 }
 
 /** The processes listening on a port. */
@@ -132,7 +142,8 @@ export function answers(port: number): Promise<boolean> {
   });
 }
 
-async function until(ready: () => Promise<boolean>, ms: number, what: string): Promise<void> {
+/** Resolves once `ready` says so, or rejects after `ms`, saying what it waited for. */
+export async function until(ready: () => Promise<boolean>, ms: number, what: string): Promise<void> {
   const giveUp = Date.now() + ms;
   while (!(await ready())) {
     if (Date.now() > giveUp) throw new Error(`gave up waiting for ${what}`);
