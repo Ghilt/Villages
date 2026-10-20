@@ -1027,3 +1027,34 @@ and `-- --drop` takes them off; by hand only.
   server's heap limit (8 GB, pinned so that runs compare), where it bent and why, and every stage's numbers. A run
   stopped with Ctrl+C is written as aborted, with the stages it got through. The file is committed with the work it
   measured, so the history travels to main; the performance page charts it.
+
+## What the shaders cost
+
+- **The shader measure**, what the game's shaders cost the graphics card at fixed places on the map:
+  `npm run perf:shaders --prefix frontend`. It starts a dev server and a game server of its own on ports the machine
+  says are free, the game server's world in memory, so no tree's servers or world are touched; opens the game in this
+  machine's own Chrome on the graphics card, without a window when Chrome will draw there with the card's timer and
+  in one when it will not; sets every shader to high and lifts the fog, so the game server sends every stand; and
+  measures eight places at 1920 by 1080 in the player's camera, each a screen of one kind of ground found in the flat
+  tiles: tundra, bog, ice, sand, grassland, forest and a coast at zoom 10, and the clouds from zoom 6, where they are
+  drawn. At each place it waits until what is drawn stops changing, draws frames back to back so the card is at its
+  working clock, and times every frame twice over in turn: as a whole, and run by run under the name of what drew,
+  the map's style layer (`map:water`, `map:painterly`) or Pixi's program (`sprites:land`, `sprites:clouds`,
+  `sprites:scenery`), each run its own query, whose small cost is worked out from the two and taken back out of the
+  parts. It keeps the fast frames, the ones at or below the twentieth percentile, because the same frame drawn back
+  to back takes one of two times a fifth to a quarter apart, frame by frame, as though something else on the card
+  now and then lands inside the timing, and how many land in the slower changes from round to round. It measures
+  every place on a page opened afresh, because a page that has been round the other places draws the same place a
+  tenth slower; and three times over, keeping the fastest, because one fresh page draws a place up to a sixth slower
+  than the next and keeps to it. Before each place it draws until two bursts in a row agree, so the card has come up
+  to its clock. It holds the wall clock while it measures, so the clouds and the wind are where they were the last
+  time. It prints a line a place - the frame, its spread, the CPU's part, how far apart the two rounds came out, and
+  the five costliest parts - and leaves the whole reading in `.logs/perf/shaders-<time>.json` and a picture of every
+  place beside it. `--places tundra,bog` measures some, `--rounds 1` once each, `--check` also measures the coast with the
+  water off to see the water's part agree, `--tree <dir>` measures another checkout. It refuses a card that is more
+  than a quarter busy before it starts, because whatever else is drawing would be in every time; `--anyway` measures
+  all the same. About four minutes, and a minute more the first time, while the game server compiles. See
+  `docs/plans/performance-history.md`.
+- **The game's own cost lines**, the ones the log says once a level for the water, the land, the clouds and the
+  trees, stay as a quick look: they are timed at the layer's own frame rate, on a card that has idled down, and read
+  two to three times what the measure does. The measure is the number to compare.

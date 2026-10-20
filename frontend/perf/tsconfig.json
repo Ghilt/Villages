@@ -1,0 +1,10 @@
+{
+  "$comment": "The performance tool: Chrome on the machine's graphics card driving the game, on Node, with Playwright.",
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM"],
+    "types": ["node"],
+    "allowImportingTsExtensions": true
+  },
+  "include": [".", "../e2e/servers.ts"]
+}

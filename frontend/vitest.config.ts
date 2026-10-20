@@ -45,6 +45,15 @@ export default defineConfig({
       },
       {
         test: {
+          // The performance tool's own reckoning: what a run of frames comes to, and where a tree keeps its levels.
+          name: 'perf',
+          root: 'perf',
+          environment: 'node',
+          include: ['**/*.test.ts'],
+        },
+      },
+      {
+        test: {
           // The repository's own rules, which read the whole tree: the size ceilings. See docs/adr/0072.
           name: 'tools',
           root: 'tools',
