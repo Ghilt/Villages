@@ -1154,3 +1154,82 @@ log counts under `stands` and the Scenery section says how many it holds. Every 
 where it would be with every stand in the world, and when the house sees further the trees there grow as the
 haze lifts. Without the game server nothing grows at all. The stand files are where only the game server reads
 them, so a page cannot fetch one for itself.
+
+---
+
+## Challenge
+
+Two things in the world measuring their strength against each other: a battle of armies, of wits, of coin, of
+faith. In Adam's words it is "the thing that models a resolution of a conflict between two participants",
+somewhere between a roll for a stat, which is too simple, and an autobattler, which is too complex.
+
+### What it is
+
+**Two sides and a rope.** At the middle of a challenge is the **tug**, one number from -100 to +100, and each
+side pulls it toward itself. A side that pulls it to its end has won outright; otherwise, when the challenge's
+seconds run out, the tug is the **outcome**: *+10 toward House Varga*. Won is ending on your side of the middle.
+It is the same whoever is watching: a player sees it from their own side, and a spectator sees who is ahead.
+
+**A progression of happenings.** A challenge lasts a number of seconds and is a **progression**: one
+**happening** after another, spaced over it, the first at once - *Violence, Violence, Holy and Violence* for a
+battle. A happening has one or more **aspects**, from ten in five linked pairs, each an aspect and its
+**anti-aspect**: Violence and Diplomacy, Holy and Reason, Authority and Freedom, Greed and Generosity, Nature and
+Industry. A pair is one dimension with two poles. **Challenge kinds** - a battle, a debate, a trade war, a
+sermon - each draw progressions of their own flavour.
+
+**Slices.** To enter a challenge a side brings one or more **slices**. A slice has an aspect, a **power**, an
+**integrity**, a **summon count**, two **effects** of its own aspect, and the slots its effects bring, which take
+a key figure or a structure. Each happening puts one slice of each side on stage: the one of its aspect, else the
+one of its anti-aspect, else one drawn at random. A slice whose aspect or anti-aspect the happening has gets the
+**aspect boost**, half as much again on whatever it does.
+
+**Effects** are **triggers**, which fire when a happening puts their slice on stage, and **passives**, which work
+while it stays there. Thirty to begin with, three to an aspect: Violence's Sellswords hire Mercenaries, Holy's
+Divine Rebuke wears the enemy's integrity down for its Priests to feed on, Greed's Collector costs its side now
+and pours its **coffer** out later. Many **summon**: a Mercenary, a Rebel, a Machine, that stays on the field
+and pulls once a second until it is killed, turned, or the challenge ends, a side holding as many as its slices'
+summon counts add up to.
+
+**Things on the line.** A slot may put what is in it on the line: a building or a person then stands in the
+challenge as a summon, stronger than most and paying its side as it arrives, and if it is killed the building
+is **damaged** or the person **fatigued**, losing a tenth of their **effectiveness**. A building at nothing is a
+ruin.
+
+**It is resolved at once and shown after.** A challenge is worked out the instant it is raised and then played
+in front of the player as a spectacle, so the synergies and the slices working with and against each other can
+be watched. The outcome goes to whatever raised it: a battle's victor, a debate's winner, the piety Sanctuary
+pays a victorious house.
+
+### What it is for
+
+**One way of settling any conflict.** Armies, wits, trade and faith are settled by the same machine, told apart
+by the aspects of their happenings and the slices brought to them, so a new kind of conflict costs a challenge
+kind and not a mechanic.
+
+**Strength that depends on the ground it is tested on.** A violent slice shines in a battle and is worse than
+useless in a sermon. What a house builds its slices for, and which challenges it can be drawn into, are where
+the choice is.
+
+**Stakes.** Putting the cathedral on the line pulls hard and risks it; the damage outlives the challenge.
+
+### Look and feel
+
+Not designed: there is no pane yet. The spectacle is the one thing settled - resolved at once and played out,
+so the player sees what happened and why, the way a report card shows the scoring of a level.
+
+### Not decided
+
+- **Who raises a challenge, and when**: a battle over a structure, a debate a dialogue starts, a rival.
+- **The pane and the spectacle**: how a challenge is shown to the player, and how a side chooses its slices.
+- **How a house comes by slices**: every house starts with the same one, and others are unlocked "in different
+  ways" that are not named yet.
+- **What damage and fatigue do in the world** beyond the number, and how either is mended.
+- **Effects outside their slice's aspect**, which Adam named as a design space for later.
+- **Relics and spirit items in slots**, and aspects beyond the first ten.
+- **The numbers and the words**: every effect's numbers and name is a first draft, to be tuned on the page.
+
+### Where it stands
+
+Planned on 2026-10-20 and not in the game: its first iteration is an engine on the server and a simulator on
+`/admin/inspect-challenges`, and nothing is built yet. Decision record 0105 is the shape and
+`docs/plans/challenges.md` the rules as settled and the steps, one commit each.
