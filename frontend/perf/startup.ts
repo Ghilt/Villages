@@ -54,7 +54,7 @@ async function loadOnce(browser: Browser, url: string): Promise<Load> {
     if (frame === page.mainFrame()) reloads += 1;
   });
   const asked = Date.now();
-  await page.goto(url, { waitUntil: 'commit' });
+  await page.goto(url, { waitUntil: 'commit', timeout: 120_000 });
   // Done when the loading screen has lifted; before there was a screen, when the map had drawn; and on a built page
   // from then, which hides the map's handle, when its last tile came.
   const readyAt = await page

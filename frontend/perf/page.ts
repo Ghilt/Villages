@@ -35,7 +35,8 @@ export async function openGame(
   url: string,
   first?: (page: Page) => Promise<void>,
 ): Promise<{ contexts: ReturnType<Perf['contexts']> }> {
-  await page.goto(url);
+  // A dev server's first page of an old tree can take more than the default half a minute (2026-10-07's did).
+  await page.goto(url, { timeout: 120_000 });
   await page.waitForFunction(
     () => (globalThis as unknown as Window).villagesMap?.style?._loaded === true,
     null,

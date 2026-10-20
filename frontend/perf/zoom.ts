@@ -72,7 +72,8 @@ function pacing(watched: Watched, from: number, to: number): Pacing {
 
 /** Opens the game on a fresh page, far out over a place, the panes put away and the fog lifted, and lets it settle. */
 async function settledFarOut(page: Page, url: string, place: Place): Promise<void> {
-  await page.goto(url);
+  // A dev server's first page of an old tree can take more than the default half a minute (2026-10-07's did).
+  await page.goto(url, { timeout: 120_000 });
   await page.waitForFunction(
     () => (globalThis as unknown as Win).villagesMap?.style?._loaded === true,
     null,
