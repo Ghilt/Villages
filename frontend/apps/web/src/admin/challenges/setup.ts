@@ -6,11 +6,15 @@ import type { Asked } from './useSimulator';
 /** An aspect as the page says it: `Violence`. */
 export const said = (aspect: string) => aspect.charAt(0).toUpperCase() + aspect.slice(1);
 
-/** A challenge as the page is building it: each side's slices, the progression, and the seed as typed, `''` to draw one. */
+/**
+ * A challenge as the page is building it: each side's slices, the progression written by hand, the challenge kind to
+ * draw one from instead, `''` for none, and the seed as typed, `''` to draw one.
+ */
 export interface Draft {
   readonly a: readonly SliceView[];
   readonly b: readonly SliceView[];
   readonly progression: ProgressionView;
+  readonly kind: string;
   readonly seed: string;
 }
 
@@ -71,13 +75,19 @@ export const SAMPLE: Draft = {
     },
   ],
   progression: { seconds: 30, happenings: [['violence'], ['diplomacy'], ['violence', 'diplomacy']] },
+  kind: '',
   seed: '',
 };
 
-/** The draft as the wire asks for it: a seed typed as a whole number, or none for the server to draw. */
+/**
+ * The draft as the wire asks for it: the progression written by hand, or the kind to draw one from; a seed typed as a
+ * whole number, or none for the server to draw.
+ */
 export function askedOf(draft: Draft): Asked {
   const seed = draft.seed.trim();
-  const asked = { a: [...draft.a], b: [...draft.b], progression: draft.progression };
+  const sides = { a: [...draft.a], b: [...draft.b] };
+  const asked =
+    draft.kind === '' ? { ...sides, progression: draft.progression } : { ...sides, kind: draft.kind };
   return /^\d+$/.test(seed) && Number.isSafeInteger(Number(seed)) ? { ...asked, seed: Number(seed) } : asked;
 }
 

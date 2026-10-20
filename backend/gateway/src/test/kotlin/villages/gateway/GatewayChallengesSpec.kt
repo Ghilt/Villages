@@ -60,6 +60,17 @@ class GatewayChallengesSpec : StringSpec({
         noAspect.reason shouldBe "not an aspect: valour"
     }
 
+    "a progression is drawn from the challenge kind a page names, and sent with what it came to" {
+        val (page, sent) = Rig().page()
+
+        page.receive(simulating("violence", "violence.sellswords").replace(""""progression":{"seconds":5,"happenings":[["reason"]]}""", """"kind":"skirmish""""))
+
+        val fought = sent.single() as ChallengeSimulated
+        fought.progression.seconds shouldBe 5
+        fought.progression.happenings shouldBe listOf(listOf("reason"))
+        fought.outcome.tug shouldBe 40.0
+    }
+
     "a server with its instruments closed refuses it" {
         val (page, sent) = Rig(instrumentsOpen = false).page()
 

@@ -35,6 +35,13 @@ describe('the challenge as the page builds it', () => {
     expect(seedReads('9007199254740993')).toBe(false);
   });
 
+  it('asks for a progression drawn from a kind in place of the one written by hand', () => {
+    const asked = askedOf({ ...SAMPLE, kind: 'battle' });
+    expect(asked.kind).toBe('battle');
+    expect('progression' in asked).toBe(false);
+    expect('kind' in askedOf(SAMPLE)).toBe(false);
+  });
+
   it('spaces the happenings as the engine does', () => {
     expect(startsOf({ seconds: 30, happenings: [['violence'], ['diplomacy'], ['reason']] })).toEqual([
       0, 10, 20,

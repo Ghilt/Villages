@@ -65,7 +65,10 @@ export function Simulator({ content }: { content: Challenges | null }) {
       )}
       <ProgressionEditor
         progression={draft.progression}
+        kind={draft.kind}
+        kinds={content?.kinds ?? []}
         onChange={(progression) => setDraft({ ...draft, progression })}
+        onKind={(kind) => setDraft({ ...draft, kind })}
       />
       <div className="challenges-run inspect-each">
         <label>

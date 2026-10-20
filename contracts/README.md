@@ -152,3 +152,5 @@ recorded over. See decision record 0037. What each one changed:
 - **58** - `simulateChallenge`, answered by `challengeSimulated`, every moment of a challenge the game server fought out
   and what it came to, or by `simulationRefused`. Instruments, refused while they are closed; nothing is stored. See
   decision record 0105.
+- **59** - `simulateChallenge` names a challenge `kind` to draw its progression from, in place of a `progression` written
+  by hand; either is optional on the wire, and the server refuses a frame with neither. See decision record 0105.

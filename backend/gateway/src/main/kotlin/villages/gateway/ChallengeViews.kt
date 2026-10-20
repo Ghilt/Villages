@@ -1,8 +1,8 @@
 package villages.gateway
 
+import villages.application.Fought
 import villages.domain.challenge.Actor
 import villages.domain.challenge.Aspect
-import villages.domain.challenge.ChallengeResult
 import villages.domain.challenge.ChallengeSetup
 import villages.domain.challenge.ChallengeSlice
 import villages.domain.challenge.Fits
@@ -16,7 +16,6 @@ import villages.protocol.LossView
 import villages.protocol.MomentView
 import villages.protocol.OutcomeView
 import villages.protocol.ProgressionView
-import villages.protocol.SimulateChallenge
 import villages.protocol.SliceView
 import villages.protocol.StandInView
 import villages.protocol.SummonSeenView
@@ -25,9 +24,7 @@ import villages.protocol.SummonSeenView
  * A challenge between the wire and the domain: the page's setup read into the engine's, a name it cannot read refused
  * by name, and a challenge fought written out flat, every moment a row the page can tabulate. See decision record 0105.
  */
-internal fun SimulateChallenge.toSetup(): ChallengeSetup = ChallengeSetup(a.map { it.toSlice() }, b.map { it.toSlice() }, progression.toProgression())
-
-private fun SliceView.toSlice(): ChallengeSlice = ChallengeSlice(
+internal fun SliceView.toSlice(): ChallengeSlice = ChallengeSlice(
     aspect = asAspect(aspect),
     power = power,
     integrity = integrity,
@@ -41,7 +38,7 @@ private fun SliceView.toSlice(): ChallengeSlice = ChallengeSlice(
     },
 )
 
-private fun ProgressionView.toProgression(): Progression =
+internal fun ProgressionView.toProgression(): Progression =
     Progression(seconds, happenings.map { aspects -> Happening(aspects.map(::asAspect)) })
 
 private fun Progression.toView(): ProgressionView =
@@ -51,7 +48,9 @@ private fun Progression.toView(): ProgressionView =
 private fun asAspect(name: String): Aspect =
     Aspect.entries.firstOrNull { it.name.lowercase() == name } ?: throw IllegalArgumentException("not an aspect: $name")
 
-internal fun ChallengeResult.toFrame(id: String, setup: ChallengeSetup, catalogue: String): ChallengeSimulated {
+internal fun Fought.toFrame(id: String, catalogue: String): ChallengeSimulated {
+    val (setup, result) = this
+    val (seed, moments, outcome) = result
     val summons = moments.flatMap { listOfNotNull(it.actor, it.target) }.filterIsInstance<Actor.OfSummon>()
         .distinctBy { it.serial }.sortedBy { it.serial }
         .map { SummonSeenView(it.serial, it.kind, it.called) }

@@ -1,5 +1,6 @@
 package villages.protocol
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 
@@ -10,14 +11,17 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
  */
 
 /**
- * Fight this challenge out: [id] the page's own, which the answer carries back; each side's slices; its progression;
- * and the [seed], a whole number the page can type back, or none for the server to draw one.
+ * Fight this challenge out: [id] the page's own, which the answer carries back; each side's slices; its progression
+ * written by hand, or the challenge [kind] to draw one from; and the [seed], a whole number the page can type back, or
+ * none for the server to draw one.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class SimulateChallenge(
     val id: String,
     val a: List<SliceView>,
     val b: List<SliceView>,
-    val progression: ProgressionView,
+    val progression: ProgressionView? = null,
+    val kind: String? = null,
     val seed: Long? = null,
 ) : ClientFrame
 

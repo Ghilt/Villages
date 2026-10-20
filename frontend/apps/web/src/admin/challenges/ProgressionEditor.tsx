@@ -1,26 +1,81 @@
 import { ASPECTS } from '@villages/world';
+import type { ChallengeKind } from '@villages/world';
 import type { ProgressionView } from '@villages/protocol';
 
 import { MOST_SECONDS, said, startsOf } from './setup';
 
 /**
- * The progression being built by hand: how many seconds the challenge lasts, and its happenings in order, each one
- * aspect or two, beginning where the engine spaces them. Never more happenings than seconds. See the plan's simulator.
+ * The progression: drawn from a challenge kind by the seed, or built by hand - how many seconds the challenge lasts,
+ * and its happenings in order, each one aspect or two, beginning where the engine spaces them, never more happenings
+ * than seconds. See the plan's simulator and its challenge engine.
  */
 export function ProgressionEditor({
   progression,
+  kind,
+  kinds,
   onChange,
+  onKind,
 }: {
   progression: ProgressionView;
+  kind: string;
+  kinds: readonly ChallengeKind[];
   onChange: (progression: ProgressionView) => void;
+  onKind: (kind: string) => void;
 }) {
   const { seconds, happenings } = progression;
   const starts = startsOf(progression);
   const setHappening = (at: number, aspects: string[]) =>
     onChange({ seconds, happenings: happenings.map((was, index) => (index === at ? aspects : was)) });
+  const drawing = kinds.find((one) => one.id === kind);
   return (
     <div className="challenges-progression">
       <h3 className="inspect-group__subtitle">progression</h3>
+      <label>
+        <span className="inspect-key">drawn from</span>{' '}
+        <select
+          aria-label="draw the progression from"
+          value={kind}
+          onChange={(event) => onKind(event.target.value)}
+        >
+          <option value="">nothing: written by hand</option>
+          {kinds.map((one) => (
+            <option key={one.id} value={one.id}>
+              {one.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      {drawing !== undefined ? (
+        <p className="inspect-note">
+          {drawing.words} {drawing.seconds[0]} to {drawing.seconds[1]} seconds, {drawing.happenings[0]} to{' '}
+          {drawing.happenings[1]} happenings, drawn from the seed: the same seed draws the same progression.
+        </p>
+      ) : (
+        <HandWritten
+          progression={progression}
+          starts={starts}
+          onChange={onChange}
+          setHappening={setHappening}
+        />
+      )}
+    </div>
+  );
+}
+
+function HandWritten({
+  progression,
+  starts,
+  onChange,
+  setHappening,
+}: {
+  progression: ProgressionView;
+  starts: readonly number[];
+  onChange: (progression: ProgressionView) => void;
+  setHappening: (at: number, aspects: string[]) => void;
+}) {
+  const { seconds, happenings } = progression;
+  return (
+    <>
       <label>
         <span className="inspect-key">seconds</span>{' '}
         <input
@@ -77,7 +132,7 @@ export function ProgressionEditor({
           add a happening
         </button>
       )}
-    </div>
+    </>
   );
 }
 

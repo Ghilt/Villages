@@ -23,8 +23,8 @@ internal class ChallengesPart(
     private fun fought(frame: SimulateChallenge): ServerFrame {
         if (!open) return SimulationRefused(frame.id, "instrumentsClosed", "simulateChallenge is one of the instruments, and they are closed here")
         return try {
-            val setup = frame.toSetup()
-            simulator.simulate(setup, frame.seed).toFrame(frame.id, setup, fingerprint())
+            simulator.simulate(frame.a.map { it.toSlice() }, frame.b.map { it.toSlice() }, frame.progression?.toProgression(), frame.kind, frame.seed)
+                .toFrame(frame.id, fingerprint())
         } catch (refused: SetupRefused) {
             SimulationRefused(frame.id, "invalidSetup", refused.message ?: "the setup cannot be fought")
         } catch (unreadable: IllegalArgumentException) {

@@ -1234,6 +1234,6 @@ Planned on 2026-10-20 and not in the game: its first iteration is an engine on t
 `/admin/inspect-challenges`. The content - thirty effects, nine summons, four kinds - is a catalogue that page shows
 and edits, and the rules' own numbers are the balance's. The engine fights a challenge out on the server, second by
 second, with all thirty effects, and buildings and people put on the line. On the page's simulator Adam builds
-both sides and a progression, has the engine fight them out through one of his instruments, and reads every moment of
+both sides and a progression, or has one drawn from a challenge kind, has the engine fight them out through one of his instruments, and reads every moment of
 it, the tug drawn, and what it came to; a seed fights the same challenge again. Decision record 0105 is the shape and
 `docs/plans/challenges.md` the rules as settled and the steps, one commit each.

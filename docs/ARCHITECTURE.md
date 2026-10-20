@@ -639,7 +639,9 @@ every second, an enemy summon about to act or having acted, a friend's acting, a
 aura on the other side's power, keeping its slice on stage - and answers with the changes it asks for, never touching
 the contest itself; `Contest` lands them. The shelf refuses a catalogue naming an effect the code has no behaviour
 for, or not giving a number a behaviour reads, and `ChallengeBehavioursTest` holds the other way, code no entry
-names.
+names. The engine's other half, `Progressions.draw`, draws a progression from a challenge kind of the catalogue -
+its seconds, its happenings and their aspects by the kind's weights - from a seed worked out from the challenge's, so
+one seed gives the same progression and the same challenge fought on it.
 
 Three things follow for the architecture:
 

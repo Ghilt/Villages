@@ -28,15 +28,17 @@ export const progressionViewSchema = z.object({
 });
 
 /**
- * Fight this challenge out: the page's own id, which the answer carries back; each side's slices; the progression;
- * and the seed, a whole number the page can type back, or none for the server to draw one.
+ * Fight this challenge out: the page's own id, which the answer carries back; each side's slices; the progression
+ * written by hand, or the challenge kind to draw one from; and the seed, a whole number the page can type back, or none
+ * for the server to draw one. A frame with neither progression nor kind is refused.
  */
 export const simulateChallengeSchema = z.object({
   type: z.literal('simulateChallenge'),
   id: z.string(),
   a: z.array(sliceViewSchema),
   b: z.array(sliceViewSchema),
-  progression: progressionViewSchema,
+  progression: progressionViewSchema.optional(),
+  kind: z.string().optional(),
   seed: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).optional(),
 });
 
