@@ -15,7 +15,6 @@ import org.bson.Document
 import org.occurrent.eventstore.api.WriteCondition
 import org.occurrent.eventstore.api.WriteConditionNotFulfilledException
 import org.testcontainers.DockerClientFactory
-import org.testcontainers.mongodb.MongoDBContainer
 import villages.application.Fault
 import villages.application.FaultBoard
 import villages.application.Provenance
@@ -52,8 +51,7 @@ class MongoWorldDockerSpec : StringSpec({
     }
 
     // The image infra/docker-compose.yml runs, so the store is tested on the MongoDB the game keeps its world in.
-    val mongo by lazy { MongoDBContainer("mongo:8.0").withReplicaSet().also { it.start() } }
-    afterSpec { if (docker) mongo.stop() }
+    val mongo by lazy { DockerStack.mongo }
 
     fun world(database: String, faults: FaultBoard = FaultBoard()) = MongoWorld(mongo.connectionString, database, faults)
 

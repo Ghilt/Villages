@@ -52,6 +52,11 @@ Every increment lands with the test that proves it. The tests are the reason we 
   `MongoWorldDockerSpec` is the pattern: `(needs Docker)` at the end of each case's name, and each case
   `.config(enabledOrReasonIf = needsDocker)`. Each case, because Kotest 6 ignored the same condition set once
   as the spec's `defaultTestConfig` and ran them all, which was found by pretending Docker was not there.
+- The Docker specs of a module share one MongoDB and one RabbitMQ, its `DockerStack`, started together the first time
+  a spec asks and stopped by Testcontainers' reaper when the tests' JVM ends: three containers for the backend's
+  tests where every spec started its own seven, and the tests from 60 s to 52 (2026-10-20). A Docker spec keeps to
+  databases and virtual hosts of names no other spec of its module uses, never reads a whole server, and starts again
+  in a `finally` whatever it stops.
 
 ## Running
 

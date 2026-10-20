@@ -6,7 +6,6 @@ import io.kotest.core.test.TestCase
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import org.testcontainers.DockerClientFactory
-import org.testcontainers.mongodb.MongoDBContainer
 import villages.application.Fault
 import villages.application.FaultBoard
 import villages.application.Provenance
@@ -38,8 +37,7 @@ class CarryDockerSpec : StringSpec({
         if (docker) Enabled.enabled else Enabled.disabled("needs Docker, and Docker is not running")
     }
 
-    val mongo by lazy { MongoDBContainer("mongo:8.0").withReplicaSet().also { it.start() } }
-    afterSpec { if (docker) mongo.stop() }
+    val mongo by lazy { DockerStack.mongo }
 
     fun heardOn(board: FaultBoard) = CopyOnWriteArrayList<Fault>().also { heard -> board.watch { heard += it } }
 

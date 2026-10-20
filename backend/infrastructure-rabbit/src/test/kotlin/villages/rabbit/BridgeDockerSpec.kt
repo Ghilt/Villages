@@ -7,8 +7,6 @@ import io.kotest.core.test.TestCase
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import org.testcontainers.DockerClientFactory
-import org.testcontainers.mongodb.MongoDBContainer
-import org.testcontainers.rabbitmq.RabbitMQContainer
 import villages.application.Fault
 import villages.application.FaultBoard
 import villages.application.Provenance
@@ -44,17 +42,8 @@ class BridgeDockerSpec : StringSpec({
         if (docker) Enabled.enabled else Enabled.disabled("needs Docker, and Docker is not running")
     }
 
-    val mongo by lazy { MongoDBContainer("mongo:8.0").withReplicaSet().also { it.start() } }
-    val rabbit by lazy {
-        RabbitMQContainer("rabbitmq:4.3-management").withAdminUser("villages").withAdminPassword("villages")
-            .also { it.start() }
-    }
-    afterSpec {
-        if (docker) {
-            mongo.stop()
-            rabbit.stop()
-        }
-    }
+    val mongo by lazy { DockerStack.mongo }
+    val rabbit by lazy { DockerStack.rabbit }
 
     val keys = RoutingKeys { "1203" }
 
@@ -193,9 +182,12 @@ class BridgeDockerSpec : StringSpec({
                     world.executor.execute(founding(houses[0]), told())
                     taken(broker, queue, 1)
                     rabbit.execInContainer("rabbitmqctl", "stop_app")
-                    world.executor.execute(founding(houses[1]), told())
-                    Thread.sleep(2_000)
-                    rabbit.execInContainer("rabbitmqctl", "start_app")
+                    try {
+                        world.executor.execute(founding(houses[1]), told())
+                        Thread.sleep(2_000)
+                    } finally {
+                        rabbit.execInContainer("rabbitmqctl", "start_app")
+                    }
 
                     taken(broker, queue, 1).map(::streamOf) shouldBe listOf(houses[1].stream)
                 }

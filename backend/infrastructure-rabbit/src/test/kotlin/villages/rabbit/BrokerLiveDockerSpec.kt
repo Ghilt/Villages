@@ -8,8 +8,6 @@ import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import org.testcontainers.DockerClientFactory
-import org.testcontainers.mongodb.MongoDBContainer
-import org.testcontainers.rabbitmq.RabbitMQContainer
 import villages.application.Fault
 import villages.application.FaultBoard
 import villages.application.NamedSubscriber
@@ -52,17 +50,8 @@ class BrokerLiveDockerSpec : StringSpec({
         if (docker) Enabled.enabled else Enabled.disabled("needs Docker, and Docker is not running")
     }
 
-    val mongo by lazy { MongoDBContainer("mongo:8.0").withReplicaSet().also { it.start() } }
-    val rabbit by lazy {
-        RabbitMQContainer("rabbitmq:4.3-management").withAdminUser("villages").withAdminPassword("villages")
-            .also { it.start() }
-    }
-    afterSpec {
-        if (docker) {
-            mongo.stop()
-            rabbit.stop()
-        }
-    }
+    val mongo by lazy { DockerStack.mongo }
+    val rabbit by lazy { DockerStack.rabbit }
 
     /** A world carried by RabbitMQ, the bridge running, and a feed over it that follows the broker. */
     class Carried(val world: MongoWorld, val carried: CarriedWorld, val faults: FaultBoard, broker: Broker) : AutoCloseable {
@@ -170,9 +159,11 @@ class BrokerLiveDockerSpec : StringSpec({
                 tree.feed.subscribe(Start.FROM_THE_BEGINNING, NamedSubscriber("Watching") { handed += it.stream }).use {
                     waitFor("the first handed") { handed.size == 1 }
                     rabbit.execInContainer("rabbitmqctl", "stop_app")
-                    val missed = found(tree.world)
-                    Thread.sleep(1_000)
-                    rabbit.execInContainer("rabbitmqctl", "start_app")
+                    val missed = try {
+                        found(tree.world).also { Thread.sleep(1_000) }
+                    } finally {
+                        rabbit.execInContainer("rabbitmqctl", "start_app")
+                    }
                     waitFor("the one written while the broker was away handed") { handed.size >= 2 }
                     val after = found(tree.world)
                     waitFor("the one written after handed") { handed.size >= 3 }

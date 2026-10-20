@@ -10,7 +10,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import org.testcontainers.DockerClientFactory
-import org.testcontainers.rabbitmq.RabbitMQContainer
 
 /**
  * A tree's broker against a real RabbitMQ: one of the spec's own in a container, the image the stack runs, with the
@@ -25,11 +24,7 @@ class BrokerDockerSpec : StringSpec({
         if (docker) Enabled.enabled else Enabled.disabled("needs Docker, and Docker is not running")
     }
 
-    val rabbit by lazy {
-        RabbitMQContainer("rabbitmq:4.3-management").withAdminUser("villages").withAdminPassword("villages")
-            .also { it.start() }
-    }
-    afterSpec { if (docker) rabbit.stop() }
+    val rabbit by lazy { DockerStack.rabbit }
 
     fun broker(virtualHost: String) =
         Broker("amqp://villages:villages@${rabbit.host}:${rabbit.amqpPort}", rabbit.httpUrl, virtualHost)
