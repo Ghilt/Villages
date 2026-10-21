@@ -5,7 +5,7 @@ import villages.domain.Stat
 /**
  * What a side brings to a challenge: a slice, its [aspect], its [power] and [integrity], how many summons it lets its
  * side have, the [effects] it carries by their ids, two at most and of its own aspect, and what stands in the slots
- * they bring, by the effect's id. See decision record 0105.
+ * they bring, by the effect's id. See decision record 0107.
  */
 data class ChallengeSlice(
     val aspect: Aspect,

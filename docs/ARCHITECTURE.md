@@ -617,7 +617,7 @@ simply created going forward - there is nothing to reconcile with the past, and 
 ## The challenge engine
 
 It is here because it is a part of the program; `MECHANICS.md` says what a challenge is, and
-`docs/plans/challenges.md` is the order it is built in. Decision record 0105 is the shape.
+`docs/plans/challenges.md` is the order it is built in. Decision record 0107 is the shape.
 
 The **challenge engine** fights a challenge out at once: `Challenge.resolve(setup, seed, catalogue, rules)`, in the
 domain's package `villages.domain.challenge`, is a pure function of what each side brings, a seed, the catalogue in
@@ -652,7 +652,7 @@ Three things follow for the architecture:
 - **Nothing is stored in this iteration.** When challenges reach the game, one event records one challenge on a
   stream of its own, carrying its setup, its seed, the catalogue's version, the engine's - `Challenge.ENGINE` - and
   its outcome, which is the truth: the spectacle is the moments fought again from the rest, the same only while the
-  engine is. Its five events' names are agreed in 0105.
+  engine is. Its five events' names are agreed in 0107.
 - **What must hold is held inside the run**: the tug within its ends, one slice on stage a side, no side past the sum
   of its slices' summon counts - checked as each summon comes - and a thing on the line on it once. A property spec
   fights hundreds of challenges made up at random against them, and a golden log keeps one challenge as a table.

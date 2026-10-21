@@ -5,7 +5,7 @@ package villages.domain.challenge
  * [boost]; how far the tug runs either way, [tugEnds]; what a building put on the line pays as it arrives for each of
  * its levels, [buildingArrives], and the shares of what a thing on the line arrives with that it pulls a second,
  * [pullShare], and adds to its slice's integrity, [integrityShare]; the effectiveness out of a hundred a building or a
- * person loses when killed on the line; and the [slice] every house starts with. See decision record 0105.
+ * person loses when killed on the line; and the [slice] every house starts with. See decision record 0107.
  */
 data class ChallengeRules(
     val boost: Double,

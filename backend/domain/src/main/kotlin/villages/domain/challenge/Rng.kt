@@ -3,7 +3,7 @@ package villages.domain.challenge
 /**
  * The challenge's luck, drawn from one seed: SplitMix64, written out here rather than taken from `kotlin.random`,
  * whose sequence a new Kotlin may change, so a seed gives the same challenge on every version of the engine's rules.
- * Its published reference values pin it (`RngSpec`). See decision record 0105.
+ * Its published reference values pin it (`RngSpec`). See decision record 0107.
  */
 class Rng(seed: Long) {
     private var state = seed

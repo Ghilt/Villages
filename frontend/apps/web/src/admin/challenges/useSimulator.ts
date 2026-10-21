@@ -25,7 +25,7 @@ export interface Simulator {
 /**
  * The challenges' page's link to the game server's engine: one connection that says no hello, through which the page
  * has a challenge fought out and is answered with every moment of it, each answer matched to its asking by an id of
- * the page's own. An instrument, which a server with its instruments closed refuses. See decision record 0105.
+ * the page's own. An instrument, which a server with its instruments closed refuses. See decision record 0107.
  */
 export function useSimulator(): Simulator {
   const [state, setState] = useState<Simulator['state']>('connecting');

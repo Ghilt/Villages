@@ -3,7 +3,7 @@ package villages.domain.challenge
 /**
  * One of the ten flavours a challenge is fought in, listed in their five pairs, each beside its [anti]-aspect: a pair
  * is one dimension with two poles. Not a structure's type, and `REASON` here is neither the resource nor the stat.
- * See decision record 0105.
+ * See decision record 0107.
  */
 enum class Aspect {
     VIOLENCE,

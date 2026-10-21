@@ -1,4 +1,4 @@
-# 0105. A challenge is resolved whole from a seed, on the server
+# 0107. A challenge is resolved whole from a seed, on the server
 
 - Status: accepted
 - Date: 2026-10-20

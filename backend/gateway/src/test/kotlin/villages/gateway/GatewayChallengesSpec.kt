@@ -9,7 +9,7 @@ import villages.protocol.SimulationRefused
 
 /**
  * The challenge through the gateway: the simulator's page, which says no hello, has the engine fight a challenge out
- * and is sent every moment of it, or a refusal saying why. An instrument, refused while they are closed. See 0105.
+ * and is sent every moment of it, or a refusal saying why. An instrument, refused while they are closed. See 0107.
  */
 class GatewayChallengesSpec : StringSpec({
 

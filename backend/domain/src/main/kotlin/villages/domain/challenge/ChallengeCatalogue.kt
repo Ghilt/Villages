@@ -6,7 +6,7 @@ import villages.domain.Stat
  * The challenge's content as the rules read it, from `world/catalogues/challenges.json`: the effects a slice carries,
  * the summons they bring, and the kinds of challenge a progression is drawn from. The names and the words are the
  * page's and are not here; an effect is known by its [ChallengeEffect.id] and its numbers by their names, which its
- * behaviour reads. A catalogue that breaks one of the rules below is refused whole. See decision record 0105.
+ * behaviour reads. A catalogue that breaks one of the rules below is refused whole. See decision record 0107.
  */
 data class ChallengeCatalogue(
     val effects: List<ChallengeEffect>,

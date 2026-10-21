@@ -14,7 +14,7 @@ import villages.domain.challenge.Rng
  * The challenge fought for Adam's simulator: the engine on the catalogue and the rules in force at the moment of
  * asking, on a progression written by hand or drawn from a challenge kind, from the seed the page gives or one drawn
  * here. The luck is choosing the seed, and it is the application's, as the fate engine's dice are (0083): the page may
- * give one because it is an instrument, never a player's. Nothing is stored. See decision record 0105.
+ * give one because it is an instrument, never a player's. Nothing is stored. See decision record 0107.
  */
 class ChallengeSimulator(
     private val catalogue: () -> ChallengeCatalogue,

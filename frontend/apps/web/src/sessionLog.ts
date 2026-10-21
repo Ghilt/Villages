@@ -221,7 +221,7 @@ export const sessionLog: GatewayListener = {
       case 'catalogueRevised':
       case 'revisionRefused':
         return;
-      // Nor fights a challenge out: the challenges' inspect page does, with no session (0105).
+      // Nor fights a challenge out: the challenges' inspect page does, with no session (0107).
       case 'challengeSimulated':
       case 'simulationRefused':
         return;

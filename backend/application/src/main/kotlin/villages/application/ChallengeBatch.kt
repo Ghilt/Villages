@@ -9,7 +9,7 @@ import villages.domain.challenge.Side
  * second, how many runs stood in each of [ROWS] bands of the tug, and in which band each run ended. The bands run from
  * pulled to B's end, the first, through twenty of equal width between the ends, to pulled to A's end, the last. A run
  * pulled to an end stays there until its own seconds are up; one whose time ran out counts no further. What the
- * simulator's page draws as a heatmap, the seed's run over it. See decision record 0105.
+ * simulator's page draws as a heatmap, the seed's run over it. See decision record 0107.
  */
 data class Batch(
     val runs: Int,

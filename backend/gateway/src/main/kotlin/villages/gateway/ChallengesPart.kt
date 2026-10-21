@@ -9,7 +9,7 @@ import villages.protocol.SimulationRefused
 /**
  * The challenge in the gateway: the simulator's page has the engine fight a challenge out, answered only to itself
  * with every moment, or refused with every reason the setup cannot be fought. An instrument, so a server with its
- * instruments closed refuses it, and nothing is stored; nobody arriving is told anything. See decision record 0105.
+ * instruments closed refuses it, and nothing is stored; nobody arriving is told anything. See decision record 0107.
  */
 internal class ChallengesPart(
     private val open: Boolean,

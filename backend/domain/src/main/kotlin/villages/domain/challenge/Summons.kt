@@ -7,7 +7,7 @@ import kotlin.math.max
  * state the moment began with; then the dead fall, so a summon both killed and turned is killed, and the room a death
  * leaves is there for what comes next; then summons turn and come, things come on the line, slices are worn and
  * summons silenced. Each change is said as it lands, a moment each. The rules that must hold are held here: no side
- * ever has more summons than its slices let it have, and a thing on the line comes on it once. See decision record 0105.
+ * ever has more summons than its slices let it have, and a thing on the line comes on it once. See decision record 0107.
  */
 internal fun Contest.land(changes: List<Change>) {
     val (moving, rest) = changes.partition { it is Change.Pull || it is Change.Say || it is Change.Deposit || it is Change.Pour }

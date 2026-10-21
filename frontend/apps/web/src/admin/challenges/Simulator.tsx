@@ -19,7 +19,7 @@ import type { Answer } from './useSimulator';
  * hand or drawn from a kind, a seed or none - fought out by the game server's engine on the catalogue in force, and
  * every moment of it shown: what it came to, the tug drawn second by second, and the moments as a table. The same seed
  * fights the same challenge, so a strange one can be fought again and read; a batch of a hundred or ten thousand says how
- * often each side wins. Words rather than marks, as every inspect page's controls are. 0105.
+ * often each side wins. Words rather than marks, as every inspect page's controls are. 0107.
  */
 export function Simulator({ content }: { content: Challenges | null }) {
   const simulator = useSimulator();

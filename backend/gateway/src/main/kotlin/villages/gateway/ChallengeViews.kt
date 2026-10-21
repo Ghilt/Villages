@@ -23,7 +23,7 @@ import villages.protocol.SummonSeenView
 
 /**
  * A challenge between the wire and the domain: the page's setup read into the engine's, a name it cannot read refused
- * by name, and a challenge fought written out flat, every moment a row the page can tabulate. See decision record 0105.
+ * by name, and a challenge fought written out flat, every moment a row the page can tabulate. See decision record 0107.
  */
 internal fun SliceView.toSlice(): ChallengeSlice = ChallengeSlice(
     aspect = asAspect(aspect),

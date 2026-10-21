@@ -5,7 +5,7 @@ package villages.domain.challenge
  * happenings each drawn between the kind's least and most, each happening's aspect drawn by the kind's weights, and,
  * at the kind's chance, a second aspect drawn by weight from the other nine. Drawn from a seed of its own, worked out
  * from the challenge's, so the same seed gives the same progression and the same challenge fought on it, and the two
- * draws do not walk in step. See decision record 0105.
+ * draws do not walk in step. See decision record 0107.
  */
 object Progressions {
     fun draw(kind: ChallengeKind, seed: Long): Progression {

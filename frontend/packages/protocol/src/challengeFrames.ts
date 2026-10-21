@@ -3,7 +3,7 @@ import { z } from 'zod';
 /**
  * How the challenges' inspect page has the game server fight a challenge out and show it every moment: an
  * instrument, as the catalogue pages' frames are, answered only to the page that asked and refused while the
- * instruments are closed. Nothing is stored. See `frames.ts`, and decision record 0105.
+ * instruments are closed. Nothing is stored. See `frames.ts`, and decision record 0107.
  */
 
 const standInSchema = z.discriminatedUnion('kind', [

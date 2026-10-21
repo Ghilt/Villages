@@ -4,7 +4,7 @@ import kotlin.math.max
 
 /**
  * Who stands on stage, and what they have to work with: the slice each happening puts forward, the power a slice has
- * under the other side's auras, and what an effect's slot gives. See decision record 0105.
+ * under the other side's auras, and what an effect's slot gives. See decision record 0107.
  */
 
 /**

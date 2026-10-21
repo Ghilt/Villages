@@ -188,7 +188,7 @@ started; worked ground is planned and not started; and challenges, the newest, a
   aspects in five pairs deciding which slice stands forward and which is boosted; resolved at once and played
   back as a spectacle. Its first iteration is not in the game: an engine on the server and a simulator on
   `/admin/inspect-challenges`, where Adam builds slices, runs them and tunes the numbers. The shape is decision
-  record 0105, and the rules as settled and the steps, one commit each, are in `docs/plans/challenges.md`; none is
+  record 0107, and the rules as settled and the steps, one commit each, are in `docs/plans/challenges.md`; none is
   built. Adam's own mechanic, planned with him on 2026-10-20.
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps

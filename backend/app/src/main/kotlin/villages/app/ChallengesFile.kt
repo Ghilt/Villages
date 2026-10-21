@@ -16,7 +16,7 @@ import villages.domain.challenge.SummonSpec
  * `world/catalogues/challenges.json` read into what the challenge's rules read: strict, so a field it cannot read
  * refuses the whole file, naming where, and a field beginning `$` is passed over. The names and the words are the
  * page's, and are only checked to be there. The shape is a contract, held by `contracts/fixtures/challenges.json`,
- * which the world package's `parseChallenges` reads too. See decision records 0097 and 0105.
+ * which the world package's `parseChallenges` reads too. See decision records 0097 and 0107.
  */
 object ChallengesFile {
     private val json = JsonMapper.builder().build()

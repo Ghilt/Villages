@@ -2,7 +2,7 @@
  * The challenge's content, `world/catalogues/challenges.json`, as the inspect page reads it: the effects a slice
  * carries, three to an aspect, the summons they bring, and the kinds of challenge a progression is drawn from, each
  * with its name, its words and its numbers. Strict as the server's reader is: a field it cannot read refuses the
- * file, naming where. Held to the server's reader by `contracts/fixtures/challenges.json`. See decision record 0105.
+ * file, naming where. Held to the server's reader by `contracts/fixtures/challenges.json`. See decision record 0107.
  */
 
 /** The ten aspects, in their pairs, each beside its anti-aspect. */

@@ -27,7 +27,7 @@ const PAIRS = ASPECTS.filter((_, at) => at % 2 === 0).map((aspect) => [aspect, a
  * in the five pairs of aspects, with its name, its words and its numbers, the slot it brings and the summon it hires;
  * every summon; and the kinds of challenge a progression is drawn from. Every name, word and number is changed in
  * place and saved through the game server, which takes it on at once. Below, the simulator has the server's engine
- * fight a challenge out on what is in force. See docs/plans/challenges.md and decision record 0105.
+ * fight a challenge out on what is in force. See docs/plans/challenges.md and decision record 0107.
  */
 export function Challenges() {
   const editor = useCatalogueEditor('challenges.json', parseChallenges);

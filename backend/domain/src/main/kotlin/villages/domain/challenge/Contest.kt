@@ -5,7 +5,7 @@ import kotlin.math.abs
 /**
  * Fights a challenge out, at once, from its setup and a seed: a pure function of the setup, the seed, the catalogue
  * and the rules, so the same four always give the same moments and the same outcome. The luck is the seed's alone,
- * and choosing it is not done here. See decision record 0105.
+ * and choosing it is not done here. See decision record 0107.
  */
 object Challenge {
     /** The version of these rules: a seed replays a challenge only on the version that fought it. */

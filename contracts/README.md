@@ -151,12 +151,12 @@ recorded over. See decision record 0037. What each one changed:
   same road as the scenery.
 - **58** - `simulateChallenge`, answered by `challengeSimulated`, every moment of a challenge the game server fought out
   and what it came to, or by `simulationRefused`. Instruments, refused while they are closed; nothing is stored. See
-  decision record 0105.
+  decision record 0107.
 - **59** - `simulateChallenge` names a challenge `kind` to draw its progression from, in place of a `progression` written
-  by hand; either is optional on the wire, and the server refuses a frame with neither. See decision record 0105.
+  by hand; either is optional on the wire, and the server refuses a frame with neither. See decision record 0107.
 - **60** - `simulateChallenge` asks for a batch of `runs`, up to ten thousand, and `challengeSimulated` answers with its sums in `batch`:
   each side's wins, the even ends, each side's pulls to the end and the mean end tug; the moments are the first run's.
-  See decision record 0105.
+  See decision record 0107.
 - **61** - a batch in `challengeSimulated` says how its runs spread: for every second, how many stood in each of
   twenty-two bands of the tug, in `spread`, and where each ended, in `ends`, with the tug's ends, `tugEnds`, which the
-  bands are cut between. See decision record 0105.
+  bands are cut between. See decision record 0107.

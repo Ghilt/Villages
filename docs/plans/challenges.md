@@ -3,7 +3,7 @@
 **What belongs here:** how the challenge gets built in its first iteration - the rules as settled, the thirty
 effects, the challenge kinds, the simulator, the engine's shape on the server, the catalogue, the frames, the
 page, the rules that must hold, and the order it all gets built in. **What does not:** what the mechanic is
-for, which is `MECHANICS.md`; why it is shaped this way, which is decision record 0105; the words, which are
+for, which is `MECHANICS.md`; why it is shaped this way, which is decision record 0107; the words, which are
 `GLOSSARY.md`. When a part of it is decided, that part becomes a decision record and leaves.
 
 Planned on 2026-10-20 from Adam's description and his answers to thirty-four questions in nine rounds, which
@@ -187,7 +187,7 @@ streams a moment after `ChallengeResolved`, by a listener; until it acts, the th
 its types and a run from a fixed seed is a rule. The luck is choosing the seed, and that stays in the
 application, as the fate engine's does (decision record 0083). The numbers are drawn by a hand-written
 SplitMix64, pinned by its reference values, so a seed gives the same run on every Kotlin version; the tug is a
-`Double`, and the page shows it to one decimal. Decision record 0105 has the reasons.
+`Double`, and the page shows it to one decimal. Decision record 0107 has the reasons.
 
 In `backend/domain/src/main/kotlin/villages/domain/challenge/`, every file well under the ceiling:
 
@@ -273,7 +273,7 @@ Every new check is seen to fail once.
 
 | # | Step | Verification requests |
 |---|---|---|
-| 1 | **The documents.** This plan; decision record 0105; the Challenge entry in `MECHANICS.md`; the words in `GLOSSARY.md`; the roadmap | Read the Challenge entry; the thirty names; the rules the plan filled in |
+| 1 | **The documents.** This plan; decision record 0107; the Challenge entry in `MECHANICS.md`; the words in `GLOSSARY.md`; the roadmap | Read the Challenge entry; the thirty names; the rules the plan filled in |
 | 2 | **The catalogue on the shelf, and the page reading it.** `challenges.json`, its two readers and its fixture, the shelf, and `/admin/inspect-challenges` listing it; `RUNNING.md` | 👀 The page shows thirty effects in five pairs, nine summons and four kinds; 👀 a file broken by hand is refused and named |
 | 3 | **Editing on the page, and the balance's challenge group** | 👀 A number saved is one line of diff and the server takes it on; 👀 the Balance page shows the group |
 | 4 | **The engine with Violence and Diplomacy**, the behaviours held to the catalogue, the rest saying they are not built; *The challenge engine* in `ARCHITECTURE.md`. Nothing to see in the program: a golden log stands in | The golden log: Sellswords and No Quarter, Sweeter Terms turning and deserting, Endless Parley's aura; a simultaneous second |

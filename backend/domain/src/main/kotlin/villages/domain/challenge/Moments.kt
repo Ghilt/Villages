@@ -3,7 +3,7 @@ package villages.domain.challenge
 /**
  * One row of what happened in a challenge: the [second], the [happening], who did [what] to whom, how much, whether
  * it was boosted, and the tug after it. A moment changes the tug once at most, so the changes of a challenge's
- * moments add up to where its tug ends; the moments are its spectacle. See decision record 0105.
+ * moments add up to where its tug ends; the moments are its spectacle. See decision record 0107.
  */
 data class ChallengeMoment(
     val second: Int,
