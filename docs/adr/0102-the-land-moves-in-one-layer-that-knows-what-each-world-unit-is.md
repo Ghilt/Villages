@@ -106,9 +106,8 @@ So the land is still one layer reading one mask, and each motion is a pass of it
 over the passes before it in the mask's order, premultiplied, which is what the one program did inside itself. A screen
 of one kind of land draws one pass; where two meet, two. And a frame costs less, not more: the one program cost every pixel a share of
 every motion's code, and a pass only its own, so the land's part of a frame at high fell from 3.5 to 1.3 ms at the
-tundra, 4.1 to 1.5 at the grassland, 2.6 to 0.6 at the ice and 3.4 to 2.1 at the bog. The picture is the one program's but for a pixel here and
-there at a tuft's edge, which the compiler rounds differently (89 of 5.1 million on the renders page, by 22 of 255 at
-the most). This takes back the consequence that a motion is never a pass of its own: it is not a layer of its own,
+tundra, 4.1 to 1.5 at the grassland, 2.6 to 0.6 at the ice and 3.4 to 2.1 at the bog. The picture is the one program's: the 89 of 5.1 million
+pixels the renders page differed in are ones it differs in between two loads of the same code (experiment 0027). This takes back the consequence that a motion is never a pass of its own: it is not a layer of its own,
 and its land is still known from the one mask. The crops' fields are a part of their own (`fieldsShader.ts`), since
 the paddy's terraces are cut by them too.
 

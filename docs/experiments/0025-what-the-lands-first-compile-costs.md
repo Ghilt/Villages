@@ -56,8 +56,9 @@ zoom is measured in, a program at a time.
   blocks, took 16 ms.
 
 **The land as a program for each motion** (the first step of the plan). The picture: the renders page drawn with the
-clock stopped, the parent commit's twice and this one's, differ in 89 of 5.1 million pixels, single pixels at a tuft's
-edge, by 22 of 255 at the most; the parent's against itself in none. What a frame costs, `perf:shaders`, the fast
+clock stopped, the parent commit's twice and this one's, differ in 89 of 5.1 million pixels, by 22 of 255 at the most;
+the parent's against itself in none that time. Those are pixels the page differs in between two loads of the same
+code, found later (experiment 0027), so the split's picture is the one program's. What a frame costs, `perf:shaders`, the fast
 frames in milliseconds, every shader at high, 1920 by 1080, the parent and this alternated twice on the same card
 while another session's work kept it busy, so beside each other rather than beside the history's quiet points:
 
