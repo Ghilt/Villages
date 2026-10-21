@@ -1,6 +1,8 @@
 package villages.occurrent
 
 import villages.domain.Event
+import villages.domain.PlayerId
+import villages.domain.WorldBotCreated
 import villages.domain.WorldCatalogueChanged
 import villages.domain.WorldTime
 import java.time.Instant
@@ -20,7 +22,16 @@ internal object WorldEventSamples {
         recordedAt = noon,
     )
 
+    /** A house bot made outside the ruin of London: the world's own player, by its town. See decision record 0108. */
+    val botByLondon = WorldBotCreated(
+        player = PlayerId.botAt("Q84"),
+        town = "Q84",
+        worldTime = WorldTime(653_712),
+        recordedAt = noon,
+    )
+
     val samples: Map<String, Event> = mapOf(
+        "villages.world.botCreated.v1" to botByLondon,
         "villages.world.catalogueChanged.v1" to structuresRetuned,
     )
 }

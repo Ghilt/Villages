@@ -49,4 +49,40 @@ class WorldDeciderSpec : StringSpec({
         shouldThrow<WorldError.InvalidCatalogue> { decider.decide(takeOn(first, "{}", catalogue = "Structures"), decider.initial) }
         shouldThrow<WorldError.InvalidCatalogue> { decider.decide(takeOn("abc", "{}"), decider.initial) }
     }
+
+    val london = Bot(PlayerId.botAt("Q84"), "Q84")
+    val paris = Bot(PlayerId.botAt("Q90"), "Q90")
+    fun create(vararg bots: Bot) = CreateBots(bots.toList(), WorldTime(653_712), noon)
+
+    "each house bot the world lacks is made, once, and one named twice in the asking is made once" {
+        decider.decide(create(london, paris, london), decider.initial) shouldBe listOf(
+            WorldBotCreated(london.player, "Q84", WorldTime(653_712), noon),
+            WorldBotCreated(paris.player, "Q90", WorldTime(653_712), noon),
+        )
+    }
+
+    "a bot already made writes nothing, so an opening asking for the same bots again is silent" {
+        val record = decider.fold(decider.decide(create(london), decider.initial))
+
+        record.bots shouldBe mapOf(london.player to "Q84")
+        decider.decide(create(london), record).shouldBeEmpty()
+        decider.decide(create(london, paris), record).map { (it as WorldBotCreated).town } shouldBe listOf("Q90")
+    }
+
+    "the world remembers its catalogues and its bots side by side" {
+        val record = decider.fold(decider.decide(takeOn(first, "{one}"), decider.initial) + decider.decide(create(london), decider.initial))
+
+        record.catalogues.keys shouldBe setOf("structures")
+        record.bots.keys shouldBe setOf(london.player)
+    }
+
+    "a bot whose player is not the one its town names, or with no town, is refused" {
+        shouldThrow<WorldError.InvalidBot> { decider.decide(create(Bot(PlayerId.botAt("Q90"), "Q84")), decider.initial) }
+        shouldThrow<WorldError.InvalidBot> { decider.decide(create(Bot(PlayerId.botAt(""), "")), decider.initial) }
+    }
+
+    "a bot's player is the same on every tree, and every town's is its own" {
+        PlayerId.botAt("Q84") shouldBe PlayerId.botAt("Q84")
+        (PlayerId.botAt("Q84") == PlayerId.botAt("Q90")) shouldBe false
+    }
 })

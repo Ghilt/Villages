@@ -28,3 +28,13 @@ data class TakeOnCatalogue(
     val worldTime: WorldTime,
     val recordedAt: Instant,
 ) : WorldCommand
+
+/** A house bot: the player the world plays, and the town of 1790, by its id, whose ruin it stands outside. */
+data class Bot(val player: PlayerId, val town: String)
+
+/**
+ * Make the house bots the world lacks: each is recorded once, and a bot already made, or named twice, writes nothing
+ * more. A bot whose player is not the one its town names is refused, so a bot is always [PlayerId.botAt] its town.
+ * See decision record 0108.
+ */
+data class CreateBots(val bots: List<Bot>, val worldTime: WorldTime, val recordedAt: Instant) : WorldCommand

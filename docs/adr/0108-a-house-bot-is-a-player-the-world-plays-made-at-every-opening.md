@@ -33,8 +33,8 @@ the player, not of the house: the house is founded by the same command and the s
 `villages.house.founded.v1` does not say who played it. Everything that follows a founding follows a bot's, its
 castle, its seat, its sight and its income.
 
-**The world records each bot it makes, on its own stream**: `CreateBot(player, town)` writes
-`villages.world.botCreated.v1` with `{player, town}`, and a second for the same player writes nothing, as an
+**The world records each bot it makes, on its own stream**: `CreateBots`, one asking for every bot, writes
+`villages.world.botCreated.v1` with `{player, town}` for each it lacks, and a bot it has writes nothing, as an
 unchanged catalogue writes nothing. It is the second thing the world's stream decides. The bot's player is a
 name-based id over its town of 1790, which never changes when the master is repainted, so a bot is the same
 player on every tree and at every start. A person's player stays unrecorded until accounts.

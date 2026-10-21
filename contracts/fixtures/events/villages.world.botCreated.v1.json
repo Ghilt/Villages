@@ -1,0 +1,12 @@
+{
+  "type": "villages.world.botCreated.v1",
+  "source": "urn:villages",
+  "subject": "world",
+  "time": "2026-09-04T12:00:00Z",
+  "data": {
+    "player": "094720f5-dff6-3fb6-a21e-e676e0455afd",
+    "town": "Q84",
+    "worldTime": 653712,
+    "recordedAt": "2026-09-04T12:00:00Z"
+  }
+}

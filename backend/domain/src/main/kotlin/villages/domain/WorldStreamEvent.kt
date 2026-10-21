@@ -27,3 +27,15 @@ data class WorldCatalogueChanged(
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
 ) : WorldStreamEvent, WorldEvent
+
+/**
+ * The world made up a player to play itself: a house bot, standing outside the ruin of [town], a town of 1790 by its
+ * id. Its house is founded by its player as any house is, a moment after, and the founding does not say it is a bot;
+ * this is how the world knows which of its players are its own. See decision record 0108.
+ */
+data class WorldBotCreated(
+    val player: PlayerId,
+    val town: String,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : WorldStreamEvent, WorldEvent

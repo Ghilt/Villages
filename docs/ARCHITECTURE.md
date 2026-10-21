@@ -188,6 +188,15 @@ unless a released server turns it off, it looks at the folder twice a second and
 still; a file it refuses is said as a fault, and the catalogues in force go on. After a wipe it records again what
 is in force.
 
+Recording the catalogues is the first half of **the opening**, `Opening` in `application`, which the server runs as it
+starts, after a wipe and after a load. The second half is the house bots (0108): `HouseBots` works out where each
+stands from the world's master, `world/ruins.json` and the balance, asks the world's stream to make the ones it
+lacks with one `CreateBots`, which records `villages.world.botCreated.v1` for each, and has every bot found its house
+as its own player through the same `FoundHouse` a person's goes through. The castle, the seat, the sight and the
+income follow as they follow any founding. Nothing is made twice: the world's stream writes nothing for a bot it
+has, and a house refuses a second founding. `villages.house-bots=false` leaves the bots out, which the tests that
+start a server do; the instruments do not gate them.
+
 ## What was verified about Occurrent
 
 Increment 0.7 compiled and ran the plan's riskiest assumption, on Occurrent 0.33.0 under Spring Boot 4.1.1:

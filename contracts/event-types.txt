@@ -42,4 +42,5 @@ villages.structure.rebuilt.v1
 villages.structure.ruined.v1
 villages.structure.slotEmptied.v1
 villages.structure.slotFilled.v1
+villages.world.botCreated.v1
 villages.world.catalogueChanged.v1

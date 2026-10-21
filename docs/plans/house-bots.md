@@ -78,7 +78,8 @@ lowering it makes none and takes none away.
 after a wipe, and again after a load. In order:
 
 1. **The catalogues are recorded**, as they are now (0097).
-2. **Each bot the world lacks is made**: `CreateBot` on the world's stream, which records `botCreated`.
+2. **Each bot the world lacks is made**: one `CreateBots` on the world's stream, asking for every bot, which
+   records a `botCreated` for each one it lacks.
 3. **Each bot without a house founds one**: `FoundHouse`, as its player, at its seat.
 
 What is there already is left alone, so opening a world twice changes nothing: a bot already made writes
@@ -86,15 +87,16 @@ nothing, as an unchanged catalogue writes nothing, and a house already founded i
 swallowed. **Bots are the world's, not a lever**, so they are made whether the instruments are open or not
 (0076). The tests that start a game server can turn them off, because every one of them opens a world.
 
-Each bot's writes are a story of their own, started from a name-based id over the bot and the opening, so the
-events log shows a bot made and its house founded together.
+The making of the bots is one story, the opening's, and each bot's founding a story of its own, both started from
+name-based ids, so the events log shows the bots made in one line of stories and then each house founded with its
+castle.
 
 ## The commands and events
 
 | | Name | Stream | Meaning |
 |---|---|---|---|
-| Command | `CreateBot(player, town)` | `world` | The world makes up a player to play itself, standing by a town of 1790. |
-| Event | `villages.world.botCreated.v1` `{player, town}` | `world` | It did. Written once a bot; a second asking writes nothing. |
+| Command | `CreateBots(bots)`, each `Bot(player, town)` | `world` | The world makes up players to play itself, each standing by a town of 1790: one asking for every bot, so the world's stream is read once. Refused `invalidBot` for a player that is not the one its town names. |
+| Event | `villages.world.botCreated.v1` `{player, town}` | `world` | It did, one for each bot the world lacked. Written once a bot; a second asking writes nothing. |
 
 `WorldRecord` keeps the bots it made beside the catalogues, by player. **No other event is new**: a bot's house
 is `villages.house.founded.v1`, its castle `villages.structure.raised.v1`, its seat `villages.house.namedSeat.v1`,
@@ -104,7 +106,7 @@ its sight and income what every house's are.
 
 | Rule | Held by | When |
 |---|---|---|
-| A bot is made once, however often the world opens | the world's stream: a second `CreateBot` for the same player writes nothing | at once |
+| A bot is made once, however often the world opens | the world's stream: a bot it has, or one named twice, writes nothing | at once |
 | A bot founds one house | its house's stream: a second founding is refused | at once |
 | Every bot has a house | the opening, founding every bot without one | a moment after. A bot made and the server stopped before it founds is a player with no house, which nothing reads as a house; the next opening founds it |
 | A bot's seat is on land, outside its town's ruin, and apart from every other bot's | where it stands is worked out by one pure function, which the tests hold | at once, by construction |
@@ -129,7 +131,7 @@ can pick one. A wipe empties the world and the opening makes them again, which t
 |---|---|---|
 | 1 | **Documents**: this plan, decision record 0108, the glossary's Player, House bot and Opening, the line in `SETTING.md`, the roadmap | 1. Decision record 0108: is "a player the world plays, made at every opening, recorded as `botCreated`" the right shape? 2. The glossary's Player, House bot and Opening: are the words right? |
 | 2 | **Where they stand**: the `houseBots` group of the balance, and the seats worked out from the towns of 1790 and the ground, pure and tested | 1. 👀 The balance page: a *house bots* group with its three numbers. 2. The checks: the same master gives the same bots, every seat on land, apart, and outside its ruin. |
-| 3 | **The opening makes them**: `CreateBot` and `botCreated` on the world's stream, then each bot founds its house, at the start, after a wipe and after a load, never twice | 1. 👀 The game with *see everything*: castles with pennants beside the old towns across the world. 2. 👀 *wipe*: after the reload the castles are back. 3. 👀 A restart of the game server on a world kept in MongoDB: the events log shows no bot made twice. |
+| 3 | **The opening makes them**: `CreateBots` and `botCreated` on the world's stream, then each bot founds its house, at the start, after a wipe and after a load, never twice | 1. 👀 The game with *see everything*: castles with pennants beside the old towns across the world. 2. 👀 *wipe*: after the reload the castles are back. 3. 👀 A restart of the game server on a world kept in MongoDB: the events log shows no bot made twice. |
 | 4 | **Telling them apart**: the players list marks bots, and the World section counts them; the protocol version up; `RUNNING.md` | 1. 👀 The World section says how many house bots there are. 2. 👀 The players list marks them, and *switch* into one shows the world from its seat. |
 
 ## Not in this plan

@@ -104,6 +104,17 @@ value class VisionId(val value: UUID) {
     }
 }
 
-/** The human, for now an anonymous token the browser generated. */
+/**
+ * Whoever issues a house's commands: a person, for now an anonymous token the browser generated, or a house bot the
+ * world plays (0108).
+ */
 @JvmInline
-value class PlayerId(val value: UUID)
+value class PlayerId(val value: UUID) {
+    companion object {
+        /**
+         * The player of the house bot standing outside the ruin of [town], a town of 1790 by its id: name-based, so
+         * the same bot is the same player on every tree and at every opening, and is made only once.
+         */
+        fun botAt(town: String): PlayerId = PlayerId(UUID.nameUUIDFromBytes("villages:bot:$town".toByteArray(Charsets.UTF_8)))
+    }
+}

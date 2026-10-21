@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import villages.application.Follower
-import villages.application.Shelf
+import villages.application.Opening
 import villages.application.WorldSaves
 import villages.occurrent.EventWorld
 import villages.occurrent.FileSaves
@@ -22,22 +22,23 @@ import kotlin.io.path.readText
 @Configuration
 class SavesConfig {
     /**
-     * A load folds every follower again from the save, and then takes on the catalogues the server runs on, as a wipe
-     * does, so the world records the numbers in force now when they differ from the save's.
+     * A load folds every follower again from the save, and then opens the world, as a wipe does: it takes on the
+     * catalogues the server runs on, so the world records the numbers in force now when they differ from the save's,
+     * and makes any house bot the save lacks (0108).
      */
     @Bean
     fun worldSaves(
         world: EventWorld,
         clock: Clock,
         followers: ObjectProvider<Follower>,
-        shelf: Shelf,
+        opening: Opening,
         @Value("\${villages.saves:}") folder: String,
     ): WorldSaves = FileSaves(
         folder = folder.ifBlank { null }?.let(Path::of) ?: savesBesideTheSharedGit(Path.of(StoreConfig.CHECKOUT)),
         world = world,
         clock = clock,
         followers = { followers.orderedStream().toList() },
-        loaded = { shelf.recordAll() },
+        loaded = { opening.open() },
     )
 }
 

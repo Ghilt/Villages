@@ -9,9 +9,9 @@ import villages.application.FaultBoard
 import villages.application.Faults
 import villages.application.Later
 import villages.application.MonthlyWorldClock
+import villages.application.Opening
 import villages.application.Resettable
 import villages.application.ScheduledLater
-import villages.application.Shelf
 import villages.application.WorldCalendar
 import villages.application.WorldWipe
 import villages.domain.WorldTime
@@ -110,10 +110,11 @@ class WorldConfig {
      * Emptying the development world: the store and everything folded from it, in one moment that nothing written
      * crosses, so that nothing is left holding a house whose events are gone. Everything is every `Resettable` there
      * is, so a read model or a listener added later is emptied without being named here. See decision record 0036.
-     * The emptied world then records the catalogues it runs on, as a fresh one does when the server starts (0097).
+     * The emptied world is then opened, as a fresh one is when the server starts: it records the catalogues it runs on
+     * and makes its house bots again (0097, 0108).
      */
     @Bean
-    fun worldWipe(world: EventWorld, folded: List<Resettable>, shelf: Shelf): WorldWipe = WorldWipe {
-        world.wipe(folded).also { shelf.recordAll() }
+    fun worldWipe(world: EventWorld, folded: List<Resettable>, opening: Opening): WorldWipe = WorldWipe {
+        world.wipe(folded).also { opening.open() }
     }
 }

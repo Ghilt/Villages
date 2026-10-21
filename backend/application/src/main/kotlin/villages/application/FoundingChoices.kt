@@ -99,8 +99,11 @@ object FoundingChoices {
 
     private const val WOBBLE = 0.66
 
-    /** A banner the rule of tincture allows: a colour charge on a metal field, or the reverse. */
-    private fun bannerFrom(rolling: Random): Banner {
+    /**
+     * A banner the rule of tincture allows: a colour charge on a metal field, or the reverse. A house bot's is drawn
+     * by it too, from a roll seeded by its player, so it keeps its banner at every opening (0108).
+     */
+    internal fun bannerFrom(rolling: Random): Banner {
         val metalField = rolling.nextBoolean()
         val field = if (metalField) METALS[rolling.nextInt(METALS.size)] else COLOURS[rolling.nextInt(COLOURS.size)]
         val charge = if (metalField) COLOURS[rolling.nextInt(COLOURS.size)] else METALS[rolling.nextInt(METALS.size)]
