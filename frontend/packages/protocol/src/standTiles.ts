@@ -18,7 +18,7 @@ export const STAND_TILES = 128;
  * ruins, `ruins`, a stand a town, and the roads, `roads`, a straight piece a record, which `decodeRoads` reads. A stands
  * frame says which it carries. See decision records 0067, 0103 and 0115.
  */
-export const STAND_LAYERS = ['biome', 'ruins', 'roads'] as const;
+export const STAND_LAYERS = ['biome', 'ruins', 'roads', 'settlements'] as const;
 export type StandLayer = (typeof STAND_LAYERS)[number];
 
 /**

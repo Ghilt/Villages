@@ -160,6 +160,22 @@ export const BAKED: readonly Artifact[] = [
     development: 'Looked at to see where the villages stand and how thickly.',
   },
   {
+    id: 'settlements-map',
+    form: 'file',
+    name: 'settlements map',
+    path: `${M}/sprites/settlements/map.json`,
+    origin: 'baked',
+    what: "Each settlement's name and its site's id, by the number its record carries, and nothing of where it is.",
+  },
+  {
+    id: 'settlements-stands',
+    form: 'folder',
+    name: 'settlements',
+    path: 'world/stands/<m>/settlements/',
+    origin: 'baked',
+    what: 'Every settlement as a stand: its middle, its radius, its kind and level; the server sends what the fog shows.',
+  },
+  {
     id: 'roads-map',
     form: 'file',
     name: 'roads map',

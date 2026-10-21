@@ -45,6 +45,8 @@ export const WORLD_CACHE = {
     'ruins-stands',
     'height',
     'settlements-server',
+    'settlements-map',
+    'settlements-stands',
     'roads-map',
     'roads-stands',
   ],

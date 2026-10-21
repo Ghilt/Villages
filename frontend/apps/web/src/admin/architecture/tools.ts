@@ -128,7 +128,7 @@ export const TOOLS: readonly Tool[] = [
       'culture',
       'height',
     ],
-    writes: ['settlements-server', 'settlements-pictures'],
+    writes: ['settlements-server', 'settlements-map', 'settlements-stands', 'settlements-pictures'],
     seconds: 110,
     perMaster: true,
     ranBy: 'world:ready, when nobody has made its step',

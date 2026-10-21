@@ -93,6 +93,8 @@ export {
 export type { SettlementSquare, SettlementType } from './settlements.ts';
 export { BUILDING_SIDES, SETTLEMENT_SIDES, settlementIn } from './settlementLayout.ts';
 export { ROAD_KINDS, decodeRoads, readRoadKind } from './roadRecords.ts';
+export { decodeSettlements } from './settlementRecords.ts';
+export type { SettlementRecord, SettlementsMapFile } from './settlementRecords.ts';
 export type { RoadChunk, RoadKind, RoadPieceKind, RoadsMapFile } from './roadRecords.ts';
 export type {
   Building,

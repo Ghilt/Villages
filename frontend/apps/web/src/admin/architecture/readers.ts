@@ -94,6 +94,14 @@ export const READERS: readonly Reader[] = [
     reads: ['art-atlas'],
   },
   {
+    id: 'settlements-held',
+    program: 'page',
+    piece: 'sprites',
+    name: 'the settlements the page holds, named',
+    where: 'sprites/settlements/settlementsHeld.ts',
+    reads: ['settlements-map'],
+  },
+  {
     id: 'road-ground',
     program: 'page',
     piece: 'sprites',
@@ -183,9 +191,9 @@ export const READERS: readonly Reader[] = [
   {
     id: 'folder-stands',
     program: 'server',
-    name: "stands, the scenery's, the ruins' and the roads'",
+    name: "stands, the scenery's, the ruins', the roads' and the settlements'",
     where: 'FolderStands.kt',
-    reads: ['stands', 'ruins-stands', 'roads-stands'],
+    reads: ['stands', 'ruins-stands', 'roads-stands', 'settlements-stands'],
   },
   {
     id: 'folder-ground',

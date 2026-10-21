@@ -219,6 +219,14 @@ export function ScenerySection() {
           </dd>
         </div>
         <div className="debug__row">
+          <dt>settlements</dt>
+          <dd>
+            {drawn.settlements.stands.toLocaleString()}{' '}
+            {drawn.settlements.stands === 1 ? 'record' : 'records'} of settlements held, in{' '}
+            {drawn.settlements.tiles.toLocaleString()} tiles the game server sent
+          </dd>
+        </div>
+        <div className="debug__row">
           <dt>frame</dt>
           <dd>
             {drawn.frameGapMs === 0

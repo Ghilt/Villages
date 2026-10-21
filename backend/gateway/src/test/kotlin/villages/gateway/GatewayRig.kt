@@ -141,6 +141,7 @@ internal class Rig(
 
     /** The one master's roads in pieces, tile by tile, as `world:roads` would write them. */
     val roadsOnDisk = mutableMapOf<Int, ByteArray>()
+    val settlementsOnDisk = mutableMapOf<Int, ByteArray>()
 
     /** The structures on the map, folded from the world as the app's are. */
     val structuresOnTheMap = StructuresProjection(world).started()
@@ -207,6 +208,7 @@ internal class Rig(
                     layer == "biome" -> standsOnDisk[tile] ?: ByteArray(0)
                     layer == "ruins" -> ruinsOnDisk[tile] ?: ByteArray(0)
                     layer == "roads" -> roadsOnDisk[tile] ?: ByteArray(0)
+                    layer == "settlements" -> settlementsOnDisk[tile] ?: ByteArray(0)
                     else -> null
                 }
             },

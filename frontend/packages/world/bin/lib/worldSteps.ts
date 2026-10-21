@@ -272,7 +272,11 @@ export const WORLD_STEPS: readonly WorldStep[] = [
       RENDER,
     ],
     after: ['tile', 'flow', 'names', 'culture', 'height'],
-    makes: [{ path: 'world/ground/<m>/settlements.json', is: 'settlements-server' }],
+    makes: [
+      { path: 'world/ground/<m>/settlements.json', is: 'settlements-server' },
+      { path: `${M}/sprites/settlements`, is: 'settlements-map', folder: true },
+      { path: 'world/stands/<m>/settlements', is: 'settlements-stands', folder: true },
+    ],
     doing: 'choosing where the settlements stand',
     done: 'the settlements have their sites',
   },

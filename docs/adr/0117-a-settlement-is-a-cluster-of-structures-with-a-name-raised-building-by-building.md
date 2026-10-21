@@ -53,7 +53,7 @@ itself.**
   measured before anything is built on it, and fewer houses a level is the lever if it is too long.
 - Being part of a settlement is the page's arithmetic for now. When a mechanic needs it - a house taking a settlement,
   what being part of one gives - the server works it out the same way from the same file.
-- The `settlements` layer bumps the protocol's version once.
+- The World section's count of the buildings standing took protocol version 68, and the `settlements` layer 69.
 
 ## Alternatives considered
 

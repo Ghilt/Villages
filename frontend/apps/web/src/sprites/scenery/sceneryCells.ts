@@ -87,8 +87,8 @@ const keyOf = (dial: number, spacing: number, cellX: number, cellY: number): str
   `${dial}/${spacing}/${cellX}/${cellY}`;
 
 onStandsArrived((tile, stands, layer) => {
-  // The roads are no cell's to grow from: they are worn into the ground. See decision record 0115.
-  if (layer === 'roads') return;
+  // The roads and the settlements are no cell's to grow from. See decision records 0115 and 0117.
+  if (layer === 'roads' || layer === 'settlements') return;
   const at = layer === 'ruins' ? RUINS_TILE + tile : tile;
   forStands.came(at);
   let stale = false;
@@ -142,6 +142,8 @@ export interface SceneryTally {
   ruins: { tiles: number; stands: number };
   /** The roads' tiles held, and the pieces in them. */
   roads: { tiles: number; stands: number };
+  /** The settlements' tiles held, and the records in them: a settlement once in every tile its circle touches. */
+  settlements: { tiles: number; stands: number };
 }
 
 /** What the last frame actually drew, put here by the layer so the panel has one thing to read. */
@@ -185,6 +187,7 @@ export function sceneryTally(): SceneryTally {
     ...standsHeld(),
     ruins: standsHeld('ruins'),
     roads: standsHeld('roads'),
+    settlements: standsHeld('settlements'),
   };
 }
 

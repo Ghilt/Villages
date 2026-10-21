@@ -1,14 +1,14 @@
 import { STAND_TILES, standTilesUnder } from '@villages/protocol';
 import type { StandLayer } from '@villages/protocol';
-import { NO_STANDS, decodeRoads, decodeStands } from '@villages/world';
-import type { RoadChunk, StandChunk } from '@villages/world';
+import { NO_STANDS, decodeRoads, decodeSettlements, decodeStands } from '@villages/world';
+import type { RoadChunk, SettlementRecord, StandChunk } from '@villages/world';
 
 import { TILE } from '../geometry/world';
 
 /**
  * The stands the gateway has sent this page, a layer of a zoom 7 tile at a time, and nothing else: the scenery's own,
- * `biome`, the towns of 1790 laid in ruins, `ruins` (decision record 0103), and the roads in pieces, `roads` (0115),
- * which are read as roads and not as stands. Each layer is kept apart, and every question asks of the scenery's unless
+ * `biome`, the towns of 1790 laid in ruins, `ruins` (decision record 0103), the roads in pieces, `roads` (0115),
+ * read as roads and not as stands, and the settlements, `settlements` (0117), read as settlements. Each layer is kept apart, and every question asks of the scenery's unless
  * it names another.
  *
  * The scenery grows from stands, and since decision 0067 they are the server's to hand out: a page is sent the
@@ -30,6 +30,8 @@ export interface SentStands {
   chunk: StandChunk;
   records: string;
   roads?: RoadChunk;
+  /** A tile of the settlements layer decoded as settlements: each one whose circle touches the tile. */
+  settlements?: readonly SettlementRecord[];
 }
 
 /** A tile off the top or the bottom of the world, where nothing stands and nothing is sent. */
@@ -39,6 +41,7 @@ const sent: Record<StandLayer, Map<number, SentStands>> = {
   biome: new Map(),
   ruins: new Map(),
   roads: new Map(),
+  settlements: new Map(),
 };
 /** The tiles under the cells being followed: the only ones the gateway sends, and so the only ones kept. */
 let coming = new Set<number>();
@@ -79,7 +82,9 @@ export function standsArrived(
   const stands =
     layer === 'roads'
       ? { chunk: NO_STANDS, records, roads: decodeRoads(bytesOf(records), tileX, tileY, TILE) }
-      : { chunk: decodeStands(bytesOf(records), tileX, tileY, TILE), records };
+      : layer === 'settlements'
+        ? { chunk: NO_STANDS, records, settlements: decodeSettlements(bytesOf(records), tileX, tileY, TILE) }
+        : { chunk: decodeStands(bytesOf(records), tileX, tileY, TILE), records };
   held.set(tile, stands);
   for (const told of arrivals) {
     told(tile, stands, layer);
@@ -145,7 +150,7 @@ export function heldStandsOf(layer: StandLayer): Iterable<SentStands> {
 export function standsHeld(layer: StandLayer = 'biome'): { tiles: number; stands: number } {
   let stands = 0;
   for (const tile of sent[layer].values()) {
-    stands += tile.roads?.count ?? tile.chunk.count;
+    stands += tile.roads?.count ?? tile.settlements?.length ?? tile.chunk.count;
   }
   return { tiles: sent[layer].size, stands };
 }
@@ -155,5 +160,6 @@ export function forgetStands(): void {
   sent.biome.clear();
   sent.ruins.clear();
   sent.roads.clear();
+  sent.settlements.clear();
   coming = new Set();
 }

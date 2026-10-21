@@ -33,6 +33,7 @@ import type { Culture } from '../src/structures.ts';
 import { TILE, WorldTiles } from './lib/classTiles.ts';
 import { args, flag, named } from './lib/flags.ts';
 import { laySite } from './lib/settlementBuildings.ts';
+import { writeSettlementsLayer } from './lib/settlementsLayer.ts';
 import type { LaidSite } from './lib/settlementBuildings.ts';
 import { ownFile, writtenAt } from './lib/outputs.ts';
 import {
@@ -203,11 +204,26 @@ const groundDir = writtenAt(resolve(GROUND_DIR, master));
 ownFile(resolve(groundDir, 'settlements.json'), 'the settlements');
 await mkdir(groundDir, { recursive: true });
 await writeFile(resolve(groundDir, 'settlements.json'), `${JSON.stringify(out)}\n`);
+const layerBytes = await writeSettlementsLayer(
+  sites.map((site, index) => ({
+    id: site.id,
+    name: nameById.get(site.id)!,
+    x: laid.get(site.id)!.x,
+    y: laid.get(site.id)!.y,
+    radius: file.radius[site.level - 1]!,
+    type: site.type,
+    level: site.level,
+    index,
+  })),
+  master,
+  worldDir,
+  width,
+);
 const built = [...laid.values()].flatMap((one) => one.buildings);
 const ofType = (type: string) => built.filter((one) => one.type === type).length.toLocaleString();
 say(
   `${built.length.toLocaleString()} buildings to raise: ${ofType('house')} houses, ${ofType('mill')} mills, ` +
-    `${ofType('market')} markets`,
+    `${ofType('market')} markets; the settlements layer ${(layerBytes / 1024).toFixed(0)} kB`,
 );
 
 const count = (pick: (one: Site) => string) =>

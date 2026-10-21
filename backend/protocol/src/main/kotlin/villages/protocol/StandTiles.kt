@@ -22,7 +22,7 @@ const val STAND_TILES = StandRecords.WORLD_UNITS / StandRecords.TILE_UNITS
  * carries, and a layer is only ever one of these: a name from a page never picks a folder. See decision records 0067,
  * 0103 and 0115.
  */
-val STAND_LAYERS = listOf("biome", "ruins", "roads")
+val STAND_LAYERS = listOf("biome", "ruins", "roads", "settlements")
 
 /**
  * The zoom 7 tiles whose stands a held cell wants, each as `y * STAND_TILES + x`: the tiles the cell lies in and

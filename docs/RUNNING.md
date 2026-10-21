@@ -513,7 +513,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   itself: it is its buildings, its name and its radius. Each building is a `villages.structure.raised.v1` in the
   events log, raised side by side; the server's log says `the world is open, with 300 house bots and 7674 settlement
   sites: 43424 of their buildings raised, 0 sites passed over for a seat, in 82.7 s` on a fresh world, measured on
-  2026-10-21, and a restart over a world kept in MongoDB raises none twice. From zoom 7.5 in the page lays each out in its buildings by `settlementIn`,
+  2026-10-21, and a restart over a world kept in MongoDB raises none twice. The page is sent each settlement itself - its middle, its
+  radius, its kind and level - as a record of the `settlements` layer of the stands, through the fog as the ruins are,
+  and reads its name from the master's `sprites/settlements/map.json`; the Scenery section counts the records held. From zoom 7.5 in the page lays each out in its buildings by `settlementIn`,
   once the ground about it has come, and draws them from `public/art/settlements.webp`, all of them one thing among
   the trees on its square; further out, and until its ground has come, it is its one mark. A click on any of its
   buildings opens its window. The log's `settlements` line says how many are laid out and in how many buildings, and
@@ -827,7 +829,9 @@ and `-- --drop` takes them off; by hand only.
   lattice under an id that outlives a repaint, and is laid out as the page lays it out: a house on each lot kept, a
   mill on the best lot by a river or a lake from a village up, a market by the green of a large village. Each site goes
   into `world/ground/<master>/settlements.json`, which only the game server reads, with its radius and its buildings,
-  each of which the opening raises as a structure of its own. It prints how many of each type, level and culture, and
+  each of which the opening raises as a structure of its own; and as a record of eight bytes into
+  `world/stands/<master>/settlements/`, every tile its circle touches, which the game server sends through the fog,
+  with each one's name in the master's `sprites/settlements/map.json`. It prints how many of each type, level and culture, and
   how many buildings of each type there are to raise; on the master of 2026-10-03, 7,389 - 3,050
   beside the ruins, 1,597 of them fishing villages - in under two minutes. `world:ready` makes it again whenever the
   tiles, the flow, the height, the names, the cultures, `world/ruins.json`, the structures' catalogue or
