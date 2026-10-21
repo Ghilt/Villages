@@ -47,6 +47,11 @@ clears the cookie.
   so no server's log sees it. It opens `/account/verify`, which sends the secret on only with a press, because mail
   scanners open links before people do. An unverified account plays and signs in all the same, and a password is
   reset only through a link mailed to its email.
+- **A forgotten password is chosen again through a link mailed to the email**, which works once, for an hour, and is
+  asked for with the same answer whether the email has an account or not. Choosing it ends every sign-in of the
+  account, signs the browser that chose it in, and verifies the email, since the link reached it. **Changing a
+  password** asks for the one it has, guessed as a sign-in's is, ends every other sign-in of the account and gives
+  this browser a new secret. A password that will not do is refused before the link is used.
 - Somebody can make an account with an address that is not theirs until it is verified. The address's owner gets it
   back by resetting the password, which ends every other sign-in.
 - The commonest-password list is short and the module's own; Adam can lengthen it without touching code.

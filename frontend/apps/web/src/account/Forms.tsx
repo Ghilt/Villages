@@ -8,6 +8,7 @@ import { TextButton } from '../ui/button/Button';
 import { TextField } from '../ui/field/TextField';
 import { Form } from '../ui/form/Form';
 import { Switch } from '../ui/switch/Switch';
+import { ForgotForm } from './PasswordForms';
 import { aboutThePassword, said } from './words';
 
 /** What a form is doing: waiting to be filled, being sent, or what came back from sending it. */
@@ -139,6 +140,7 @@ export function SignInForm({ onElsewhere }: { onElsewhere?: () => void }) {
   const [password, setPassword] = useState('');
   const [remembered, remember] = useState(true);
   const [sending, send] = useState<Sending>({ at: 'filling' });
+  const [forgetting, forget] = useState(false);
   const house = useGuestHouse();
 
   const enter = () => {
@@ -152,6 +154,9 @@ export function SignInForm({ onElsewhere }: { onElsewhere?: () => void }) {
     );
   };
 
+  if (forgetting) {
+    return <ForgotForm onBack={() => forget(false)} />;
+  }
   return (
     <Form
       label="Sign in"
@@ -178,6 +183,11 @@ export function SignInForm({ onElsewhere }: { onElsewhere?: () => void }) {
         {...{ email, setEmail, password, setPassword, remembered, remember, sending }}
         choosing={false}
       />
+      <div className="settings__row">
+        <TextButton face="secondary" size="small" onClick={() => forget(true)}>
+          Forgot your password?
+        </TextButton>
+      </div>
     </Form>
   );
 }

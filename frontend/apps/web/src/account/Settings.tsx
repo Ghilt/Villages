@@ -13,6 +13,7 @@ import { Dialog } from '../ui/dialog/Dialog';
 import { Dropdown } from '../ui/field/Dropdown';
 import { AccountPart } from './AccountPart';
 import { CreateAccountForm, SignInForm } from './Forms';
+import { ChangePasswordForm } from './PasswordForms';
 
 const MOTIONS: readonly { id: Motion; label: string }[] = [
   { id: 'device', label: 'As my device asks' },
@@ -21,9 +22,14 @@ const MOTIONS: readonly { id: Motion; label: string }[] = [
 ];
 
 /** What the settings' dialog is showing: the settings, or one of the two ways to an account. */
-type View = 'settings' | 'create' | 'signIn';
+type View = 'settings' | 'create' | 'signIn' | 'password';
 
-const TITLES: Record<View, string> = { settings: 'Settings', create: 'Create an account', signIn: 'Sign in' };
+const TITLES: Record<View, string> = {
+  settings: 'Settings',
+  create: 'Create an account',
+  signIn: 'Sign in',
+  password: 'Change the password',
+};
 
 /**
  * The settings that are not the game's, behind their mark, a gear, in the stage's top right corner: who this browser
@@ -81,9 +87,15 @@ export function Settings() {
       <Dialog open={open} onClose={close} title={TITLES[view]} actions={actions}>
         {view === 'create' && <CreateAccountForm onElsewhere={() => show('signIn')} />}
         {view === 'signIn' && <SignInForm onElsewhere={() => show('create')} />}
+        {view === 'password' && <ChangePasswordForm onBack={() => show('settings')} />}
         {view === 'settings' && (
           <>
-            <AccountPart me={me} onCreate={() => show('create')} onSignIn={() => show('signIn')} />
+            <AccountPart
+              me={me}
+              onCreate={() => show('create')}
+              onSignIn={() => show('signIn')}
+              onPassword={() => show('password')}
+            />
             <section className="settings__part" aria-label="The world moving">
               <h3 className="ui-caps settings__title">The world moving</h3>
               <p className="ui-label">The clouds, the water, the creatures and the trees in the wind.</p>

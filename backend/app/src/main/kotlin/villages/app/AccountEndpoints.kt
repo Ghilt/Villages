@@ -85,19 +85,63 @@ class AccountEndpoints(private val accounts: Accounts, private val cookie: SignI
         }
     }
 
+    /** A link to choose a new password mailed to the account of an email, if it has one; the same answer either way. */
+    @PostMapping("/forgot")
+    fun forgot(request: HttpServletRequest, @RequestBody asked: ForgotAsked): Map<String, Boolean> {
+        accounts.forgot(asked.email, askingOf(request))
+        return mapOf("mailedIfAnAccount" to true)
+    }
+
+    /**
+     * A new password chosen through a mailed link: every sign-in of the account ended, and this browser signed in to it
+     * anew, remembered unless unticked.
+     */
+    @PostMapping("/reset")
+    fun reset(request: HttpServletRequest, response: HttpServletResponse, @RequestBody asked: ResetAsked): ResponseEntity<Any> =
+        signedInBy(request, response, accounts.reset(asked.secret, asked.password, keepingOf(asked.remember), currentOf(request), askingOf(request)))
+
+    /** This account's password changed: every other browser signed out of it, and this one given a new secret. */
+    @PostMapping("/password")
+    fun changePassword(request: HttpServletRequest, response: HttpServletResponse, @RequestBody asked: PasswordAsked): ResponseEntity<Any> {
+        val current = currentOf(request) ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(refused("notSignedIn"))
+        return signedInBy(request, response, accounts.changePassword(current, asked.was, asked.password, askingOf(request)))
+    }
+
+    /** What making a sign-in came to, answered: the new cookie and who it is, or the refusal. */
+    private fun signedInBy(request: HttpServletRequest, response: HttpServletResponse, made: Making): ResponseEntity<Any> =
+        when (made) {
+            is Making.Made -> {
+                cookie.write(response, request, made.begun.secret, made.begun.signIn.keeping)
+                ResponseEntity.ok(Me.of(made.begun.signIn, accounts.recordOf(made.begun.signIn.player)))
+            }
+            Making.Taken -> ResponseEntity.badRequest().body(refused("taken"))
+            is Making.Refused -> ResponseEntity.badRequest().body(refused(made.why))
+        }
+
     private fun currentOf(request: HttpServletRequest) = cookie.read(request)?.let(accounts.signIns::find)
 
     /** Where the request came from: its browser, its address, and the page that sent it, which a mailed link opens. */
     private fun askingOf(request: HttpServletRequest) =
         Asking(browserOf(request), request.remoteAddr, request.getHeader("Origin") ?: "http://localhost")
 
-    private fun keepingOf(asked: EmailAsked) = if (asked.remember) Keeping.REMEMBERED else Keeping.FOR_NOW
+    private fun keepingOf(asked: EmailAsked) = keepingOf(asked.remember)
+
+    private fun keepingOf(remember: Boolean) = if (remember) Keeping.REMEMBERED else Keeping.FOR_NOW
 
     private fun browserOf(request: HttpServletRequest) = browserOf(request.getHeader("User-Agent"))
 }
 
 /** A mailed link's secret, as the page it opened sends it on. */
 data class SecretAsked(val secret: String)
+
+/** The email whose account has forgotten its password. */
+data class ForgotAsked(val email: String)
+
+/** A new password chosen through a mailed link's secret, and whether to remember this browser. */
+data class ResetAsked(val secret: String, val password: String, val remember: Boolean = true)
+
+/** The password an account has, and the one it is to have. */
+data class PasswordAsked(val was: String, val password: String)
 
 /** An email and a password, as a form sends them, and whether to remember this browser: ticked unless unticked. */
 data class EmailAsked(val email: String, val password: String, val remember: Boolean = true)

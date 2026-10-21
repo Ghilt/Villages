@@ -91,6 +91,9 @@ interface MailLinkStore {
     /** The link [hash] is, taken out of the store as it is read, so it works once however many ask at once. */
     fun take(hash: String): MailLink?
 
+    /** The link [hash] is, left where it is: to know whose it is before it is used. */
+    fun peek(hash: String): MailLink?
+
     /** Every link of [kind] of [player]'s gone, so only the newest mailed works. */
     fun forget(player: PlayerId, kind: LinkKind)
 }
@@ -152,6 +155,8 @@ class InMemoryAccounts : AccountStores {
         }
 
         override fun take(hash: String): MailLink? = byHash.remove(hash)
+
+        override fun peek(hash: String): MailLink? = byHash[hash]
 
         override fun forget(player: PlayerId, kind: LinkKind) {
             byHash.values.removeIf { it.player == player && it.kind == kind }

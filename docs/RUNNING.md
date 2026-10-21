@@ -1109,7 +1109,12 @@ and `-- --drop` takes them off; by hand only.
   the outbox too: it opens **`/account/verify`**, a page of its own with nothing of the game behind it, whose *Verify
   it* verifies the email once - pressed, because a mail scanner opens a link before a person does - and says so; a
   link used already, or a day old, says to ask for a new one. Until then Account says *Not verified yet*, with *Send it
-  again*, three times an hour, the newest link the only one that works. Signed in, Account says the email, and **Log out** at the
+  again*, three times an hour, the newest link the only one that works. **Forgot your password?** under the sign-in
+  mails a link to choose a new one, if the email has an account, and says the same if it has not; it opens
+  **`/account/reset`**, where a new password signs out every browser signed in to the account, signs this one in, and
+  verifies the email, since the link reached it; it works once, for an hour. **Change password**, in Account once
+  signed in, asks for the one it has and a new one, signs out every other browser of the account, and loads the page
+  again with a new secret. Signed in, Account says the email, and **Log out** at the
   foot ends the sign-in on the server and dims the window under **Signed out**, whose *Sign in* signs in again there.
   **The world moving** is
   *As my device asks*, *Still* or *Moving*: still holds the clouds, the water, the creatures, the trees and the grass

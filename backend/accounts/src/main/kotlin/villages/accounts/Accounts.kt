@@ -134,6 +134,51 @@ class Accounts(
         return Entering.In(signIns.swap(current?.id, record.player, keeping, asking.browser))
     }
 
+    /**
+     * A link to choose a new password mailed to the account kept under [asked], if there is one, three times an hour at
+     * most; and nothing at all otherwise. The asker is told the same either way, so it says nothing of who plays.
+     */
+    fun forgot(asked: String, asking: Asking) {
+        val record = emailOf(asked)?.let(stores.players::byEmail) ?: return
+        val key = record.player.value.toString()
+        if (!mailing.allowed(key)) return
+        mailing.failed(key)
+        mailer.send(Letters.reset(record.email!!, links.issue(LinkKind.RESET, record, asking.page), clock.instant()))
+    }
+
+    /**
+     * A new password chosen through a mailed link's [secret]: kept, the email verified, since the link reached it, every
+     * sign-in of the account ended, and this browser, whose sign-in is [current], signed in to it anew. A password that
+     * will not do is refused before the link is used, so the link can be tried again.
+     */
+    fun reset(secret: String, password: String, keeping: Keeping, current: SignIn?, asking: Asking): Making {
+        val known = stores.links.peek(Secrets.hashOf(secret))
+        if (known != null) Passwords.problemWith(password, known.email)?.let { return Making.Refused(it) }
+        val link = links.take(LinkKind.RESET, secret) ?: return Making.Refused("linkUsedOrOld")
+        val record = stores.players.of(link.player)?.takeIf { it.email == link.email } ?: return Making.Refused("linkUsedOrOld")
+        stores.players.put(record.copy(password = Passwords.hash(password), verified = true))
+        signIns.endEveryOther(record.player, kept = null)
+        return Making.Made(signIns.swap(current?.id, record.player, keeping, asking.browser))
+    }
+
+    /**
+     * [current]'s account's password changed from [was] to [password]: every other sign-in of the account ended, and
+     * this one swapped for a new secret. [was] is guessed as a sign-in's password is, so many times and no more.
+     */
+    fun changePassword(current: SignIn, was: String, password: String, asking: Asking): Making {
+        val record = stores.players.of(current.player)?.takeIf { !it.guest } ?: return Making.Refused("notSignedIn")
+        if (!guessed.allowed(record.email!!) || !guessing.allowed(asking.from)) return Making.Refused("tooMany")
+        if (!Passwords.matches(was, record.password)) {
+            guessed.failed(record.email)
+            guessing.failed(asking.from)
+            return Making.Refused("notThatPassword")
+        }
+        Passwords.problemWith(password, record.email)?.let { return Making.Refused(it) }
+        stores.players.put(record.copy(password = Passwords.hash(password)))
+        signIns.endEveryOther(record.player, kept = current.id)
+        return Making.Made(signIns.swap(current.id, record.player, current.keeping, asking.browser))
+    }
+
     /** Who [secret] is signed in as, used now, or null when it is no sign-in or one that has ended. */
     fun who(secret: String, cookie: Boolean = false): Who? {
         val signIn = signIns.find(secret) ?: return null

@@ -169,6 +169,24 @@ export async function mailVerifyingAgain(): Promise<void> {
   await ask('POST', 'verify/again');
 }
 
+/** A link to choose a new password mailed to the account of [email], if it has one: the answer is the same either way. */
+export async function forgotPassword(email: string): Promise<void> {
+  await ask('POST', 'forgot', { email });
+}
+
+/**
+ * A new password chosen through a mailed link's [secret]: every browser signed in to the account signed out, and this
+ * one signed in to it, remembered unless [remember] is false. Refused as its code.
+ */
+export function resetPassword(secret: string, password: string, remember: boolean): Promise<Me> {
+  return ask('POST', 'reset', { secret, password, remember });
+}
+
+/** This account's password changed from [was]: every other browser signed out of it. Refused as its code. */
+export function changePassword(was: string, password: string): Promise<Me> {
+  return ask('POST', 'password', { was, password });
+}
+
 /** This browser signed out: its sign-in ended on the server, and its windows stood down. */
 export async function signOut(): Promise<void> {
   await ask('POST', 'signout');

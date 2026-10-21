@@ -94,6 +94,8 @@ class MongoAccounts(connection: String, val database: String) : AccountStores {
 
         override fun take(hash: String): MailLink? = linkRows.findOneAndDelete(eq("_id", hash))?.link()
 
+        override fun peek(hash: String): MailLink? = linkRows.find(eq("_id", hash)).first()?.link()
+
         override fun forget(player: PlayerId, kind: LinkKind) {
             linkRows.deleteMany(Filters.and(eq("player", player.value.toString()), eq("kind", kind.name)))
         }

@@ -145,4 +145,43 @@ class AccountsWithPasswordsSpec : StringSpec({
         accounts.verify(first) shouldBe false
         accounts.verify(outbox.mail().last().link!!.substringAfter('#')) shouldBe true
     }
+
+    "a forgotten password is chosen again through a mailed link, which signs out every browser and this one in" {
+        val outbox = Outbox()
+        val told = mutableListOf<villages.application.SignInId>()
+        val stores = InMemoryAccounts()
+        val accounts = Accounts(stores, HandClock(), ended = { told += it }, mailer = outbox)
+        val here = Asking("Chrome", "here", "http://localhost:5548")
+        val made = accounts.makeAccount("ada@example.com", password, Keeping.REMEMBERED, null, here).shouldBeInstanceOf<Making.Made>()
+
+        accounts.forgot("nobody@example.com", here)
+        accounts.forgot("Ada@example.com", here)
+        val link = outbox.mail().last().also { it.subject shouldBe "Choose a new Villages password" }.link!!
+        link.substringBefore('#') shouldBe "http://localhost:5548/account/reset"
+        val secret = link.substringAfter('#')
+
+        accounts.reset(secret, "short", Keeping.REMEMBERED, null, here) shouldBe Making.Refused("short")
+        val again = accounts.reset(secret, "another quiet river", Keeping.REMEMBERED, null, here).shouldBeInstanceOf<Making.Made>()
+        accounts.reset(secret, "a third quiet river", Keeping.REMEMBERED, null, here) shouldBe Making.Refused("linkUsedOrOld")
+
+        told shouldBe listOf(made.begun.signIn.id)
+        accounts.signInWith("ada@example.com", password, Keeping.REMEMBERED, null, here) shouldBe Entering.NotThatPassword
+        accounts.signInWith("ada@example.com", "another quiet river", Keeping.REMEMBERED, null, here).shouldBeInstanceOf<Entering.In>()
+        accounts.who(again.begun.secret).shouldNotBeNull()
+    }
+
+    "a changed password ends every other sign-in of the account and keeps this one, with a new secret" {
+        val told = mutableListOf<villages.application.SignInId>()
+        val accounts = Accounts(InMemoryAccounts(), HandClock(), ended = { told += it })
+        val here = Asking("Chrome", "here", "http://localhost:5548")
+        val made = accounts.makeAccount("ada@example.com", password, Keeping.REMEMBERED, null, here).shouldBeInstanceOf<Making.Made>()
+        val elsewhere = accounts.signInWith("ada@example.com", password, Keeping.REMEMBERED, null, here).shouldBeInstanceOf<Entering.In>()
+
+        accounts.changePassword(made.begun.signIn, "not the password", "another quiet river", here) shouldBe Making.Refused("notThatPassword")
+        val changed = accounts.changePassword(made.begun.signIn, password, "another quiet river", here).shouldBeInstanceOf<Making.Made>()
+
+        told shouldBe listOf(elsewhere.begun.signIn.id)
+        accounts.who(changed.begun.secret).shouldNotBeNull()
+        accounts.who(made.begun.secret).shouldBeNull()
+    }
 })

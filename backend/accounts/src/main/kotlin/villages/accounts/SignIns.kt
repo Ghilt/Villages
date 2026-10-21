@@ -105,6 +105,11 @@ class SignIns(private val store: SignInStore, private val clock: Clock, private 
     /** Every sign-in of [player], the newest first. */
     fun of(player: PlayerId): List<SignIn> = store.of(player).sortedByDescending { it.lastUsed }
 
+    /** Ends every sign-in of [player]'s but [kept], and says so of each: a changed password's, or *sign out everywhere else*. */
+    fun endEveryOther(player: PlayerId, kept: SignInId?) {
+        store.of(player).filter { it.id != kept }.forEach { end(it.id) }
+    }
+
     /** Ends [id], and says so; false when there was no such sign-in. */
     fun end(id: SignInId): Boolean = store.remove(id).also { if (it) ended(id) }
 

@@ -22,6 +22,23 @@ object Letters {
         sent = at,
     )
 
+    /** To an account's email, with the link that chooses a new password. */
+    fun reset(to: String, link: String, at: Instant) = Mail(
+        to = to,
+        subject = "Choose a new Villages password",
+        text = """
+            |Somebody, perhaps you, asked to choose a new password for the Villages account of this address. Open the link
+            |to choose one:
+            |
+            |$link
+            |
+            |It works once, for an hour, and choosing a new password signs out every browser signed in to the account.
+            |If it was not you, nothing has changed, and the password is what it was.
+        """.trimMargin(),
+        link = link,
+        sent = at,
+    )
+
     /** To an address somebody tried to make an account with, when it has one already. */
     fun alreadyAnAccount(to: String, at: Instant) = Mail(
         to = to,

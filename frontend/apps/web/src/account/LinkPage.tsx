@@ -1,11 +1,13 @@
 import '../ui/ui.css';
 import './linkPage.css';
+import './settings.css';
 
 import { useState } from 'react';
 
 import { verifyEmail } from '../net/auth';
 import { TextButton } from '../ui/button/Button';
 import { DialogBox } from '../ui/dialog/Dialog';
+import { ResetForm } from './PasswordForms';
 import { said } from './words';
 
 /** Where a press has got to: not pressed, being sent, done, or refused. */
@@ -20,6 +22,15 @@ export function LinkPage({ path }: { path: string }) {
   const secret = window.location.hash.slice(1);
   const [pressed, press] = useState<Pressed>({ at: 'waiting' });
 
+  if (secret !== '' && path === '/account/reset') {
+    return (
+      <main className="ui-root link-page">
+        <DialogBox title="Choose a new password">
+          <ResetForm secret={secret} />
+        </DialogBox>
+      </main>
+    );
+  }
   if (secret === '' || path !== '/account/verify') {
     return (
       <main className="ui-root link-page">

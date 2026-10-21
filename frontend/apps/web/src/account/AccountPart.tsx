@@ -23,16 +23,26 @@ export function AccountPart({
   me,
   onCreate,
   onSignIn,
+  onPassword,
 }: {
   me: Me | null;
   onCreate: () => void;
   onSignIn: () => void;
+  /** Changing the account's password. */
+  onPassword: () => void;
 }) {
   return (
     <section className="settings__part" aria-label="Account">
       <h3 className="ui-caps settings__title">Account</h3>
       <p className="ui-body">{whoSaid(me)}</p>
       {me !== null && !me.guest && !me.verified && <NotVerified email={me.email ?? ''} />}
+      {me !== null && me.player !== null && !me.guest && (
+        <div className="settings__row">
+          <TextButton face="secondary" size="small" onClick={onPassword}>
+            Change password
+          </TextButton>
+        </div>
+      )}
       {me !== null && me.guest && (
         <div className="settings__row">
           <TextButton onClick={onCreate}>Create an account</TextButton>
