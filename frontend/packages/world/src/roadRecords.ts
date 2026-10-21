@@ -1,5 +1,5 @@
-import { BRIDGE_AXES, BRIDGE_KINDS } from './settlementLooks.ts';
-import type { BridgeAxis, BridgeKind } from './settlementLooks.ts';
+import { BRIDGE_WAYS } from './bridgeModel.ts';
+import type { BridgeWay } from './bridgeModel.ts';
 import { STAND_BYTES } from './stands.ts';
 
 /*
@@ -15,13 +15,13 @@ import { STAND_BYTES } from './stands.ts';
  * | 2-3 | the middle, south of it |
  * | 4 | the reach: half its length and half its width, in quarters, so the fog's test covers all of it |
  * | 5-6 | the half of it from the middle to one end, east and south, in eighths, signed |
- * | 7 | its kind: a track, a road or a trunk; or a bridge, its kind and its axis |
+ * | 7 | its kind: a track, a road or a trunk; or a bridge, and the way it runs |
  */
 
 export const ROAD_KINDS = ['track', 'road', 'trunk'] as const;
 export type RoadKind = (typeof ROAD_KINDS)[number];
 
-/** The kind byte of a bridge: past every grade, its kind and then its axis. */
+/** The kind byte of a bridge: past every grade, the way it runs. */
 const BRIDGE_FROM = 16;
 /** The most a piece reaches from its middle to an end along either axis, in world units. */
 export const LONGEST_HALF = 127 / 8;
@@ -36,24 +36,21 @@ export interface RoadPiece {
 }
 
 /** What a piece's kind byte says it is. */
-export type RoadPieceKind =
-  { readonly road: RoadKind } | { readonly bridge: BridgeKind; readonly axis: BridgeAxis };
+export type RoadPieceKind = { readonly road: RoadKind } | { readonly bridge: BridgeWay };
 
 export function roadKindByte(kind: RoadKind): number {
   return ROAD_KINDS.indexOf(kind);
 }
 
-export function bridgeKindByte(kind: BridgeKind, axis: BridgeAxis): number {
-  return BRIDGE_FROM + BRIDGE_KINDS.indexOf(kind) * BRIDGE_AXES.length + BRIDGE_AXES.indexOf(axis);
+export function bridgeKindByte(way: BridgeWay): number {
+  return BRIDGE_FROM + BRIDGE_WAYS.indexOf(way);
 }
 
 /** What a kind byte is; null for one no road is written with. */
 export function readRoadKind(byte: number): RoadPieceKind | null {
   if (byte < ROAD_KINDS.length) return { road: ROAD_KINDS[byte]! };
-  const bridge = byte - BRIDGE_FROM;
-  const kind = BRIDGE_KINDS[Math.floor(bridge / BRIDGE_AXES.length)];
-  if (bridge < 0 || kind === undefined) return null;
-  return { bridge: kind, axis: BRIDGE_AXES[bridge % BRIDGE_AXES.length]! };
+  const way = byte < BRIDGE_FROM ? undefined : BRIDGE_WAYS[byte - BRIDGE_FROM];
+  return way === undefined ? null : { bridge: way };
 }
 
 const quarter = (value: number) => Math.round(value * 4) / 4;
@@ -161,7 +158,7 @@ export interface RoadsMapFile {
   readonly at: string;
   readonly world: { readonly side: number; readonly tileUnits: number };
   readonly kinds: readonly RoadKind[];
-  readonly bridges: { readonly kinds: readonly BridgeKind[]; readonly axes: readonly BridgeAxis[] };
+  readonly bridges: { readonly ways: readonly BridgeWay[] };
   /** How wide each grade is drawn, and a bridge, in world units. */
   readonly widths: {
     readonly track: number;

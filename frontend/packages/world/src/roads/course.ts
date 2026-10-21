@@ -1,6 +1,7 @@
 import { CostHeap } from '../costHeap.ts';
 import { GROUND_LATTICE, frameOf } from '../lattice.ts';
-import type { BridgeAxis } from '../settlementLooks.ts';
+import { BRIDGE_WAYS, WAY_STEPS } from '../bridgeModel.ts';
+import type { BridgeWay } from '../bridgeModel.ts';
 import { unitsAlong } from './line.ts';
 
 /*
@@ -51,7 +52,7 @@ export interface Point {
 /** A bridge of a course: the point it starts from, by its place in the course's points, its axis and its span. */
 export interface CourseBridge {
   readonly at: number;
-  readonly axis: BridgeAxis;
+  readonly axis: BridgeWay;
   /** How long it is from end to end, in world units. */
   readonly span: number;
 }
@@ -59,7 +60,7 @@ export interface CourseBridge {
 /** A bridge as a course lands it: the place of the unit it lands in among the course's units, and its far end. */
 export interface Landing {
   readonly at: number;
-  readonly axis: BridgeAxis;
+  readonly axis: BridgeWay;
   readonly span: number;
   readonly end: Point;
 }
@@ -91,19 +92,20 @@ export function unitOf(key: number): Point {
 }
 
 const FRAME = frameOf(GROUND_LATTICE);
-const HALF = Math.SQRT1_2;
-/** The eight ways a bridge may run, in world units: each axis of the lattice, and each diagonal, both ways. */
-const WAYS: readonly { axis: BridgeAxis; dx: number; dy: number }[] = (
-  [
-    ['u', FRAME.cos, FRAME.sin],
-    ['v', -FRAME.sin, FRAME.cos],
-    ['uv', (FRAME.cos - FRAME.sin) * HALF, (FRAME.sin + FRAME.cos) * HALF],
-    ['vu', (FRAME.cos + FRAME.sin) * HALF, (FRAME.sin - FRAME.cos) * HALF],
-  ] as const
-).flatMap(([axis, dx, dy]) => [
-  { axis, dx, dy },
-  { axis, dx: -dx, dy: -dy },
-]);
+/**
+ * The sixteen directions a bridge may be built in, in world units: each of its eight ways - the lattice's two axes, its
+ * two diagonals and the four halfway between - both ways along it.
+ */
+const WAYS: readonly { axis: BridgeWay; dx: number; dy: number }[] = BRIDGE_WAYS.flatMap((axis) => {
+  const [u, v] = WAY_STEPS[axis];
+  const length = Math.hypot(u, v);
+  const dx = (u * FRAME.cos - v * FRAME.sin) / length;
+  const dy = (u * FRAME.sin + v * FRAME.cos) / length;
+  return [
+    { axis, dx, dy },
+    { axis, dx: -dx, dy: -dy },
+  ];
+});
 
 const STEPS = [
   [1, 0],
@@ -121,7 +123,7 @@ interface Crossing {
   readonly x: number;
   readonly y: number;
   readonly end: Point;
-  readonly axis: BridgeAxis;
+  readonly axis: BridgeWay;
   readonly span: number;
 }
 

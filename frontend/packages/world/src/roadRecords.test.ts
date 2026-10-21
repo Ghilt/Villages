@@ -92,8 +92,9 @@ describe("a road's records", () => {
   it('says what each kind byte is', () => {
     expect(readRoadKind(roadKindByte('track'))).toEqual({ road: 'track' });
     expect(readRoadKind(roadKindByte('trunk'))).toEqual({ road: 'trunk' });
-    expect(readRoadKind(bridgeKindByte('stone', 'uv'))).toEqual({ bridge: 'stone', axis: 'uv' });
-    expect(readRoadKind(bridgeKindByte('timber', 'u'))).toEqual({ bridge: 'timber', axis: 'u' });
+    expect(readRoadKind(bridgeKindByte('uv'))).toEqual({ bridge: 'uv' });
+    expect(readRoadKind(bridgeKindByte('vu-u'))).toEqual({ bridge: 'vu-u' });
+    expect(readRoadKind(16 + 8)).toBeNull();
     expect(readRoadKind(200)).toBeNull();
     expect(readRoadKind(9)).toBeNull();
   });

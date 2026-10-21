@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { BRIDGE_WAYS, WAY_STEPS } from '../bridgeModel.ts';
 import { GROUND_LATTICE, frameOf } from '../lattice.ts';
 import { BRIDGEABLE, RIVER, WATER, courseBetween, unitKey } from './course.ts';
 import type { Course, CourseGround, CourseRules, Point } from './course.ts';
@@ -40,13 +41,12 @@ function unitsUnder(course: Course): { walked: Set<string>; bridged: Set<string>
 }
 
 const FRAME = frameOf(GROUND_LATTICE);
-const HALF = Math.SQRT1_2;
-const AXES: readonly Point[] = [
-  { x: FRAME.cos, y: FRAME.sin },
-  { x: -FRAME.sin, y: FRAME.cos },
-  { x: (FRAME.cos - FRAME.sin) * HALF, y: (FRAME.sin + FRAME.cos) * HALF },
-  { x: (FRAME.cos + FRAME.sin) * HALF, y: (FRAME.sin - FRAME.cos) * HALF },
-];
+/** The eight ways a bridge may run, a unit long in world units. */
+const AXES: readonly Point[] = BRIDGE_WAYS.map((way) => {
+  const [u, v] = WAY_STEPS[way];
+  const length = Math.hypot(u, v);
+  return { x: (u * FRAME.cos - v * FRAME.sin) / length, y: (u * FRAME.sin + v * FRAME.cos) / length };
+});
 
 const west: Point = { x: 5.5, y: 20.5 };
 const east: Point = { x: 45.5, y: 20.5 };
@@ -65,7 +65,7 @@ describe("a road's course", () => {
     expect(course.points[course.points.length - 1]).toEqual(east);
   });
 
-  it('crosses a river only by a bridge, straight along one of the four axes', () => {
+  it('crosses a river only by a bridge, straight along one of its eight ways', () => {
     const river = (x: number) => (x === 25 || x === 26 ? 'r' : '.');
     const course = courseBetween(
       [west],

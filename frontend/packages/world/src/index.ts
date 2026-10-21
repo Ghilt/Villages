@@ -67,9 +67,7 @@ export { namesAt } from './names.ts';
 export { RUIN_PIECES } from './ruins.ts';
 export type { RuinPieceName, RuinsLook, RuinsMapFile } from './ruins.ts';
 export {
-  BRIDGE_AXES,
   BRIDGE_SPAN,
-  BRIDGE_KINDS,
   JETTY_AXES,
   PIECE_SIDES,
   SETTLEMENT_PIECES,
@@ -77,7 +75,7 @@ export {
   jettyKey,
   settlementPieceKey,
 } from './settlementLooks.ts';
-export type { BridgeAxis, BridgeKind, JettyAxis, SettlementPiece } from './settlementLooks.ts';
+export type { JettyAxis, SettlementPiece } from './settlementLooks.ts';
 export { BRIDGE_WAYS, WAY_STEPS } from './bridgeModel.ts';
 export type { BridgeWay } from './bridgeModel.ts';
 export {

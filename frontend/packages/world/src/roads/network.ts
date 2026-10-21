@@ -1,4 +1,4 @@
-import type { BridgeAxis } from '../settlementLooks.ts';
+import type { BridgeWay } from '../bridgeModel.ts';
 import { courseBetween, unitKey, unitOf } from './course.ts';
 import type { Course, CourseGround, CourseRules, Point } from './course.ts';
 import type { Join } from './graph.ts';
@@ -34,7 +34,7 @@ export type RoadGrade = (typeof ROAD_GRADES)[number];
 export interface Chain {
   readonly points: readonly Point[];
   readonly grade: RoadGrade;
-  readonly bridge: { readonly axis: BridgeAxis; readonly span: number } | null;
+  readonly bridge: { readonly axis: BridgeWay; readonly span: number } | null;
 }
 
 /** Every join routed, in the order given, which `placesJoined` gives shortest first; and the joins no way reached. */
@@ -64,7 +64,7 @@ interface Edge {
   readonly a: number;
   readonly b: number;
   use: number;
-  readonly bridge: { axis: BridgeAxis; span: number } | null;
+  readonly bridge: { axis: BridgeWay; span: number } | null;
 }
 
 const edgeKey = (a: number, b: number) => (a < b ? `${a}:${b}` : `${b}:${a}`);
@@ -79,7 +79,7 @@ export interface RawChain {
   readonly run: readonly Point[];
   readonly out: readonly [Point | null, Point | null];
   readonly grade: RoadGrade;
-  readonly bridge: { readonly axis: BridgeAxis; readonly span: number } | null;
+  readonly bridge: { readonly axis: BridgeWay; readonly span: number } | null;
 }
 
 /** The courses as one network, cut into chains, in an order that depends on nothing else; none of them shaped yet. */

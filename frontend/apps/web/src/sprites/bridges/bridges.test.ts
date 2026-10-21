@@ -4,13 +4,13 @@ import { bridgeKindByte, roadKindByte } from '@villages/world/build';
 
 import { bridgesAmong, deckOf } from './bridges';
 
-const stone = { ax: 100, ay: 200, bx: 103.25, by: 203, kind: bridgeKindByte('stone', 'uv') };
+const stone = { ax: 100, ay: 200, bx: 103.25, by: 203, kind: bridgeKindByte('uv') };
 
 describe('the bridges among the roads', () => {
-  it('are the pieces whose kind is a bridge, with their kind, axis, middle and span', () => {
+  it('are the pieces whose kind is a bridge, with their way, middle and span', () => {
     const [bridge, ...rest] = bridgesAmong([stone, { ...stone, ax: 90, kind: roadKindByte('road') }]);
     expect(rest).toEqual([]);
-    expect(bridge).toMatchObject({ kind: 'stone', axis: 'uv', middle: { x: 101.625, y: 201.5 } });
+    expect(bridge).toMatchObject({ axis: 'uv', middle: { x: 101.625, y: 201.5 } });
     expect(bridge!.span).toBeCloseTo(Math.hypot(3.25, 3), 9);
     expect(Math.hypot(bridge!.along.x, bridge!.along.y)).toBeCloseTo(1, 9);
   });

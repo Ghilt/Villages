@@ -1,12 +1,12 @@
 import { readRoadKind } from '@villages/world';
-import type { BridgeAxis, BridgeKind } from '@villages/world';
+import type { BridgeWay } from '@villages/world';
 
 import type { HeldPiece } from '../ground/roads';
 import type { GroundFootprint, GroundPoint } from '../standing/footprint';
 
 /*
  * The bridges among the roads the page holds: every piece of the `roads` layer whose kind says it is one, with its
- * kind, its axis, its middle and its span, and the strip of ground its deck stands on, which the trees are drawn in
+ * way, its middle and its span, and the strip of ground its deck stands on, which the trees are drawn in
  * front of or behind (decision record 0110). A bridge reads the same from either end, so one picture an axis draws it
  * whichever way its road runs. See docs/plans/settlements-and-roads.md and decision record 0115.
  */
@@ -18,8 +18,7 @@ const DECK_HALF = 0.6;
 export interface Bridge {
   /** Its own name on the map, the same for the same bridge whichever tile brought it. */
   readonly id: string;
-  readonly kind: BridgeKind;
-  readonly axis: BridgeAxis;
+  readonly axis: BridgeWay;
   /** The middle of its deck, in world units. */
   readonly middle: GroundPoint;
   /** Which way its deck runs, a unit long, and how long it is end to end. */
@@ -40,8 +39,7 @@ export function bridgesAmong(pieces: readonly HeldPiece[]): Bridge[] {
     const middle = { x: (piece.ax + piece.bx) / 2, y: (piece.ay + piece.by) / 2 };
     bridges.push({
       id: `bridge:${middle.x},${middle.y}`,
-      kind: kind.bridge,
-      axis: kind.axis,
+      axis: kind.bridge,
       middle,
       along: { x: dx / span, y: dy / span },
       span,

@@ -1,4 +1,4 @@
-import { Sprite } from 'pixi.js';
+import { Matrix, Sprite } from 'pixi.js';
 
 import { BRIDGE_SPAN, bridgeKey } from '@villages/world';
 
@@ -84,26 +84,38 @@ export function createBridgesLayer(pictures: SettlementPictures, standing: Stand
           one.sprite = new Sprite(picture.texture);
         }
         const { sprite, bridge } = one;
-        // The picture is of a bridge `BRIDGE_SPAN` long: this one is drawn as long as it is.
-        const stretch = bridge.span / BRIDGE_SPAN;
+        // The picture is of a bridge `BRIDGE_SPAN` long: this one is drawn as long as it is, stretched along its deck
+        // as the screen shows it and nowhere else, so a long bridge is no wider and no taller than a short one.
+        const more = bridge.span / BRIDGE_SPAN - 1;
         const foot = tiltGround(bridge.middle.x, bridge.middle.y, tilt);
+        const ahead = tiltGround(bridge.middle.x + bridge.along.x, bridge.middle.y + bridge.along.y, tilt);
+        const reach = Math.hypot(ahead.x - foot.x, ahead.y - foot.y) || 1;
+        const [dx, dy] = [(ahead.x - foot.x) / reach, (ahead.y - foot.y) / reach];
+        const size = (picture.tall * pixelsPerWorldUnit(view.zoom)) / sprite.texture.height;
         sprite.anchor.set(picture.foot.x, picture.foot.y);
-        sprite.scale.set((picture.tall * stretch * pixelsPerWorldUnit(view.zoom)) / sprite.texture.height);
-        sprite.position.set(foot.x * scale + left, foot.y * scale + top);
+        sprite.setFromMatrix(
+          new Matrix(
+            size * (1 + more * dx * dx),
+            size * more * dx * dy,
+            size * more * dx * dy,
+            size * (1 + more * dy * dy),
+            foot.x * scale + left,
+            foot.y * scale + top,
+          ),
+        );
         sprite.alpha = fade;
         const onScreen =
           sprite.x > -sprite.width && sprite.x < view.width + sprite.width && sprite.y > -sprite.height;
         sprite.visible = fade > 0 && onScreen && sprite.y < view.height + sprite.height;
         if (sprite.visible) drawn += 1;
-        const tall = picture.tall * stretch;
         things.push({
           id: bridge.id,
           sprites: [sprite],
           place: bridge.middle,
           anchor: picture.foot.x,
           footprint: deckOf(bridge),
-          tall: tall * picture.foot.y,
-          wide: (tall * sprite.texture.width) / sprite.texture.height,
+          tall: picture.tall * picture.foot.y * (1 + more * dy * dy),
+          wide: ((picture.tall * sprite.texture.width) / sprite.texture.height) * (1 + more * dx * dx),
           shown: sprite.visible,
         });
       }

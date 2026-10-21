@@ -17,7 +17,6 @@ export interface RoadsFile {
     readonly building: number;
     readonly longestSpan: number;
     readonly biggestRiver: number;
-    readonly stoneFrom: number;
   };
   readonly shape: { readonly straightest: number; readonly smoothing: number; readonly approach: number };
   readonly grades: { readonly road: number; readonly trunk: number };
@@ -68,7 +67,7 @@ export function parseRoads(text: string): RoadsFile {
   numbers(
     'bridges',
     file['bridges'],
-    ['perUnit', 'building', 'longestSpan', 'stoneFrom'],
+    ['perUnit', 'building', 'longestSpan'],
     positive,
     'a number above nought',
   );

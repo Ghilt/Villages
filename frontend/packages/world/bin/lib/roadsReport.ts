@@ -3,8 +3,8 @@ import type { Chain } from '../../src/roads/network.ts';
 import { fromWorld } from '../../src/sphere.ts';
 
 /*
- * What `world:roads` made, in numbers for the hand-over: how much road of each grade, the bridges of each kind on each
- * axis, and the settlements no road reaches and why. See docs/plans/settlements-and-roads.md.
+ * What `world:roads` made, in numbers for the hand-over: how much road of each grade, the bridges on each of their
+ * eight ways, and the settlements no road reaches and why. See docs/plans/settlements-and-roads.md.
  */
 
 export interface RoadsMade {
@@ -14,7 +14,6 @@ export interface RoadsMade {
   readonly reached: ReadonlySet<string>;
   readonly joined: ReadonlySet<string>;
   readonly longestKm: number;
-  readonly stoneFrom: number;
   readonly kmPerUnit: (y: number) => number;
   /** The world's side in units, for where on the map a bridge is. */
   readonly width: number;
@@ -44,7 +43,7 @@ export function reportRoads(made: RoadsMade): void {
   const bridges = chains.filter((chain) => chain.bridge !== null);
   const counted = new Map<string, number>();
   for (const chain of bridges) {
-    const name = `${chain.bridge!.span >= made.stoneFrom ? 'stone' : 'timber'} ${chain.bridge!.axis}`;
+    const name = chain.bridge!.axis;
     counted.set(name, (counted.get(name) ?? 0) + 1);
   }
   say(
@@ -53,11 +52,10 @@ export function reportRoads(made: RoadsMade): void {
       .map(([name, count]) => `${count} ${name}`)
       .join(', ')}`,
   );
-  // One of each kind on each axis, the nearest the town, where the map can be opened on it: a bridge reads the same
-  // from either end, so four axes are its eight directions.
+  // One on each way, the nearest the town, where the map can be opened on it.
   const nearest = new Map<string, { away: number; x: number; y: number }>();
   for (const chain of bridges) {
-    const name = `${chain.bridge!.span >= made.stoneFrom ? 'stone' : 'timber'} ${chain.bridge!.axis}`;
+    const name = chain.bridge!.axis;
     const [a, b] = chain.points as [{ x: number; y: number }, { x: number; y: number }];
     const x = (a.x + b.x) / 2;
     const y = (a.y + b.y) / 2;

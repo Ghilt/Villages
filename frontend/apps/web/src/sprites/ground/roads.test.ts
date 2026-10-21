@@ -44,7 +44,7 @@ describe('the roads worn into the ground', () => {
     const river: GroundOf = (u) => (u % 3 === 0 ? 'river' : 'land');
     for (const key of wearRoads([road], WIDTHS, 1, river, null).keys())
       expect(diamondOf(key).u % 3).not.toBe(0);
-    const bridge = { ...road, kind: bridgeKindByte('stone', 'u') };
+    const bridge = { ...road, kind: bridgeKindByte('u') };
     expect(wearRoads([bridge], WIDTHS, 1, land, null).size).toBe(0);
     expect(wearRoads([road], WIDTHS, 1, () => null, null).size).toBe(0);
   });

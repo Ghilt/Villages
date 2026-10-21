@@ -193,8 +193,9 @@ paler through the middle, a little yard at each door and a lane to the street. T
 a ruined city, and further out than zoom 7.5 a village is one mark. **Roads join them**, and run on to the ruins'
 gates: worn earth a light brown, wider and paler than a path, packed so no tree stands on it, a track for one road's
 worth of traffic and wider where several roads share the way, crossing open country and winding round hills, lakes and
-bogs, and coming into a village down its street. **A river is crossed only on a bridge**, timber where it is short and
-stone where it is long, laid straight along one of the ground's four axes so it meets its road head on; a road stops
+bogs, and coming into a village down its street. **A river is crossed only on a bridge**, the same humped stone bridge
+of three arches everywhere, laid straight along one of eight ways - the ground's axes, its diagonals and the four
+between - so it meets its road head on, and as long as the river is wide; a road stops
 where the house's revealed ground stops. Every picture of a village, a boat and a bridge is a placeholder until
 asseterizer paints it. See decision records 0114 and 0115 and `docs/plans/settlements-and-roads.md`.
 

@@ -488,7 +488,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   whole file**, folded at the foot. See `docs/plans/structures.md` and
   `docs/plans/catalogues.md`.
   Under the types, **the settlements' pieces and the bridges**: every piece in every culture standing on its
-  footprint with its shadow, and each jetty and bridge lying over the diamonds of its axis, from
+  footprint with its shadow, each jetty lying over the diamonds of its axis, and the bridge over the diamonds of each
+  of its eight ways, from
   `public/art/settlements.webp`, a placeholder ringed in dashes; and **the settlements laid out** - a village or a
   fishing village, the buttons choose, as a hamlet, a village and a large village in each culture - on made-up ground,
   land all round a village and a shore across a fishing village's front, its square, its streets and its green under
@@ -566,8 +567,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   The roads are the pieces of the `roads` layer the game server sent, worn along their lines wherever the ground is land
   and the house has revealed it, so a road stops where the revealed ground stops and the river under a bridge shows; no
   tree grows on one, so a road through a forest is a clear way. Where a road crosses a river it does so on a bridge,
-  its picture by its kind and axis from `public/art/settlements.webp`, hung at its deck's middle and drawn as long as
-  its span, standing among the trees on the strip of its deck from zoom 7.5 in; the log says under `roads` how many
+  its picture by the way it runs from `public/art/settlements.webp`, hung at its deck's middle and stretched along its
+  deck to its span, never wider or taller, standing among the trees on the strip of its deck from zoom 7.5 in; the log says under `roads` how many
   bridges are held, and the probe `villagesBridges()` how many are drawn. A path is walked only
   once the flat tiles under it have come, keeps off open water, and is worn only on ground the house has revealed. They are the look's, Adam's to settle by eye at zoom 9 or 10
   over a few buildings, and are not kept across a reload. The yards come in at 7.5 with the buildings' pictures, and
@@ -825,14 +826,14 @@ and `-- --drop` takes them off; by hand only.
   ruined towns near it, by `world/roads.json`: two places are joined when no third stands nearer both, no further
   apart than the longest road and never one ruin to another, each road the cheapest way over the zoom-7 tiles by
   their ground and their climb, the cheaper along a road already there so roads merge, a river crossed only by a
-  bridge straight along one of the ground lattice's four axes, into a settlement by its streets and into a ruin by
+  bridge straight along one of eight ways - the lattice's axes, its diagonals and the four between - into a settlement by its streets and into a ruin by
   its gates or past its outline, never over a square or a ruin's piece. The roads are joined into one network, cut
   into stretches between junctions, ends and bridges, each shaped once and graded a track, a road or a trunk by how
   many roads use it, and written as pieces of the stands' eight bytes into `world/stands/<master>/roads/`, which only
   the game server reads, with how to read them in the master's `sprites/roads/map.json`. It prints how much road of
-  each grade, the bridges of each kind on each axis, the settlements no road reaches and why, and the stretches over a
-  building, a ruin's piece or water, which must be none; on the master of 2026-10-03, 340,000 km of road and 2,131
-  bridges between 10,838 places, 880 settlements left alone - 798 with no place within 90 km, in the far north and
+  each grade, the bridges on each way, the settlements no road reaches and why, and the stretches over a
+  building, a ruin's piece or water, which must be none; on the master of 2026-10-03, 341,000 km of road and 2,142
+  bridges between 10,838 places, 877 settlements left alone - 798 with no place within 90 km, in the far north and
   the deserts - in a minute and a quarter. `world:ready` makes it again whenever the tiles, the flow, the height, the
   names, the ruins, the settlements or `world/roads.json` changed. `-- --picture` draws the roads over the ground
   around Paris, Grand Cairo, Jeddo, New Orleans, Vienna and Dantzic into `world/painterly/roads/` - a track brown, a

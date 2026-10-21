@@ -43,12 +43,6 @@ export const JETTY = 'jetty';
 export const JETTY_AXES = ['u', 'v'] as const;
 export type JettyAxis = (typeof JETTY_AXES)[number];
 
-/** The kinds and axes the roads' records name a bridge by, until they name only its way. */
-export const BRIDGE_KINDS = ['timber', 'stone'] as const;
-export type BridgeKind = (typeof BRIDGE_KINDS)[number];
-export const BRIDGE_AXES = ['u', 'v', 'uv', 'vu'] as const;
-export type BridgeAxis = (typeof BRIDGE_AXES)[number];
-
 /** Each culture's colours: its walls, its roofs, its wood. */
 const COLOURS: Readonly<Record<Culture, { wall: string; roof: string; wood: string; stone: string }>> = {
   european: { wall: '#e9dfc8', roof: '#a4553a', wood: '#7a5636', stone: '#b9b0a0' },

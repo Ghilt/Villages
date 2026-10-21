@@ -27,7 +27,7 @@ import { ruinsIn } from '../src/ruinLayout.ts';
 import type { RuinPiece } from '../src/ruinLayout.ts';
 import { RUIN_PIECES } from '../src/ruins.ts';
 import type { RuinsMapFile } from '../src/ruins.ts';
-import { BRIDGE_AXES, BRIDGE_KINDS } from '../src/settlementLooks.ts';
+import { BRIDGE_WAYS } from '../src/bridgeModel.ts';
 import { SETTLEMENT_SIDES } from '../src/settlementLayout.ts';
 import { settlementSquare, unitsOfKm } from '../src/settlements.ts';
 import type { SettlementsFiled } from '../src/settlementsFile.ts';
@@ -277,9 +277,7 @@ for (const { one } of raw) {
 say(`${chains.length.toLocaleString()} stretches of road between junctions, ends and bridges`);
 
 const kindOf = (chain: Chain) =>
-  chain.bridge === null
-    ? roadKindByte(chain.grade)
-    : bridgeKindByte(chain.bridge.span >= file.bridges.stoneFrom ? 'stone' : 'timber', chain.bridge.axis);
+  chain.bridge === null ? roadKindByte(chain.grade) : bridgeKindByte(chain.bridge.axis);
 const widthOf = (kind: number) => {
   const read = readRoadKind(kind);
   return read === null || 'bridge' in read ? file.widths.bridge : file.widths[read.road];
@@ -344,7 +342,7 @@ const map = {
   at,
   world: { side: width, tileUnits: TILE_UNITS },
   kinds: ROAD_KINDS,
-  bridges: { kinds: BRIDGE_KINDS, axes: BRIDGE_AXES },
+  bridges: { ways: BRIDGE_WAYS },
   widths: file.widths,
   pieces: pieces.length,
   chunks: byTile.size,
@@ -359,7 +357,6 @@ reportRoads({
   reached,
   joined,
   longestKm: file.longestKm,
-  stoneFrom: file.bridges.stoneFrom,
   kmPerUnit,
   width,
   near: towns.find((town) => town.id === (flag('near') ?? 'Q1792')) ?? { x: width / 2, y: width / 2 },

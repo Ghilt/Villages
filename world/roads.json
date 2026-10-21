@@ -1,5 +1,5 @@
 {
-  "$comment": "The roads between the settlements and to the ruined towns of 1790, Adam's to tune: a first draft of 2026-10-21, every number a placeholder. longestKm is the longest road there is: two places further apart are never joined straight, and the settlements stand about fifty kilometres apart. ground is what a step onto each class costs beside one onto open farmland, one or more; a class it does not name costs two, and open water and the sea are never stepped on. climb is what a metre up or down between two world units costs, in steps. trunk is the share of a step's cost onto a unit another road has taken already, so roads merge into trunks. margin is how far, in world units, a road may stray past the box round its two ends. bridges: what a world unit of bridge costs and what building one costs at all, in steps; the longest span of river in world units; the biggest river a bridge crosses, by world:flow's size from nought to one; and the span from which a bridge is stone rather than timber. shape: the longest straight line a run of steps is made into, in world units, how many times its corners are cut, and how far a road runs straight as it comes into a settlement's street or onto a bridge. grades: how many roads use a stretch for it to be a road rather than a track, and a trunk. widths: how wide each is drawn, in world units, which its records' reach takes in. Read by `npm run world:roads --prefix frontend`. See docs/plans/settlements-and-roads.md and decision record 0115.",
+  "$comment": "The roads between the settlements and to the ruined towns of 1790, Adam's to tune: a first draft of 2026-10-21, every number a placeholder. longestKm is the longest road there is: two places further apart are never joined straight, and the settlements stand about fifty kilometres apart. ground is what a step onto each class costs beside one onto open farmland, one or more; a class it does not name costs two, and open water and the sea are never stepped on. climb is what a metre up or down between two world units costs, in steps. trunk is the share of a step's cost onto a unit another road has taken already, so roads merge into trunks. margin is how far, in world units, a road may stray past the box round its two ends. bridges: what a world unit of bridge costs and what building one costs at all, in steps; the longest span of river in world units; the biggest river a bridge crosses, by world:flow's size from nought to one. A bridge runs along one of eight ways and is the same stone bridge everywhere. shape: the longest straight line a run of steps is made into, in world units, how many times its corners are cut, and how far a road runs straight as it comes into a settlement's street or onto a bridge. grades: how many roads use a stretch for it to be a road rather than a track, and a trunk. widths: how wide each is drawn, in world units, which its records' reach takes in. Read by `npm run world:roads --prefix frontend`. See docs/plans/settlements-and-roads.md and decision record 0115.",
   "longestKm": 90,
   "ground": {
     "farmland": 1,
@@ -38,8 +38,7 @@
     "perUnit": 3,
     "building": 6,
     "longestSpan": 4,
-    "biggestRiver": 0.75,
-    "stoneFrom": 3
+    "biggestRiver": 0.75
   },
   "shape": {
     "straightest": 6,

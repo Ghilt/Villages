@@ -129,7 +129,8 @@ alone. `ground` is what a step costs on each class beside farmland, one or more 
 still - and `climb` what a metre up or down costs, so a road goes round a hill or a bog when the way round is
 cheaper. `trunk` is the share of a step along a road already there, so roads share ground. A river is crossed only
 by a bridge: `bridges.longestSpan` is the most river one spans, `biggestRiver` the biggest river by `world:flow`'s
-size it crosses at all, `stoneFrom` the span from which it is stone. Paint a lake across a road and it goes round;
+size it crosses at all; a bridge runs straight along one of eight ways, the ground's axes, its diagonals and the
+four between, and is the same stone bridge everywhere. Paint a lake across a road and it goes round;
 paint a river too wide to bridge and the villages either side are joined on their own banks. `shape` is how straight
 and how smooth a road is drawn, `grades` how many roads share a stretch for it to be a road and a trunk rather than a
 track, and `widths` how wide each is drawn. See `docs/plans/settlements-and-roads.md`.
