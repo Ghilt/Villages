@@ -940,10 +940,11 @@ and `-- --drop` takes them off; by hand only.
   against every other: the game server fights a slice of each aspect - the balance's first numbers, every way of choosing
   two of its effects taking its turn, a middling key figure or building of level two in each slot - against a slice of
   each other, 90 or 900 runs a pairing, on progressions drawn from a challenge kind, Even unless another is picked, and
-  the page draws who won how often as a grid: side A down the side and side B across, each cell side A's share of the
-  runs either side won, the even ends left out, blue where A wins most, red where B does, grey about even, with each aspect's mean as A and as B at the ends.
-  Pointing at a cell says the whole of it. A grid of 900 is 90,000 challenges. It asks with
-  `simulateChallenge`, one of Adam's instruments, on a connection that says no hello, and a server with its instruments
+  the page draws who won how often as a grid: side A down the side, its aspects inked blue, and side B across the top,
+  inked red, each cell side A's share of the runs either side won, the even ends left out, so a blue cell is the aspect
+  down the side winning and a red one the aspect across the top, grey about even, with each aspect's mean down the side
+  and across the top at the ends. Pointing at a cell says the whole of it in the aspects' names. A grid of 900 is 90,000
+  challenges. It asks with `simulateMatchups`, one of Adam's instruments, on a connection that says no hello, and a server with its instruments
   closed refuses it; nothing is stored. The plan is `docs/plans/challenges.md`.
 - **`/admin/inspect-story`** is the world's history as a timeline, `docs/STORY.md` drawn, and needs nothing else
   running. Time runs down the page from the first box to the present, where the line ends at the compass: each

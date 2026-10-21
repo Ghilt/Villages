@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { Challenges } from '@villages/world';
 import type { MatchupView, MatchupsSimulatedFrame } from '@villages/protocol';
 
-import { numberSaid, said, towardSaid } from './setup';
+import { numberSaid, said } from './setup';
 import { useSimulator } from './useSimulator';
 import type { Weighed } from './useSimulator';
 
@@ -37,6 +37,10 @@ export const shareOf = (cell: MatchupView) =>
   cell.wonByA + cell.wonByB === 0 ? 0.5 : cell.wonByA / (cell.wonByA + cell.wonByB);
 
 const percent = (share: number) => `${Math.round(100 * share)}%`;
+
+/** A pairing's mean end tug, said toward the aspect it leans to rather than toward a side. */
+const leanSaid = (tug: number, side: string, top: string) =>
+  tug === 0 ? 'even' : `${numberSaid(Math.abs(tug))} toward ${tug > 0 ? side : top}`;
 
 /** How many runs a pairing gets: a quick look, or a closer one. */
 const RUNS = [90, 900] as const;
@@ -129,24 +133,31 @@ function Grid({ grid, took }: { grid: MatchupsSimulatedFrame; took: number }) {
         <table className="challenges-grid">
           <thead>
             <tr>
-              <th className="challenges-grid__corner">A down, B across</th>
+              <th className="challenges-grid__corner">
+                <span className="challenges-grid__top-said">across the top: side B</span>
+                <span className="challenges-grid__side-said">down the side: side A</span>
+              </th>
               {aspects.map((aspect) => (
-                <th key={aspect} scope="col">
+                <th key={aspect} scope="col" className="challenges-grid__top">
                   {said(aspect)}
                 </th>
               ))}
-              <th scope="col" className="challenges-grid__mean">
-                won as A
+              <th scope="col" className="challenges-grid__mean challenges-grid__side-said">
+                won, down the side
               </th>
             </tr>
           </thead>
           <tbody>
             {cells.map((row, at) => (
               <tr key={aspects[at]} className={at % 2 === 1 ? 'challenges-grid__pair-end' : undefined}>
-                <th scope="row">{said(aspects[at]!)}</th>
+                <th scope="row" className="challenges-grid__side">
+                  {said(aspects[at]!)}
+                </th>
                 {row.map((cell, column) => {
                   const share = shareOf(cell);
                   const shade = shareClass(share);
+                  const side = said(aspects[at]!);
+                  const top = said(aspects[column]!);
                   return (
                     <td
                       key={aspects[column]}
@@ -154,7 +165,7 @@ function Grid({ grid, took }: { grid: MatchupsSimulatedFrame; took: number }) {
                       style={{ background: shade.colour }}
                       onMouseEnter={() =>
                         setHover(
-                          `${said(aspects[at]!)} as A against ${said(aspects[column]!)} as B: A won ${cell.wonByA}, B won ${cell.wonByB}, even ${cell.even} of ${runs}; ${cell.pulled} pulled to an end; the mean end tug ${towardSaid(cell.meanTug)}`,
+                          `${side}, down the side, won ${cell.wonByA}; ${top}, across the top, won ${cell.wonByB}; even ${cell.even}; of ${runs}. ${cell.pulled} pulled to an end; the mean end tug ${leanSaid(cell.meanTug, side, top)}`,
                         )
                       }
                       onMouseLeave={() => setHover(null)}
@@ -167,8 +178,8 @@ function Grid({ grid, took }: { grid: MatchupsSimulatedFrame; took: number }) {
               </tr>
             ))}
             <tr>
-              <th scope="row" className="challenges-grid__mean">
-                won as B
+              <th scope="row" className="challenges-grid__mean challenges-grid__top-said">
+                won, across the top
               </th>
               {asB.map((share, column) => (
                 <td key={aspects[column]} className="challenges-grid__mean">
@@ -181,11 +192,11 @@ function Grid({ grid, took }: { grid: MatchupsSimulatedFrame; took: number }) {
         </table>
       </div>
       <div className="challenges-spread__legend inspect-each">
-        <span className="inspect-key">side A&apos;s share of the runs won</span>
+        <span className="challenges-grid__top-said">the aspect across the top won nearly all</span>
         {SHARES.map((one) => (
           <span key={one.upTo} className="challenges-spread__swatch" style={{ background: one.colour }} />
         ))}
-        <span>from B winning nearly all, through even, to A winning nearly all</span>
+        <span className="challenges-grid__side-said">the aspect down the side won nearly all</span>
       </div>
       <p className="inspect-note challenges-chart__said">
         {hover ?? `point at a cell for the whole of it; ${numberSaid(runs)} runs a pairing`}

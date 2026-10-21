@@ -213,7 +213,26 @@
 
 .challenges-grid__corner {
   font-size: 0.7rem;
-  color: var(--ink-soft);
+}
+
+.challenges-grid__corner span {
+  display: block;
+}
+
+/*
+ * Side A's aspects down the side are inked in the cells' deep blue and side B's across the top in their deep red, each
+ * with a rule of its colour against the cells, so a cell's colour says which of its two headers won.
+ */
+.challenges-grid th.challenges-grid__side {
+  font-weight: 600;
+  color: #1c5cab;
+  border-right: 4px solid #3987e5;
+}
+
+.challenges-grid th.challenges-grid__top {
+  font-weight: 600;
+  color: #b52f2e;
+  border-bottom: 4px solid #e34948;
 }
 
 .challenges-grid__cell {
@@ -241,4 +260,13 @@
   padding: 0.35rem 0.5rem;
   color: var(--ink-soft);
   text-align: center;
+}
+
+/* After the means, so the means' headers take the colour of the side they sum. */
+.challenges-grid__side-said {
+  color: #1c5cab;
+}
+
+.challenges-grid__top-said {
+  color: #b52f2e;
 }
