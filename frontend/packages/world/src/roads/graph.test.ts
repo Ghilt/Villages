@@ -83,7 +83,8 @@ describe('where a road meets a place', () => {
   it('meets a walled ruin a step outside its gates, and an open one round its outline', () => {
     const town = { x: 500, y: 500, built: 10 };
     const gate = { x: 510, y: 500, piece: 6, culture: 0, rank: 0, height: 4 };
-    expect(ruinEnds(town, [gate])).toEqual([{ x: 511.5, y: 500 }]);
+    // A step past the gate's own ground, which no road passes over.
+    expect(ruinEnds(town, [gate])).toEqual([{ x: 512, y: 500, out: { x: 1, y: 0 } }]);
     const open = ruinEnds(town, []);
     expect(open).toHaveLength(16);
     for (const end of open) expect(Math.hypot(end.x - 500, end.y - 500)).toBeCloseTo(11.5, 6);

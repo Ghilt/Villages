@@ -75,9 +75,19 @@ export interface Course {
   readonly landings: readonly Landing[];
 }
 
-/** A unit of the world by one number, the whole world's units apart. */
+// A unit's key: its two whole numbers in one, every unit apart, a world's width either side of it too, so a course
+// that steps across the world's edge at a longitude of 180 is still read back where it went.
+const OFFSET = 32768;
+const SPAN = 131072;
+
+/** A unit of the world by one number. */
 export function unitKey(x: number, y: number): number {
-  return y * 65536 + x;
+  return (y + OFFSET) * SPAN + (x + OFFSET);
+}
+
+/** The unit a key is. */
+export function unitOf(key: number): Point {
+  return { x: (key % SPAN) - OFFSET, y: Math.floor(key / SPAN) - OFFSET };
 }
 
 const FRAME = frameOf(GROUND_LATTICE);
@@ -222,6 +232,7 @@ export function courseBetween(
   }
   if (goals.size === 0) return null;
   const goalPoints = [...goals.values()];
+  // A guess never above what is left: every step costs at least what one along a road already there does.
   const guess = (x: number, y: number) =>
     rules.trunk * Math.min(...goalPoints.map((end) => Math.hypot(end.x - x - 0.5, end.y - y - 0.5)));
 
@@ -300,7 +311,19 @@ export function courseBetween(
     x: minX + (node % width) + 0.5,
     y: minY + Math.floor(node / width) + 0.5,
   });
-  const points: Point[] = [startedAt.get(nodes[0]!)!];
+  // A point that is not a unit's middle - an end, a bridge's far end - put on the quarter of a unit and kept inside its
+  // own unit as it is, so the records cut from it meet exactly and no line from it clips a unit beside it.
+  const within = <P extends Point>(point: P, node: number): P => {
+    const { x, y } = centre(node);
+    const fit = (value: number, middle: number) =>
+      Math.min(middle + 0.25, Math.max(middle - 0.25, Math.round(value * 4) / 4));
+    return { ...point, x: fit(point.x, x), y: fit(point.y, y) };
+  };
+  const ends = nodes.map((node) => {
+    const crossing = bridged.get(node);
+    return crossing === undefined ? null : within(crossing.end, node);
+  });
+  const points: Point[] = [within(startedAt.get(nodes[0]!)!, nodes[0]!)];
   const bridges: CourseBridge[] = [];
   const push = (point: Point) => {
     const last = points[points.length - 1]!;
@@ -311,17 +334,17 @@ export function courseBetween(
     if (at > 0 && crossing !== undefined) {
       push(centre(nodes[at - 1]!));
       bridges.push({ at: points.length - 1, axis: crossing.axis, span: crossing.span });
-      points.push(crossing.end);
+      points.push(ends[at]!);
     } else {
       push(centre(node));
     }
   });
-  push(goals.get(reached)!);
+  push(within(goals.get(reached)!, reached));
   const units = nodes.map((node) => unitKey(minX + (node % width), minY + Math.floor(node / width)));
   const landings = nodes.flatMap((node, at) => {
     const crossing = bridged.get(node);
     return at > 0 && crossing !== undefined
-      ? [{ at, axis: crossing.axis, span: crossing.span, end: crossing.end }]
+      ? [{ at, axis: crossing.axis, span: crossing.span, end: ends[at]! }]
       : [];
   });
   return { points, bridges, units, landings };

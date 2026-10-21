@@ -81,9 +81,10 @@ describe("a road's course", () => {
       const a = course.points[bridge.at]!;
       const b = course.points[bridge.at + 1]!;
       const long = Math.hypot(b.x - a.x, b.y - a.y);
-      expect(long).toBeCloseTo(bridge.span, 6);
+      // Its far end is put on the quarter of a unit, so it runs within a few degrees of its axis, and as long.
+      expect(Math.abs(long - bridge.span)).toBeLessThan(0.4);
       const along = AXES.map((axis) => Math.abs((axis.x * (b.x - a.x) + axis.y * (b.y - a.y)) / long));
-      expect(Math.max(...along)).toBeCloseTo(1, 9);
+      expect(Math.max(...along)).toBeGreaterThan(Math.cos((6 * Math.PI) / 180));
     }
   });
 
@@ -136,6 +137,27 @@ describe("a road's course", () => {
 });
 
 describe('the units along a line', () => {
+  it('takes the same units walked either way, an end on a corner too', () => {
+    const walk = (ax: number, ay: number, bx: number, by: number) => {
+      const seen: string[] = [];
+      unitsAlong(ax, ay, bx, by, (x, y) => {
+        seen.push(`${x},${y}`);
+        return true;
+      });
+      return seen.sort();
+    };
+    for (const [ax, ay, bx, by] of [
+      [12.5, 9.5, 13, 11],
+      [3, 4, 5.25, 7],
+      [7.75, 2.25, 6, 1],
+      [10, 10, 12, 12],
+    ] as const) {
+      expect(walk(ax, ay, bx, by)).toEqual(walk(bx, by, ax, ay));
+    }
+    // Ending on a corner, it takes the unit its end is in, and not the two it only touches there.
+    expect(walk(12.5, 9.5, 13, 9)).toEqual(['12,9', '13,9']);
+  });
+
   it('takes both units beside a corner it passes exactly through', () => {
     const seen: string[] = [];
     unitsAlong(0.5, 0.5, 2.5, 2.5, (x, y) => {

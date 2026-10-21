@@ -3,8 +3,8 @@ import type { RuinPiece } from '../ruinLayout.ts';
 import { RUIN_PIECES } from '../ruins.ts';
 import { inSquare, streetEnds } from '../settlements.ts';
 import type { SettlementSquare } from '../settlements.ts';
-import type { Point } from './course.ts';
 import { unitKey } from './course.ts';
+import type { RoadEnd } from './network.ts';
 
 /*
  * Where a road meets a place, and what of a place it keeps off. Into a settlement by one of its two streets, at the
@@ -22,12 +22,20 @@ const AROUND = 16;
 /** How far about a ruin's piece no road passes, in world units. */
 const CLEAR = 0.8;
 
-/** The four ends of a settlement's streets, in world units: the middle of the diamond just outside each. */
-export function settlementEnds(square: SettlementSquare): Point[] {
-  return streetEnds(square).map(({ u, v }) => ({
-    x: worldXOf(FRAME, u + 0.5, v + 0.5),
-    y: worldYOf(FRAME, u + 0.5, v + 0.5),
-  }));
+/**
+ * The four ends of a settlement's streets, in world units: the middle of the diamond just outside each, and the way
+ * out along its street.
+ */
+export function settlementEnds(square: SettlementSquare): RoadEnd[] {
+  return streetEnds(square).map(({ u, v }) => {
+    const du = u < square.fromU ? -1 : u >= square.fromU + square.side ? 1 : 0;
+    const dv = v < square.fromV ? -1 : v >= square.fromV + square.side ? 1 : 0;
+    return {
+      x: worldXOf(FRAME, u + 0.5, v + 0.5),
+      y: worldYOf(FRAME, u + 0.5, v + 0.5),
+      out: { x: worldXOf(FRAME, du, dv), y: worldYOf(FRAME, du, dv) },
+    };
+  });
 }
 
 /**
@@ -69,31 +77,39 @@ export interface RuinTown {
 }
 
 /**
- * Where a road may end at a ruin: a step outside each of its gates, out from its middle, where `pieces` - the town's,
- * laid out by `ruinsIn` - hold any; else at even bearings round its built ground, a step outside it.
+ * Where a road may end at a ruin: outside each of its gates, out from its middle, where `pieces` - the town's, laid out
+ * by `ruinsIn` - hold any; else at even bearings round its built ground. Either way a step past the furthest piece
+ * along its way out, so no end is shut in among the pieces at the town's ragged edge, or among those outside its wall.
  */
-export function ruinEnds(town: RuinTown, pieces: readonly RuinPiece[]): Point[] {
-  const gates = pieces.filter(
+export function ruinEnds(town: RuinTown, pieces: readonly RuinPiece[]): RoadEnd[] {
+  const near = pieces.filter((one) => Math.hypot(one.x - town.x, one.y - town.y) < town.built * 2.5);
+  const gates = near.filter(
     (one) => one.piece === GATE && Math.hypot(one.x - town.x, one.y - town.y) < town.built * 1.5,
   );
+  /** The first point along `out` from `from`, a step at a time, at least `OUTSIDE` on and clear of every piece. */
+  const past = (from: { x: number; y: number }, out: { x: number; y: number }): RoadEnd => {
+    for (let along = OUTSIDE; ; along += 0.5) {
+      const x = from.x + out.x * along;
+      const y = from.y + out.y * along;
+      const shut = near.some(
+        (piece) => Math.abs(piece.x - x) < CLEAR + 1.2 && Math.abs(piece.y - y) < CLEAR + 1.2,
+      );
+      if (!shut || along > town.built * 1.5 + OUTSIDE) return { x, y, out };
+    }
+  };
   if (gates.length > 0) {
     return gates.map((gate) => {
       const away = Math.hypot(gate.x - town.x, gate.y - town.y) || 1;
-      return {
-        x: gate.x + ((gate.x - town.x) / away) * OUTSIDE,
-        y: gate.y + ((gate.y - town.y) / away) * OUTSIDE,
-      };
+      return past(gate, { x: (gate.x - town.x) / away, y: (gate.y - town.y) / away });
     });
   }
-  const out: Point[] = [];
+  const ends: RoadEnd[] = [];
   for (let at = 0; at < AROUND; at += 1) {
     const turn = (at / AROUND) * 2 * Math.PI;
-    out.push({
-      x: town.x + Math.cos(turn) * (town.built + OUTSIDE),
-      y: town.y + Math.sin(turn) * (town.built + OUTSIDE),
-    });
+    const out = { x: Math.cos(turn), y: Math.sin(turn) };
+    ends.push(past({ x: town.x + out.x * town.built, y: town.y + out.y * town.built }, out));
   }
-  return out;
+  return ends;
 }
 
 /** The world's units a ruin's pieces stand on and about, by `unitKey`, which no road passes over. */

@@ -1,5 +1,5 @@
 import type { BridgeAxis } from '../settlementLooks.ts';
-import { courseBetween, unitKey } from './course.ts';
+import { courseBetween, unitKey, unitOf } from './course.ts';
 import type { Course, CourseGround, CourseRules, Point } from './course.ts';
 import type { Join } from './graph.ts';
 import { onQuarter, shapeOf } from './shape.ts';
@@ -68,11 +68,22 @@ interface Edge {
 }
 
 const edgeKey = (a: number, b: number) => (a < b ? `${a}:${b}` : `${b}:${a}`);
-const centreOf = (unit: number): Point => ({ x: (unit % 65536) + 0.5, y: Math.floor(unit / 65536) + 0.5 });
+const centreOf = (unit: number): Point => {
+  const { x, y } = unitOf(unit);
+  return { x: x + 0.5, y: y + 0.5 };
+};
 const ascending = (a: number, b: number) => a - b;
 
-/** The courses as one network of chains, each shaped by `clear` and `rules`, in an order that depends on nothing else. */
-export function networkOf(courses: readonly Course[], clear: Clear, rules: NetworkRules): Chain[] {
+/** A chain as the network cuts it, before it is shaped: its points, the way out of its first and last, what it is. */
+export interface RawChain {
+  readonly run: readonly Point[];
+  readonly out: readonly [Point | null, Point | null];
+  readonly grade: RoadGrade;
+  readonly bridge: { readonly axis: BridgeAxis; readonly span: number } | null;
+}
+
+/** The courses as one network, cut into chains, in an order that depends on nothing else; none of them shaped yet. */
+export function chainsOf(courses: readonly Course[], rules: Pick<NetworkRules, 'grades'>): RawChain[] {
   const edges = new Map<string, Edge>();
   const near = new Map<number, Set<number>>();
   /** Where a unit's point is when it is not its middle: a place's end, a bridge's far end. */
@@ -129,7 +140,7 @@ export function networkOf(courses: readonly Course[], clear: Clear, rules: Netwo
     use >= rules.grades[1] ? 'trunk' : use >= rules.grades[0] ? 'road' : 'track';
   const anchor = (unit: number) => near.get(unit)?.size !== 2 || pointAt.has(unit) || outOf.has(unit);
   const used = new Set<string>();
-  const chains: Chain[] = [];
+  const chains: RawChain[] = [];
 
   const walk = (start: number, towards: number) => {
     const units = [start];
@@ -150,43 +161,29 @@ export function networkOf(courses: readonly Course[], clear: Clear, rules: Netwo
       at = next;
       next = onward;
     }
-    chains.push({ points: shaped(units), grade: gradeOf(use), bridge: null });
-  };
-
-  const shaped = (units: readonly number[]): Point[] => {
-    const run: Point[] = [];
-    const fixed: boolean[] = [];
-    units.forEach((unit, at) => {
-      const point = pointAt.get(unit) ?? centreOf(unit);
-      const out = outOf.get(unit);
-      const ahead =
-        out === undefined
-          ? null
-          : onQuarter({ x: point.x + out.x * rules.approach, y: point.y + out.y * rules.approach });
-      const approach = ahead !== null && clear(point, ahead) ? ahead : null;
-      if (at === units.length - 1 && approach !== null) {
-        run.push(approach);
-        fixed.push(true);
-      }
-      run.push(point);
-      fixed.push(true);
-      if (at === 0 && approach !== null) {
-        run.push(approach);
-        fixed.push(true);
-      }
-      if (at !== 0 && at !== units.length - 1) fixed[fixed.length - 1] = false;
+    chains.push({
+      // An end's own point and then its unit's middle, so every line of the run goes from one unit to the next.
+      run: units.flatMap((unit, at) => {
+        const own = pointAt.get(unit);
+        if (own === undefined) return [centreOf(unit)];
+        return at === 0 ? [own, centreOf(unit)] : at === units.length - 1 ? [centreOf(unit), own] : [own];
+      }),
+      out: [outOf.get(units[0]!) ?? null, outOf.get(units[units.length - 1]!) ?? null],
+      grade: gradeOf(use),
+      bridge: null,
     });
-    return shapeOf(run, fixed, clear, rules);
   };
 
   const units = [...near.keys()].sort(ascending);
   for (const edge of [...edges.values()].sort((one, other) => one.a - other.a || one.b - other.b)) {
     if (edge.bridge === null) continue;
     used.add(edgeKey(edge.a, edge.b));
-    const ends = [pointAt.get(edge.a) ?? centreOf(edge.a), pointAt.get(edge.b) ?? centreOf(edge.b)].map(
-      onQuarter,
-    );
-    chains.push({ points: ends, grade: gradeOf(edge.use), bridge: edge.bridge });
+    chains.push({
+      run: [pointAt.get(edge.a) ?? centreOf(edge.a), pointAt.get(edge.b) ?? centreOf(edge.b)],
+      out: [null, null],
+      grade: gradeOf(edge.use),
+      bridge: edge.bridge,
+    });
   }
   for (const unit of units) {
     if (!anchor(unit)) continue;
@@ -201,4 +198,44 @@ export function networkOf(courses: readonly Course[], clear: Clear, rules: Netwo
     }
   }
   return chains;
+}
+
+/**
+ * A chain shaped: a bridge straight from end to end; a road straightened and smoothed by `clear` and `rules`, coming
+ * out of a place or off a bridge straight along its way for `rules.approach` where that is clear.
+ */
+export function shapeChain(raw: RawChain, clear: Clear, rules: NetworkRules): Chain {
+  if (raw.bridge !== null) return { points: raw.run.map(onQuarter), grade: raw.grade, bridge: raw.bridge };
+  const run: Point[] = [];
+  const fixed: boolean[] = [];
+  const approach = (point: Point, out: Point | null, then: Point | undefined): Point | null => {
+    if (out === null) return null;
+    const ahead = onQuarter({ x: point.x + out.x * rules.approach, y: point.y + out.y * rules.approach });
+    return clear(point, ahead) && (then === undefined || clear(ahead, then)) ? ahead : null;
+  };
+  raw.run.forEach((point, at) => {
+    const last = at === raw.run.length - 1;
+    const ahead =
+      at === 0
+        ? approach(point, raw.out[0], raw.run[1])
+        : last
+          ? approach(point, raw.out[1], raw.run[at - 1])
+          : null;
+    if (last && ahead !== null) {
+      run.push(ahead);
+      fixed.push(true);
+    }
+    run.push(point);
+    fixed.push(at === 0 || last);
+    if (at === 0 && ahead !== null) {
+      run.push(ahead);
+      fixed.push(true);
+    }
+  });
+  return { points: shapeOf(run, fixed, clear, rules), grade: raw.grade, bridge: null };
+}
+
+/** The courses as one network of chains, each shaped by `clear` and `rules`. */
+export function networkOf(courses: readonly Course[], clear: Clear, rules: NetworkRules): Chain[] {
+  return chainsOf(courses, rules).map((raw) => shapeChain(raw, clear, rules));
 }

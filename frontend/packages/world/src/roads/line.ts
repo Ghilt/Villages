@@ -1,8 +1,8 @@
 /*
- * The world's units a straight line passes over, in order from its start: every one it touches, and where it passes
- * exactly through a corner, both of the units on either side of it, so a line between two rivers joined only at their
- * corners is never taken to pass between them. What a bridge is laid along and what a smoothed road is checked
- * against. See docs/plans/settlements-and-roads.md.
+ * The world's units a straight line passes over, in order from its start: every one it crosses, and where it passes
+ * exactly through a corner between its ends, both of the units on either side of it, so a line between two rivers
+ * joined only at their corners is never taken to pass between them. What a bridge is laid along and what a smoothed
+ * road is checked against. See docs/plans/settlements-and-roads.md.
  */
 
 /**
@@ -31,14 +31,22 @@ export function unitsAlong(
   let nextY = stepY === 0 ? Infinity : (stepY > 0 ? y + 1 - ay : ay - y) * acrossY;
   let entered = 0;
   for (let guard = 0; guard < 1_000_000; guard += 1) {
-    const left = Math.min(nextX, nextY, 1);
+    const next = Math.min(nextX, nextY);
+    const left = Math.min(next, 1);
     if (!visit(x, y, entered, left)) return false;
     if (x === endX && y === endY) return true;
-    if (left >= 1) return true;
+    // An end on this unit's edge or corner is in the unit beside it, which is taken; a unit it only touches at that
+    // corner is not, as a start on a corner takes none, so a line and the same line walked back take the same units.
+    if (next >= 1 - 1e-12) return visit(endX, endY, 1, 1);
     entered = left;
     if (Math.abs(nextX - nextY) < 1e-12) {
-      // Through a corner: the two units it passes between, then the one across it.
-      if (!visit(x + stepX, y, entered, entered) || !visit(x, y + stepY, entered, entered)) return false;
+      // Through a corner between its ends: the two units it passes between, then the one across it.
+      if (
+        entered > 1e-12 &&
+        (!visit(x + stepX, y, entered, entered) || !visit(x, y + stepY, entered, entered))
+      ) {
+        return false;
+      }
       x += stepX;
       y += stepY;
       nextX += acrossX;
