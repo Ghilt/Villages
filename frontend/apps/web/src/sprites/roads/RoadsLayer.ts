@@ -9,7 +9,7 @@ import {
   Sprite,
   UniformGroup,
 } from 'pixi.js';
-import type { Renderer } from 'pixi.js';
+import type { Container, Renderer } from 'pixi.js';
 
 import type { RoadsMapFile } from '@villages/world';
 
@@ -19,8 +19,11 @@ import { note } from '../../log/log';
 import { heldStandsOf, onStandsArrived, onStandsFollowed } from '../../net/stands';
 import { piecesHeld, roadsMap } from '../ground/roads';
 import { workedGroundStore } from '../ground/settings';
+import type { Worked } from '../ground/worked';
 import type { Layer } from '../layer';
+import type { SettlementPictures } from '../settlements/settlementPictures';
 import { BECOMES_A_MARK_AT } from '../twoForms';
+import { createRoadsideLayer } from './RoadsideLayer';
 import { stripsOf } from './roadStrips';
 import type { RoadStrip } from './roadStrips';
 import { ROAD_FRAGMENT, ROAD_VERTEX } from './roadShader';
@@ -36,12 +39,16 @@ import { ROAD_FRAGMENT, ROAD_VERTEX } from './roadShader';
 
 export interface RoadsLayer extends Layer {
   sprite: Sprite;
+  /** The roadside along the roads, over them and under everything standing (`RoadsideLayer.ts`). */
+  roadside: Container;
+  /** The worked ground, whose wayside the roadside stands on. */
+  setWorked(worked: ReadonlyMap<number, Worked>): void;
   /** Where the ground is revealed, for where a road stops: null with the fog off. */
   setRevealed(revealed: ((x: number, y: number) => boolean) | null): void;
   /** The folder of the master's world, for its roads map. */
   setTilesRoot(tilesRoot: string): void;
   /** How many stretches are held to draw. */
-  report(): { strips: number };
+  report(): { strips: number; roadside: number };
 }
 
 /** The zoom the roads first show at, where their records first come, and how far they take to come in. */
@@ -103,7 +110,12 @@ function geometryOf(strips: readonly RoadStrip[], origin: { x: number; y: number
   });
 }
 
-export function createRoadsLayer(renderer: Renderer, repaint: () => void): RoadsLayer {
+export function createRoadsLayer(
+  renderer: Renderer,
+  repaint: () => void,
+  pictures: SettlementPictures,
+): RoadsLayer {
+  const roadside = createRoadsideLayer(pictures, repaint);
   const uniforms = new UniformGroup({
     uSize: { value: new Float32Array(2), type: 'vec2<f32>' },
     uRowX: { value: new Float32Array(3), type: 'vec3<f32>' },
@@ -162,6 +174,9 @@ export function createRoadsLayer(renderer: Renderer, repaint: () => void): Roads
 
   return {
     sprite,
+    roadside: roadside.container,
+
+    setWorked: (worked) => roadside.setWorked(worked),
 
     setRevealed(next): void {
       if (next === revealed) return;
@@ -170,6 +185,7 @@ export function createRoadsLayer(renderer: Renderer, repaint: () => void): Roads
     },
 
     setTilesRoot(next: string): void {
+      roadside.setTilesRoot(next);
       if (next === tilesRoot) return;
       tilesRoot = next;
       widths = null;
@@ -180,9 +196,10 @@ export function createRoadsLayer(renderer: Renderer, repaint: () => void): Roads
       });
     },
 
-    report: () => ({ strips: strips.length }),
+    report: () => ({ strips: strips.length, roadside: roadside.report().items }),
 
-    draw(view: CameraView): number | null {
+    draw(view: CameraView, now: number, elapsed: number): number | null {
+      roadside.draw(view, now, elapsed);
       const { on, strength, road } = workedGroundStore.get();
       const appear = smoothstep(FROM_ZOOM - 0.1, FROM_ZOOM + COMING_IN, view.zoom);
       if (stale) {
@@ -230,6 +247,7 @@ export function createRoadsLayer(renderer: Renderer, repaint: () => void): Roads
     },
 
     destroy(): void {
+      roadside.destroy();
       stopArriving();
       stopFollowing();
       stopWatching();

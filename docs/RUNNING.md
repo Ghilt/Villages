@@ -569,8 +569,12 @@ stage alone, with none of the debug panel in it (decision record 0079).
   revealed ground stops: from zoom 6, where their records first come, a thin line edged darker, every road the page
   holds; from 7.5 in, packed earth as wide as its grade, its edge ragged and two ruts along it. Under a road and a
   little either side of it, for its roadside, the ground is kept clear, a diamond at a time, as the wayside, which is
-  not drawn: no tree grows on it, so a road through a forest is a clear way. The log says under `roads` how many
-  stretches are drawn, and the probe `villagesRoads()` too. Where a road crosses a river it does so on a bridge,
+  not drawn: no tree grows on it, so a road through a forest is a clear way. Along both sides of a road, from 7.5 in,
+  stands its **roadside**, chosen by the biome under it (`packages/world/src/roadsideLooks.ts`): stubs of dry-stone
+  wall laid end to end in runs where the biome builds walls, mossy where it is green and wet and bare where it is dry,
+  and the scenery's own small growth - grass, ferns, heather, scrub, boulders, cacti - smaller than in the open, never
+  in a settlement, on water or on another road. The log says under `roads` how many stretches and how many things of
+  the roadside are drawn, and the probe `villagesRoads()` too. Where a road crosses a river it does so on a bridge,
   its picture by the way it runs from `public/art/settlements.webp`, hung at its deck's middle and stretched along its
   deck to its span, never wider or taller, standing among the trees on the strip of its deck from zoom 7.5 in; the log says under `roads` how many
   bridges are held, and the probe `villagesBridges()` how many are drawn. A path is walked only

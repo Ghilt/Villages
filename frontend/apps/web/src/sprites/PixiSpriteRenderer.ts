@@ -210,6 +210,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     }
     if (was === null || next.worked !== was.worked) {
       ground?.setWorked(next.worked);
+      roads?.setWorked(next.worked);
       scenery?.setGround(whereSceneryGrows(groundField, next.worked));
     }
   }
@@ -260,8 +261,8 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       const land = createLandLayer(app.renderer, () => scene.scenery.tilesRoot, drawSoon);
       // The ground worn bare under the buildings, over the land's motion and under all that stands on it.
       ground = createGroundLayer(app.renderer, drawSoon);
-      // The roads over it, as shapes, from zoom 6 in.
-      roads = createRoadsLayer(app.renderer, drawSoon);
+      // The roads over it, as shapes, from zoom 6 in, and their roadside.
+      roads = createRoadsLayer(app.renderer, drawSoon, textures.settlements);
       roads.setRevealed(revealedBy(groundField));
       // The critters' shadows under the scenery and the critters over it, only where the house sees now, and the
       // selection ring on the ground under the structures among its trees (0110); the world outside vision over them,
@@ -271,6 +272,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
         land.sprite,
         ground.sprite,
         roads.sprite,
+        roads.roadside,
         marks.shadows,
         critters.ground,
         scenery.container,
@@ -334,7 +336,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
         undulating: clock.undulating,
         sprites: () => layers?.marks.report() ?? {},
         bridges: () => bridges?.report() ?? { bridges: 0, drawn: 0 },
-        roads: () => roads?.report() ?? { strips: 0 },
+        roads: () => roads?.report() ?? { strips: 0, roadside: 0 },
       });
     },
 

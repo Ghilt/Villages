@@ -195,7 +195,9 @@ gates: worn earth a light brown, a smooth band with soft ragged edges and two fa
 worth of traffic and wider where several roads share the way, crossing open country and winding round hills, lakes and
 bogs, and coming into a village down its street. **A river is crossed only on a bridge**, the same humped stone bridge
 of three arches everywhere, laid straight along one of eight ways - the ground's axes, its diagonals and the four
-between - so it meets its road head on, and as long as the river is wide; a road stops
+between - so it meets its road head on, and as long as the river is wide; along its sides the roadside fits the country it
+crosses - low dry-stone walls green with moss in the wet west, bare and pale round the Mediterranean, in runs and
+never everywhere, and between them tufts of grass, ferns, heather or scrub, boulders, a cactus at the desert's edge; a road stops
 where the house's revealed ground stops. Every picture of a village, a boat and a bridge is a placeholder until
 asseterizer paints it. See decision records 0114 and 0115 and `docs/plans/settlements-and-roads.md`.
 
