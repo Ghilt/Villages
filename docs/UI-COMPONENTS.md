@@ -457,6 +457,14 @@ A line each: what it is for, its variants, and where on the page it is.
   pips of what it bears; what it `pulled` rises over it on a pill of night and fades, again each time its key
   changes; `fallen`, it lies down grey. Its box's bottom middle is its foot. Drawn, until a summon has a picture.
   *Challenges*.
+- **`Diorama`**, `ui/diorama/Diorama.tsx`: a small piece of the world drawn as the map draws it, from the south and
+  above, in a scene of its own units scaled to cover its box or stand whole inside it (decision record 0116). Its
+  `ground` lies under everything; the map's own `pictures`, each cut from its sheet as the map's atlases are, stand
+  on their feet, a share of the frame across and down, and whatever else is `placed` - a `FieldFigure`, a drawn
+  piece - hangs from its foot; each stands in front of whatever stands behind it, its foot further down the scene,
+  and what is placed walks to where it is next put. A picture has no way to be turned round: a building is never
+  mirrored. Reads no picture of its own: the sheets are whoever shows it's to give. `ui/diorama/dioramaFit.ts` is its
+  arithmetic. *Challenges*.
 - **`Dialog`** and **`DialogBox`**, `ui/dialog/Dialog.tsx`: a question that has to be answered before
   anything else - kill this key figure? - over the whole page, the page behind dimmed with night and out of
   reach. The browser's own modal dialog is under it, so it is drawn over everything, the keyboard stays in

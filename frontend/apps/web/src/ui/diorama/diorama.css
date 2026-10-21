@@ -1,0 +1,52 @@
+/*
+ * A diorama: a box that crops a scene drawn in units of its own and scaled to fit, its ground under everything and
+ * whatever stands on it in the order of their feet. A placed thing hangs from its foot, its box's bottom middle.
+ */
+
+@layer ui {
+  .ui-diorama {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .ui-diorama__scene {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0;
+  }
+
+  .ui-diorama__ground {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .ui-diorama__ground > svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .ui-diorama__picture {
+    position: absolute;
+    background-repeat: no-repeat;
+    transition: opacity 0.8s ease;
+  }
+
+  .ui-diorama__placed {
+    position: absolute;
+    width: 0;
+    height: 0;
+  }
+
+  .ui-diorama__foot {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    display: inline-flex;
+    transform: translateX(-50%);
+  }
+}
