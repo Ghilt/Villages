@@ -262,27 +262,27 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
           textureSourceOptions: { autoGenerateMipmaps: true, scaleMode: 'linear' },
         }),
       );
-      const marks = createMarksLayer(camera, textures, () => scene.scenery.shadows);
+      // Under everything, because it is the ground the rest stands on; drawn bending in the wind by the trees' layer.
+      const trees = createTreesLayer(app.renderer, drawSoon);
+      scenery = createSceneryLayer(trees.shaders);
+      scenery.setGround(whereSceneryGrows(groundField, scene.worked));
+      const marks = createMarksLayer(camera, textures, () => scene.scenery.shadows, scenery.standing);
       // The structures' pictures cut into an atlas, once they are read: until then, and without one, drawn in code.
       unpaint = watchStructureArt(textures.structures, () => {
         marks.setSprites(scene.sprites);
         drawSoon();
       });
       const ring = createRingLayer(textures, marks);
-      // Under everything, because it is the ground the rest stands on; drawn bending in the wind by the trees' layer.
-      const trees = createTreesLayer(app.renderer, drawSoon);
-      scenery = createSceneryLayer(trees.shaders);
-      scenery.setGround(whereSceneryGrows(groundField, scene.worked));
       // The land moving in the wind and the light, on the ground under everything that stands on it.
       const land = createLandLayer(app.renderer, () => scene.scenery.tilesRoot, drawSoon);
       // The ground worn bare under the buildings, over the land's motion and under all that stands on it.
       ground = createGroundLayer(app.renderer, drawSoon);
-      // The world outside vision over the scenery, both losing their colour on ground only revealed; then the
-      // fog over them, and everything the fog must not cover above that.
-      // The critters' shadows under the scenery, and the critters over it: only where the house sees now.
+      // The critters' shadows under the scenery and the critters over it, only where the house sees now, and the
+      // structures among its trees (0110); the world outside vision over them, all losing their colour on ground only
+      // revealed; then the fog over them, and everything the fog must not cover above that.
       const critters = createCritterLayer(drawSoon, () => ({ scenery: scene.scenery, sight: groundField }));
       world.addChild(land.sprite, ground.sprite, marks.shadows, critters.ground);
-      world.addChild(scenery.container, critters.flying, marks.underTheFog);
+      world.addChild(scenery.container, scenery.standing.view, critters.flying, marks.underTheFog);
       stage.addChild(world);
       // The clouds over the fog, and under the ring and every sign. See decision record 0098.
       const clouds = createCloudLayer(app.renderer, drawSoon, () => marks.iconsDrawn());
@@ -300,9 +300,9 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       app.stage.addChild(stage);
       container.appendChild(app.canvas);
 
-      // Drawn in the order the old frame drew them: the marks, the ring put where they were just drawn, the
-      // fog, the colour taken out, and the scenery, then the wind it bends in; then the clouds, after the marks
-      // they keep clear of.
+      // Drawn in the order the old frame drew them: the marks, the ring put where they were just drawn, the fog, the
+      // colour taken out, and the scenery cut into slices with the structures between, then the wind it bends in;
+      // then the clouds, after the marks they keep clear of.
       layers = {
         marks,
         ring,

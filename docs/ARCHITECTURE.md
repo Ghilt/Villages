@@ -385,7 +385,8 @@ stands it was sent, which on revealed ground are every stand that could change i
 between the map and the sprites that `fog/uncolouring.ts` lays a grey picture of the field on, blended by the
 browser's saturation blend, and the sprites under the fog by a filter on the container that holds them. The
 fog shader's code for where a pixel lies and how far inside each edge is shared by the fog and the filter.
-**The sprite canvas is a stack of layers**, each a `Layer` (`sprites/layer.ts`): the scenery, the marks under
+**The sprite canvas is a stack of layers**, each a `Layer` (`sprites/layer.ts`): the scenery, its trees cut into
+slices with the structures standing among them between (`sprites/standing/`, 0110), the marks under
 the fog and over it (`MarksLayer.ts`), the fog with the haze's clock, the clouds over the fog with theirs, the
 selection ring (`RingLayer.ts`), the colour taken out of the map on its own canvas, the wind the scenery bends
 in, which draws nothing of its own, the ground worn bare under the buildings over the land's motion (0105), and the critters, their shadows and what runs on the ground under the scenery and what flies over it. Each draws its part of a

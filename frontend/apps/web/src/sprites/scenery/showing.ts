@@ -34,6 +34,23 @@ export function groupOf(kind: number, rank: number): number {
   return kind * STEPS + step;
 }
 
+/** The points of a cell, split by group once, because the group is what comes and goes. */
+export function splitByGroup<Point extends { kind: number; rank: number }>(
+  points: readonly Point[],
+): Map<number, Point[]> {
+  const by = new Map<number, Point[]>();
+  for (const point of points) {
+    const group = groupOf(point.kind, point.rank);
+    const already = by.get(group);
+    if (already === undefined) {
+      by.set(group, [point]);
+    } else {
+      already.push(point);
+    }
+  }
+  return by;
+}
+
 /** How many groups a set of kinds has. */
 export function groupCount(kinds: readonly Standing[]): number {
   return kinds.length * STEPS;

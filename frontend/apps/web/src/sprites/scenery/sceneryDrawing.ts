@@ -9,7 +9,8 @@ type SceneryLayer = ReturnType<typeof createSceneryLayer>;
 /**
  * The world's furniture as a layer of the renderer's stack: shown or hidden by its switch, grown for the view by the
  * dial and spacing it is handed, and said in the panel with the worst gap between two frames of a moving map, which
- * is what a stutter is. It asks for its own frames as the cells it cuts land.
+ * is what a stutter is. It asks for its own frames as the cells it cuts land, and then cuts its trees into slices with
+ * whatever stands among them between (decision record 0110).
  */
 export function createSceneryDrawing(
   scenery: () => SceneryLayer | null,
@@ -51,7 +52,7 @@ export function createSceneryDrawing(
       } else {
         noteDrawn(drew);
       }
-      return null;
+      return layer.standing.draw(view, now, 0);
     },
     destroy: () => scenery()?.destroy(),
   };

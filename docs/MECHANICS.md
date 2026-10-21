@@ -1090,8 +1090,9 @@ bridge is sent - and a spot seen again and again does not swell. Decision record
 
 **The fog covers the world, not the signs for the things in it.** In Adam's words, it "should only cover 'the
 world' not representations of important things when zoomed out", and a thing in sight is never under it. So
-every icon, the seats a choice offers and anything standing in vision are drawn over the fog, and what stands
-outside vision close in - a castle, a person, the trees - is under it. How a thing's significance should enter
+every icon, the seats a choice offers and anyone standing in vision are drawn over the fog, a structure close in
+stands among the trees under it, which is clear over both in vision, and what stands outside vision close in - a
+castle, a person, the trees - is under it. How a thing's significance should enter
 that, so that something seen from far out is never covered, waits on significance being worked out.
 
 The switch for it is Adam's, in the debug panel's Debug map section: *fog of war: on* or *off*, in words. Off
@@ -1129,8 +1130,9 @@ wanders a little. With no house the
 whole world is under the haze. The switch is in the Debug map section. The haze lies in bands of mist
 stretched along the screen, like mist over a field, flat far out; close in they swell, thin and drift while
 its edge stays still, and only while some of it is on the screen. Every
-icon and anything in vision is drawn over the fog. Decision record 0061 is the shape, 0062 how the fog is
-drawn, 0063 which side of it each thing is on, and 0065 how revealed ground loses its colour.
+icon and anyone in vision is drawn over the fog, and a structure among the trees under it, where it is clear in
+vision. Decision record 0061 is the shape, 0062 how the fog is drawn, 0063 which side of it each thing is on, 0110 a
+structure's place among the trees, and 0065 how revealed ground loses its colour.
 
 **The server holds back what the fog hides**, from wire version 11. A player is sent the houses on ground
 their house has revealed and the people in its vision, their own house and key figures wherever they are,

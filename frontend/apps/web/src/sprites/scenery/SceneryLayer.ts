@@ -6,9 +6,10 @@ import * as camera from '../../geometry/cameraMath';
 import { readAtlas } from '../atlas';
 import { LONGEST_STEP_MS, PRESENCE_MS, easeTowards, midTrade } from '../twoForms';
 import { biomeAt, cellOf, type ArtAtlasFile, type Kind, type ScatteredPoint } from '@villages/world';
+import { createStandingLayer } from '../standing/StandingLayer';
 import type { SceneryShaders } from '../trees/TreesLayer';
 import { currentPointsOf, noteDrawn, pointsOf, sceneryMap, sceneryTally } from './sceneryCells';
-import { MOST_CUT_AT_ONCE, groupCount, groupOf, thresholdOf, wantedAt, worthDrawing } from './showing';
+import { MOST_CUT_AT_ONCE, groupCount, splitByGroup, thresholdOf, wantedAt, worthDrawing } from './showing';
 
 /**
  * The world's furniture, drawn as particles under the marks.
@@ -85,7 +86,8 @@ export function createSceneryLayer(sway: SceneryShaders) {
   // Only the colour moves: positions and sizes are in world units and never change, so the vertex buffer
   // is written once a group, not once a frame. The trees' shaders bend the sprites in the wind as they draw.
   const dynamicProperties = { position: false, vertex: false, rotation: false, uvs: false, color: true };
-  const container = new ParticleContainer({ dynamicProperties, shader: sway.standing });
+  // The trees in slices, with whatever stands among them drawn between, as the scenery's own switch says.
+  const container = createStandingLayer({ dynamicProperties, shader: sway.standing }, () => layers.visible);
   // The shadows, under every sprite and blended by the greater, so that two overlapping are no darker
   // than one. Drawn first onto the cleared canvas, which is what makes the greater safe: there is
   // nothing under it but the transparency the map shows through.
@@ -93,7 +95,7 @@ export function createSceneryLayer(sway: SceneryShaders) {
   shadowLayer.blendMode = 'max';
   shadowLayer.visible = false;
   const layers = new Container();
-  layers.addChild(shadowLayer, container);
+  layers.addChild(shadowLayer);
   const shown = new Map<string, Held>();
   let frames: Texture[] = [];
   /** Where each kind stands in its own frame, as a fraction of it, and its tint: how it bends in the wind. */
@@ -259,7 +261,7 @@ export function createSceneryLayer(sway: SceneryShaders) {
         firstMade === undefined
           ? null
           : { x: firstMade.x, y: firstMade.y, alpha: firstMade.alpha, scaleY: firstMade.scaleY },
-      container: { visible: container.visible, scale: container.scale.x, x: container.x, y: container.y },
+      container: container.report(),
     };
   }
   if (import.meta.env.DEV) {
@@ -268,21 +270,6 @@ export function createSceneryLayer(sway: SceneryShaders) {
 
   function keyOf(cellX: number, cellY: number): string {
     return `${cellX}/${cellY}`;
-  }
-
-  /** The points of a cell, split by group once, because the group is what comes and goes. */
-  function splitByGroup(points: readonly ScatteredPoint[]): Map<number, ScatteredPoint[]> {
-    const by = new Map<number, ScatteredPoint[]>();
-    for (const point of points) {
-      const group = groupOf(point.kind, point.rank);
-      const already = by.get(group);
-      if (already === undefined) {
-        by.set(group, [point]);
-      } else {
-        already.push(point);
-      }
-    }
-    return by;
   }
 
   function makeGroup(cell: Held, group: number, alpha: number): void {
@@ -434,10 +421,13 @@ export function createSceneryLayer(sway: SceneryShaders) {
   }
 
   return {
-    /** The shadows and the sprites over them, placed as one. */
+    /** The shadows, under the trees and everything standing among them. */
     get container() {
       return layers;
     },
+
+    /** The trees, and everything standing among them, over the shadows. */
+    standing: container,
 
     ready(): boolean {
       return frames.length > 0;
@@ -710,6 +700,7 @@ export function createSceneryLayer(sway: SceneryShaders) {
     },
 
     destroy(): void {
+      container.destroy();
       layers.destroy({ children: true });
       atlas?.destroy();
       atlas = null;

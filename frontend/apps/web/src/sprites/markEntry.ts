@@ -23,7 +23,7 @@ export interface Entry {
   ground: Sprite | null;
   /** The sign for it. Null for a kind that is only ever itself. */
   icon: Sprite | null;
-  /** The pennant its holder flies over it, on the side of the fog its ground form is; null for none. */
+  /** The pennant its holder flies over it, drawn with whichever form it flies over; null for none. */
   pennant: Sprite | null;
   /** The shadow its ground form casts, on the ground under the trees; null for a mark that casts none. */
   shadow: Sprite | null;
@@ -48,8 +48,9 @@ export interface Entry {
   /** The "+N" it wears while it leads a crowd, made the first time it does. */
   badge: Badge | null;
   /**
-   * Whether it stands in vision, which puts its ground form over the fog rather than under it. Worked out
-   * when the mark or the house's vision changes, never a frame. See `fogLayering.ts`.
+   * Whether it stands in vision, which puts a person's ground form over the fog rather than under it; a structure's
+   * stands among the trees wherever it is. Worked out when the mark or the house's vision changes, never a frame.
+   * See `fogLayering.ts`.
    */
   inVision: boolean;
 }
@@ -97,13 +98,23 @@ export function letGo(entry: Entry): void {
 
 /**
  * Flies a mark's pennant over it as tall as it is drawn, `tall`, standing at `at`, as `pennantOn` says, from the form
- * that is more of the two.
+ * that is more of the two, and drawn with it: among the trees with the thing itself, over the fog with its sign.
  */
-export function flyPennant(entry: Entry, tall: number, at: { x: number; y: number }): void {
+export function flyPennant(
+  entry: Entry,
+  tall: number,
+  at: { x: number; y: number },
+  overIt: Container,
+): void {
   if (entry.pennant === null) {
     return;
   }
-  const flies = pennantOn(entry.look, tall, at, formForHit(entry.blend));
+  const form = formForHit(entry.blend);
+  const flown = form === 'ground' ? (entry.ground?.parent ?? overIt) : overIt;
+  if (entry.pennant.parent !== flown) {
+    flown.addChild(entry.pennant);
+  }
+  const flies = pennantOn(entry.look, tall, at, form);
   entry.pennant.visible = flies !== null;
   if (flies !== null) {
     entry.pennant.alpha = entry.presence * entry.grouped;

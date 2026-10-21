@@ -172,7 +172,7 @@ export interface DrawnSprite {
   height: number;
   /** How much of it is here: nought on its way out, one arrived. */
   presence: number;
-  /** Whether its ground form is drawn over the fog, which it is in vision. Its icon always is. */
+  /** Whether its ground form is drawn over the fog, which a person's is in vision; a structure's stands among the trees. */
   groundOverTheFog: boolean;
   /** Whether a pennant is flown over it, for a structure held by a house; absent for a mark that has none. */
   pennant?: boolean;

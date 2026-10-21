@@ -1,3 +1,4 @@
+import type { MapSprite } from './SpriteRenderer';
 import type { Form } from './twoForms';
 
 /**
@@ -15,4 +16,20 @@ import type { Form } from './twoForms';
  */
 export function overTheFog(form: Form, inVision: boolean): boolean {
   return form === 'icon' || inVision;
+}
+
+/**
+ * Whether a kind of thing's ground form stands among the trees instead, on no side of the fog of its own: a
+ * structure's does, because the trees about it are drawn in front of it and behind it, and the trees are under the
+ * fog. In vision the fog is clear over the trees and over it, so a structure in sight is still never hidden; the
+ * clouds pass over it as they pass over the trees. A person stands on a point and keeps to the rule above. See
+ * decision record 0110.
+ */
+export function standsAmongTheTrees(kind: MapSprite['kind']): boolean {
+  return kind === 'structure';
+}
+
+/** Where a kind of thing's ground form is drawn, standing in vision or not: among the trees, over the fog or under it. */
+export function groundSideOf(kind: MapSprite['kind'], inVision: boolean): 'among' | 'over' | 'under' {
+  return standsAmongTheTrees(kind) ? 'among' : overTheFog('ground', inVision) ? 'over' : 'under';
 }

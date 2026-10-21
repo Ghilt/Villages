@@ -5,7 +5,7 @@ import type { Coverage } from '@villages/protocol';
 import { isWithinView, toScreen } from '../geometry/cameraMath';
 import { note } from '../log/log';
 import type { CameraView } from '../geometry/cameraMath';
-import { overTheFog } from './fogLayering';
+import { groundSideOf } from './fogLayering';
 import type { Layer } from './layer';
 import { castShadow, dress, drawnOf, flyPennant, hide, letGo, show, wearBadge } from './markEntry';
 import type { Entry } from './markEntry';
@@ -14,14 +14,16 @@ import type { Groups, Placed } from './markGroups';
 import { lookOf } from './markLooks';
 import type { Textures } from './markTextures';
 import type { CameraSource, DrawnSprite, MapSprite } from './SpriteRenderer';
+import type { StandingLayer } from './standing/StandingLayer';
+import { standingOf } from './standing/standingOf';
 import { PRESENCE_MS, alphasFor, easeTowards, formForHit, midTrade, sizesAt, wantedForm } from './twoForms';
 
 /**
  * The marks: every house, person, structure and offered seat, in both of its forms, a structure's pennant over it.
  *
  * Two things in the stack rather than one, because the fog lies between them: under it, the ground forms of
- * whatever stands outside vision, and over it every icon and whatever stands in vision. See `fogLayering.ts`
- * and decision 0062.
+ * whatever stands outside vision, and over it every icon and whatever stands in vision. A structure's ground form is
+ * in neither: it stands among the trees, wherever it is. See `fogLayering.ts` and decisions 0062 and 0110.
  *
  * Each mark holds both of its forms at once and trades between them with alpha. They are never created
  * or destroyed by the zoom, only faded: putting the switch on existence rather than on appearance is
@@ -68,6 +70,7 @@ export function createMarksLayer(
   camera: CameraSource,
   textures: Textures,
   darkness: () => number,
+  amongTheTrees: StandingLayer,
 ): MarksLayer {
   const shadows = new Container();
   const underTheFog = new Container();
@@ -83,6 +86,9 @@ export function createMarksLayer(
   let vision: Coverage | null = null;
   const standsInVision = (at: { lng: number; lat: number }): boolean =>
     vision?.covers({ lat: at.lat, lon: at.lng }) ?? false;
+  /** Where a mark's ground form is drawn: a structure's among the trees, a person's on its side of the fog. */
+  const sides = { among: amongTheTrees.view, over: overIt, under: underTheFog };
+  const groundSide = (entry: Entry): Container => sides[groundSideOf(entry.spec.kind, entry.inVision)];
 
   /**
    * Makes the sprites a mark needs, dressed as its look says.
@@ -119,7 +125,7 @@ export function createMarksLayer(
       sprite.anchor.set(look.groundAnchor, 1);
       sprite.tint = spec.tint;
       sprite.visible = false;
-      (overTheFog('ground', entry.inVision) ? overIt : underTheFog).addChild(sprite);
+      groundSide(entry).addChild(sprite);
       entry.ground = sprite;
     }
     dress(entry, textures.pennant, overIt, shadows);
@@ -140,16 +146,14 @@ export function createMarksLayer(
   }
 
   /**
-   * Puts a mark's ground form on the side of the fog it now belongs on: over it in vision, under it outside.
-   * Moving a sprite between two containers keeps it; nothing is made again.
+   * Puts a mark's ground form where it now belongs: over the fog in vision, under it outside, a structure's among the
+   * trees wherever it is. Moving a sprite between containers keeps it, and its pennant follows it as it is flown.
    */
   function sideOfTheFog(entry: Entry): void {
     entry.inVision = standsInVision(entry.spec.at);
-    const belongs = overTheFog('ground', entry.inVision) ? overIt : underTheFog;
-    for (const sprite of [entry.ground, entry.pennant]) {
-      if (sprite !== null && sprite.parent !== belongs) {
-        belongs.addChild(sprite);
-      }
+    const belongs = groundSide(entry);
+    if (entry.ground !== null && entry.ground.parent !== belongs) {
+      belongs.addChild(entry.ground);
     }
   }
 
@@ -249,7 +253,7 @@ export function createMarksLayer(
             alpha: icon.alpha,
           });
         }
-        flyPennant(entry, sizes.ground * alphas.ground + sizes.icon * alphas.icon, point);
+        flyPennant(entry, sizes.ground * alphas.ground + sizes.icon * alphas.icon, point, overIt);
         wearBadge(
           entry,
           (groups.led.get(id)?.length ?? 1) - 1,
@@ -267,6 +271,7 @@ export function createMarksLayer(
         }
         entries.delete(id);
       }
+      amongTheTrees.stand([...entries.values()].flatMap((entry) => standingOf(entry) ?? []));
 
       // A trade still running wants the next frame: the map is not moving, so nothing else will ask.
       return trading ? 0 : null;

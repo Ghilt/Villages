@@ -591,7 +591,12 @@ stage alone, with none of the debug panel in it (decision record 0079).
   gathered into fewer, larger crowds. Anyone else's building or person has no mark: it shrinks with the map until it
   fades at 7.5, with the scenery: from 7.5 out the map is marks and nothing else. One a house holds flies a pennant in the house's
   field, over the building close in and on the pin's head far out; nobody's flies none. A type with no picture is a
-  plain house. It is drawn from zoom 7.5 like everything on the map, and under the fog outside vision.
+  plain house. It is drawn from zoom 7.5 like everything on the map. **Close in it stands among the trees**, in the
+  scenery's own stack and so under the fog wherever it is, clear over it in vision: a tree whose foot is in front of
+  its footprint is drawn over it and one behind under it, by the line from the footprint's left corner to its right
+  one, and its yard keeps the trees off its footprint (decision record 0110). The log says under `scenery` how many
+  structures stand among the trees when that changes, and `villagesScenery()` in a development build's console how
+  many slices the trees are cut into.
   Far out, marks whose pictures would overlap are a **crowd**, drawn as the most significant of them wearing a
   gold "+N" for how many more it stands for (`sprites/markGroups.ts`); the debug log says, under `marks`, how many
   crowds there are when that changes. A click on the "+N" opens the crowd's card over it (`sprites/CrowdCard.tsx`,
