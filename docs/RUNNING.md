@@ -488,8 +488,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   whole file**, folded at the foot. See `docs/plans/structures.md` and
   `docs/plans/catalogues.md`.
   Under the types, **the settlements' pieces and the bridges**: every piece in every culture standing on its
-  footprint with its shadow, each jetty lying over the diamonds of its axis, and the bridge over the diamonds of each
-  of its eight ways, from
+  footprint with its shadow, each jetty lying over the diamonds of its axis, and the bridge and the roadside's walls,
+  mossy and bare, over the diamonds of each of their eight ways, from
   `public/art/settlements.webp`, a placeholder ringed in dashes; and **the settlements laid out** - a village or a
   fishing village, the buttons choose, as a hamlet, a village and a large village in each culture - on made-up ground,
   land all round a village and a shore across a fishing village's front, its square, its streets and its green under

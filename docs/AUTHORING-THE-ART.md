@@ -98,6 +98,14 @@ standing on its footprint or lying over its axis's diamonds, and on `/admin/insp
 `packages/world/src/settlementLooks.ts`; the briefs for painting them are `world/guides/settlements/` and
 `world/guides/bridges/`. See `docs/plans/settlements-and-roads.md` and `docs/plans/houses-bridges-and-road-render.md`.
 
+**The roadside's walls are low dry-stone walls**, `world/sprites/roadside/wall-<style>-<way>.png`: a stub one world
+unit long and about a third of a unit high, `mossy` - its top grown over, moss in the joints near it - or `bare` and
+pale, along each of the bridge's eight ways, sixteen placeholders modelled in 3D (`wallModel.ts`) and cut into the same
+atlas as the bridge, standing on the middle of their picture as it does, so **keep a wall's file the size it is and
+the wall where it is in it**. The map lays stubs end to end along a road's side where its biome builds walls; the rest
+of the roadside is the scenery's own growth, painted once, drawn smaller. Shown lying along their ways on
+`/admin/inspect-structures`.
+
 **A critter is a strip of frames**, cut by a tool of its own from `world/sprites/critters/`, with its own
 `placeholders.json`: `<kind>.png` for every kind in `world/critters.json`, its frames side by side from left to
 right, each as wide as the picture over how many frames that file gives the kind, so a bird of three frames is a

@@ -12,6 +12,7 @@ import { MARK_NAMES, placeholderKinds } from './placeholderArt.ts';
 import { ruinFrameKey, ruinPictureName } from './ruinLooks.ts';
 import { RUIN_PIECES } from './ruins.ts';
 import { BRIDGE_WAYS } from './bridgeModel.ts';
+import { wallFile } from './roadsideLooks.ts';
 import {
   JETTY_AXES,
   SETTLEMENT_PIECES,
@@ -20,6 +21,7 @@ import {
   settlementPieceFile,
 } from './settlementLooks.ts';
 import { CULTURES } from './structures.ts';
+import { WALL_STYLES } from './wallModel.ts';
 
 /**
  * The rules `world/sprites/` is held to, by reading the folder itself. It is Adam's: he saves pictures
@@ -51,6 +53,7 @@ describe("the sprites folder, which is Adam's", () => {
       'critters',
       'marks',
       'placeholders.json',
+      'roadside',
       'ruins',
       'scenery',
       'settlements',
@@ -58,7 +61,7 @@ describe("the sprites folder, which is Adam's", () => {
     ]);
   });
 
-  it("holds exactly one picture of every settlement's piece in every culture, each jetty and every bridge", () => {
+  it("holds exactly one picture of every settlement's piece in every culture, each jetty, every bridge and wall", () => {
     const pieces = [
       ...SETTLEMENT_PIECES.flatMap((piece) => CULTURES.map((culture) => settlementPieceFile(piece, culture))),
       ...JETTY_AXES.map(jettyFile),
@@ -66,6 +69,8 @@ describe("the sprites folder, which is Adam's", () => {
     expect(namesIn('settlements').sort()).toEqual(pieces.map((file) => file.slice(0, -4)).sort());
     const bridges = BRIDGE_WAYS.map(bridgeFile);
     expect(namesIn('bridges').sort()).toEqual(bridges.map((file) => file.slice(0, -4)).sort());
+    const walls = WALL_STYLES.flatMap((style) => BRIDGE_WAYS.map((way) => wallFile(style, way)));
+    expect(namesIn('roadside').sort()).toEqual(walls.map((file) => file.slice(0, -4)).sort());
   });
 
   it('holds exactly one picture of every piece of the ruins in every culture, and no other', () => {

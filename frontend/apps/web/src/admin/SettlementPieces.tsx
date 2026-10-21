@@ -1,6 +1,8 @@
 import {
   BRIDGE_SPAN,
   BRIDGE_WAYS,
+  WALL_LENGTH,
+  WALL_STYLES,
   CULTURES,
   JETTY_AXES,
   PIECE_SIDES,
@@ -8,6 +10,7 @@ import {
   bridgeKey,
   jettyKey,
   settlementPieceKey,
+  wallKey,
 } from '@villages/world';
 import type { BridgeWay } from '@villages/world';
 
@@ -40,10 +43,10 @@ export function SettlementPieces() {
     atlas.frames[key]?.placeholder === true ? 'structures-placeholder' : '';
   return (
     <section className="inspect-group" aria-label="settlement pieces and bridges">
-      <h2 className="inspect-group__title">Settlements' pieces and bridges</h2>
+      <h2 className="inspect-group__title">Settlements' pieces, bridges and the roadside's walls</h2>
       <p className="inspect-note">
-        world/sprites/settlements/ and world/sprites/bridges/, cut to public/art/settlements.webp: each piece
-        at its own size, a world unit {UNIT} pixels here
+        world/sprites/settlements/, world/sprites/bridges/ and world/sprites/roadside/, cut to
+        public/art/settlements.webp: each piece at its own size, a world unit {UNIT} pixels here
       </p>
       <div className="inspect-scroll">
         <table className="inspect-table">
@@ -87,6 +90,19 @@ export function SettlementPieces() {
             <Lying atlas={atlas} at={jettyKey(axis)} axis={axis} span={3.4} name={`jetty along ${axis}`} />
           </span>
         ))}
+        {WALL_STYLES.flatMap((style) =>
+          BRIDGE_WAYS.map((way) => (
+            <span key={`${style}-${way}`} className={placeholder(wallKey(style, way))}>
+              <Lying
+                atlas={atlas}
+                at={wallKey(style, way)}
+                axis={way}
+                span={WALL_LENGTH}
+                name={`${style} wall along ${way}`}
+              />
+            </span>
+          )),
+        )}
         {BRIDGE_WAYS.map((way) => (
           <span key={way} className={placeholder(bridgeKey(way))}>
             <Lying

@@ -1,6 +1,8 @@
 import { facesSvg } from '../src/blockOut.ts';
 import { BRIDGE_WAYS } from '../src/bridgeModel.ts';
 import { renderBridge } from '../src/bridgeRender.ts';
+import { renderModel } from '../src/modelRender.ts';
+import { keyOfRoadsideFile, wallFile } from '../src/roadsideLooks.ts';
 import {
   CUT_PER_UNIT,
   DRAWN_PER_UNIT,
@@ -25,6 +27,7 @@ import {
 } from '../src/structureLooks.ts';
 import { keyOfStructureMarkFile, structureMarkFile, structureMarkSvg } from '../src/structureMarks.ts';
 import { CULTURES } from '../src/structures.ts';
+import { WALL_STYLES, wallModel } from '../src/wallModel.ts';
 
 import {
   cutAtlas,
@@ -34,7 +37,14 @@ import {
   picturesIn,
   savePlaceholders,
 } from './lib/cutBuildings.ts';
-import { ART_DIR, BRIDGES_DIR, SETTLEMENTS_DIR, STRUCTURE_MARKS_DIR, STRUCTURES_DIR } from './lib/paths.ts';
+import {
+  ART_DIR,
+  BRIDGES_DIR,
+  ROADSIDE_DIR,
+  SETTLEMENTS_DIR,
+  STRUCTURE_MARKS_DIR,
+  STRUCTURES_DIR,
+} from './lib/paths.ts';
 
 /**
  * The pictures of structures, one a type and a culture and a ruin a culture, cut into one atlas; and the pictures of
@@ -52,7 +62,8 @@ import { ART_DIR, BRIDGES_DIR, SETTLEMENTS_DIR, STRUCTURE_MARKS_DIR, STRUCTURES_
  *
  * Then the same for `world/sprites/settlements/` - a cottage, a house, a barn, a chapel, a fishing hut, a net rack and a
  * boat in every culture, and a jetty along each axis - and `world/sprites/bridges/`, the bridge along each of its eight
- * ways, modelled in 3D (`bridgeModel.ts`): placeholders drawn in the map's own camera at `DRAWN_PER_UNIT` pixels to the world unit, the
+ * ways, modelled in 3D (`bridgeModel.ts`), and `world/sprites/roadside/`, a stub of dry-stone wall mossy and bare on
+ * each of them (`wallModel.ts`): placeholders drawn in the map's own camera at `DRAWN_PER_UNIT` pixels to the world unit, the
  * scale a picture painted over one keeps, cut at `CUT_PER_UNIT` into `public/art/settlements.webp`, each frame saying how
  * many world units it stands. Nothing is written when nothing is new. Seconds. See docs/plans/structures.md and
  * docs/plans/settlements-and-roads.md.
@@ -67,6 +78,7 @@ const pictures = await folderOf(STRUCTURES_DIR, keyOfStructureFile);
 const marks = await folderOf(STRUCTURE_MARKS_DIR, keyOfStructureMarkFile);
 const pieces = await folderOf(SETTLEMENTS_DIR, keyOfSettlementFile);
 const bridges = await folderOf(BRIDGES_DIR, keyOfBridgeFile);
+const roadside = await folderOf(ROADSIDE_DIR, keyOfRoadsideFile);
 
 // Draw what is missing, never over a file that is there.
 let drawn = 0;
@@ -95,6 +107,10 @@ for (const axis of JETTY_AXES) {
 for (const way of BRIDGE_WAYS) {
   if (await drawMissingPicture(bridges, bridgeFile(way), () => renderBridge(way, DRAWN_PER_UNIT, 3), 3))
     drawn += 1;
+  for (const style of WALL_STYLES) {
+    const wall = () => renderModel(wallModel(style), way, DRAWN_PER_UNIT, 3);
+    if (await drawMissingPicture(roadside, wallFile(style, way), wall, 3)) drawn += 1;
+  }
 }
 
 const structures = await cutAtlas(
@@ -134,11 +150,18 @@ const settlements = await cutAtlas(
       pin: false,
       stands: 'centre' as const,
     })),
+    ...(await picturesIn(roadside)).map(({ from, file }) => ({
+      from,
+      file,
+      source: `../roadside/${file}`,
+      pin: false,
+      stands: 'centre' as const,
+    })),
   ],
   { drawnPerUnit: DRAWN_PER_UNIT, cutPerUnit: CUT_PER_UNIT },
   ART_DIR,
   'settlements',
 );
-await savePlaceholders([pictures, marks, pieces, bridges]);
+await savePlaceholders([pictures, marks, pieces, bridges, roadside]);
 console.log(`${structures}${drawn > 0 ? `, ${drawn} drawn just now` : ''}`);
 console.log(settlements);

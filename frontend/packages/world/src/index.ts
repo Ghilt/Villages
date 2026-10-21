@@ -77,6 +77,10 @@ export {
 } from './settlementLooks.ts';
 export type { JettyAxis, SettlementPiece } from './settlementLooks.ts';
 export { BRIDGE_WAYS, WAY_STEPS } from './bridgeModel.ts';
+export { ROADSIDE, ROADSIDE_GROWTH_SCALE, roadsideOf, wallKey } from './roadsideLooks.ts';
+export type { RoadsideLook } from './roadsideLooks.ts';
+export { WALL_LENGTH, WALL_STYLES } from './wallModel.ts';
+export type { WallStyle } from './wallModel.ts';
 export type { BridgeWay } from './bridgeModel.ts';
 export {
   SETTLEMENT_TYPES,

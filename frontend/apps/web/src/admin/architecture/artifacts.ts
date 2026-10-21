@@ -110,10 +110,10 @@ export const ARTIFACTS: readonly Artifact[] = [
   {
     id: 'settlement-pictures',
     form: 'folder',
-    name: 'settlement and bridge pictures',
-    path: 'world/sprites/settlements/, world/sprites/bridges/',
+    name: 'settlement, bridge and roadside pictures',
+    path: 'world/sprites/settlements/, world/sprites/bridges/, world/sprites/roadside/',
     origin: 'authored',
-    what: 'Every settlement piece in every culture, the jetties and the bridges: placeholders until painted over.',
+    what: 'Every settlement piece, the jetties, the bridge and the roadside walls: placeholders until painted.',
   },
   {
     id: 'critter-pictures',
