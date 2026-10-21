@@ -192,6 +192,15 @@
         { "name": "presses", "takes": "item", "places": [1, 2, 3], "seenBy": "holder" }
       ]
     },
+    "house": {
+      "words": { "european": "house", "islamic": "house", "eastAsian": "house", "african": "house" },
+      "significance": [4, 5, 6],
+      "sightKm": [4, 5, 6],
+      "groundHeight": [4.3, 4.6, 4.9],
+      "footprint": [3, 3, 3],
+      "yields": {},
+      "slots": []
+    },
     "village": {
       "words": { "european": "village", "islamic": "village", "eastAsian": "village", "african": "village" },
       "significance": [6, 8, 10],

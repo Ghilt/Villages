@@ -40,9 +40,9 @@ describe('the catalogue of structures', () => {
     expect(watchtower!.words.african).toBe('watchtower');
   });
 
-  it("reads the world's own, eighteen types of three levels", () => {
+  it("reads the world's own, nineteen types of three levels", () => {
     const { types } = parseStructureCatalogue(world);
-    expect(types).toHaveLength(18);
+    expect(types).toHaveLength(19);
     expect(types.every((one) => one.levels === 3)).toBe(true);
   });
 
