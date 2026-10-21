@@ -1,5 +1,5 @@
 {
-  "$comment": "Every type of structure there is, Adam's to tune: a first draft of 2026-10-08, every number a placeholder. Each list runs a level at a time, first to highest, and every list of a type is as long as its others. significance is how far out it is drawn (0 to 100; 20 is a founded house, drawn from zoom 8); sightKm how far its holder sees round it, never 0; groundHeight its size on the map in world units (the castle of today is 8, doubled on 2026-10-15); footprint the side of the square of the ground's diamonds its base covers, whole diamonds, its front corner where the building stands, which its yard is laid round and which the game server passes over; yields what it gives its holder a world month, which is a real day, by the resources' names on the wire. A slot takes a character, an item or either, has places at each level that never fall as the level rises, and is seen into by all or by its holder only; needed means the type gives nothing while it is empty, adds is what each filled place gives, scales names the stat of the character in it that what the type gives follows, and bringsItsOwn means an item in it gives its own. words is what each culture calls the type. zone is the ground it reaches when selected, the castle's alone so far. The game server reads this as it starts and takes on a change while it runs, and the page reads it through the dev server. A settlement, village or fishingVillage, is held by nobody at the world's start and drawn as the buildings the page lays out for it: its groundHeight is its tallest building and its footprint the side of its square of ground (docs/plans/settlements-and-roads.md, decision record 0114). See docs/plans/structures.md and decision record 0093.",
+  "$comment": "Every type of structure there is, Adam's to tune: a first draft of 2026-10-08, every number a placeholder. Each list runs a level at a time, first to highest, and every list of a type is as long as its others. significance is how far out it is drawn (0 to 100; 20 is a founded house, drawn from zoom 8); sightKm how far its holder sees round it, never 0; groundHeight its size on the map in world units (the castle of today is 8, doubled on 2026-10-15); footprint the side of the square of the ground's diamonds its base covers, whole diamonds, its front corner where the building stands, which its yard is laid round and which the game server passes over; yields what it gives its holder a world month, which is a real day, by the resources' names on the wire. A slot takes a character, an item or either, has places at each level that never fall as the level rises, and is seen into by all or by its holder only; needed means the type gives nothing while it is empty, adds is what each filled place gives, scales names the stat of the character in it that what the type gives follows, and bringsItsOwn means an item in it gives its own. words is what each culture calls the type. zone is the ground it reaches when selected, the castle's alone so far. The game server reads this as it starts and takes on a change while it runs, and the page reads it through the dev server. A settlement, village or fishingVillage, is held by nobody at the world's start and drawn as the buildings the page lays out for it: its groundHeight is its tallest building and its footprint the side of its square of ground, seven, thirteen or nineteen diamonds as its rings of lots reach, which the page's layout holds it to (docs/plans/settlements-and-roads.md, decision record 0114). See docs/plans/structures.md and decision record 0093.",
   "types": {
     "castle": {
       "words": { "european": "castle", "islamic": "kasbah", "eastAsian": "castle", "african": "stockade" },
@@ -197,7 +197,7 @@
       "significance": [6, 8, 10],
       "sightKm": [8, 10, 12],
       "groundHeight": [4.5, 5, 5.5],
-      "footprint": [9, 12, 15],
+      "footprint": [7, 13, 19],
       "yields": {},
       "slots": []
     },
@@ -206,7 +206,7 @@
       "significance": [6, 8, 10],
       "sightKm": [8, 10, 12],
       "groundHeight": [4.5, 5, 5.5],
-      "footprint": [9, 12, 15],
+      "footprint": [7, 13, 19],
       "yields": {},
       "slots": []
     }

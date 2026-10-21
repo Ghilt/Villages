@@ -28,7 +28,7 @@ export interface Footing {
 }
 
 /** A corner of the ground's lattice, counted in diamonds back from the foot, as the camera draws it. */
-function onScreen(u: number, v: number): Point {
+export function onScreen(u: number, v: number): Point {
   return { x: worldXOf(FRAME, u, v), y: worldYOf(FRAME, u, v) * SQUASH };
 }
 

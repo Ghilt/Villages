@@ -74,3 +74,25 @@
   outline: 1px dashed var(--ink);
   outline-offset: -2px;
 }
+
+/* A settlement laid out: the ground about it, its square, its streets and green worn, and water where it is. */
+.settlements-ground {
+  stroke: rgb(110 82 48 / 25%);
+  stroke-width: 0.04;
+}
+
+.settlements-ground.is-land {
+  fill: rgb(150 160 110 / 35%);
+}
+
+.settlements-ground.is-square {
+  fill: rgb(170 150 110 / 45%);
+}
+
+.settlements-ground.is-street {
+  fill: rgb(156 122 78 / 75%);
+}
+
+.settlements-ground.is-water {
+  fill: rgb(96 140 170 / 60%);
+}

@@ -13,6 +13,7 @@ import type {
 import { Cut, useAtlas } from './frame/Atlas';
 import { LevelsField, NumberField, WordsField } from './frame/Fields';
 import { InspectPage } from './frame/InspectPage';
+import { SettlementLayouts } from './SettlementLayouts';
 import { SettlementPieces } from './SettlementPieces';
 import { Standing } from './Standing';
 import type { StructuresAtlas } from './Standing';
@@ -104,6 +105,7 @@ export function Structures() {
         <TypesTable editor={editor} read={read} atlas={atlas === 'missing' ? null : atlas} level={level} />
       )}
       <SettlementPieces />
+      <SettlementLayouts />
       <WholeFile editor={editor} />
     </InspectPage>
   );

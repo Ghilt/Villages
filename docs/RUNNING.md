@@ -483,6 +483,13 @@ stage alone, with none of the debug panel in it (decision record 0079).
   income moves with a yield; refused, the bar says why. What has no cell - a slot, a type added - is changed in **the
   whole file**, folded at the foot. See `docs/plans/structures.md` and
   `docs/plans/catalogues.md`.
+  Under the types, **the settlements' pieces and the bridges**: every piece in every culture standing on its
+  footprint with its shadow, and each jetty and bridge lying over the diamonds of its axis, from
+  `public/art/settlements.webp`, a placeholder ringed in dashes; and **the settlements laid out** - a village or a
+  fishing village, the buttons choose, as a hamlet, a village and a large village in each culture - on made-up ground,
+  land all round a village and a shore across a fishing village's front, its square, its streets and its green under
+  it and its buildings standing on their feet, as `settlementIn` lays one out for the map. See
+  `docs/plans/settlements-and-roads.md`.
 - The world's own houses: **house bots**. The world opens with them, as the game server starts, after a wipe and
   after a load: as many as the balance's `houseBots.count`, first 300, each a castle with a pennant standing a few
   kilometres outside the ruin of a town of 1790 and named after it, Pekin, Jeddo and London first. The events log

@@ -86,6 +86,8 @@ export {
   streetEnds,
 } from './settlements.ts';
 export type { SettlementSquare, SettlementType } from './settlements.ts';
+export { SETTLEMENT_SIDES, settlementIn } from './settlementLayout.ts';
+export type { Building, DiamondFooting, FootingOf, Jetty, LaidOut } from './settlementLayout.ts';
 export { ruinFrameKey } from './ruinLooks.ts';
 export { CULTURES, STRUCTURE_RESOURCES, parseStructureCatalogue } from './structures.ts';
 export { RARITIES, parseBalance } from './balance.ts';
