@@ -1,7 +1,8 @@
-# 0027. Where the wet land's frame goes
+# 0027. Where the wet land's frame goes, and the cells a tuft cannot reach
 
-- Status: open
+- Status: closed
 - Started: 2026-10-21
+- Closed: 2026-10-21
 
 ## Hypothesis
 
@@ -57,7 +58,32 @@ The wet land's program at the bog, 2.14 ms as it was, with one part left out:
 `perf:shaders --compare` against main's point: the bog 2.65 to 2.22 ms (-16%), the wet land 2.15 to 1.74; the ice 0.78
 to 0.72, within the 0.71 to 0.78 it has read across 2026-10-20; nothing else moved.
 
+**The grass, the heath, the crops and the paddy the same way.** Each looks at twenty-five roots about a pixel: the
+grass's tufts and brush, the heath's clumps and the tundra's cotton grass, the crops' stalks in their rows, the paddy's
+shoots in theirs. What a root can ink is a box worked out for each from the most its code can draw (`strokeInk` for a
+stroke, `clumpInk` for a round clump, `eitherInk` for both), and a lattice turned to a field's own rows is one the reach
+can be asked of as well as one square to the world (`reachOf`, `squareReach`). The renders page, photographed twice
+with and twice without, differs in no pixel. `perf:shaders --compare` against main's point, twice:
+
+| | main's point | now | the land's own |
+|---|---|---|---|
+| tundra | 1.54 ms | 1.32, 1.36 | the heath 1.23 to 1.02, 1.03 |
+| grassland | 1.86 | 1.63, 1.60 | the grass 1.51 to 1.29, 1.26 |
+| forest | 1.51 | 1.38, 1.30 | the grass 1.20 to 1.08, 1.00 |
+| coast | 1.45 | 1.30, 1.33 | the crops 0.26 to 0.18 |
+| bog | 2.65 | 2.15, 2.21 | the wet land 2.15 to 1.67, 1.72 |
+
+The ice, the sand and the sky did not move.
+
 ## Result
 
-Open: the reeds pass over the cells that cannot reach a pixel, the same picture for a fifth less of the wet land; the
-grass, the heath and the crops look at their cells the same way and come next.
+**Confirmed.** The wet land's cost at the bog was its reeds, and the reeds' cost the cells each pixel works out. A
+cell that cannot reach a pixel is now passed over before it is, in every motion that roots tufts or stalks on a
+lattice: the same picture, and each such land's own program an eighth to a third cheaper.
+
+## Consequences
+
+- `reachOf` in `landShader.ts` is how a new motion with things rooted on a lattice keeps to the cells that can reach a
+  pixel: the box of what one root can ink, from the most its code draws.
+- Two loads of the renders page with the same code can differ in some 100 pixels, so a comparison of it takes two
+  pictures of each side.

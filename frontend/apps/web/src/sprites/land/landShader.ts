@@ -60,11 +60,11 @@ float segment(vec2 p, vec2 a, vec2 b) {
   return length(pa - ba * h);
 }
 
-// Which cells of a lattice of roots, this many world units across, can put a stroke on this pixel at all. A cell's
-// root lies anywhere in it; a stroke rises from its root at most \`tallest\` pixels, leaning down the wind by a share of
-// its height from \`leanFrom\` to \`leanTo\`, and inks the pixels within \`halfWidth\` of itself. A cell beyond that is
-// passed over before anything of it is worked out, which leaves out only strokes that could not have touched the
-// pixel: the same picture, for the work of the cells that could (experiment 0027).
+// Which cells of a lattice of roots can put ink on this pixel at all. A root lies anywhere in its cell, and from it a
+// tuft, a stalk or a clump can ink only so far: a cell beyond that is passed over before anything of it is worked out,
+// which leaves out only ink that could not have touched the pixel, the same picture for the work of the cells that
+// could (experiment 0027). What a root can ink is a box of offsets from it on the screen, \`low\` and \`high\` in a vec4:
+// strokeInk and clumpInk make one, eitherInk joins two.
 struct Reach {
   vec2 corner;
   vec2 east;
@@ -73,26 +73,60 @@ struct Reach {
   vec2 high;
 };
 
-Reach reachOf(ivec2 middle, float cell, float tallest, vec2 downWind, float leanFrom, float leanTo, float halfWidth) {
+// How a move of so many world units over the ground moves a point on the screen: screenOf, without its start.
+vec2 screenStep(vec2 world) {
+  return uScale * vec2(world.x * uTilt.x + world.y * uTilt.y, (world.y * uTilt.x - world.x * uTilt.y) * uTilt.z);
+}
+
+// A stroke from its root up to \`tallest\` pixels high, leaning down the wind by a share of its height from \`leanFrom\` to
+// \`leanTo\`, inking within \`halfWidth\` of itself: its points are its height times its lean less straight up, nought or
+// the tallest at the corners.
+vec4 strokeInk(float tallest, vec2 downWind, float leanFrom, float leanTo, float halfWidth) {
+  vec2 one = tallest * (downWind * leanFrom - vec2(0.0, 1.0));
+  vec2 other = tallest * (downWind * leanTo - vec2(0.0, 1.0));
+  return vec4(min(vec2(0.0), min(one, other)) - halfWidth, max(vec2(0.0), max(one, other)) + halfWidth);
+}
+
+// A round clump of radius up to \`radius\` pixels, its middle raised \`raise\` of its radius above its root and moved down
+// the wind by a share of its radius from \`leanFrom\` to \`leanTo\`, inking within its radius and \`edge\` more, squashed
+// up the screen by \`squash\`: every part of it straight in its radius, so nought or the widest at the corners.
+vec4 clumpInk(float radius, float raise, vec2 downWind, float leanFrom, float leanTo, float squash, float edge) {
+  vec2 smallest = vec2(edge, edge / squash);
+  vec2 widest = vec2(radius + edge, (radius + edge) / squash);
+  vec2 one = radius * (vec2(0.0, -raise) + downWind * leanFrom);
+  vec2 other = radius * (vec2(0.0, -raise) + downWind * leanTo);
+  return vec4(min(-smallest, min(one, other) - widest), max(smallest, max(one, other) + widest));
+}
+
+vec4 eitherInk(vec4 one, vec4 other) {
+  return vec4(min(one.xy, other.xy), max(one.zw, other.zw));
+}
+
+// The cells of a lattice whose cell nought starts at \`cornerWorld\`, a step along each of its two ways \`stepA\` and
+// \`stepB\` world units, a root anywhere from \`footFrom\` to \`footTo\` steps into its cell, and \`ink\` what a root can
+// put down.
+Reach reachOf(vec2 cornerWorld, vec2 stepA, vec2 stepB, vec2 footFrom, vec2 footTo, vec4 ink) {
   Reach reach;
-  // Where the middle cell's corner lands on the screen, and how one cell east and one south move it there.
-  reach.corner = screenOf(vec2(middle) * cell);
-  reach.east = cell * uScale * vec2(uTilt.x, -uTilt.y * uTilt.z);
-  reach.south = cell * uScale * vec2(uTilt.y, uTilt.x * uTilt.z);
-  vec2 footLow = min(min(vec2(0.0), reach.east), min(reach.south, reach.east + reach.south));
-  vec2 footHigh = max(max(vec2(0.0), reach.east), max(reach.south, reach.east + reach.south));
-  // A stroke's points from its root: its height times its lean less straight up, at its corners nought or the tallest.
-  vec2 leanLow = tallest * (downWind * leanFrom - vec2(0.0, 1.0));
-  vec2 leanHigh = tallest * (downWind * leanTo - vec2(0.0, 1.0));
-  // A twentieth of a pixel more each way, for the rounding between these sums and the strokes' own, which is some
+  reach.corner = screenOf(cornerWorld);
+  reach.east = screenStep(stepA);
+  reach.south = screenStep(stepB);
+  vec2 a = footFrom.x * reach.east + footFrom.y * reach.south;
+  vec2 b = footTo.x * reach.east + footFrom.y * reach.south;
+  vec2 c = footFrom.x * reach.east + footTo.y * reach.south;
+  vec2 d = footTo.x * reach.east + footTo.y * reach.south;
+  // A twentieth of a pixel more each way, for the rounding between these sums and the ink's own, which is some
   // ten-thousandths of one at the world's sizes.
-  float margin = halfWidth + 0.05;
-  reach.low = footLow + min(vec2(0.0), min(leanLow, leanHigh)) - margin;
-  reach.high = footHigh + max(vec2(0.0), max(leanLow, leanHigh)) + margin;
+  reach.low = min(min(a, b), min(c, d)) + ink.xy - 0.05;
+  reach.high = max(max(a, b), max(c, d)) + ink.zw + 0.05;
   return reach;
 }
 
-// Whether a cell so many cells east and south of the middle one can put a stroke on this pixel.
+// The cells of a lattice of whole cells this many world units across, square to the world, about the middle one.
+Reach squareReach(ivec2 middle, float cell, vec4 ink) {
+  return reachOf(vec2(middle) * cell, vec2(cell, 0.0), vec2(0.0, cell), vec2(0.0), vec2(1.0), ink);
+}
+
+// Whether a cell so many steps along the lattice's two ways from cell nought can put ink on this pixel.
 bool reaches(Reach reach, ivec2 offset) {
   vec2 from = vScreen - (reach.corner + float(offset.x) * reach.east + float(offset.y) * reach.south);
   return all(greaterThanEqual(from, reach.low)) && all(lessThanEqual(from, reach.high));

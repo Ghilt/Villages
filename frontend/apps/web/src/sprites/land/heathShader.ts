@@ -48,6 +48,7 @@ const float HEATH_WHOLE_PIXELS = ${float(H.wholePixels)};
 const vec3 HEATH_SHEEN = ${colour(H.sheen)};
 const float HEATH_SHEEN_ALPHA = ${float(H.sheenOpacity)};
 const float HEATH_NUDGE = ${float(H.nudge)};
+const float HEATH_WIDEST = ${float(Math.max(...KINDS.map((kind) => kind.radius)))};
 const float HEATH_SWAY = ${float(H.sway)};
 const float HEATH_SWAY_SPEED = ${float(H.swaySpeed)};
 const float COTTON_HEIGHT = ${float(C.height)};
@@ -88,8 +89,20 @@ vec4 heathHere(vec2 world) {
   float ink = 0.0;
   vec3 drawn = vec3(0.0);
   float inkAlpha = 0.0;
+  // Only the cells whose clumps or cotton grass could reach this pixel are worked out (landShader.ts's reachOf): a clump
+  // as wide as the widest look's, nudged by the gust give or take its sway; cotton grass, while there is any, as tall as
+  // the tallest and as wide as its stem or its head.
+  vec4 inks = clumpInk(HEATH_WIDEST * uHeathSize * uScale * 1.3, 0.7, downWind, blow * HEATH_NUDGE - HEATH_SWAY, blow * HEATH_NUDGE + HEATH_SWAY, 1.25, uPixel * 0.5);
+  if (uCotton > 0.0) {
+    float widest = max(thick * 0.5 + uPixel, max(COTTON_HEAD * uScale, uPixel * 1.2) + uPixel * 0.5);
+    inks = eitherInk(inks, strokeInk(tallest, downWind, blow * COTTON_BEND - COTTON_SWAY, blow * COTTON_BEND + COTTON_SWAY, widest));
+  }
+  Reach near = squareReach(middle, cell, inks);
   for (int dy = -2; dy <= 2; dy++) {
     for (int dx = -2; dx <= 2; dx++) {
+      if (!reaches(near, ivec2(dx, dy))) {
+        continue;
+      }
       ivec2 at = middle + ivec2(dx, dy);
       vec2 rootWorld = (vec2(at) + vec2(hash(at, 61), hash(at, 62))) * cell;
       if (rootsAt(rootWorld)[HEATH] < 0.5) {

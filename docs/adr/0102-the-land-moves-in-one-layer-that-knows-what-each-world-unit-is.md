@@ -123,3 +123,14 @@ canvas (`afterStart`), or the first time the land is wanted if that is sooner: h
 the five competed with the start's own programs for the browser's compile threads, and a first load read 0.6 s
 longer. A browser without the extension draws the land as before, and waits as before. The first close zoom of a
 fresh browser waits 0.1 s, against 22 to 40 (experiment 0025).
+
+## Amendment, 2026-10-21: a pixel works out only the roots that can reach it
+
+The grass's tufts, the heath's clumps and cotton grass, the crops' stalks and the wet land's reeds and shoots are each
+found by a pixel looking at the twenty-five roots of a lattice about it, and working them out was most of what those
+motions cost: the reeds 1.75 of the wet land's 2.14 ms at the bog (experiment 0027). So a pixel first asks of each
+root's cell whether anything rooted there could ink it at all - from the box of what one root can put down, the most
+its code draws (`reachOf`, `strokeInk`, `clumpInk` in `landShader.ts`) - and passes over the rest before anything of
+them is worked out. Only ink that could not have touched the pixel is left out, so the picture is the same; each of
+those lands' own program is an eighth to a third cheaper. A motion that roots things on a lattice keeps to its reach
+the same way, its box worked out from what it draws.

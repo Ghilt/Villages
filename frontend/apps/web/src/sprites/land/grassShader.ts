@@ -137,8 +137,22 @@ vec4 grassHere(vec2 world) {
     float ink = 0.0;
     vec3 colour = vec3(0.0);
     float inkAlpha = 0.0;
+    // Only the cells whose tufts or brush could reach this pixel are worked out (landShader.ts's reachOf): a tuft as tall
+    // as the tallest, as thick as tall grass's, bent by the gust as little or as much as the woods and the tall grass
+    // bend it, give or take its sway; a clump of brush as wide as the widest.
+    float bent = blow * BEND;
+    float bentLeast = min(min(bent, bent * UNDER_BEND), min(bent * 1.3, bent * UNDER_BEND * 1.3)) - SWAY;
+    float bentMost = max(max(bent, bent * UNDER_BEND), max(bent * 1.3, bent * UNDER_BEND * 1.3)) + SWAY;
+    vec4 inks = eitherInk(
+      strokeInk(tall * max(1.0, uTallHeight) * 1.15, downWind, bentLeast, bentMost, thick * 1.25 * 0.5 + uPixel),
+      clumpInk(uBrushSize * uScale * 1.25, 0.8, downWind, blow * 0.25, blow * 0.25, 1.15, uPixel * 0.5)
+    );
+    Reach near = squareReach(middle, CELL, inks);
     for (int dy = -2; dy <= 2; dy++) {
       for (int dx = -2; dx <= 2; dx++) {
+        if (!reaches(near, ivec2(dx, dy))) {
+          continue;
+        }
         ivec2 cell = middle + ivec2(dx, dy);
         vec2 rootWorld = (vec2(cell) + vec2(hash(cell, 1), hash(cell, 2))) * CELL;
         float rooted = rootedExactly(rootWorld)[GRASS];

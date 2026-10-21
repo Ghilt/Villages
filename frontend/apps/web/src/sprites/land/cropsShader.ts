@@ -122,8 +122,16 @@ vec4 cropsHere(vec2 world) {
   float ink = 0.0;
   vec3 drawn = vec3(0.0);
   float inkAlpha = 0.0;
+  // Only the stalks that could reach this pixel are worked out (landShader.ts's reachOf): each stood a stagger of -0.15
+  // to 0.65 of a stalk along its row, as tall as the tallest, bent by the wave give or take its sway.
+  vec2 firstStalk = field.middle + along * (float(stalk0) * spacing) + across * (float(row0) * uRows);
+  vec4 inks = strokeInk(tall * 1.1, downWind, blow * STALK_BEND - STALK_SWAY, blow * STALK_BEND + STALK_SWAY, thick * 0.5 + uPixel);
+  Reach near = reachOf(firstStalk, along * spacing, across * uRows, vec2(-0.15, 0.0), vec2(0.65, 0.0), inks);
   for (int dr = -2; dr <= 2; dr++) {
     for (int ds = -2; ds <= 2; ds++) {
+      if (!reaches(near, ivec2(ds, dr))) {
+        continue;
+      }
       int row = row0 + dr;
       int at = stalk0 + ds;
       ivec2 stalk = ivec2(at, row) + field.id * 4099;

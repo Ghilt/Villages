@@ -270,8 +270,13 @@ vec4 wetHere(vec2 world) {
       vec2 off = reach - field.middle;
       int row0 = int(floor(dot(off, across) / PADDY_ROW + 0.5));
       int at0 = int(floor(dot(off, along) / PADDY_ALONG + 0.5));
+      // Only the shoots that could reach this pixel are worked out (landShader.ts's reachOf), each on its row's line.
+      vec2 firstShoot = field.middle + along * (float(at0) * PADDY_ALONG) + across * (float(row0) * PADDY_ROW);
+      vec4 shootInk = strokeInk(tallest, downWind, blow * STEM_BEND - STEM_SWAY, blow * STEM_BEND + STEM_SWAY, thick * 0.5 + uPixel);
+      Reach rows = reachOf(firstShoot, along * PADDY_ALONG, across * PADDY_ROW, vec2(0.0), vec2(0.0), shootInk);
       for (int dr = -2; dr <= 2; dr++) {
         for (int da = -2; da <= 2; da++) {
+          if (!reaches(rows, ivec2(da, dr))) continue;
           ivec2 shoot = ivec2(at0 + da, row0 + dr) + field.id * 4099;
           vec2 rootWorld = field.middle + along * (float(at0 + da) * PADDY_ALONG) + across * (float(row0 + dr) * PADDY_ROW);
           if (insideOf(field, rootWorld) < 0.12 || rootsAt(rootWorld)[WET] < 0.5) continue;
@@ -297,7 +302,7 @@ vec4 wetHere(vec2 world) {
         }
       }
       float reachable = tallestHere * uStems * uScale * 1.2;
-      Reach near = reachOf(middle, STEM_CELL, reachable, downWind, blow * STEM_BEND - STEM_SWAY, blow * STEM_BEND + STEM_SWAY, thick * 0.5 + uPixel);
+      Reach near = squareReach(middle, STEM_CELL, strokeInk(reachable, downWind, blow * STEM_BEND - STEM_SWAY, blow * STEM_BEND + STEM_SWAY, thick * 0.5 + uPixel));
       for (int dy = -2; dy <= 2; dy++) {
         for (int dx = -2; dx <= 2; dx++) {
           if (!reaches(near, ivec2(dx, dy))) continue;
