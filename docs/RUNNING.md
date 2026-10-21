@@ -866,7 +866,8 @@ and `-- --drop` takes them off; by hand only.
   names, the ruins, the settlements or `world/roads.json` changed. `-- --picture` draws the roads over the ground
   around Paris, Grand Cairo, Jeddo, New Orleans, Vienna and Dantzic into `world/painterly/roads/` - a track brown, a
   road pale, a trunk yellow, a bridge red, a settlement a pale square, a ruin's pieces grey; `--around` and `--scale`
-  as the ruins'. Nothing draws them on the map yet: see `docs/plans/settlements-and-roads.md`.
+  as the ruins'. The page draws them from zoom 6 as smooth bands with a roadside, under the worked ground's entry
+  above; see `docs/plans/houses-bridges-and-road-render.md`.
 - How high the ground is, for the relief: `npm run world:height --prefix frontend` reads ETOPO 2022's whole world,
   a height every 60 arc-seconds, through the master's origin map, so every point of the master has the height of
   where on Earth it was cut from, and invented land is given ground of the kind the master paints on it, and
