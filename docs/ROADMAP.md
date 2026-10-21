@@ -35,8 +35,8 @@ character dialogue; the UI component library is built and waiting on Adam's eye,
 and so is the origin map, the first of real names on the edited world. Structures are planned and not
 started; the world cache is built and waiting on Adam's eye; quests are built and on main, waiting on Adam's
 eye for their experiment; catalogues are built and waiting on Adam's eye; ruined cities are planned and not
-started; worked ground is planned and not started; challenges are planned and not started; and settlements and
-roads, the newest, are built and waiting on Adam's eye.
+started; worked ground is planned and not started; challenges are planned and not started; settlements and roads are
+built and on main; and houses, bridges and the road render, the newest, are planned and being built.
 
 - **Characters and key figures**: the people of the world, each with a history of their own, and the
   house's tie to the few it acts through, shown in a pane in the corner beside the house status. The shape
@@ -205,8 +205,14 @@ roads, the newest, are built and waiting on Adam's eye.
   out by the browser on worn ground of its own; roads baked between them and to the ruins' gates, worn into the
   ground; and a bridge, timber or stone on one of four axes, wherever a road crosses a river. The pictures are
   painted by asseterizer over placeholders. The shape is decision records 0114 and 0115, and the twenty steps, one
-  commit each, are in `docs/plans/settlements-and-roads.md`; all twenty are built, the pictures still placeholders.
-  Asked for by Adam on 2026-10-21.
+  commit each, are in `docs/plans/settlements-and-roads.md`; all twenty are built and on main, the pictures still
+  placeholders. Asked for by Adam on 2026-10-21.
+- **Houses, bridges and the road render**: the second round, from Adam's notes on the first. A settlement becomes a
+  cluster of ordinary structures with a name and a radius - houses, a mill, a market - each raised at the opening and
+  each inspected on its own, linked to the settlement it stands in; one stone bridge modelled in 3D on eight axes,
+  painted by asseterizer; roads joining 95% of the villages, drawn smooth from zoom 6, with a roadside by biome. The
+  shape is decision record 0117 and an amendment to 0115; thirteen steps in
+  `docs/plans/houses-bridges-and-road-render.md`, being built. Asked for by Adam on 2026-10-21.
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps
 its world in MongoDB whenever Docker is running, and RabbitMQ carries every event it stores to the read models.

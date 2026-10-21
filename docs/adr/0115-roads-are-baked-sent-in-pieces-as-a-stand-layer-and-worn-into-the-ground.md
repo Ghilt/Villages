@@ -55,3 +55,24 @@ its roads would change as the fog lifted. A road can also be long, far longer th
   stands, it needs to learn nothing.
 - **Bridges at any angle.** A picture for every angle, or one stretched and turned, which a painted bridge does not
   survive; four axes give eight directions from four pictures.
+
+## Amendment, 2026-10-21: one bridge on eight axes, roads drawn as shapes, and a roadside
+
+Adam, looking at the first roads: a bridge should be a sprite, simple and the same for all cultures, modelled in 3D and
+painted by asseterizer, in eight directions; a road render that shows every road from further out; at least 95% of the
+villages joined by a road to another village; no jagged edges; and a roadside of small stone walls with moss, tufts and
+the like, fitting the biome. Asked which eight directions, eight axes and eight pictures; asked how far out, zoom 6, as
+far as the records already come. So, in `docs/plans/houses-bridges-and-road-render.md`:
+
+- **One stone bridge** for every culture and span, modelled once and drawn in the map's camera along **eight axes**: the
+  lattice's two axes, its two diagonals and the four halfway between them, two along one axis for one along the other.
+  The bake crosses on all eight, the kind byte names only the axis, and the page stretches a bridge along its deck to
+  its span, never wider or taller.
+- **Every village has a road to another village where one can be had**: a village the graph leaves with no other
+  village in its network is joined to its nearest, out to a far limit; the bake reports the share, which is to be 95% or
+  more, and why each of the rest is alone.
+- **A road is drawn as a shape**, not as coloured diamonds: every piece a band with round ends, so bends and joins are
+  smooth, from zoom 7.5 in as worn earth and from 6 as a thin line. The worked ground keeps its `road` kind only so that
+  no tree grows on a road or its roadside.
+- **A roadside**, by the biome under it, along both sides of every road from 7.5 in, laid out by the page from the
+  pieces it holds, drawn between the roads and the trees.

@@ -1,6 +1,7 @@
 # 0114. A settlement is a structure nobody holds, raised at the opening from a site the bake chose
 
-- Status: accepted
+- Status: accepted; superseded in part by 0117, which makes a settlement a cluster of structures with a name rather
+  than a structure, its buildings raised one by one and laid out by the bake
 - Date: 2026-10-21
 - Plan: `docs/plans/settlements-and-roads.md`
 - Builds on 0093, which made a structure a history of its own that nobody may hold and named "finding it standing in
