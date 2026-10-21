@@ -14,11 +14,13 @@ import { startGame, stopGame, testPorts } from './servers.ts';
  */
 test('remember me: kept through a closed browser when ticked and not when unticked, in two tabs, and through a restart', async ({
   browser,
+  // The test's own, which Playwright closes when it ends, failed or not: a window of the game left open draws on in
+  // software for the rest of the run, and starved the smoke test after it of the time its map is given to appear.
+  context: first,
 }) => {
   // Made up for this run, in this test's own world: a test account, never anybody's.
   const email = `e2e-${randomUUID()}@example.com`;
   const password = `e2e ${randomUUID()}`;
-  const first = await browser.newContext();
   const page = await first.newPage();
 
   await test.step('a guest makes an account through the settings, and is the same player', async () => {
