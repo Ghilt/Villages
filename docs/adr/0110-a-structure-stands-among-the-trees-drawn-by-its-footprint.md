@@ -52,6 +52,12 @@ behind it. No one height of the building says both.
   *"Stand people among the trees too, by the same draw order"*): sorted against a tree as one tree is against another,
   and under the fog with them wherever they are. Every kind with a ground form stands among the trees now, so 0063's
   side of the fog for a ground form is kept for a kind that would not.
+- **The trees in the way of what the pointer is over fade seven tenths away** (amended 2026-10-21, Adam's: *"if the
+  structure or character is hovered, the trees in front of it fade away"*, and then, of the pace and the depth,
+  *"it can be a little slower, and maybe 70%"*): the ones drawn after it whose pictures overlap its own, to three
+  tenths of themselves over about seven tenths of a second, and back as slowly when the pointer leaves. Each keeps its
+  own alpha under the fade, so the scenery's own fades still reach it (`sprites/standing/veil.ts`). The map tells the
+  renderer what the pointer is over as it crosses from one thing to the next, by the same hit test a click asks.
 - **The ring under what is selected lies on the ground with it**, round its footprint, a circle on the ground squashed
   as the ground is - round a person's patch of ground for a person - between the trees' shadows and the trees, so the
   building and the trees in front of it stand over it. It was a picture over every tree, centred on the building's foot
@@ -75,7 +81,7 @@ The order follows the footprint the catalogue gives, not the picture: a picture 
 footprint sorts by the footprint, as its yard is worn by it. Tuning one is tuning both, on `/admin/inspect-structures`.
 
 The log says under `scenery` how many marks stand among the trees when that changes, and `villagesScenery()`
-says how many slices there are.
+says how many slices there are, what the pointer is over and how many trees are in its way.
 
 Every person on the screen is a slice break as a building is, so a crowd of people in a wood costs a draw each.
 

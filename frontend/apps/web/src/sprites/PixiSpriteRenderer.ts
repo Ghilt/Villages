@@ -345,6 +345,11 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       return layers?.marks.hitTest(point) ?? null;
     },
 
+    hover(id: string | null): void {
+      scenery?.standing.hover(id);
+      drawSoon();
+    },
+
     groupOf(leader: string): readonly string[] {
       return layers?.marks.groupOf(leader) ?? [];
     },

@@ -183,6 +183,29 @@ export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick, st
     };
   }, [map, renderer]);
 
+  // What the pointer is over, so the trees in front of a building or a person fade out of its way; a crowd's badge
+  // has nothing standing behind trees. Said only when it changes, as the pointer crosses from one thing to the next.
+  useEffect(() => {
+    let over: string | null = null;
+    const hover = (next: string | null) => {
+      if (next !== over) {
+        over = next;
+        renderer?.hover(next);
+      }
+    };
+    const onMove = (event: maplibregl.MapMouseEvent) => {
+      const hit = renderer?.hitTest(event.point) ?? null;
+      hover(hit === null || hit.startsWith(GROUP) ? null : hit);
+    };
+    const onOut = () => hover(null);
+    map.on('mousemove', onMove);
+    map.on('mouseout', onOut);
+    return () => {
+      map.off('mousemove', onMove);
+      map.off('mouseout', onOut);
+    };
+  }, [map, renderer]);
+
   // The canvas the map's colour is taken out through comes first, so that it lies between the map and the
   // sprites and its blend reaches the map alone. See decision record 0065.
   return (

@@ -86,6 +86,11 @@ function overlap(building: Building, left: number, right: number, top: number, b
   );
 }
 
+/** Whether a tree's picture overlaps a building's: drawn after it, it stands in its way. */
+export function overlaps(building: Building, tree: Tree): boolean {
+  return overlap(building, tree.left, tree.right, tree.top, tree.y);
+}
+
 /**
  * Whether one of two buildings whose pictures overlap is drawn before the other: where their footprints share a
  * stretch across the screen, the one wholly above the other there; otherwise, or where they cross, the one whose line

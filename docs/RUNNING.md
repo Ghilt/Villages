@@ -607,8 +607,11 @@ stage alone, with none of the debug panel in it (decision record 0079).
   scenery's own stack and so under the fog wherever it is, clear over it in vision: a tree whose foot is in front of
   its footprint is drawn over it and one behind under it, by the line from the footprint's left corner to its right
   one, and its yard keeps the trees off its footprint (decision record 0110). A person stands among them as well, on
-  their foot. The log says under `scenery` how many marks stand among the trees when that changes, and
-  `villagesScenery()` in a development build's console how many slices the trees are cut into.
+  their foot. With the pointer over either, the trees in front of it fade to three tenths of themselves over about
+  seven tenths of a second, and come back as slowly when it leaves.
+  The log says under `scenery` how many marks stand among the trees when that changes, and `villagesScenery()` in a
+  development build's console how many slices the trees are cut into, what the pointer is over and how many trees
+  are in its way.
   Far out, marks whose pictures would overlap are a **crowd**, drawn as the most significant of them wearing a
   gold "+N" for how many more it stands for (`sprites/markGroups.ts`); the debug log says, under `marks`, how many
   crowds there are when that changes. A click on the "+N" opens the crowd's card over it (`sprites/CrowdCard.tsx`,

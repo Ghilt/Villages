@@ -23,7 +23,7 @@ export function createSceneryDrawing(
   let lastDrawnAt = 0;
 
   return {
-    draw(view: CameraView, now: number): number | null {
+    draw(view: CameraView, now: number, elapsed: number): number | null {
       const layer = scenery();
       if (layer === null) {
         return null;
@@ -52,7 +52,7 @@ export function createSceneryDrawing(
       } else {
         noteDrawn(drew);
       }
-      return layer.standing.draw(view, now, 0);
+      return layer.standing.draw(view, now, elapsed);
     },
     destroy: () => scenery()?.destroy(),
   };

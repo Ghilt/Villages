@@ -78,6 +78,8 @@ export interface SpriteRenderer {
    * click on its `group:<leader>` badge opens.
    */
   groupOf(leader: string): readonly string[];
+  /** What the pointer is over, by the id `hitTest` answered, or null: the trees standing in its way fade out of it. */
+  hover(id: string | null): void;
   /** Stop following, release the canvas and the textures. */
   destroy(): void;
 }

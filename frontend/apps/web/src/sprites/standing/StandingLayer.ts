@@ -5,10 +5,11 @@ import { groundTilt, tiltGround } from '../../geometry/cameraMath';
 import type { CameraView } from '../../geometry/cameraMath';
 import { note } from '../../log/log';
 import type { Layer } from '../layer';
-import { drawOrder } from './drawOrder';
-import type { Tree } from './drawOrder';
+import { drawOrder, overlaps } from './drawOrder';
+import type { Building, Tree } from './drawOrder';
 import { tilted } from './footprint';
 import type { GroundFootprint, GroundPoint } from './footprint';
+import { createVeil } from './veil';
 
 /*
  * The trees and the structures standing among them, drawn farthest first as one stack: the scenery's particles cut
@@ -16,7 +17,7 @@ import type { GroundFootprint, GroundPoint } from './footprint';
  * One particle container draws its particles in one go, so a picture can only go between two of them. The slices are
  * cut again only when something changed - a tree came or went, the camera tipped, a structure moved or came on the
  * screen - and cost one draw each, one more than there are structures on the screen. See `drawOrder.ts` for the
- * rule and decision record 0110.
+ * rule and decision record 0110. The trees standing in the way of what the pointer is over fade out of it, `veil.ts`.
  */
 
 /** Something standing among the trees, as the marks hand it over: what it is drawn as, and the ground it stands on. */
@@ -47,6 +48,9 @@ export interface TreeParticles {
   report(): {
     slices: number;
     standing: number;
+    /** What the pointer is over, and how many trees are in its way. */
+    hovered: string | null;
+    inTheWay: number;
     first: { visible: boolean; scale: number; x: number; y: number };
   };
 }
@@ -56,6 +60,8 @@ export interface StandingLayer extends Layer, TreeParticles {
   readonly view: Container;
   /** Everything standing among the trees, handed over by the marks every frame they are drawn. */
   stand(things: readonly StandingThing[]): void;
+  /** What the pointer is over, by its id, or null: the trees standing in its way fade out of it. */
+  hover(id: string | null): void;
 }
 
 /** The trees as a particle container sees them, and whether they are drawn: the scenery's switch. */
@@ -74,6 +80,19 @@ export function createStandingLayer(
   let unsliced = true;
   /** The structures last said to stand among the trees, so the log speaks only when that changes. */
   let said = '';
+  /** What was cut last: what stood, as the order saw it, the order it was drawn in, and the trees of each slice. */
+  let cutOf: {
+    shown: readonly StandingThing[];
+    buildings: readonly Building[];
+    order: readonly number[];
+    parts: readonly (readonly Particle[])[];
+  } = { shown: [], buildings: [], order: [], parts: [] };
+  let cuts = 0;
+  /** What the pointer is over, the trees in its way, and what they were worked out for. */
+  let hovered: string | null = null;
+  let inTheWay: ReadonlySet<Particle> = new Set();
+  let wayFor = '';
+  const veil = createVeil<Particle>();
 
   function slice(at: number): ParticleContainer {
     while (slices.length <= at) {
@@ -102,22 +121,22 @@ export function createStandingLayer(
   /** Cuts the trees into slices and puts each structure between the two it stands between. */
   function cut(camera: CameraView, shown: readonly StandingThing[]): void {
     const tilt = groundTilt(camera);
-    const { order, slices: of } = drawOrder(
-      shown.map((thing) => ({
-        corners: tilted(thing.footprint, tilt),
-        foot: tiltGround(thing.place.x, thing.place.y, tilt),
-        anchor: thing.anchor,
-        tall: thing.tall,
-        wide: thing.wide,
-      })),
-      shown.length === 0 ? [] : all.map(treeOf),
-    );
+    const buildings = shown.map((thing) => ({
+      corners: tilted(thing.footprint, tilt),
+      foot: tiltGround(thing.place.x, thing.place.y, tilt),
+      anchor: thing.anchor,
+      tall: thing.tall,
+      wide: thing.wide,
+    }));
+    const { order, slices: of } = drawOrder(buildings, shown.length === 0 ? [] : all.map(treeOf));
+    cuts += 1;
     const parts: Particle[][] = slices.map(() => []);
     for (let at = 0; at <= order.length; at += 1) {
       slice(at);
       parts[at] ??= [];
     }
     all.forEach((particle, at) => parts[of[at] ?? 0]!.push(particle));
+    cutOf = { shown, buildings, order, parts };
     slices.forEach((one, at) => {
       one.particleChildren = parts[at]!;
       one.update();
@@ -131,6 +150,22 @@ export function createStandingLayer(
     for (const thing of things) {
       if (!thing.shown) view.addChild(...thing.sprites);
     }
+  }
+
+  /** The trees drawn after what the pointer is over whose pictures overlap its own: the ones in its way. */
+  function treesInTheWay(): ReadonlySet<Particle> {
+    const at = cutOf.shown.findIndex((thing) => thing.id === hovered);
+    const building = cutOf.buildings[at];
+    if (building === undefined) {
+      return new Set();
+    }
+    const way = new Set<Particle>();
+    for (let after = cutOf.order.indexOf(at) + 1; after <= cutOf.order.length; after += 1) {
+      for (const tree of cutOf.parts[after] ?? []) {
+        if (overlaps(building, treeOf(tree))) way.add(tree);
+      }
+    }
+    return way;
   }
 
   return {
@@ -165,8 +200,11 @@ export function createStandingLayer(
     stand(next: readonly StandingThing[]): void {
       things = next;
     },
+    hover(id: string | null): void {
+      hovered = id;
+    },
 
-    draw(camera: CameraView): number | null {
+    draw(camera: CameraView, _now: number, elapsed: number): number | null {
       const drawTrees = treesShown();
       for (const one of slices) one.visible = drawTrees;
       const shown = things.filter((thing) => thing.shown);
@@ -177,22 +215,28 @@ export function createStandingLayer(
             `${id}:${sprites.length}:${tall}:${anchor}:${place.x},${place.y}:${footprint[2].x},${footprint[2].y}`,
         )
         .join('|')}`;
-      if (!unsliced && key === cutFor) return null;
-      cut(camera, shown);
-      cutFor = key;
-      unsliced = false;
-      const now = shown.map(({ id }) => id).join(' ');
-      if (now !== said) {
-        said = now;
-        const many = shown.length === 1 ? 'one mark stands' : `${shown.length} marks stand`;
-        note(
-          'scenery',
-          shown.length === 0
-            ? 'nothing stands among the trees'
-            : `${many} among the trees, between ${shown.length + 1} slices of them`,
-        );
+      if (unsliced || key !== cutFor) {
+        cut(camera, shown);
+        cutFor = key;
+        unsliced = false;
+        const standing = shown.map(({ id }) => id).join(' ');
+        if (standing !== said) {
+          said = standing;
+          const many = shown.length === 1 ? 'one mark stands' : `${shown.length} marks stand`;
+          note(
+            'scenery',
+            shown.length === 0
+              ? 'nothing stands among the trees'
+              : `${many} among the trees, between ${shown.length + 1} slices of them`,
+          );
+        }
       }
-      return null;
+      // The trees in the way of what the pointer is over, worked out again when it moves or the trees are cut again.
+      if (`${hovered} ${cuts}` !== wayFor) {
+        wayFor = `${hovered} ${cuts}`;
+        inTheWay = treesInTheWay();
+      }
+      return veil.step(inTheWay, elapsed) ? 0 : null;
     },
 
     report() {
@@ -200,6 +244,8 @@ export function createStandingLayer(
       return {
         slices: slices.length,
         standing: things.filter((thing) => thing.shown).length,
+        hovered,
+        inTheWay: inTheWay.size,
         first: { visible: first.visible, scale: first.scale.x, x: first.x, y: first.y },
       };
     },

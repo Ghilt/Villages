@@ -147,7 +147,9 @@ little right of its middle, drawn on a corner of the diamonds. **A building stan
 foot is south of the line from its footprint's left corner to its right one is drawn in front of it, and one north of
 that line behind it, and since the diamonds are turned that line runs up the screen to the right, so a tree beside a
 castle's left wall can stand in front of it while a tree beside its right wall, lower on the screen, stands behind.
-A person stands among them too, on their foot; decision record 0110. It carries its own colour and is never tinted. A sprite is between twenty and about
+A person stands among them too, on their foot. **Point at a building or a person and the trees in front of it fade
+seven tenths away**, slowly, so it shows through them and the wood is still there, and come back when the pointer
+leaves; decision record 0110. It carries its own colour and is never tinted. A sprite is between twenty and about
 ninety pixels tall wherever it is drawn, so **its outline is what reads**: what tells one kind from another has to
 be its shape. No picture has an outline, and **no sprite carries a shadow**: a picture drawn standing on a
 plinth brings one, and it goes with the plinth, because a shadow drawn into a sprite darkens whatever it is
