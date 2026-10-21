@@ -97,6 +97,9 @@ export const RECIPES = {
   /** A top bar standing on its own, framed: the same, because a pane on top put away is a strip. */
   'bar.top': { border: 'gilt-thin', scale: 0.5, fill: 'stone' },
 
+  /** A challenge's replay along the bottom of its stage: the bottom bar's gilt on stone. */
+  'bar.replay': { border: 'gilt-thin', scale: 0.5, fill: 'stone', padding: [1, 4, 1, 4] },
+
   /** A plain gilt pane on parchment, with nothing standing out past it: what a tab bar tucks under. */
   'pane.plain': { border: 'gilt-simple', fill: 'parchment', text: 'ink', padding: 8 },
 

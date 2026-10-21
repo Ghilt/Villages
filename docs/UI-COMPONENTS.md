@@ -441,6 +441,14 @@ A line each: what it is for, its variants, and where on the page it is.
   sliding along itself so it never leaves the bar; a meter to a screen reader. The **happening plate** is its
   aspects' discs, its name, the seconds it runs and whom it lights. `ui/tug/tugShare.ts` is the share and its
   words. *Challenges*.
+- **`ReplayBar`** and **`useReplayClock`**, `ui/replay/`: a challenge's replay along the bottom of its stage
+  (decision record 0116). Play and pause, the pace - one, two or three chevrons, each a second of the challenge in
+  700, 350 or 140 milliseconds - and to the end, every one a `MarkButton` on Adam's word of 2026-10-21; the
+  happenings as bands of their aspects' colours with their names, the tug drawn over them as a line with the first
+  side's end at the top, a gilt tick where something arrived and a velvet one where it fell; and the scrub, a range
+  the arrow keys step a second at a time. Held by whoever shows it; `useReplayClock` is the clock, counted from when
+  it began rather than ticked, stopping at the last second and starting again from the first. In the `bar.replay`
+  recipe. `ui/replay/replayClock.ts` is its arithmetic. *Challenges*.
 - **`Dialog`** and **`DialogBox`**, `ui/dialog/Dialog.tsx`: a question that has to be answered before
   anything else - kill this key figure? - over the whole page, the page behind dimmed with night and out of
   reach. The browser's own modal dialog is under it, so it is drawn over everything, the keyboard stays in
