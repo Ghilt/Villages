@@ -434,6 +434,13 @@ A line each: what it is for, its variants, and where on the page it is.
   is its two effects, each with what it needs of the happening - matching, anti-aspect or any - and whether it works
   now, its slot and its numbers, in the `card.slice` recipe, closed by its mark. Drawn, and reads no picture of its
   own; the aspects' colours are the `--ui-aspect-…` tokens. `ui/slice/sliceWords.ts` is its words. *Challenges*.
+- **`TugBar`** and **`HappeningPlate`**, `ui/tug/Tug.tsx`: the tug of a challenge drawn as a share, and the
+  happening going on, each a plate of night over the stage (decision record 0116). The **tug bar** is the two
+  sides' colours, the first's from the left as far as its share - at 28 toward the first, 64 parts in a hundred - a
+  cream hairline at the middle, the sides' names and pennants at its ends, and what it says riding the split,
+  sliding along itself so it never leaves the bar; a meter to a screen reader. The **happening plate** is its
+  aspects' discs, its name, the seconds it runs and whom it lights. `ui/tug/tugShare.ts` is the share and its
+  words. *Challenges*.
 - **`Dialog`** and **`DialogBox`**, `ui/dialog/Dialog.tsx`: a question that has to be answered before
   anything else - kill this key figure? - over the whole page, the page behind dimmed with night and out of
   reach. The browser's own modal dialog is under it, so it is drawn over everything, the keyboard stays in

@@ -1,8 +1,12 @@
 import { useState } from 'react';
 
+import { Slider } from '../../ui/slider/Slider';
 import { SliceChip, SliceOpened, SliceTray } from '../../ui/slice/Slice';
 import type { AspectShown, EffectShown } from '../../ui/slice/Slice';
 import type { Borne, SliceState } from '../../ui/slice/sliceWords';
+import { HappeningPlate, TugBar } from '../../ui/tug/Tug';
+import type { SideShown } from '../../ui/tug/Tug';
+import { towardSaid } from '../../ui/tug/tugShare';
 import { Part, Specimen, Specimens } from './Specimen';
 
 /** Four of the ten aspects, as a slice shows them. */
@@ -88,6 +92,24 @@ const HOLYS_EFFECTS: readonly EffectShown[] = [
 
 const VARGA = '#3d6aa6';
 const BRANNOCK = '#a8452a';
+const VARGA_SIDE: SideShown = { name: 'Varga', colour: VARGA };
+const BRANNOCK_SIDE: SideShown = { name: 'Brannock', colour: BRANNOCK };
+
+/** The tug held here, dragged by a slider under it. */
+function LiveTug() {
+  const [tug, setTug] = useState(28.3);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: 'min(560px, 100%)' }}>
+      <TugBar
+        first={VARGA_SIDE}
+        second={BRANNOCK_SIDE}
+        tug={tug}
+        said={towardSaid(tug, 'Varga', 'Brannock')}
+      />
+      <Slider value={tug} min={-100} max={100} step={0.5} onChange={setTug} label="The tug" />
+    </div>
+  );
+}
 
 /** A house's tray, held here: folded and opened, and a chip pressed to open its slice. */
 function LiveTray({ direction, align }: { direction: 'row' | 'column'; align: 'start' | 'end' }) {
@@ -247,6 +269,64 @@ export function Challenges() {
               ]}
               borne={[WEAKENED]}
               onClose={() => {}}
+            />
+          </Specimen>
+        </Specimens>
+      </Part>
+
+      <Part title="The tug">
+        <p className="ui-label showcase__lead">
+          The tug as a share of the bar, the first house’s colour from the left as far as its share: at 28
+          toward Varga, Varga has 64 parts in a hundred. So it moves as the crowd or the ground it stands over
+          does, and what it says rides the split. Drag the live one.
+        </p>
+        <Specimens>
+          <Specimen name="TugBar tug={0}" note="even">
+            <TugBar first={VARGA_SIDE} second={BRANNOCK_SIDE} tug={0} said="even" />
+          </Specimen>
+          <Specimen name="TugBar tug={28.3}" note="leaning toward the first">
+            <TugBar first={VARGA_SIDE} second={BRANNOCK_SIDE} tug={28.3} said="28.3 toward Varga" />
+          </Specimen>
+          <Specimen name="TugBar tug={100}" note="pulled to the first’s end">
+            <TugBar first={VARGA_SIDE} second={BRANNOCK_SIDE} tug={100} said="100 toward Varga" />
+          </Specimen>
+          <Specimen name="TugBar tug={-100}" note="pulled to the second’s end">
+            <TugBar first={VARGA_SIDE} second={BRANNOCK_SIDE} tug={-100} said="100 toward Brannock" />
+          </Specimen>
+          <Specimen name="TugBar, live" note="held here: drag the slider under it" wide>
+            <LiveTug />
+          </Specimen>
+        </Specimens>
+      </Part>
+
+      <Part title="The happening">
+        <p className="ui-label showcase__lead">
+          The happening going on, over the stage: its aspects’ discs, its name, the seconds it runs, and whom
+          it lights.
+        </p>
+        <Specimens>
+          <Specimen name="HappeningPlate" note="one aspect" wide>
+            <HappeningPlate
+              aspects={[HOLY]}
+              name="Holy"
+              when="second 15 to 30"
+              said="Varga’s Holy matches, ×1.5 · Brannock’s Reason answers its anti-aspect"
+            />
+          </Specimen>
+          <Specimen name="HappeningPlate, two aspects" note="a happening of two, each lighting a house" wide>
+            <HappeningPlate
+              aspects={[VIOLENCE, INDUSTRY]}
+              name="Violence and Industry"
+              when="second 45 to 60"
+              said="Varga’s Violence matches, ×1.5 · Brannock’s Industry matches, ×1.5"
+            />
+          </Specimen>
+          <Specimen name="HappeningPlate, nobody lit" note="a happening no slice matches" wide>
+            <HappeningPlate
+              aspects={[AUTHORITY]}
+              name="Authority"
+              when="second 0 to 20"
+              said="nothing matches"
             />
           </Specimen>
         </Specimens>

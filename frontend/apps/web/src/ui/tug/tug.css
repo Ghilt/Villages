@@ -1,0 +1,127 @@
+/*
+ * The tug bar and the happening plate, both plates of night over a challenge's stage so they read on whatever is
+ * drawn under them. The bar is the two sides' colours as a share, a cream hairline at the middle, what it says riding
+ * the split. Drawn rather than painted for now.
+ */
+
+@layer ui {
+  .ui-tug {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    box-sizing: border-box;
+    min-width: 16rem;
+    padding: 0.2rem 0.7rem 0.45rem;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--ui-night) 88%, transparent);
+    box-shadow: 0 0 0 1px var(--ui-gilt-deep);
+  }
+
+  .ui-tug__said-row {
+    position: relative;
+    height: 1.4rem;
+  }
+
+  .ui-tug__said {
+    position: absolute;
+    left: var(--ui-tug-share);
+    transform: translateX(calc(var(--ui-tug-frac) * -100%));
+    font-size: 1.05rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition:
+      left 0.5s ease,
+      transform 0.5s ease;
+  }
+
+  .ui-tug__row {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+  }
+
+  .ui-tug__side {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .ui-tug__pennant {
+    width: 0.7rem;
+    height: 1rem;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%);
+  }
+
+  .ui-tug__bar {
+    position: relative;
+    flex: 1 1 auto;
+    height: 1.05rem;
+    overflow: hidden;
+    border-radius: 0.55rem;
+    background: var(--ui-tug-second);
+    box-shadow: 0 0 0 1px var(--ui-gilt-light);
+  }
+
+  .ui-tug__first {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: var(--ui-tug-share);
+    background: var(--ui-tug-first);
+    box-shadow: 1px 0 0 color-mix(in srgb, var(--ui-cream) 70%, transparent);
+    transition: width 0.5s ease;
+  }
+
+  .ui-tug__middle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    margin-left: -1px;
+    background: color-mix(in srgb, var(--ui-cream) 75%, transparent);
+  }
+
+  .ui-happening {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    box-sizing: border-box;
+    max-width: 100%;
+    padding: 0.35rem 0.85rem 0.35rem 0.5rem;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--ui-night) 88%, transparent);
+    box-shadow: 0 0 0 1px var(--ui-gilt-deep);
+  }
+
+  .ui-happening__discs {
+    display: inline-flex;
+    flex: none;
+    gap: 3px;
+  }
+
+  .ui-happening__words {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.2;
+  }
+
+  .ui-happening__name {
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+
+  .ui-happening__when {
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--ui-text-soft);
+  }
+
+  .ui-happening__said {
+    font-size: 0.9rem;
+    color: var(--ui-text-soft);
+  }
+}
