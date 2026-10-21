@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { basename, resolve } from 'node:path';
 import { deflateSync } from 'node:zlib';
@@ -20,7 +21,9 @@ import {
   sitesSoFar,
 } from '../src/settlementSites.ts';
 import type { Candidate, RuinPlace, Site } from '../src/settlementSites.ts';
-import { parseSettlements } from '../src/settlements.ts';
+import { SettlementNamer } from '../src/settlementNames.ts';
+import type { Region } from '../src/settlementNames.ts';
+import { parseSettlements, unitsOfKm } from '../src/settlements.ts';
 import { fromWorld, toWorld } from '../src/sphere.ts';
 import { CULTURES, parseStructureCatalogue } from '../src/structures.ts';
 import type { Culture } from '../src/structures.ts';
@@ -143,6 +146,29 @@ const cultureOf = (site: Site): Culture => {
   return cultureAt(cultureFile, cultureBytes, lng, lat) ?? nearestCulture(anchors, lat, lng);
 };
 
+// Each named by its place, in its culture's word for its type: the regions' squares where the names made them.
+const regionsFile = resolve(worldDir, 'regions.bin');
+const namer = new SettlementNamer(
+  names.names,
+  existsSync(regionsFile)
+    ? {
+        columns: names.columns,
+        rows: names.rows,
+        bytes: new Uint8Array(await readFile(regionsFile)),
+        regions: names.regions as readonly Region[],
+      }
+    : null,
+);
+const words = new Map(catalogue.types.map((one) => [one.type, one.words]));
+const nameOf = (site: Site): string => {
+  const [lng, lat] = placeOf(site);
+  return namer.nameOf(
+    { type: site.type, by: site.by, first: site.id.endsWith(':0'), lng, lat },
+    words.get(site.type)![cultureOf(site)],
+  );
+};
+const nameById = new Map(sites.map((site) => [site.id, nameOf(site)]));
+
 const at = new Date().toISOString();
 const out = {
   $comment:
@@ -153,6 +179,7 @@ const out = {
     id: site.id,
     type: site.type,
     level: site.level,
+    name: nameById.get(site.id)!,
     at: placeOf(site),
     by: site.by,
   })),
@@ -175,6 +202,27 @@ say(
     `fishing villages; ${levels['1'] ?? 0} hamlets, ${levels['2'] ?? 0} villages, ${levels['3'] ?? 0} large villages`,
 );
 say(`in ${CULTURES.map((one) => `${cultures[one] ?? 0} ${one}`).join(', ')}`);
+// The names about a few towns, as an atlas of the place would print them.
+for (const id of (flag('near') ?? 'Q71,Q1792').split(',')) {
+  const town = ruins.find((one) => one.id === id);
+  const label = names.names.find((one) => one.id === id)?.name ?? id;
+  if (town === undefined) continue;
+  const about = sites.filter(
+    (one) => Math.hypot(one.x - town.x, one.y - town.y) < unitsOfKm(150, town.y, width),
+  );
+  say(`about ${label}: ${about.map((one) => nameById.get(one.id)).join('; ')}`);
+}
+for (const culture of CULTURES) {
+  const some = sites
+    .filter((one) => cultureOf(one) === culture)
+    .filter((_, at, all) => at % Math.max(1, Math.floor(all.length / 10)) === 0);
+  say(
+    `named in ${culture}: ${some
+      .slice(0, 10)
+      .map((one) => nameById.get(one.id))
+      .join('; ')}`,
+  );
+}
 say(`into ${resolve(groundDir, 'settlements.json')}`);
 
 if (args.includes('--picture')) {
