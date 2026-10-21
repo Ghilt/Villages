@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { quadkeyOf } from '@villages/protocol';
-import { encodeStands } from '@villages/world/build';
+import { encodeRoads, encodeStands, roadKindByte } from '@villages/world/build';
 import type { Stand } from '@villages/world/build';
 
 import {
@@ -71,6 +71,30 @@ describe('the stands the gateway sent', () => {
     followStandsUnder([]);
     expect(sentStandsOf(70, 37, 'ruins')).toBeNull();
     expect(standsHeld('ruins')).toEqual({ tiles: 0, stands: 0 });
+  });
+
+  it('reads a tile of the roads layer as roads, its pieces counted apart from every stand', () => {
+    followStandsUnder([cellInside(70, 37)]);
+    const piece = {
+      ax: 70 * 256 + 10,
+      ay: 37 * 256 + 20,
+      bx: 70 * 256 + 14.5,
+      by: 37 * 256 + 23.25,
+      kind: roadKindByte('road'),
+    };
+    const records = btoa(String.fromCharCode(...encodeRoads([piece], 70, 37, 256, () => 1)));
+    standsArrived(70, 37, records, 'roads');
+
+    const roads = sentStandsOf(70, 37, 'roads')?.roads;
+    expect([roads?.ax[0], roads?.ay[0], roads?.bx[0], roads?.by[0]]).toEqual([
+      piece.ax,
+      piece.ay,
+      piece.bx,
+      piece.by,
+    ]);
+    expect(sentStandsOf(70, 37, 'roads')?.chunk.count).toBe(0);
+    expect(standsHeld('roads')).toEqual({ tiles: 1, stands: 1 });
+    expect(standsHeld()).toEqual({ tiles: 0, stands: 0 });
   });
 
   it('keeps an empty tile as empty, which is all there is, rather than not yet', () => {

@@ -166,7 +166,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   and ruins sort in depth together; it waits for the ruins of the tiles under it and the eight cells about it, and is
   cut again when they change. The pieces are kinds of scenery after the sprite map's own, `ruin:<piece>-<culture>`,
   so the Scenery part says 48 kinds where the sprite map has 16, and its `ruins` row says how many ruined towns are
-  held. The dial thins them with the trees. See `docs/plans/ruined-cities.md`.
+  held. The dial thins them with the trees. See `docs/plans/ruined-cities.md`. Its `roads` row says how many pieces
+  of road the game server sent, the `roads` layer of the same stands, a straight piece a record, by the same rule of
+  the fog: more as more ground is revealed (decision record 0115).
 - The scenery bends in the wind, from zoom 7.5 in, wherever it is drawn: every tree, bush, reed and tuft leans down
   the wind as a gust passes, its foot where it stands and its shadow leaning with it, and its crown turns a little
   paler, as the grass's field does; with no gust it sways a little on its own. How far each kind bends is its own - a
@@ -300,7 +302,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   under **house bots** and how many there are, which the dropdown's hover says too: `switch` signs this browser in as
   the one picked and reloads as them, which is how to look at a world from a seeded house's seat, or a bot's; `load`
   arrives as a save's maker the same way, and both are refused while the instruments are closed. See decision records
-  0101, 0108 and 0111.
+  0101, 0108 and 0111. Under them, while the instruments are open, a line counts the world's settlements as the game
+  server did when this window came: `Settlements: 7,618 standing on the master's 7,674 sites, 52 passed over for a seat,
+  4 on no site` - the last being settlements a repaint left without a site, which nothing moves (decision record 0114).
   What the log says is what was worth saying, through `note(area, message)` in `apps/web/src/log/log.ts`:
   moving the camera about writes nothing, and the cells a move brought back are counted and said in one line
   only when they carried something. `window.villagesPainterly()` gives the paint counters from a console.

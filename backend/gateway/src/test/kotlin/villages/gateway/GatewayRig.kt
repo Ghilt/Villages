@@ -95,6 +95,8 @@ internal class Rig(
     saves: WorldSaves = WorldSaves.NOWHERE,
     /** Which windows the open instruments are open to, by sign-in: every one unless told. */
     instrumentsFor: ((villages.application.SignedIn?) -> Boolean)? = null,
+    /** The world's settlements counted, as the opening would count them: none unless told. */
+    settlements: () -> villages.protocol.SettlementsNow? = { null },
 ) {
     val world = TinyWorld()
     val later = ManualLater()
@@ -136,6 +138,9 @@ internal class Rig(
 
     /** The one master's ruined towns, tile by tile, as `world:ruins` would write them. */
     val ruinsOnDisk = mutableMapOf<Int, ByteArray>()
+
+    /** The one master's roads in pieces, tile by tile, as `world:roads` would write them. */
+    val roadsOnDisk = mutableMapOf<Int, ByteArray>()
 
     /** The structures on the map, folded from the world as the app's are. */
     val structuresOnTheMap = StructuresProjection(world).started()
@@ -201,6 +206,7 @@ internal class Rig(
                     master != "terrain" -> null
                     layer == "biome" -> standsOnDisk[tile] ?: ByteArray(0)
                     layer == "ruins" -> ruinsOnDisk[tile] ?: ByteArray(0)
+                    layer == "roads" -> roadsOnDisk[tile] ?: ByteArray(0)
                     else -> null
                 }
             },
@@ -209,6 +215,7 @@ internal class Rig(
             instrumentsOpen = instrumentsOpen,
             instrumentsFor = instrumentsFor,
             worldKept = worldKept,
+            settlements = settlements,
             catalogues = catalogues,
             saves = saves,
             everyHouse = houses,

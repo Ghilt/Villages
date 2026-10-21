@@ -175,9 +175,9 @@ export const READERS: readonly Reader[] = [
   {
     id: 'folder-stands',
     program: 'server',
-    name: "stands, the scenery's and the ruins'",
+    name: "stands, the scenery's, the ruins' and the roads'",
     where: 'FolderStands.kt',
-    reads: ['stands', 'ruins-stands'],
+    reads: ['stands', 'ruins-stands', 'roads-stands'],
   },
   {
     id: 'folder-ground',

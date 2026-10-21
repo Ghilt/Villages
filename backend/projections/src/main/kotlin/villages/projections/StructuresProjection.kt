@@ -185,6 +185,8 @@ class StructuresProjection(feed: EventFeed) : Follower(feed), StructuresByCell, 
 
     override fun heldBy(house: HouseId): List<StructureRow> = byHolder.of(house).mapNotNull { rows[it]?.row }
 
+    override fun all(): Sequence<StructureRow> = rows.values.asSequence().map { it.row }
+
     override fun of(structure: StructureId): Map<String, List<Content>> = rows[structure]?.row?.slots.orEmpty()
 
     override fun slotOf(character: CharacterId): PlaceInSlot? = people[character]

@@ -87,6 +87,8 @@ const keyOf = (dial: number, spacing: number, cellX: number, cellY: number): str
   `${dial}/${spacing}/${cellX}/${cellY}`;
 
 onStandsArrived((tile, stands, layer) => {
+  // The roads are no cell's to grow from: they are worn into the ground. See decision record 0115.
+  if (layer === 'roads') return;
   const at = layer === 'ruins' ? RUINS_TILE + tile : tile;
   forStands.came(at);
   let stale = false;
@@ -138,6 +140,8 @@ export interface SceneryTally {
   stands: number;
   /** Tiles of the ruins the gateway sent and the page holds, and the ruined towns in them. */
   ruins: { tiles: number; stands: number };
+  /** The roads' tiles held, and the pieces in them. */
+  roads: { tiles: number; stands: number };
 }
 
 /** What the last frame actually drew, put here by the layer so the panel has one thing to read. */
@@ -180,6 +184,7 @@ export function sceneryTally(): SceneryTally {
     points,
     ...standsHeld(),
     ruins: standsHeld('ruins'),
+    roads: standsHeld('roads'),
   };
 }
 

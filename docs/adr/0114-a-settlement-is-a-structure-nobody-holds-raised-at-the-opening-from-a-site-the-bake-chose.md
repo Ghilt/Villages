@@ -53,6 +53,8 @@ held by somebody or nobody, inspected, one day taken.
 - The world's history says which settlements stand, and the bake says where they should. A repaint that leaves a
   settlement without a site never moves it; the opening and the debug panel name such ones, and before alpha a wipe is
   the answer.
+  While the instruments are open the welcome counts them - the sites, the settlements standing on them, those passed
+  over for a seat and those on no site - and the World section of the debug panel says so (protocol version 67).
 - The opening raises a few thousand structures on a fresh world, after a wipe and after a load. Its time is measured
   before the spacing is tightened.
 - A bot's seat and a settlement can want the same ground. The settlements give way at the opening; the bots learn to

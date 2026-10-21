@@ -174,8 +174,7 @@ export const BAKED: readonly Artifact[] = [
     name: 'roads',
     path: 'world/stands/<m>/roads/',
     origin: 'baked',
-    what: 'Every road and bridge cut into pieces the size of a stand; the server will hand out only what the fog shows.',
-    development: 'Read by the game server once the stands channel carries roads, step 17 of the plan.',
+    what: 'Every road and bridge cut into pieces the size of a stand; the server hands out only what the fog shows.',
   },
   {
     id: 'roads-pictures',

@@ -34,6 +34,29 @@ class Settlements(
     /** What an opening did: how many sites there were, how many it raised, and how many it passed over for a seat. */
     data class Opened(val sites: Int, val raised: Int, val passedOver: Int)
 
+    /**
+     * The settlements as the world has them now: how many sites the master has, how many of them a settlement stands on,
+     * how many are passed over for a seat, and how many settlements stand on no site of it, left by a repaint.
+     */
+    data class Tally(val sites: Int, val standing: Int, val passedOver: Int, val orphans: Int)
+
+    /** The settlements counted, as the World section of the debug panel shows them. */
+    fun tally(): Tally {
+        val here = sites()
+        val near = SeatsNear(seats(), clearKm())
+        val ids = here.map { StructureId.ofSettlement(it.id) }.toSet()
+        var stands = 0
+        var passedOver = 0
+        for (site in here) {
+            if (standing.row(StructureId.ofSettlement(site.id)) != null) stands += 1
+            else if (near.within(site.place)) passedOver += 1
+        }
+        val orphans = standing.all().count { row ->
+            row.id !in ids && row.faces.lastOrNull()?.type?.isASettlement == true
+        }
+        return Tally(here.size, stands, passedOver, orphans)
+    }
+
     /** Raises a settlement on every site the world lacks, and says what it did. */
     fun open(): Opened {
         val here = sites()

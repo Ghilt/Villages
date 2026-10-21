@@ -18,6 +18,7 @@ import villages.application.WorldWipe
 import villages.application.fate.WaterAt
 import villages.application.Shelf
 import villages.domain.StructureCatalogue
+import villages.protocol.SettlementsNow
 
 /**
  * What the gateway's own parts are made from, and what its core reads besides its read models: the chronicle and the
@@ -41,6 +42,8 @@ class Mechanics(
     val instrumentsFor: ((SignedIn?) -> Boolean)? = null,
     /** Where the world is kept and what of it cannot be read, which hello and the instruments say. */
     val worldKept: WorldKept = WorldKept.IN_MEMORY,
+    /** The world's settlements counted, which hello says while the instruments are open; none for a world without. */
+    val settlements: () -> SettlementsNow? = { null },
 
     /** The catalogue, for what a structure's slots are and how many places each has; none shows no slots. */
     val structureCatalogue: () -> StructureCatalogue? = { null },

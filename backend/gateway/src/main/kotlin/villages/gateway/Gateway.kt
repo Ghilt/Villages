@@ -70,6 +70,7 @@ class Gateway(
 
     /** Where the world is kept and what of it cannot be read: said at hello, while the instruments are open. */
     private val worldKept = mechanics.worldKept
+    private val settlementsNow = mechanics.settlements
 
     /** What every connection is shown of a structure's slots. */
     private val slotsSeen = SlotsSeen(mechanics.structureCatalogue, mechanics.characterById)
@@ -259,6 +260,7 @@ class Gateway(
                     playerId = who.value.toString(),
                     world = WorldNow(today = today.day, earliest = (houses.earliest() ?: today).day),
                     keptIn = worldKept.keptIn.takeIf { instruments },
+                    settlements = if (instruments) settlementsNow() else null,
                 ),
             )
             parts.forEach { it.greet(this, who) }

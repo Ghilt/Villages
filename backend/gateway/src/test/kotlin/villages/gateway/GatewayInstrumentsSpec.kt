@@ -80,6 +80,19 @@ class GatewayInstrumentsSpec : StringSpec({
         welcomeFrom(Rig()).keptIn shouldBe "in memory, and gone when the server stops"
     }
 
+    "a window is told at hello how many settlements the world has, only while the instruments are open" {
+        val counted = villages.protocol.SettlementsNow(sites = 12, standing = 10, passedOver = 1, orphans = 1)
+        fun welcomeFrom(rig: Rig): Welcome {
+            val sent = mutableListOf<ServerFrame>()
+            rig.connect { sent += it }.receive(hello)
+            return sent.filterIsInstance<Welcome>().single()
+        }
+
+        welcomeFrom(Rig(instrumentsOpen = false, settlements = { counted })).settlements shouldBe null
+        welcomeFrom(Rig(settlements = { counted })).settlements shouldBe counted
+        welcomeFrom(Rig()).settlements shouldBe null
+    }
+
     "a window is told at hello what the world holds that this code cannot read, only while the instruments are open" {
         val oldShapes = object : WorldKept {
             override val keptIn = "in MongoDB, database villages-a-tree, which outlives the server"

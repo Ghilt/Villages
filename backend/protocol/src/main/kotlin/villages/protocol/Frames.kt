@@ -21,7 +21,7 @@ import tools.jackson.databind.JsonNode
  * It goes up whenever a frame or a field changes, and `ProtocolShapeSpec` makes sure of that: every frame's shape
  * is recorded in contracts/protocol-v<n>.txt, and what each version changed is in contracts/README.md.
  */
-const val PROTOCOL_VERSION = 66
+const val PROTOCOL_VERSION = 67
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -110,6 +110,12 @@ data class YourHouseView(
 
 /** Where the world's clock stands: today's world-day, and the earliest day anything is known to exist from. */
 data class WorldNow(val today: Long, val earliest: Long)
+
+/**
+ * The world's settlements counted: the master's sites, the settlements standing on them, the sites passed over for a
+ * seat, and the settlements standing on no site, which a repaint leaves. See decision record 0114.
+ */
+data class SettlementsNow(val sites: Int, val standing: Int, val passedOver: Int, val orphans: Int)
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes(
@@ -244,8 +250,17 @@ class WipeWorld : ClientFrame {
 )
 sealed interface ServerFrame
 
-/** The answer to hello: where the world's clock stands, and where the world is kept while the instruments are open. */
-data class Welcome(val serverTime: Long, val playerId: String, val world: WorldNow, val keptIn: String? = null) : ServerFrame
+/**
+ * The answer to hello: where the world's clock stands, and while the instruments are open where the world is kept and
+ * its settlements counted.
+ */
+data class Welcome(
+    val serverTime: Long,
+    val playerId: String,
+    val world: WorldNow,
+    val keptIn: String? = null,
+    val settlements: SettlementsNow? = null,
+) : ServerFrame
 
 /**
  * What a cell holds, sent on subscribing to it, before any deltas: the people standing in it and the structures in
@@ -268,10 +283,10 @@ data class Snapshot(
 /**
  * The stands of one layer of the sprite map in one zoom 7 tile, `x` across and `y` down, that touch ground the house
  * has revealed: the layer's own records, eight bytes each, in base64, which `StandRecords` reads - the scenery's,
- * `biome`, or the ruined towns of 1790, `ruins`, one of `STAND_LAYERS`. Sent for every layer of every tile under a
+ * `biome`, the ruined towns of 1790, `ruins`, or the roads in pieces, `roads`, one of `STAND_LAYERS`. Sent for every layer of every tile under a
  * held cell from zoom 6 in, once while a held cell stays over it, and again when the house's sight or the fog switch
  * changes what it lets through; empty when nothing there does. What the fog holds back is simply not in it, and
- * nothing says how much. See decision records 0054, 0067 and 0103.
+ * nothing says how much. See decision records 0054, 0067, 0103 and 0115.
  */
 data class StandsFrame(val x: Int, val y: Int, val stands: String, val layer: String = "biome") : ServerFrame
 

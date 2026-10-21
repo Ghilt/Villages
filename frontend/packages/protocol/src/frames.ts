@@ -16,6 +16,7 @@ import {
 } from './choiceFrames';
 import { dialogueViewSchema } from './dialogueFrames';
 import { standsFrameSchema } from './standTiles';
+import { welcomeFrameSchema } from './welcomeFrame';
 import { questCommandSchemas, questViewSchema } from './questFrames';
 import {
   structureArrivedSchema,
@@ -278,15 +279,7 @@ export const deltaSchema = z.discriminatedUnion('type', [
 ]);
 
 export const serverFrameSchema = z.discriminatedUnion('type', [
-  z.object({
-    type: z.literal('welcome'),
-    serverTime: z.number().int(),
-    playerId: z.string(),
-    /** Where the world's clock stands: today, and the earliest day anything is known to exist from. */
-    world: z.object({ today: worldDaySchema, earliest: worldDaySchema }),
-    /** Where the world is kept - in memory, or which database - said only while the instruments are open (0092). */
-    keptIn: z.string().nullable().optional(),
-  }),
+  welcomeFrameSchema,
   /** The player's own house and what only they can see of it. Null when they have none. */
   z.object({ type: z.literal('yourHouse'), yours: yourHouseViewSchema.nullable() }),
   /** What this player has to decide, or null when they have nothing. The parchment's one frame. */

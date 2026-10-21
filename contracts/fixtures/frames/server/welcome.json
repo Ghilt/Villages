@@ -6,5 +6,11 @@
     "today": 454901,
     "earliest": 437635
   },
-  "keptIn": "in MongoDB, database villages, which outlives the server"
+  "keptIn": "in MongoDB, database villages, which outlives the server",
+  "settlements": {
+    "sites": 7674,
+    "standing": 7618,
+    "passedOver": 52,
+    "orphans": 4
+  }
 }

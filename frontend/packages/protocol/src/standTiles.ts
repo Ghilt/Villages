@@ -14,10 +14,11 @@ import { z } from 'zod';
 export const STAND_TILES = 128;
 
 /**
- * The layers of the sprite map whose stands the gateway sends: the scenery's own, `biome`, and the towns of 1790 laid
- * in ruins, `ruins`, a stand a town. A stands frame says which it carries. See decision records 0067 and 0103.
+ * The layers of the sprite map whose stands the gateway sends: the scenery's own, `biome`, the towns of 1790 laid in
+ * ruins, `ruins`, a stand a town, and the roads, `roads`, a straight piece a record, which `decodeRoads` reads. A stands
+ * frame says which it carries. See decision records 0067, 0103 and 0115.
  */
-export const STAND_LAYERS = ['biome', 'ruins'] as const;
+export const STAND_LAYERS = ['biome', 'ruins', 'roads'] as const;
 export type StandLayer = (typeof STAND_LAYERS)[number];
 
 /**

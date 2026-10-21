@@ -17,11 +17,12 @@ const val STAND_TILE_MARGIN = 16.0
 const val STAND_TILES = StandRecords.WORLD_UNITS / StandRecords.TILE_UNITS
 
 /**
- * The layers of the sprite map whose stands the gateway sends: the scenery's own, `biome`, and the towns of 1790
- * laid in ruins, `ruins`, a stand a town. A stands frame says which it carries, and a layer is only ever one of these:
- * a name from a page never picks a folder. See decision records 0067 and 0103.
+ * The layers of the sprite map whose stands the gateway sends: the scenery's own, `biome`, the towns of 1790 laid in
+ * ruins, `ruins`, a stand a town, and the roads, `roads`, a straight piece a record. A stands frame says which it
+ * carries, and a layer is only ever one of these: a name from a page never picks a folder. See decision records 0067,
+ * 0103 and 0115.
  */
-val STAND_LAYERS = listOf("biome", "ruins")
+val STAND_LAYERS = listOf("biome", "ruins", "roads")
 
 /**
  * The zoom 7 tiles whose stands a held cell wants, each as `y * STAND_TILES + x`: the tiles the cell lies in and

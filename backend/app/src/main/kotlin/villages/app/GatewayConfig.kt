@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import villages.application.Antarctica
 import villages.application.Faults
+import villages.application.Opening
 import villages.application.ScheduledLater
 import villages.application.Stands
 import villages.application.WorldClock
@@ -22,6 +23,7 @@ import villages.projections.CharactersProjection
 import villages.projections.HousesProjection
 import villages.projections.RecentEventsProjection
 import villages.projections.StructuresProjection
+import villages.protocol.SettlementsNow
 import java.time.Clock
 import java.util.concurrent.ExecutorService
 
@@ -59,6 +61,7 @@ class GatewayConfig {
         own: List<GatewayMechanic>,
         @Value("\${villages.instruments:true}") instruments: Boolean,
         gate: InstrumentsGate,
+        opening: Opening,
     ): Gateway = Gateway(
         faults = faults,
         houses = houses,
@@ -77,6 +80,9 @@ class GatewayConfig {
             instrumentsOpen = instruments,
             instrumentsFor = gate.takeIf { it.forSome }?.let { it::openTo },
             worldKept = world,
+            settlements = {
+                opening.settlementsTally()?.let { SettlementsNow(it.sites, it.standing, it.passedOver, it.orphans) }
+            },
 
             structureCatalogue = { shelf.structures },
             catalogues = shelf,

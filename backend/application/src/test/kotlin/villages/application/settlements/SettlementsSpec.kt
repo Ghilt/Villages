@@ -4,12 +4,14 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import villages.application.Provenance
 import villages.application.StructureChange
+import villages.application.StructureFace
 import villages.application.StructureCommandExecutor
 import villages.application.StructureRow
 import villages.application.StructuresByCell
 import villages.domain.HouseId
 import villages.domain.Location
 import villages.domain.RaiseStructure
+import villages.domain.Significance
 import villages.domain.StructureCommand
 import villages.domain.StructureError
 import villages.domain.StructureId
@@ -41,6 +43,9 @@ class SettlementsSpec : StringSpec({
     class Standing(private val store: Raised) : StructuresByCell {
         var heard = emptySet<StructureId>()
 
+        /** Settlements standing on no site of the master, as a repaint leaves them. */
+        val strays = mutableListOf<StructureRow>()
+
         fun catchUp() {
             heard = store.commands.map { it.structureId }.toSet()
         }
@@ -51,6 +56,8 @@ class SettlementsSpec : StringSpec({
         override fun inCell(cell: String, everything: Boolean): List<StructureRow> = emptyList()
 
         override fun heldBy(house: HouseId): List<StructureRow> = emptyList()
+
+        override fun all(): Sequence<StructureRow> = heard.asSequence().mapNotNull { row(it) } + strays.asSequence()
 
         override fun asOf(): Long = 0
 
@@ -98,5 +105,17 @@ class SettlementsSpec : StringSpec({
 
         opening(store, Standing(store), listOf(castle)).open() shouldBe Settlements.Opened(sites = 2, raised = 1, passedOver = 1)
         store.commands.map { it.name } shouldBe listOf("fishing village on the Lake of Geneva")
+    }
+
+    "counts the sites, the settlements standing on them, those passed over, and those standing on no site" {
+        val store = Raised()
+        val standing = Standing(store)
+        val settlements = opening(store, standing, listOf(Location(54.43, 18.72)))
+        settlements.open()
+        standing.catchUp()
+        val face = StructureFace(StructureType.VILLAGE, 1, null, Significance(6.0), WorldTime(653_705), 1)
+        standing.strays += StructureRow(StructureId.ofSettlement("site:1:1"), "a village", Location(1.0, 1.0), listOf(face))
+
+        settlements.tally() shouldBe Settlements.Tally(sites = 2, standing = 1, passedOver = 1, orphans = 1)
     }
 })

@@ -62,6 +62,7 @@ function aName(): string {
 export function WorldSection({ map }: WorldSectionProps) {
   const connection = useStore(sessionStore, (state) => state.connection);
   const everything = useStore(sessionStore, (state) => state.seeAll);
+  const settlements = useStore(sessionStore, (state) => state.settlements);
   const [naming, setNaming] = useState(false);
 
   /** Founds this player's one house, here. Pressed twice, the second is refused: you have a house. */
@@ -167,6 +168,16 @@ export function WorldSection({ map }: WorldSectionProps) {
         }}
         onClose={() => setNaming(false)}
       />
+      {settlements !== null && (
+        <p
+          className="debug__quiet"
+          title="the world's villages and fishing villages, as the game server counted them when this window came"
+        >
+          Settlements: {settlements.standing.toLocaleString()} standing on the master's{' '}
+          {settlements.sites.toLocaleString()} sites, {settlements.passedOver.toLocaleString()} passed over
+          for a seat, {settlements.orphans.toLocaleString()} on no site
+        </p>
+      )}
       <p className="debug__quiet">
         The events log is at <a href={EVENTS_LOG}>{EVENTS_LOG}</a>, every inspect view at{' '}
         <a href="/admin">/admin</a>

@@ -71,6 +71,9 @@ interface StructuresByCell {
     /** Every structure [house] holds now, wherever it stands: its holdings, which its player is sent. */
     fun heldBy(house: HouseId): List<StructureRow>
 
+    /** Every structure there is, wherever it stands and whoever holds it: what a tally of the world counts. */
+    fun all(): Sequence<StructureRow>
+
     /** How many changes the read model has applied. Monotonic, and only ever compared with a face's stamp. */
     fun asOf(): Long
 

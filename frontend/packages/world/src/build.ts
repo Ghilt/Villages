@@ -25,6 +25,7 @@ export {
   thicknessAt,
 } from './stands.ts';
 export type { Stand, Thickness } from './stands.ts';
+export { bridgeKindByte, encodeRoads, roadKindByte } from './roadRecords.ts';
 export {
   biomeProblems,
   chooseBiome,

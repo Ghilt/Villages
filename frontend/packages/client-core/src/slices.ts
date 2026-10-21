@@ -79,6 +79,11 @@ export interface SessionState {
   /** Where the world's clock stands, as welcome said, or null until it has. */
   world: { today: number; earliest: number } | null;
   /**
+   * The world's settlements counted, as welcome said while the instruments are open, or null: the master's sites, the
+   * settlements standing on them, the sites passed over for a seat, and the settlements on no site. See 0114.
+   */
+  settlements: { sites: number; standing: number; passedOver: number; orphans: number } | null;
+  /**
    * Whether this window has asked to see everything: every house in the cells it holds, whatever its
    * significance, which is Adam's switch and not the player's eye. Off at every load. See decision record 0038.
    */
@@ -129,17 +134,18 @@ const forgottenWhenTakenOver =
 
 const SLICES = {
   connection: {
-    initial: { connection: 'connecting', playerId: undefined, world: null },
+    initial: { connection: 'connecting', playerId: undefined, world: null, settlements: null },
     onFrame: {
       welcome: (state, frame) => ({
         ...state,
         connection: 'open',
         playerId: frame.playerId,
         world: frame.world,
+        settlements: frame.settlements ?? null,
       }),
     },
     onReset: (state, cause) => ({ ...state, connection: cause }),
-  } satisfies Slice<'connection' | 'playerId' | 'world'>,
+  } satisfies Slice<'connection' | 'playerId' | 'world' | 'settlements'>,
 
   /** The cells followed and what is in them, which the map draws. Gone with any end: nobody is updating them. */
   cells: {

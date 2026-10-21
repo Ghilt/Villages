@@ -84,14 +84,17 @@ class FolderStandsTest {
     @Test
     fun `each layer is read from its own folder, and a layer it does not know is never looked for`(@TempDir masters: Path) {
         val ruins = ByteArray(8) { (it + 100).toByte() }
+        val roads = ByteArray(16) { (it + 40).toByte() }
         furnish(masters, "terrain", mapOf((70 to 37) to someStands))
         furnish(masters, "terrain", mapOf((70 to 37) to ruins), "ruins")
+        furnish(masters, "terrain", mapOf((70 to 37) to roads), "roads")
         Files.createDirectories(masters.resolve("terrain").resolve("secrets"))
         Files.writeString(masters.resolve("terrain").resolve("secrets").resolve("stands.json"), "{}")
         val stands = FolderStands(masters)
 
         assertArrayEquals(someStands, stands.of("terrain", "biome", 70, 37))
         assertArrayEquals(ruins, stands.of("terrain", "ruins", 70, 37))
+        assertArrayEquals(roads, stands.of("terrain", "roads", 70, 37))
         assertNull(stands.of("terrain", "secrets", 70, 37))
         assertNull(stands.of("terrain", "../terrain/biome", 70, 37))
     }

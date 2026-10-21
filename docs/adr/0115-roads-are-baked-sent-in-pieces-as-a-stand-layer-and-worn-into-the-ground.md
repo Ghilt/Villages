@@ -31,8 +31,8 @@ its roads would change as the fog lifted. A road can also be long, far longer th
   says the river is small enough. A long span is stone, a short one timber.
 - **A road is cut into straight pieces that fit the stands' eight bytes**: a middle in eighths of a unit, a reach of half
   its length and width, the half-vector to one end, and a kind - its grade, or a bridge's axis and kind. They are the
-  `roads` layer of the stands, sent by the gateway's test of the fog unchanged; the protocol's version goes up once for
-  the layer's name.
+  `roads` layer of the stands, sent by the gateway's test of the fog unchanged; the protocol's version goes up once, to
+  67, for the layer's name.
 - **The page wears a road into the worked ground**, a kind of its own, only on revealed ground and clipped there a
   diamond at a time; no tree grows on it. A bridge stands among the trees on the strip of its deck, its picture chosen by
   its axis and kind.

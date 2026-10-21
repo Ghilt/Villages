@@ -18,6 +18,9 @@ class Opening(
     /** What an opening did: how many house bots it asked for, and what it did about the settlements. */
     data class Opened(val bots: Int, val settlements: Settlements.Opened?)
 
+    /** The settlements as the world has them now, or null for a world opened without them. */
+    fun settlementsTally(): Settlements.Tally? = settlements?.tally()
+
     /** Opens the world, and says what it did. */
     fun open(): Opened {
         recordCatalogues()

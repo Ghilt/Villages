@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -13,7 +15,35 @@ import {
 const TILE = 256;
 const width = () => 1.5;
 
+interface Fixture {
+  tileUnits: number;
+  tile: { x: number; y: number };
+  records: string;
+  pieces: { ax: number; ay: number; bx: number; by: number; kind: number }[];
+}
+const fixture = JSON.parse(
+  readFileSync(new URL('../../../../contracts/fixtures/roads.json', import.meta.url), 'utf8'),
+) as Fixture;
+
 describe("a road's records", () => {
+  it('decode to the pieces the shared fixture lists, and encode back to its bytes', () => {
+    const records = new Uint8Array(Buffer.from(fixture.records, 'base64'));
+    const chunk = decodeRoads(records, fixture.tile.x, fixture.tile.y, fixture.tileUnits);
+    expect(chunk.count).toBe(fixture.pieces.length);
+    fixture.pieces.forEach((piece, at) => {
+      expect([chunk.ax[at], chunk.ay[at], chunk.bx[at], chunk.by[at], chunk.kind[at]]).toEqual([
+        piece.ax,
+        piece.ay,
+        piece.bx,
+        piece.by,
+        piece.kind,
+      ]);
+    });
+    const widths = (kind: number) => (kind === roadKindByte('track') ? 0.7 : 1);
+    const written = encodeRoads(fixture.pieces, fixture.tile.x, fixture.tile.y, fixture.tileUnits, widths);
+    expect(Buffer.from(written).toString('base64')).toBe(fixture.records);
+  });
+
   it('reads both ends of every piece back exactly, the long ones cut short enough', () => {
     const run = [
       { x: 1000.25, y: 2049.5 },

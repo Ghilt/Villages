@@ -167,7 +167,7 @@ class GatewayStandsSpec : StringSpec({
 
         recordsOf(sent.standsOf("biome").single()) shouldBe atTheSeat.toList()
         recordsOf(sent.standsOf("ruins").single()) shouldBe justOutside.toList()
-        sent.filterIsInstance<StandsFrame>().map { it.layer }.toSet() shouldBe setOf("biome", "ruins")
+        sent.filterIsInstance<StandsFrame>().map { it.layer }.toSet() shouldBe setOf("biome", "ruins", "roads")
 
         rig.ruinsOnDisk.clear()
         val (other, toldOther) = rig.introduced(token = UUID.randomUUID().toString(), master = "terrain")
@@ -175,6 +175,21 @@ class GatewayStandsSpec : StringSpec({
         toldOther.clear()
         other.receive(subscribe(STOCKHOLM_Z10))
         toldOther.standsOf("ruins").single().stands shouldBe ""
+    }
+
+    "a tile's roads are sent in pieces beside its ruins, a piece as far as the fog lets it through" {
+        val rig = Rig()
+        rig.roadsOnDisk[STOCKHOLM_TILE] = justOutside + farOff
+        val (mine, sent) = rig.introduced(master = "terrain")
+        mine.receive(founding())
+        rig.settle()
+        sent.clear()
+
+        mine.receive(subscribe(STOCKHOLM_Z10))
+
+        // A piece is a middle and a reach to the fog, as a stand is: the one within reach goes, the far one does not.
+        recordsOf(sent.standsOf("roads").single()) shouldBe justOutside.toList()
+        sent.standsOf("ruins").single().stands shouldBe ""
     }
 
     "a cell too coarse for the scenery to be drawn in brings no stands" {
