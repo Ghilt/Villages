@@ -7,6 +7,21 @@ import java.time.Instant
  * what a person reads in their inbox. Plain text, short, and saying what to do. See docs/plans/accounts.md.
  */
 object Letters {
+    /** To an account's email, with the link that verifies it. */
+    fun verify(to: String, link: String, at: Instant) = Mail(
+        to = to,
+        subject = "Verify your Villages email",
+        text = """
+            |This address was given to a Villages account. Open the link to say that it is yours:
+            |
+            |$link
+            |
+            |It works once, for a day. If you did not make an account, nothing will happen if you leave this be.
+        """.trimMargin(),
+        link = link,
+        sent = at,
+    )
+
     /** To an address somebody tried to make an account with, when it has one already. */
     fun alreadyAnAccount(to: String, at: Instant) = Mail(
         to = to,

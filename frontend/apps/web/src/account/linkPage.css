@@ -1,0 +1,13 @@
+/* A page a mailed link opens: its one box in the middle of the night, at a dialog's width. See LinkPage.tsx. */
+.link-page {
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding: var(--ui-space-4);
+  background: var(--ui-night);
+}
+
+.link-page > * {
+  width: min(32rem, 100%);
+}

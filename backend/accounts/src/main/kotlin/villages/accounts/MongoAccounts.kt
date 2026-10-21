@@ -15,6 +15,7 @@ import villages.application.SignInId
 import villages.domain.PlayerId
 import java.util.Date
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 /**
  * The stores in the tree's own MongoDB, in the database its world is kept in, so a sign-in outlasts a restart of the
@@ -36,6 +37,11 @@ class MongoAccounts(connection: String, val database: String) : AccountStores {
             Indexes.ascending("email"),
             IndexOptions().unique(true).partialFilterExpression(Filters.exists("email")),
         )
+    }
+
+    private val linkRows: MongoCollection<Document> = client.getDatabase(database).getCollection(MAIL_LINKS).also {
+        // MongoDB deletes a link once its end has passed, so the ones never opened do not pile up.
+        it.createIndex(Indexes.ascending("ends"), IndexOptions().expireAfter(0L, TimeUnit.SECONDS))
     }
 
     override val signIns: SignInStore = object : SignInStore {
@@ -81,6 +87,18 @@ class MongoAccounts(connection: String, val database: String) : AccountStores {
             }
     }
 
+    override val links: MailLinkStore = object : MailLinkStore {
+        override fun put(link: MailLink) {
+            linkRows.replaceOne(eq("_id", link.hash), link.row(), ReplaceOptions().upsert(true))
+        }
+
+        override fun take(hash: String): MailLink? = linkRows.findOneAndDelete(eq("_id", hash))?.link()
+
+        override fun forget(player: PlayerId, kind: LinkKind) {
+            linkRows.deleteMany(Filters.and(eq("player", player.value.toString()), eq("kind", kind.name)))
+        }
+    }
+
     override val keptIn: String = "in MongoDB, database $database"
 
     override fun close() = client.close()
@@ -88,6 +106,7 @@ class MongoAccounts(connection: String, val database: String) : AccountStores {
     private companion object {
         const val SIGN_INS = "signIns"
         const val PLAYERS = "players"
+        const val MAIL_LINKS = "mailLinks"
     }
 }
 
@@ -129,4 +148,19 @@ private fun Document.player() = PlayerRecord(
     email = getString("email"),
     verified = getBoolean("verified", false),
     password = getString("password"),
+)
+
+private fun MailLink.row() = Document()
+    .append("_id", hash)
+    .append("kind", kind.name)
+    .append("player", player.value.toString())
+    .append("email", email)
+    .append("ends", Date.from(ends))
+
+private fun Document.link() = MailLink(
+    hash = getString("_id"),
+    kind = LinkKind.valueOf(getString("kind")),
+    player = PlayerId(UUID.fromString(getString("player"))),
+    email = getString("email"),
+    ends = getDate("ends").toInstant(),
 )

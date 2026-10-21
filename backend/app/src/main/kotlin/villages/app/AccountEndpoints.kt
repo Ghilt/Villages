@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import villages.accounts.Accounts
+import villages.accounts.Asking
 import villages.accounts.Entering
 import villages.accounts.Keeping
 import villages.accounts.Making
@@ -31,7 +32,7 @@ class AccountEndpoints(private val accounts: Accounts, private val cookie: SignI
     @PostMapping("/signup")
     fun signUp(request: HttpServletRequest, response: HttpServletResponse, @RequestBody asked: EmailAsked): ResponseEntity<Any> {
         val current = currentOf(request)
-        return when (val made = accounts.makeAccount(asked.email, asked.password, keepingOf(asked), browserOf(request), current, request.remoteAddr)) {
+        return when (val made = accounts.makeAccount(asked.email, asked.password, keepingOf(asked), current, askingOf(request))) {
             is Making.Made -> {
                 cookie.write(response, request, made.begun.secret, made.begun.signIn.keeping)
                 ResponseEntity.ok(Me.of(made.begun.signIn, accounts.recordOf(made.begun.signIn.player)))
@@ -44,7 +45,7 @@ class AccountEndpoints(private val accounts: Accounts, private val cookie: SignI
     /** This browser signed in to the account the email is kept under, if the password is its. */
     @PostMapping("/signin")
     fun signIn(request: HttpServletRequest, response: HttpServletResponse, @RequestBody asked: EmailAsked): ResponseEntity<Any> =
-        when (val entering = accounts.signInWith(asked.email, asked.password, keepingOf(asked), browserOf(request), currentOf(request), request.remoteAddr)) {
+        when (val entering = accounts.signInWith(asked.email, asked.password, keepingOf(asked), currentOf(request), askingOf(request))) {
             is Entering.In -> {
                 cookie.write(response, request, entering.begun.secret, entering.begun.signIn.keeping)
                 ResponseEntity.ok(Me.of(entering.begun.signIn, accounts.recordOf(entering.begun.signIn.player)))
@@ -64,12 +65,39 @@ class AccountEndpoints(private val accounts: Accounts, private val cookie: SignI
         return Me.NOBODY
     }
 
+    /** The email a mailed link was sent to, verified, if the link's secret is one that has not been used or ended. */
+    @PostMapping("/verify")
+    fun verify(@RequestBody asked: SecretAsked): ResponseEntity<Any> =
+        if (accounts.verify(asked.secret)) {
+            ResponseEntity.ok(mapOf("verified" to true))
+        } else {
+            ResponseEntity.badRequest().body(refused("linkUsedOrOld"))
+        }
+
+    /** The link that verifies this browser's account's email mailed again, only the newest working. */
+    @PostMapping("/verify/again")
+    fun verifyAgain(request: HttpServletRequest): ResponseEntity<Any> {
+        val current = currentOf(request) ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(refused("notSignedIn"))
+        return if (accounts.mailVerifyingAgain(current, askingOf(request))) {
+            ResponseEntity.ok(mapOf("mailed" to true))
+        } else {
+            ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(refused("tooMany"))
+        }
+    }
+
     private fun currentOf(request: HttpServletRequest) = cookie.read(request)?.let(accounts.signIns::find)
+
+    /** Where the request came from: its browser, its address, and the page that sent it, which a mailed link opens. */
+    private fun askingOf(request: HttpServletRequest) =
+        Asking(browserOf(request), request.remoteAddr, request.getHeader("Origin") ?: "http://localhost")
 
     private fun keepingOf(asked: EmailAsked) = if (asked.remember) Keeping.REMEMBERED else Keeping.FOR_NOW
 
     private fun browserOf(request: HttpServletRequest) = browserOf(request.getHeader("User-Agent"))
 }
+
+/** A mailed link's secret, as the page it opened sends it on. */
+data class SecretAsked(val secret: String)
 
 /** An email and a password, as a form sends them, and whether to remember this browser: ticked unless unticked. */
 data class EmailAsked(val email: String, val password: String, val remember: Boolean = true)

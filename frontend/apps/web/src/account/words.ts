@@ -12,6 +12,8 @@ const SAID: Record<string, string> = {
   notThatPassword: 'That email and password are not an account’s.',
   tooMany: 'Too many tries. Wait a quarter of an hour and try again.',
   notSignedIn: 'This browser is not signed in.',
+  linkUsedOrOld:
+    'This link has been used already, or it is older than it lasts. Ask for a new one from the settings.',
 };
 
 /** What [refusal], thrown by `net/auth.ts`, says to a player. */

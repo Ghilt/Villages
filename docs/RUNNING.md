@@ -1105,7 +1105,11 @@ and `-- --drop` takes them off; by hand only.
   the page again as the account. A password manager offers to fill both and to save what is made. What is wrong is
   said under its field in the game's words: not an email, too short, one of the commonest, the email itself, not an
   account's, or too many tries. An email that has an account already is mailed to say so, and the form says a mail is
-  on its way; the mail is in the Accounts section's outbox. Signed in, Account says the email, and **Log out** at the
+  on its way; the mail is in the Accounts section's outbox. A made account is mailed a link to verify its email, in
+  the outbox too: it opens **`/account/verify`**, a page of its own with nothing of the game behind it, whose *Verify
+  it* verifies the email once - pressed, because a mail scanner opens a link before a person does - and says so; a
+  link used already, or a day old, says to ask for a new one. Until then Account says *Not verified yet*, with *Send it
+  again*, three times an hour, the newest link the only one that works. Signed in, Account says the email, and **Log out** at the
   foot ends the sign-in on the server and dims the window under **Signed out**, whose *Sign in* signs in again there.
   **The world moving** is
   *As my device asks*, *Still* or *Moving*: still holds the clouds, the water, the creatures, the trees and the grass

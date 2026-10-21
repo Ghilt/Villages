@@ -75,10 +75,31 @@ interface PlayerStore {
     fun claim(record: PlayerRecord): Boolean
 }
 
+/** What a mailed link is for: verifying an email, or choosing a new password. */
+enum class LinkKind { VERIFY, RESET }
+
+/**
+ * A link mailed to [email], for [player], which works once and until [ends]. The mail carries its secret; this keeps
+ * only the secret's hash, as a sign-in does, so a copy of the store opens nobody's link.
+ */
+data class MailLink(val hash: String, val kind: LinkKind, val player: PlayerId, val email: String, val ends: Instant)
+
+/** Where the mailed links are kept: in memory, or in the tree's own MongoDB. */
+interface MailLinkStore {
+    fun put(link: MailLink)
+
+    /** The link [hash] is, taken out of the store as it is read, so it works once however many ask at once. */
+    fun take(hash: String): MailLink?
+
+    /** Every link of [kind] of [player]'s gone, so only the newest mailed works. */
+    fun forget(player: PlayerId, kind: LinkKind)
+}
+
 /** The accounts' stores, together, as one thing that is opened and closed. */
 interface AccountStores : AutoCloseable {
     val signIns: SignInStore
     val players: PlayerStore
+    val links: MailLinkStore
 
     /** Where they are kept, as the debug panel says it. */
     val keptIn: String
@@ -120,6 +141,20 @@ class InMemoryAccounts : AccountStores {
             if (records.values.any { it.email == record.email && it.player != record.player }) return false
             records[record.player] = record
             return true
+        }
+    }
+
+    override val links: MailLinkStore = object : MailLinkStore {
+        private val byHash = ConcurrentHashMap<String, MailLink>()
+
+        override fun put(link: MailLink) {
+            byHash[link.hash] = link
+        }
+
+        override fun take(hash: String): MailLink? = byHash.remove(hash)
+
+        override fun forget(player: PlayerId, kind: LinkKind) {
+            byHash.values.removeIf { it.player == player && it.kind == kind }
         }
     }
 

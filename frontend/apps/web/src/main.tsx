@@ -47,7 +47,18 @@ window.addEventListener('pageshow', (event) => {
  * bundle (0091).
  */
 const inspecting = inspectViewAt(window.location.pathname);
-if (isInspectIndex(window.location.pathname)) {
+if (window.location.pathname.startsWith('/account/')) {
+  // A page a mailed link opens: verifying an email, or choosing a new password. Fetched, as the inspect pages are,
+  // so none of it is in the game's bundle. See docs/plans/accounts.md.
+  document.title = 'Villages: your account';
+  void import('./account/LinkPage').then(({ LinkPage }) =>
+    root.render(
+      <StrictMode>
+        <LinkPage path={window.location.pathname} />
+      </StrictMode>,
+    ),
+  );
+} else if (isInspectIndex(window.location.pathname)) {
   document.title = 'Villages: inspect';
   void import('./admin/InspectIndex').then(({ InspectIndex }) =>
     root.render(

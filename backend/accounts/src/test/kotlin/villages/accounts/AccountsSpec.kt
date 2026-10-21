@@ -51,7 +51,7 @@ class AccountsWithPasswordsSpec : StringSpec({
         val accounts = accounts()
         val guest = accounts.newcomer("Chrome on Windows")
 
-        val made = accounts.makeAccount("Ada@Example.com", password, Keeping.REMEMBERED, "Chrome on Windows", guest.signIn, "here")
+        val made = accounts.makeAccount("Ada@Example.com", password, Keeping.REMEMBERED, guest.signIn, Asking("Chrome on Windows", "here", "http://localhost:5548"))
 
         made.shouldBeInstanceOf<Making.Made>().begun.signIn.player shouldBe guest.signIn.player
         made.begun.secret shouldNotBe guest.secret
@@ -64,12 +64,12 @@ class AccountsWithPasswordsSpec : StringSpec({
     "an email with an account already is mailed to say so, and nothing else changes" {
         val outbox = Outbox()
         val accounts = accounts(outbox)
-        accounts.makeAccount("ada@example.com", password, Keeping.REMEMBERED, "Chrome on Windows", null, "here")
+        accounts.makeAccount("ada@example.com", password, Keeping.REMEMBERED, null, Asking("Chrome on Windows", "here", "http://localhost:5548"))
         val other = accounts.newcomer("Firefox on Linux")
 
-        accounts.makeAccount("ADA@example.com", "another quiet river", Keeping.REMEMBERED, "Firefox on Linux", other.signIn, "there") shouldBe
+        accounts.makeAccount("ADA@example.com", "another quiet river", Keeping.REMEMBERED, other.signIn, Asking("Firefox on Linux", "there", "http://localhost:5548")) shouldBe
             Making.Taken
-        outbox.mail().single().subject shouldBe "You already have a Villages account"
+        outbox.mail().map { it.subject } shouldBe listOf("Verify your Villages email", "You already have a Villages account")
         accounts.who(other.secret)?.guest shouldBe true
     }
 
@@ -77,22 +77,22 @@ class AccountsWithPasswordsSpec : StringSpec({
         val accounts = accounts()
         val guest = accounts.newcomer("Chrome on Windows")
 
-        accounts.makeAccount("ada@example.com", "too short", Keeping.REMEMBERED, "Chrome", guest.signIn, "here") shouldBe Making.Refused("short")
-        accounts.makeAccount("not an email", password, Keeping.REMEMBERED, "Chrome", guest.signIn, "here") shouldBe Making.Refused("notAnEmail")
+        accounts.makeAccount("ada@example.com", "too short", Keeping.REMEMBERED, guest.signIn, Asking("Chrome", "here", "http://localhost:5548")) shouldBe Making.Refused("short")
+        accounts.makeAccount("not an email", password, Keeping.REMEMBERED, guest.signIn, Asking("Chrome", "here", "http://localhost:5548")) shouldBe Making.Refused("notAnEmail")
         accounts.who(guest.secret)?.guest shouldBe true
     }
 
     "the right password signs a browser in, leaving whatever it was before; a wrong one and a stranger are answered alike" {
         val accounts = accounts()
-        val made = accounts.makeAccount("ada@example.com", password, Keeping.REMEMBERED, "Chrome", null, "here")
+        val made = accounts.makeAccount("ada@example.com", password, Keeping.REMEMBERED, null, Asking("Chrome", "here", "http://localhost:5548"))
             .shouldBeInstanceOf<Making.Made>()
         val guest = accounts.newcomer("Firefox on Linux")
 
-        accounts.signInWith("ada@example.com", "a long and quiet rivet", Keeping.FOR_NOW, "Firefox", guest.signIn, "there") shouldBe
+        accounts.signInWith("ada@example.com", "a long and quiet rivet", Keeping.FOR_NOW, guest.signIn, Asking("Firefox", "there", "http://localhost:5548")) shouldBe
             Entering.NotThatPassword
-        accounts.signInWith("nobody@example.com", password, Keeping.FOR_NOW, "Firefox", guest.signIn, "there") shouldBe
+        accounts.signInWith("nobody@example.com", password, Keeping.FOR_NOW, guest.signIn, Asking("Firefox", "there", "http://localhost:5548")) shouldBe
             Entering.NotThatPassword
-        val entered = accounts.signInWith(" Ada@example.com", password, Keeping.FOR_NOW, "Firefox", guest.signIn, "there")
+        val entered = accounts.signInWith(" Ada@example.com", password, Keeping.FOR_NOW, guest.signIn, Asking("Firefox", "there", "http://localhost:5548"))
             .shouldBeInstanceOf<Entering.In>()
 
         entered.begun.signIn.player shouldBe made.begun.signIn.player
@@ -103,12 +103,46 @@ class AccountsWithPasswordsSpec : StringSpec({
     "five wrong passwords for one email are a quarter of an hour's wait, even with the right one" {
         val clock = HandClock()
         val accounts = accounts(clock = clock)
-        accounts.makeAccount("ada@example.com", password, Keeping.REMEMBERED, "Chrome", null, "here")
+        accounts.makeAccount("ada@example.com", password, Keeping.REMEMBERED, null, Asking("Chrome", "here", "http://localhost:5548"))
 
-        repeat(5) { accounts.signInWith("ada@example.com", "wrong guess $it", Keeping.REMEMBERED, "Chrome", null, "there") }
+        repeat(5) { accounts.signInWith("ada@example.com", "wrong guess $it", Keeping.REMEMBERED, null, Asking("Chrome", "there", "http://localhost:5548")) }
 
-        accounts.signInWith("ada@example.com", password, Keeping.REMEMBERED, "Chrome", null, "there") shouldBe Entering.TooMany
+        accounts.signInWith("ada@example.com", password, Keeping.REMEMBERED, null, Asking("Chrome", "there", "http://localhost:5548")) shouldBe Entering.TooMany
         clock.pass(java.time.Duration.ofMinutes(15))
-        accounts.signInWith("ada@example.com", password, Keeping.REMEMBERED, "Chrome", null, "there").shouldBeInstanceOf<Entering.In>()
+        accounts.signInWith("ada@example.com", password, Keeping.REMEMBERED, null, Asking("Chrome", "there", "http://localhost:5548")).shouldBeInstanceOf<Entering.In>()
+    }
+
+    "a made account is mailed a link under the page that asked, which verifies its email once, and only for a day" {
+        val outbox = Outbox()
+        val clock = HandClock()
+        val accounts = accounts(outbox, clock)
+        val made = accounts.makeAccount("ada@example.com", password, Keeping.REMEMBERED, null, Asking("Chrome", "here", "http://localhost:5548"))
+            .shouldBeInstanceOf<Making.Made>()
+        val link = outbox.mail().single().link!!
+
+        link.substringBefore('#') shouldBe "http://localhost:5548/account/verify"
+        accounts.verify(link.substringAfter('#')) shouldBe true
+        accounts.recordOf(made.begun.signIn.player)?.verified shouldBe true
+        accounts.verify(link.substringAfter('#')) shouldBe false
+
+        val later = accounts.makeAccount("babbage@example.com", password, Keeping.REMEMBERED, null, Asking("Chrome", "here", "http://localhost:5548"))
+            .shouldBeInstanceOf<Making.Made>()
+        clock.pass(java.time.Duration.ofHours(24))
+        accounts.verify(outbox.mail().last().link!!.substringAfter('#')) shouldBe false
+        accounts.recordOf(later.begun.signIn.player)?.verified shouldBe false
+    }
+
+    "a verifying link mailed again is the only one that works, three times an hour at most" {
+        val outbox = Outbox()
+        val accounts = accounts(outbox)
+        val made = accounts.makeAccount("ada@example.com", password, Keeping.REMEMBERED, null, Asking("Chrome", "here", "http://localhost:5548"))
+            .shouldBeInstanceOf<Making.Made>()
+        val first = outbox.mail().single().link!!.substringAfter('#')
+
+        repeat(3) { accounts.mailVerifyingAgain(made.begun.signIn, Asking("Chrome", "here", "http://localhost:5548")) shouldBe true }
+        accounts.mailVerifyingAgain(made.begun.signIn, Asking("Chrome", "here", "http://localhost:5548")) shouldBe false
+
+        accounts.verify(first) shouldBe false
+        accounts.verify(outbox.mail().last().link!!.substringAfter('#')) shouldBe true
     }
 })

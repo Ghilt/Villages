@@ -31,6 +31,11 @@ class Accounts(
     /** Accounts asked for from one address: ten in an hour. */
     private val making = Attempts(clock, most = 10, within = Duration.ofHours(1))
 
+    /** Links mailed again for one player: three in an hour. */
+    private val mailing = Attempts(clock, most = 3, within = Duration.ofHours(1))
+
+    private val links = MailedLinks(stores.links, clock)
+
     /** Where the accounts are kept, as the debug panel says it. */
     val keptIn: String get() = stores.keptIn
 
@@ -69,14 +74,14 @@ class Accounts(
      * An account made with [asked] and [password], and this browser, whose sign-in is [current], signed in to it,
      * kept as [keeping] says. A guest's own player becomes the account, so its house is kept; anyone else gets a
      * player of their own. An email with an account already is mailed to say so and nothing else changes, and the
-     * answer to the asker is the same either way. [from] is the address that asked, which may ask so many times.
+     * answer to the asker is the same either way. A made account's email is mailed a link to verify it. One address
+     * may ask so many times.
      */
-    @Suppress("LongParameterList")
-    fun makeAccount(asked: String, password: String, keeping: Keeping, browser: String, current: SignIn?, from: String): Making {
+    fun makeAccount(asked: String, password: String, keeping: Keeping, current: SignIn?, asking: Asking): Making {
         val email = emailOf(asked) ?: return Making.Refused("notAnEmail")
         Passwords.problemWith(password, email)?.let { return Making.Refused(it) }
-        if (!making.allowed(from)) return Making.Refused("tooMany")
-        making.failed(from)
+        if (!making.allowed(asking.from)) return Making.Refused("tooMany")
+        making.failed(asking.from)
         val guest = current?.let { stores.players.of(it.player) }?.takeIf { it.guest }
         val record = (guest ?: PlayerRecord(newPlayer(), clock.instant()))
             .copy(email = email, verified = false, password = Passwords.hash(password))
@@ -84,28 +89,49 @@ class Accounts(
             mailer.send(Letters.alreadyAnAccount(email, clock.instant()))
             return Making.Taken
         }
-        return Making.Made(signIns.swap(current?.id, record.player, keeping, browser))
+        mailer.send(Letters.verify(email, links.issue(LinkKind.VERIFY, record, asking.page), clock.instant()))
+        return Making.Made(signIns.swap(current?.id, record.player, keeping, asking.browser))
+    }
+
+    /** The email a verifying link was mailed to, verified, if [secret] is one that has not been used or ended. */
+    fun verify(secret: String): Boolean {
+        val link = links.take(LinkKind.VERIFY, secret) ?: return false
+        val record = stores.players.of(link.player)?.takeIf { it.email == link.email } ?: return false
+        stores.players.put(record.copy(verified = true))
+        return true
+    }
+
+    /**
+     * A verifying link mailed again to the email of [current]'s account, which only the newest works, three times an
+     * hour at most; false when there is nothing to verify, or too many have been asked for.
+     */
+    fun mailVerifyingAgain(current: SignIn, asking: Asking): Boolean {
+        val record = stores.players.of(current.player)?.takeIf { !it.guest && !it.verified } ?: return false
+        val key = record.player.value.toString()
+        if (!mailing.allowed(key)) return false
+        mailing.failed(key)
+        mailer.send(Letters.verify(record.email!!, links.issue(LinkKind.VERIFY, record, asking.page), clock.instant()))
+        return true
     }
 
     /**
      * This browser, whose sign-in is [current], signed in to the account kept under [asked], if [password] is its,
      * kept as [keeping] says. Whatever it was signed in as before is left: a guest's house is left behind with it,
      * which the page says first. A wrong password and an email nobody has are answered alike and as slowly, and so
-     * many tries for one email, or from one address [from], are refused for a quarter of an hour.
+     * many tries for one email, or from one address, are refused for a quarter of an hour.
      */
-    @Suppress("LongParameterList")
-    fun signInWith(asked: String, password: String, keeping: Keeping, browser: String, current: SignIn?, from: String): Entering {
+    fun signInWith(asked: String, password: String, keeping: Keeping, current: SignIn?, asking: Asking): Entering {
         val email = emailOf(asked) ?: asked.trim().lowercase()
-        if (!guessed.allowed(email) || !guessing.allowed(from)) return Entering.TooMany
+        if (!guessed.allowed(email) || !guessing.allowed(asking.from)) return Entering.TooMany
         val record = stores.players.byEmail(email)
         if (record == null || !Passwords.matches(password, record.password)) {
             if (record == null) Passwords.matches(password, null)
             guessed.failed(email)
-            guessing.failed(from)
+            guessing.failed(asking.from)
             return Entering.NotThatPassword
         }
         guessed.forget(email)
-        return Entering.In(signIns.swap(current?.id, record.player, keeping, browser))
+        return Entering.In(signIns.swap(current?.id, record.player, keeping, asking.browser))
     }
 
     /** Who [secret] is signed in as, used now, or null when it is no sign-in or one that has ended. */
@@ -126,6 +152,12 @@ class Accounts(
 
     override fun signedIn(secret: String): SignedIn? = who(secret)?.let { SignedIn(it.signIn.player, it.signIn.id) }
 }
+
+/**
+ * What a request says of where it came from: the browser as a person would name it, the address it came from, which
+ * may ask so many times, and the page it was sent from, under which a mailed link opens.
+ */
+data class Asking(val browser: String, val from: String, val page: String)
 
 /** A browser signed in, its player's record, and whether its cookie is to be given its lifetime again. */
 data class Who(val signIn: SignIn, val record: PlayerRecord?, val cookieAgain: Boolean) {

@@ -42,8 +42,11 @@ clears the cookie.
 
 ## Consequences
 
-- An unverified account plays and signs in; verifying the email is the next step of the plan, and a password is reset
-  only through a link mailed to it.
+- **An account's email is verified by a link mailed to it**, in `mailLinks` beside the rest and kept by its secret's
+  hash as a sign-in is: it works once, for a day, the newest the only one that works, and its secret is after the `#`
+  so no server's log sees it. It opens `/account/verify`, which sends the secret on only with a press, because mail
+  scanners open links before people do. An unverified account plays and signs in all the same, and a password is
+  reset only through a link mailed to its email.
 - Somebody can make an account with an address that is not theirs until it is verified. The address's owner gets it
   back by resetting the password, which ends every other sign-in.
 - The commonest-password list is short and the module's own; Adam can lengthen it without touching code.

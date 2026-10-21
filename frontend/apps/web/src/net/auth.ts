@@ -159,6 +159,16 @@ export function signInWith(email: string, password: string, remember: boolean): 
   return ask('POST', 'signin', { email, password, remember });
 }
 
+/** The email a mailed link's [secret] verifies, verified; refused as `linkUsedOrOld` when it has been used or has ended. */
+export async function verifyEmail(secret: string): Promise<void> {
+  await ask('POST', 'verify', { secret });
+}
+
+/** The link that verifies this browser's account's email mailed again; only the newest works. */
+export async function mailVerifyingAgain(): Promise<void> {
+  await ask('POST', 'verify/again');
+}
+
 /** This browser signed out: its sign-in ended on the server, and its windows stood down. */
 export async function signOut(): Promise<void> {
   await ask('POST', 'signout');

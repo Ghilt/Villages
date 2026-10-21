@@ -1,5 +1,9 @@
+import { useState } from 'react';
+
+import { mailVerifyingAgain } from '../net/auth';
 import type { Me } from '../net/auth';
 import { TextButton } from '../ui/button/Button';
+import { said } from './words';
 
 /** Who this browser plays as, in a sentence. */
 function whoSaid(me: Me | null): string {
@@ -28,6 +32,7 @@ export function AccountPart({
     <section className="settings__part" aria-label="Account">
       <h3 className="ui-caps settings__title">Account</h3>
       <p className="ui-body">{whoSaid(me)}</p>
+      {me !== null && !me.guest && !me.verified && <NotVerified email={me.email ?? ''} />}
       {me !== null && me.guest && (
         <div className="settings__row">
           <TextButton onClick={onCreate}>Create an account</TextButton>
@@ -37,5 +42,30 @@ export function AccountPart({
         </div>
       )}
     </section>
+  );
+}
+
+/**
+ * An account whose email has not been verified yet: it plays and signs in all the same, and the link that verifies it
+ * can be mailed again, the newest the only one that works.
+ */
+function NotVerified({ email }: { email: string }) {
+  const [sent, send] = useState<string | null>(null);
+  const again = () => {
+    mailVerifyingAgain().then(
+      () => send(`Mailed again to ${email}.`),
+      (refusal: unknown) => send(said(refusal)),
+    );
+  };
+  return (
+    <>
+      <p className="ui-label">Not verified yet: a link to verify it was mailed to {email}.</p>
+      <div className="settings__row">
+        <TextButton face="secondary" size="small" onClick={again}>
+          Send it again
+        </TextButton>
+        {sent !== null && <span className="ui-label">{sent}</span>}
+      </div>
+    </>
   );
 }
