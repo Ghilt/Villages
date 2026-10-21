@@ -296,8 +296,10 @@ stage alone, with none of the debug panel in it (decision record 0079).
   when it was made and how many events it holds, and `load` gives this tree's world the one picked: every window
   arrives anew on it, this one as the player who made it. The clock runs on, so a save a week old wakes seven
   months on. A save this code cannot read is listed and cannot be picked. Under it, the players of the world, every
-  one with a house, by the house's name, this browser's marked `you`: `switch` makes this browser the one picked and
-  reloads as them, which is how to look at a world from a seeded house's seat. See decision record 0101.
+  one with a house, by the house's name, this browser's marked `you`, the people first and the world's own after them
+  under **house bots** and how many there are, which the dropdown's hover says too: `switch` makes this browser the
+  one picked and reloads as them, which is how to look at a world from a seeded house's seat, or a bot's. See decision
+  records 0101 and 0108.
   What the log says is what was worth saying, through `note(area, message)` in `apps/web/src/log/log.ts`:
   moving the camera about writes nothing, and the cells a move brought back are counted and said in one line
   only when they carried something. `window.villagesPainterly()` gives the paint counters from a console.
@@ -484,7 +486,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   kilometres outside the ruin of a town of 1790 and named after it, Pekin, Jeddo and London first. The events log
   shows one `villages.world.botCreated.v1` for each, then each bot's `villages.house.founded.v1` and its castle; a
   restart over a world kept in MongoDB makes none twice, and the server's log says `the world is open, with 300 house
-  bots`. They never act. Another house's castle is seen only through the fog, so *see everything* shows them all;
+  bots`. The World section's players list counts them under **house bots**. They never act. Another house's castle is seen only through the fog, so *see everything* shows them all;
   the balance page tunes how many, how far apart and how far past the ruin. `--villages.house-bots=false` leaves them
   out. See decision record 0108 and `docs/plans/house-bots.md`.
 - Every type standing at once: **Antarctica**. While the instruments are open the game server raises one structure of

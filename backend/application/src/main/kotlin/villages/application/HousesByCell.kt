@@ -125,4 +125,7 @@ fun interface HouseById {
  */
 fun interface EveryHouse {
     fun everyHouse(): List<HouseRow>
+
+    /** Whether [player] is one the world plays itself, a house bot, as the world's stream recorded it (0108). */
+    fun isBot(player: PlayerId): Boolean = false
 }

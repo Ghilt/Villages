@@ -22,6 +22,7 @@ import villages.domain.HouseResourceGranted
 import villages.domain.HouseIncomeChanged
 import villages.domain.HouseId
 import villages.domain.PlayerId
+import villages.domain.WorldBotCreated
 import villages.domain.Location
 import villages.domain.WorldTime
 import villages.domain.everyStock
@@ -56,6 +57,9 @@ class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesBy
 
     /** Which house is whose. One entry a player, because a player founds one house; see decision 0028. */
     private val byPlayer = ConcurrentHashMap<PlayerId, HouseId>()
+
+    /** The players the world plays itself, its house bots, as its own stream made them. See decision record 0108. */
+    private val bots = ConcurrentHashMap.newKeySet<PlayerId>()
     private val listeners = CopyOnWriteArraySet<(HouseChange) -> Unit>()
     private val applied = AtomicLong()
 
@@ -77,6 +81,11 @@ class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesBy
             )
 
             is ResourceEvent -> resource(event, stored) ?: return
+            // A bot's house is founded as any is; which players are the world's own is its stream's to say. 0108.
+            is WorldBotCreated -> {
+                bots += event.player
+                return
+            }
             // Every other mechanic leaves a house's row as it was: this read model draws the map. See decision record 0075.
             else -> return
         }
@@ -173,6 +182,8 @@ class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesBy
 
     override fun everyHouse(): List<HouseRow> = rows.values.map { it.row }.sortedBy { it.name.value }
 
+    override fun isBot(player: PlayerId): Boolean = player in bots
+
     /** Every house standing within the distance on the day: of those in the cells round the place, the ones that near. */
     override fun near(place: Location, km: Double, at: WorldTime): List<HouseRow> =
         cellsRound(place.lat, place.lon, km).asSequence()
@@ -201,6 +212,7 @@ class HousesProjection(feed: EventFeed) : Follower(feed), HousesByCell, HousesBy
         rows.clear()
         byCell.clear()
         byPlayer.clear()
+        bots.clear()
         applied.incrementAndGet()
     }
 }

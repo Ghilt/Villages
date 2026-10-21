@@ -105,11 +105,14 @@ describe("the page's saves of the world", () => {
     page.gateway.listPlayers();
     expect(page.socket.sent.at(-1)).toEqual({ type: 'listPlayers' });
     page.socket.says(fixture('playersListed'));
-    expect(page.gateway.sessionStore.get().players?.map((one) => one.house)).toEqual(['Ravenscar', 'Hollin']);
+    expect(page.gateway.sessionStore.get().players?.map((one) => [one.house, one.bot])).toEqual([
+      ['Ravenscar', false],
+      ['London', true],
+    ]);
 
-    page.gateway.switchPlayer('0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8e');
+    page.gateway.switchPlayer('094720f5-dff6-3fb6-a21e-e676e0455afd');
 
-    expect(localStorage.getItem('villages.playerToken')).toBe('0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8e');
+    expect(localStorage.getItem('villages.playerToken')).toBe('094720f5-dff6-3fb6-a21e-e676e0455afd');
     expect(window.location.reload).toHaveBeenCalledOnce();
   });
 });

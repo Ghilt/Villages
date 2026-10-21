@@ -20,6 +20,11 @@ import villages.domain.StructureCommand
 import villages.domain.StructureDecider
 import villages.domain.StructureEvent
 import villages.domain.EventNames
+import villages.domain.PlayerId
+import villages.domain.WORLD_STREAM
+import villages.domain.WorldBotCreated
+import villages.domain.WorldTime
+import java.time.Instant
 import java.util.UUID
 
 /** The catalogued type of an event, as the store would name it: by the rule the store names it by. */
@@ -122,6 +127,26 @@ internal class TinyWorld : HouseCommandExecutor, CharacterCommandExecutor, Struc
     }
 
     /** An event's id, a UUID as the store's are, because a listener carries it on as what caused its command. */
+    /** A house bot made on the world's own stream, as the opening makes one, delivered to whatever follows. 0108. */
+    fun aBotIsMade(player: PlayerId, town: String) {
+        val event = WorldBotCreated(player, town, WorldTime(0), Instant.EPOCH)
+        val record = StoredEvent(
+            id = idOf("w-$town"),
+            type = typeOf(event),
+            stream = WORLD_STREAM,
+            streamVersion = (++botsMade).toLong(),
+            time = event.recordedAt,
+            data = "{}",
+            correlationId = idOf("opening"),
+            causationId = idOf("opening"),
+            event = event,
+        )
+        this.stored += record
+        subscribers.toList().forEach { it(record) }
+    }
+
+    private var botsMade = 0
+
     private fun idOf(name: String): String = UUID.nameUUIDFromBytes(name.toByteArray(Charsets.UTF_8)).toString()
 
     override fun subscribe(from: Start, subscriber: (StoredEvent) -> Unit): AutoCloseable {

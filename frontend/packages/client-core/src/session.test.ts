@@ -296,7 +296,7 @@ describe('the session, folded from what each mechanic folds', () => {
     socket.says({ type: 'savesListed', saves, saved: null });
     session.loadSave('first-test');
     session.listPlayers();
-    const players = [{ player: 'p-1', house: 'Ravenscar' }];
+    const players = [{ player: 'p-1', house: 'Ravenscar', bot: false }];
     socket.says({ type: 'playersListed', players });
 
     expect(socket.sent.slice(-3)).toEqual([

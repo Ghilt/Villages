@@ -15,8 +15,11 @@ class ListPlayers : ClientFrame {
     override fun toString(): String = "ListPlayers"
 }
 
-/** One player of the world: the player's id, which is their token, and the name of the house they founded. */
-data class PlayerView(val player: String, val house: String)
+/**
+ * One player of the world: the player's id, which is their token, the name of the house they founded, and whether the
+ * world plays it itself, a house bot (0108).
+ */
+data class PlayerView(val player: String, val house: String, val bot: Boolean)
 
 /** Every player with a house in this world, by the house's name. */
 data class PlayersListed(val players: List<PlayerView>) : ServerFrame

@@ -2,6 +2,7 @@ package villages.gateway
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import villages.domain.PlayerId
 import villages.protocol.ErrorFrame
 import villages.protocol.PlayersListed
 import villages.protocol.ServerFrame
@@ -28,6 +29,18 @@ class GatewayPlayersSpec : StringSpec({
         listed.players.map { it.player } shouldBe listOf("Hollin", "Ravenscar").map { name ->
             rig.houses.everyHouse().single { it.name.value == name }.player.value.toString()
         }
+    }
+
+    "the world's own players, its house bots, are listed as such, and a person's are not" {
+        val rig = Rig()
+        rig.aHouseIsFounded("Ravenscar")
+        val london = PlayerId.botAt("Q84")
+        rig.world.aBotIsMade(london, "Q84")
+        rig.introduced(london.value.toString()).first.receive(founding(name = "London"))
+        rig.settle()
+
+        val listed = asked(rig).single() as PlayersListed
+        listed.players.map { it.house to it.bot } shouldBe listOf("London" to true, "Ravenscar" to false)
     }
 
     "closed instruments list nobody" {

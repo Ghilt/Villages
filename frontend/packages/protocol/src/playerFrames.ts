@@ -9,8 +9,11 @@ import { z } from 'zod';
 /** Ask who plays in this world: answered by `playersListed`. */
 export const listPlayersSchema = z.object({ type: z.literal('listPlayers') });
 
-/** One player of the world: the player's id, which is their token, and the name of the house they founded. */
-export const playerViewSchema = z.object({ player: z.string(), house: z.string() });
+/**
+ * One player of the world: the player's id, which is their token, the name of the house they founded, and whether the
+ * world plays it itself, a house bot (0108).
+ */
+export const playerViewSchema = z.object({ player: z.string(), house: z.string(), bot: z.boolean() });
 
 /** Every player with a house in this world, by the house's name. */
 export const playersListedSchema = z.object({

@@ -160,3 +160,5 @@ recorded over. See decision record 0037. What each one changed:
 - **61** - a batch in `challengeSimulated` says how its runs spread: for every second, how many stood in each of
   twenty-two bands of the tug, in `spread`, and where each ended, in `ends`, with the tug's ends, `tugEnds`, which the
   bands are cut between. See decision record 0107.
+- **62** - `playersListed` says of each player whether the world plays it itself, `bot`: a house bot (decision record
+  0108).
