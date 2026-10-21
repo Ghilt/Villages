@@ -2,12 +2,11 @@ package villages.domain.challenge
 
 /** The six effects of the Authority-Freedom pair, the Enforcer and the Rebel. See `docs/plans/challenges.md`. */
 
-/** By Decree: a `chance` to stop each act of an enemy summon whose integrity its slice's power beats. */
-private object Decree : EffectBehaviour {
-    override val reads = setOf("chance")
+/** Curfew: every enemy summon is put under the debuff its entry names, under curfew, for `seconds`, boosted and cut to whole seconds. */
+private object Curfew : EffectBehaviour {
+    override val reads = setOf("seconds")
 
-    override fun stops(scene: Scene, summon: Summon): Boolean =
-        scene.ownPower(scene.slice) > summon.integrity && scene.chance(scene.number("chance"))
+    override fun activated(scene: Scene): List<Change> = scene.summons(scene.side.other).map { scene.putOn(it.actor, scene.number("seconds")) }
 }
 
 /** The Firm Hand: while the tug favours its side, the opponent's power is `power` lower. */
@@ -48,13 +47,13 @@ private object Enforcer : SummonBehaviour {
         if (enemies.isEmpty()) return listOf(cost)
         val hardest = enemies.maxOf { scene.pullOf(it) }
         val target = scene.pick(enemies.filter { scene.pullOf(it) == hardest })
-        return listOf(cost, Change.Silence(target.serial, scene.second + scene.boost(scene.number("silences")).toInt(), summon.actor, null))
+        return listOf(cost, scene.putOn(target.actor, scene.number("silences")))
     }
 }
 
 internal val authorityAndFreedom: Map<String, EffectBehaviour> = mapOf(
     "authority.watch" to Hires,
-    "authority.decree" to Decree,
+    "authority.curfew" to Curfew,
     "authority.firmHand" to FirmHand,
     "freedom.commons" to Hires,
     "freedom.againstTheGrain" to AgainstTheGrain,

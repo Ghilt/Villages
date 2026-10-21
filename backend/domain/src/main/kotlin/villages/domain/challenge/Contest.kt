@@ -43,6 +43,9 @@ internal class Contest(
 ) {
     val rng = Rng(seed)
     val integrity: Map<Side, DoubleArray> = Side.entries.associateWith { side -> setup.side(side).map { it.integrity }.toDoubleArray() }
+    /** What each of each side's slices bears, its buffs' and debuffs' ids each with the last second it lasts. */
+    val bearings: Map<Side, List<MutableMap<String, Int>>> = Side.entries.associateWith { side -> List(setup.side(side).size) { mutableMapOf<String, Int>() } }
+
     /** Whether each of each side's slices' aspects matches the latest happening, as its slices are numbered. */
     val matching: Map<Side, BooleanArray> = Side.entries.associateWith { side -> BooleanArray(setup.side(side).size) }
     val field = mutableListOf<Summon>()
@@ -72,6 +75,7 @@ internal class Contest(
         val progression = setup.progression
         for (now in 0 until progression.seconds) {
             second = now
+            lift()
             val due = progression.happenings.indices.firstOrNull { progression.startOf(it) == now }
             if (due != null) {
                 begin(due)
@@ -124,17 +128,12 @@ internal class Contest(
         val changes = mutableListOf<Change>()
         Side.entries.forEach { side -> changes += working(side).flatMap { (slice, effect, behaviour) -> behaviour.everySecond(scene(side, slice, effect)) } }
         field.toList().forEach { summon ->
-            if (summon.arrived >= second || summon.silencedUntil >= second) return@forEach
-            if (catalogue.summons[summon.kind]?.matching == true && !happening.matches(summon.aspect)) {
+            if (summon.arrived >= second || silenced(summon)) return@forEach
+            if (needsMatch(summon) && !happening.matches(summon.aspect)) {
                 if (idle.add(summon.serial to at)) changes += Change.Say(What.IDLE, summon.side, summon.actor, null)
                 return@forEach
             }
             val enemy = summon.side.other
-            val stopping = working(enemy).firstOrNull { (slice, effect, behaviour) -> behaviour.stops(scene(enemy, slice, effect), summon) }
-            if (stopping != null) {
-                changes += Change.Say(What.STOPPED, enemy, Actor.OfSlice(enemy, stopping.first), stopping.second.id, summon.actor)
-                return@forEach
-            }
             changes += actOf(summon)
             changes += working(enemy).flatMap { (slice, effect, behaviour) -> behaviour.enemyActed(scene(enemy, slice, effect), summon) }
             changes += working(summon.side).flatMap { (slice, effect, behaviour) -> behaviour.friendActed(scene(summon.side, slice, effect), summon) }
@@ -202,15 +201,16 @@ internal class Contest(
         boosted: Boolean = false,
         tugDelta: Double = 0.0,
         targetEffect: String? = null,
+        status: String? = null,
     ) {
-        moments += ChallengeMoment(second, at, side, actor, what, effect, target, amount, boosted, tugDelta, tug, targetEffect)
+        moments += ChallengeMoment(second, at, side, actor, what, effect, target, amount, boosted, tugDelta, tug, targetEffect, status)
     }
 
     fun scene(side: Side, slice: Int, effect: ChallengeEffect): Scene =
-        SceneOf(side, slice, effect.aspect, effect::number, Actor.OfSlice(side, slice), effect)
+        SceneOf(side, slice, effect.aspect, effect::number, Actor.OfSlice(side, slice), effect, effect.puts)
 
     fun summonScene(summon: Summon): Scene =
-        SceneOf(summon.side, summon.owner, summon.aspect, { catalogue.summons.getValue(summon.kind).number(it) }, summon.actor, null)
+        SceneOf(summon.side, summon.owner, summon.aspect, { catalogue.summons.getValue(summon.kind).number(it) }, summon.actor, null, catalogue.summons[summon.kind]?.puts)
 
     private inner class SceneOf(
         override val side: Side,
@@ -219,6 +219,7 @@ internal class Contest(
         private val numbers: (String) -> Double,
         override val actor: Actor,
         private val entry: ChallengeEffect?,
+        private val puts: String?,
     ) : Scene {
         override val second: Int get() = this@Contest.second
         override val happening: Happening get() = this@Contest.happening
@@ -253,5 +254,8 @@ internal class Contest(
         }
 
         override fun pullOf(summon: Summon): Double = this@Contest.pullOf(summon)
+
+        override fun putOn(target: Actor, seconds: Double): Change =
+            Change.PutOn(side, target, puts ?: error("${effect ?: actor} puts nothing on"), second + boost(seconds).toInt(), actor, effect)
     }
 }

@@ -51,6 +51,8 @@ export interface ChallengeEffect {
   readonly slot: ChallengeSlot | null;
   /** Whether it needs a matching aspect: works only while the latest happening has its slice's aspect. */
   readonly matching: boolean;
+  /** The buff or the debuff it puts on, by its id; none for one that puts nothing on. */
+  readonly puts: string | null;
 }
 
 export interface ChallengeSummon {
@@ -61,6 +63,17 @@ export interface ChallengeSummon {
   readonly numbers: Readonly<Record<string, number>>;
   /** Whether it needs a matching aspect: acts only while the happening has its own aspect. */
   readonly matching: boolean;
+  /** The buff or the debuff its acts put on, by its id; none for one that puts nothing on. */
+  readonly puts: string | null;
+}
+
+/** A buff, which helps, or a debuff, which hinders: what it goes on, its words and its own numbers. */
+export interface ChallengeLasting {
+  readonly id: string;
+  readonly name: string;
+  readonly on: 'slice' | 'summon';
+  readonly words: string;
+  readonly numbers: Readonly<Record<string, number>>;
 }
 
 export interface ChallengeKind {
@@ -77,8 +90,10 @@ export interface ChallengeKind {
 export interface Challenges {
   readonly effects: readonly ChallengeEffect[];
   readonly summons: readonly ChallengeSummon[];
+  readonly buffs: readonly ChallengeLasting[];
+  readonly debuffs: readonly ChallengeLasting[];
   readonly kinds: readonly ChallengeKind[];
-  /** What the file and each of its sections say of themselves, by `''`, `effects`, `summons` and `kinds`. */
+  /** What the file and each of its sections say of themselves, by `''`, `effects`, `summons`, `buffs`, `debuffs` and `kinds`. */
   readonly said: Readonly<Record<string, string>>;
 }
 
@@ -146,6 +161,7 @@ function effectOf(aspect: Aspect, key: string, node: unknown): ChallengeEffect {
     summons: summons ?? null,
     slot: slotOf(node.slot, `${at}.slot`),
     matching: flagOf(node.matching, `${at}.matching`),
+    puts: putsOf(node.puts, `${at}.puts`),
   };
 }
 
@@ -159,7 +175,28 @@ function summonOf(id: string, node: unknown): ChallengeSummon {
     words: word(node, 'words', at),
     numbers: numbersOf(node.numbers, `${at}.numbers`),
     matching: flagOf(node.matching, `${at}.matching`),
+    puts: putsOf(node.puts, `${at}.puts`),
   };
+}
+
+function lastingOf(section: string, id: string, node: unknown): ChallengeLasting {
+  const at = `${section}.${id}`;
+  if (!isObject(node)) refuse(at);
+  const { on } = node;
+  if (on !== 'slice' && on !== 'summon') refuse(`${at}.on`);
+  return {
+    id,
+    name: word(node, 'name', at),
+    on,
+    words: word(node, 'words', at),
+    numbers: numbersOf(node.numbers, `${at}.numbers`),
+  };
+}
+
+/** A buff's or a debuff's id, or none when it is not there. */
+function putsOf(value: unknown, at: string): string | null {
+  if (value !== undefined && typeof value !== 'string') refuse(at);
+  return value ?? null;
 }
 
 /** True or false, and false when it is not there. */
@@ -199,6 +236,8 @@ export function parseChallenges(text: string): Challenges {
   if (!isObject(file)) refuse('the file');
   const effects = section(file, 'effects');
   const summons = section(file, 'summons');
+  const buffs = section(file, 'buffs');
+  const debuffs = section(file, 'debuffs');
   const kinds = section(file, 'kinds');
   const comment = (node: Node) => (typeof node.$comment === 'string' ? node.$comment : '');
   return {
@@ -208,8 +247,17 @@ export function parseChallenges(text: string): Challenges {
       return fieldsOf(those).map(([key, node]) => effectOf(known, key, node));
     }),
     summons: fieldsOf(summons).map(([id, node]) => summonOf(id, node)),
+    buffs: fieldsOf(buffs).map(([id, node]) => lastingOf('buffs', id, node)),
+    debuffs: fieldsOf(debuffs).map(([id, node]) => lastingOf('debuffs', id, node)),
     kinds: fieldsOf(kinds).map(([id, node]) => kindOf(id, node)),
-    said: { '': comment(file), effects: comment(effects), summons: comment(summons), kinds: comment(kinds) },
+    said: {
+      '': comment(file),
+      effects: comment(effects),
+      summons: comment(summons),
+      buffs: comment(buffs),
+      debuffs: comment(debuffs),
+      kinds: comment(kinds),
+    },
   };
 }
 

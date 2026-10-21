@@ -1201,6 +1201,11 @@ and pours its **coffer** out later. Many **summon**: a Mercenary, a Rebel, a Mac
 and pulls once a second until it is killed, turned, or the challenge ends, a side holding as many as its slices'
 summon counts add up to.
 
+**Buffs and debuffs.** An effect or a summon may put a **buff**, which helps, or a **debuff**, which hinders, on a
+slice or a summon for some seconds: Authority's Curfew puts every enemy summon *under curfew*, so that it acts only in
+happenings of its own aspect, and the Enforcer *silences* the enemy's hardest puller. The same one put on again lasts
+from then and never stacks; different ones add up. The page charts them all.
+
 **Things on the line.** A slot may put what is in it on the line: a building or a person then stands in the
 challenge as a summon, stronger than most and paying its side as it arrives, and if it is killed the building
 is **damaged** or the person **fatigued**, losing a tenth of their **effectiveness**. A building at nothing is a

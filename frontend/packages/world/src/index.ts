@@ -76,6 +76,7 @@ export type {
   Aspect,
   ChallengeEffect,
   ChallengeKind,
+  ChallengeLasting,
   ChallengeSlot,
   ChallengeSummon,
   Challenges,

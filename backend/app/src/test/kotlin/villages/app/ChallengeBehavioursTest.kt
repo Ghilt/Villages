@@ -8,8 +8,8 @@ import villages.domain.challenge.ChallengeBehaviours
 import java.io.File
 
 /**
- * The challenge's code and its catalogue held to each other, both ways: every effect in the real catalogue has a
- * behaviour with the numbers it reads, and every behaviour has its effect there. The shelf refuses a catalogue the code
+ * The challenge's code and its catalogue held to each other, both ways: every effect, buff and debuff in the real
+ * catalogue has a behaviour with the numbers it reads, and every behaviour has its entry there. The shelf refuses a catalogue the code
  * cannot fight with, so that half is held as the server runs; the other half, code nobody's catalogue names, is held here.
  */
 class ChallengeBehavioursTest {
@@ -26,6 +26,7 @@ class ChallengeBehavioursTest {
 
         assertEquals(emptySet<String>(), ChallengeBehaviours.effects.keys - catalogue.effects.map { it.id }.toSet())
         assertEquals(emptySet<String>(), ChallengeBehaviours.summons.keys - catalogue.summons.keys)
+        assertEquals(emptySet<String>(), ChallengeBehaviours.lasting.keys - (catalogue.buffs.keys + catalogue.debuffs.keys))
     }
 
     @Test

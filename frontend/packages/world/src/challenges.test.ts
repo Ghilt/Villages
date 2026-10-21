@@ -36,6 +36,20 @@ describe("the challenge's content", () => {
       matching: false,
     });
     expect(challenges.summons.find((summon) => summon.id === 'mercenary')!.matching).toBe(true);
+    expect(challenges.effects[1]!.puts).toBe('shaken');
+    expect(challenges.effects[0]!.puts).toBeNull();
+    expect(challenges.summons.find((summon) => summon.id === 'collector')!.puts).toBe('oiled');
+    expect(challenges.buffs).toEqual([
+      {
+        id: 'oiled',
+        name: 'Oiled',
+        on: 'summon',
+        words: 'Acts again, {rate}% of seconds.',
+        numbers: { rate: 50 },
+      },
+    ]);
+    expect(challenges.debuffs[0]).toMatchObject({ id: 'shaken', on: 'slice', numbers: { percent: 25 } });
+    expect(challenges.said.debuffs).toBe('One debuff.');
     expect(challenges.kinds[0]).toMatchObject({ seconds: [30, 90], happenings: [3, 6], twoAspects: 20 });
     expect(challenges.kinds[0]!.weights).toMatchObject({ violence: 8, holy: 1, reason: 0 });
     expect(challenges.said.summons).toBe('Two summons.');

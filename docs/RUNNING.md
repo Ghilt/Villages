@@ -910,7 +910,9 @@ and `-- --drop` takes them off; by hand only.
   `world/catalogues/challenges.json`, and needs nothing else running to read. Every effect a slice can carry, in the
   five pairs of aspects, an aspect and its anti-aspect side by side, each effect's name, whether it is a trigger or a
   passive, whether it needs a matching aspect, what it does in words with its numbers filled in, the slot it brings and
-  the summon it hires; every summon, its aspect, what it does and whether it needs a matching aspect; and the kinds of challenge, how long each lasts, how many happenings it has, how often
+  the summon it hires, and the buff or debuff it puts on; every summon, its aspect, what it does and whether it needs a
+  matching aspect; the chart of buffs and debuffs, each one's name, whether it helps or hinders, whether it goes on a
+  slice or a summon, what it does, and the effects and summons that put it on; and the kinds of challenge, how long each lasts, how many happenings it has, how often
   one has two aspects and what each aspect weighs. It reads the file through the dev server and again whenever it
   changes on disk. Every name, word and number is a field, and whether a slot puts what is in it on the line, and whether an effect or
   a summon needs a matching aspect, a box;

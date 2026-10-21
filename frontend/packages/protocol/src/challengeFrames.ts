@@ -59,6 +59,8 @@ export const momentViewSchema = z.object({
   tugDelta: z.number(),
   tugAfter: z.number(),
   targetEffect: z.string().nullable(),
+  /** The buff or the debuff the moment put on or lifted, by its id. */
+  status: z.string().nullable(),
 });
 
 /** What a challenge came to: the tug toward side A, how it ended and in which second, who won, gains and losses. */

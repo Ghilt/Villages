@@ -16,22 +16,31 @@ class AuthorityFreedomSpec : StringSpec({
         val result = fight(listOf(slice(AUTHORITY, "authority.watch")), hiring, 8, Happening(REASON), catalogue = anywhere)
 
         result.saying(What.COST).map { it.second to it.amount } shouldBe (1..7).map { it to -5.0 }
-        result.saying(What.SILENCED).first().amount shouldBe 3.0
+        result.saying(What.DEBUFFED).first().let { it.status to it.amount } shouldBe ("silenced" to 3.0)
         result.saying(What.PULLED).filter { it.side == Side.B }.map { it.second } shouldBe listOf(1)
     }
 
     "an Enforcer's silence is boosted in a happening of its own aspect, and cut to whole seconds" {
-        fight(listOf(slice(AUTHORITY, "authority.watch")), hiring, 4, Happening(AUTHORITY, VIOLENCE)).saying(What.SILENCED).first().amount shouldBe 4.0
+        fight(listOf(slice(AUTHORITY, "authority.watch")), hiring, 4, Happening(AUTHORITY, VIOLENCE)).saying(What.DEBUFFED).first().amount shouldBe 4.0
     }
 
-    "By Decree stops an enemy summon's act when its slice's power beats the summon's integrity" {
-        val certain = TEST_CATALOGUE.with("authority.decree", "chance", 100.0)
-        val stopping = fight(listOf(slice(AUTHORITY, "authority.decree", power = 60.0)), hiring, 4, Happening(VIOLENCE, AUTHORITY), catalogue = certain)
-        stopping.saying(What.STOPPED).map { it.second } shouldBe listOf(1, 2, 3)
-        stopping.saying(What.PULLED) shouldBe emptyList()
+    "a silenced summon does not act until its silence is lifted, and a silence put on again lasts from then" {
+        val anywhere = TEST_CATALOGUE.marked("authority.watch", false).marked("violence.sellswords", false)
+        val result = fight(listOf(slice(AUTHORITY, "authority.watch")), hiring, 9, Happening(REASON), catalogue = anywhere)
 
-        fight(listOf(slice(AUTHORITY, "authority.decree", power = 40.0)), hiring, 4, Happening(VIOLENCE, AUTHORITY), catalogue = certain)
-            .saying(What.STOPPED) shouldBe emptyList()
+        result.saying(What.DEBUFFED).map { it.second to it.target.toString() } shouldBe (1..8).map { it to "#2" }
+        result.saying(What.LIFTED) shouldBe emptyList()
+    }
+
+    "Curfew puts every enemy summon under curfew: it sits out a happening without its own aspect until the curfew lifts" {
+        val curfew = listOf(slice(AUTHORITY, "authority.curfew"))
+        val anywhere = TEST_CATALOGUE.marked("violence.sellswords", false).with("authority.curfew", "seconds", 4.0)
+        val result = fight(curfew, hiring, 15, Happening(AUTHORITY), Happening(AUTHORITY), Happening(REASON), catalogue = anywhere)
+
+        result.saying(What.DEBUFFED).map { Triple(it.second, it.status, it.amount) } shouldBe listOf(Triple(5, "underCurfew", 6.0))
+        result.saying(What.IDLE).map { it.second } shouldBe listOf(5, 10)
+        result.saying(What.LIFTED).map { it.second to it.status } shouldBe listOf(12 to "underCurfew")
+        result.saying(What.PULLED).filter { it.side == Side.B }.map { it.second } shouldBe (1..4).toList() + (12..14).toList()
     }
 
     "The Firm Hand lowers the opponent's power while the tug favours its side" {

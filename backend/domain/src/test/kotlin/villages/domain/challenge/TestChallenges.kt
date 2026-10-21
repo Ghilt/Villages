@@ -20,7 +20,7 @@ val TEST_CATALOGUE = ChallengeCatalogue(
         ChallengeEffect("reason.refutation", Aspect.REASON, Fires.PASSIVE, mapOf("chance" to 20.0)),
         ChallengeEffect("reason.seenThrough", Aspect.REASON, Fires.PASSIVE, mapOf("chance" to 20.0, "amount" to 5.0)),
         ChallengeEffect("authority.watch", Aspect.AUTHORITY, Fires.TRIGGER, summons = "enforcer", matching = true),
-        ChallengeEffect("authority.decree", Aspect.AUTHORITY, Fires.PASSIVE, mapOf("chance" to 25.0), matching = true),
+        ChallengeEffect("authority.curfew", Aspect.AUTHORITY, Fires.TRIGGER, mapOf("seconds" to 8.0), matching = true, puts = "underCurfew"),
         ChallengeEffect("authority.firmHand", Aspect.AUTHORITY, Fires.PASSIVE, mapOf("power" to 5.0), matching = true),
         ChallengeEffect("freedom.commons", Aspect.FREEDOM, Fires.TRIGGER, summons = "rebel"),
         ChallengeEffect("freedom.againstTheGrain", Aspect.FREEDOM, Fires.PASSIVE, mapOf("amount" to 20.0)),
@@ -41,7 +41,7 @@ val TEST_CATALOGUE = ChallengeCatalogue(
     summons = mapOf(
         "mercenary" to SummonSpec(Aspect.VIOLENCE, mapOf("pulls" to 10.0)),
         "priest" to SummonSpec(Aspect.HOLY, mapOf("share" to 1.0)),
-        "enforcer" to SummonSpec(Aspect.AUTHORITY, mapOf("costs" to 5.0, "silences" to 3.0)),
+        "enforcer" to SummonSpec(Aspect.AUTHORITY, mapOf("costs" to 5.0, "silences" to 3.0), puts = "silenced"),
         "rebel" to SummonSpec(Aspect.FREEDOM, mapOf("pulls" to 5.0, "behind" to 10.0)),
         "collector" to SummonSpec(Aspect.GREED, mapOf("costs" to 3.0, "deposits" to 6.0)),
         "benefactor" to SummonSpec(Aspect.GENEROSITY, mapOf("pulls" to 5.0, "behind" to 10.0)),
@@ -50,6 +50,7 @@ val TEST_CATALOGUE = ChallengeCatalogue(
         "creature" to SummonSpec(Aspect.NATURE, mapOf("pulls" to 3.0), matching = true),
     ),
     kinds = emptyMap(),
+    debuffs = mapOf("silenced" to Lasting(Bearer.SUMMON), "underCurfew" to Lasting(Bearer.SUMMON)),
 )
 
 val TEST_RULES = ChallengeRules(1.5, 100.0, 10.0, 0.2, 0.5, 10.0, SliceStart(50.0, 50.0, 3))

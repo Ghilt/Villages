@@ -8,7 +8,8 @@
         "name": "No Quarter",
         "fires": "passive",
         "words": "{chance}% to kill as well.",
-        "numbers": { "chance": 25 }
+        "numbers": { "chance": 25 },
+        "puts": "shaken"
       }
     },
     "reason": {
@@ -42,8 +43,17 @@
       "name": "Collector",
       "aspect": "greed",
       "words": "Costs {costs}, puts {deposits} by.",
-      "numbers": { "costs": 3, "deposits": 6.5 }
+      "numbers": { "costs": 3, "deposits": 6.5 },
+      "puts": "oiled"
     }
+  },
+  "buffs": {
+    "$comment": "One buff.",
+    "oiled": { "name": "Oiled", "on": "summon", "words": "Acts again, {rate}% of seconds.", "numbers": { "rate": 50 } }
+  },
+  "debuffs": {
+    "$comment": "One debuff.",
+    "shaken": { "name": "Shaken", "on": "slice", "words": "Works {percent}% less.", "numbers": { "percent": 25 } }
   },
   "kinds": {
     "$comment": "One kind, weighing two aspects.",

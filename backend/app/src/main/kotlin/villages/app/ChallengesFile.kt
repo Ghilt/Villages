@@ -4,12 +4,14 @@ import tools.jackson.databind.JsonNode
 import tools.jackson.databind.json.JsonMapper
 import villages.domain.Stat
 import villages.domain.challenge.Aspect
+import villages.domain.challenge.Bearer
 import villages.domain.challenge.ChallengeCatalogue
 import villages.domain.challenge.ChallengeEffect
 import villages.domain.challenge.ChallengeKind
 import villages.domain.challenge.ChallengeSlot
 import villages.domain.challenge.Fires
 import villages.domain.challenge.Fits
+import villages.domain.challenge.Lasting
 import villages.domain.challenge.SummonSpec
 
 /**
@@ -25,6 +27,7 @@ object ChallengesFile {
     private val STATS = Stat.entries.associateBy { it.name.lowercase() }
     private val FIRES = Fires.entries.associateBy { it.name.lowercase() }
     private val FITS = mapOf("keyFigure" to Fits.KEY_FIGURE, "structure" to Fits.STRUCTURE)
+    private val BEARERS = Bearer.entries.associateBy { it.name.lowercase() }
 
     fun parse(text: String): ChallengeCatalogue {
         val root = json.readTree(text)
@@ -34,8 +37,10 @@ object ChallengesFile {
             fields(effects).map { (name, node) -> effectOf("$aspectName.$name", aspect, node) }
         }
         val summons = section(root, "summons").associate { (id, node) -> id to summonOf(id, node) }
+        val buffs = section(root, "buffs").associate { (id, node) -> id to lastingOf("buffs.$id", node) }
+        val debuffs = section(root, "debuffs").associate { (id, node) -> id to lastingOf("debuffs.$id", node) }
         val kinds = section(root, "kinds").associate { (id, node) -> id to kindOf(id, node) }
-        return checked("effects") { ChallengeCatalogue(effects, summons, kinds) }
+        return checked("effects") { ChallengeCatalogue(effects, summons, kinds, buffs, debuffs) }
     }
 
     private fun effectOf(id: String, aspect: Aspect, node: JsonNode): ChallengeEffect {
@@ -52,6 +57,7 @@ object ChallengesFile {
                 summons = node["summons"]?.let { it.takeIf { summon -> summon.isString }?.asString() ?: refuse("$at.summons") },
                 slot = node["slot"]?.let { slotOf(it, "$at.slot") },
                 matching = flag(node, "matching", at),
+                puts = node["puts"]?.let { it.takeIf { lasting -> lasting.isString }?.asString() ?: refuse("$at.puts") },
             )
         }
     }
@@ -75,7 +81,16 @@ object ChallengesFile {
         word(node, "name", at)
         word(node, "words", at)
         val aspect = node["aspect"]?.takeIf { it.isString }?.asString()?.let(ASPECTS::get) ?: refuse("$at.aspect")
-        return checked(at) { SummonSpec(aspect, numbers(node["numbers"], "$at.numbers"), flag(node, "matching", at)) }
+        val puts = node["puts"]?.let { it.takeIf { lasting -> lasting.isString }?.asString() ?: refuse("$at.puts") }
+        return checked(at) { SummonSpec(aspect, numbers(node["numbers"], "$at.numbers"), flag(node, "matching", at), puts) }
+    }
+
+    private fun lastingOf(at: String, node: JsonNode): Lasting {
+        if (!node.isObject) refuse(at)
+        word(node, "name", at)
+        word(node, "words", at)
+        val on = node["on"]?.takeIf { it.isString }?.asString()?.let(BEARERS::get) ?: refuse("$at.on")
+        return checked(at) { Lasting(on, numbers(node["numbers"], "$at.numbers")) }
     }
 
     private fun kindOf(id: String, node: JsonNode): ChallengeKind {

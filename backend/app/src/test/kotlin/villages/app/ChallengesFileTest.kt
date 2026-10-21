@@ -5,9 +5,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import villages.domain.Stat
 import villages.domain.challenge.Aspect
+import villages.domain.challenge.Bearer
 import villages.domain.challenge.ChallengeSlot
 import villages.domain.challenge.Fires
 import villages.domain.challenge.Fits
+import villages.domain.challenge.Lasting
 import java.io.File
 
 /** The challenge's content as the server reads it, held to the fixture the world package's reader is held to. */
@@ -31,6 +33,10 @@ class ChallengesFileTest {
         assertEquals(false, challenges.effect("violence.noQuarter")?.matching)
         assertEquals(true, challenges.summons.getValue("mercenary").matching)
         assertEquals(false, challenges.summons.getValue("collector").matching)
+        assertEquals("shaken", challenges.effect("violence.noQuarter")?.puts)
+        assertEquals("oiled", challenges.summons.getValue("collector").puts)
+        assertEquals(Lasting(Bearer.SUMMON, mapOf("rate" to 50.0)), challenges.buffs.getValue("oiled"))
+        assertEquals(Lasting(Bearer.SLICE, mapOf("percent" to 25.0)), challenges.debuffs.getValue("shaken"))
         val battle = challenges.kinds.getValue("battle")
         assertEquals(30..90, battle.seconds)
         assertEquals(3..6, battle.happenings)

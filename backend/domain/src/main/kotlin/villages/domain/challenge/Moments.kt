@@ -19,6 +19,8 @@ data class ChallengeMoment(
     val tugAfter: Double,
     /** The effect the deed was done to: a trigger cancelled. */
     val targetEffect: String? = null,
+    /** The buff or the debuff the deed put on or lifted. */
+    val status: String? = null,
 )
 
 /** Who did a moment's deed: a slice by its side and place, a summon by its serial, or the challenge itself. */
@@ -75,10 +77,15 @@ enum class What {
 
     /** A summon that would have turned found no room on its new side, and left both. */
     DESERTED,
-    SILENCED,
 
-    /** An act was stopped before it was made. */
-    STOPPED,
+    /** A buff went on a slice or a summon, [ChallengeMoment.status] naming it and the amount its seconds. */
+    BUFFED,
+
+    /** A debuff went on a slice or a summon, [ChallengeMoment.status] naming it and the amount its seconds. */
+    DEBUFFED,
+
+    /** A buff or a debuff came off as its seconds ran out, [ChallengeMoment.status] naming it. */
+    LIFTED,
 
     /** A trigger was cancelled before it fired. */
     CANCELLED,

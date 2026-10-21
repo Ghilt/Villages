@@ -18,6 +18,7 @@ const moment = (second: number, tugAfter: number): MomentView => ({
   tugDelta: 0,
   tugAfter,
   targetEffect: null,
+  status: null,
 });
 
 describe('the challenge as the page builds it', () => {

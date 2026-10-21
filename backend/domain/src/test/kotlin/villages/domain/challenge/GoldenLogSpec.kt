@@ -52,7 +52,7 @@ fun tableOf(result: ChallengeResult): String = buildString {
                 moment.side?.name ?: "",
                 who(moment.actor),
                 moment.what.name.lowercase().replace('_', ' '),
-                (moment.effect ?: moment.targetEffect ?: "") + if (moment.boosted) " ×" else "",
+                (moment.effect ?: moment.targetEffect ?: moment.status ?: "") + if (moment.boosted) " ×" else "",
                 moment.target?.let(::who) ?: "",
                 moment.amount?.let(::number) ?: "",
                 if (moment.tugDelta == 0.0) "" else number(moment.tugDelta),

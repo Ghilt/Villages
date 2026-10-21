@@ -91,3 +91,10 @@ there. *Against the Grain* and *Will of One's Own*, which leant on the draw, kee
 `Challenge.ENGINE` is 2. The moments say which slices match at each happening, and what sits out. No event changes:
 nothing is stored yet, and the agreed `ChallengeResolved` carries the engine's version. The plan is
 `docs/plans/challenge-matching.md`.
+
+Buffs and debuffs came with it, Adam's words: one goes on a slice or a summon for the seconds the effect or summon that
+puts it on says, and comes off when they are up; the same one put on again lasts from then and never stacks, and
+different ones add up. Like an effect, its words, numbers and what it goes on are the catalogue's and what it does is
+code, held to each other both ways. The Enforcer's silence became the first debuff, and *Curfew* took the place of *By
+Decree*, which never fired between slices of equal numbers. The moments name each one put on and lifted, at
+protocol 64.

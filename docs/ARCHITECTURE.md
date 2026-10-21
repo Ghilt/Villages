@@ -645,9 +645,11 @@ second:
 
 An effect's behaviour is code, keyed by its id; its words and numbers are the catalogue,
 `world/catalogues/challenges.json`. A behaviour hangs on hooks - its slice meeting a happening, the happening changing,
-every second, an enemy summon about to act or having acted, a friend's acting, an enemy trigger, a summon killed, an
+every second, an enemy summon having acted, a friend's acting, an enemy trigger, a summon killed, an
 aura on the other side's power, holding its slice matching - and answers with the changes it asks for, never touching
-the contest itself; `Contest` lands them. The shelf refuses a catalogue naming an effect the code has no behaviour
+the contest itself; `Contest` lands them. A buff or a debuff is the same pair: its words, numbers and what it goes on
+in the catalogue, what it does in code by its id, held to each other both ways; it goes on a slice or a summon for
+the seconds the effect says and comes off when they are up, and the moments say both. The shelf refuses a catalogue naming an effect the code has no behaviour
 for, or not giving a number a behaviour reads, and `ChallengeBehavioursTest` holds the other way, code no entry
 names. The engine's other half, `Progressions.draw`, draws a progression from a challenge kind of the catalogue -
 its seconds, its happenings and their aspects by the kind's weights - from a seed worked out from the challenge's, so

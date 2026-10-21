@@ -119,6 +119,8 @@ data class MomentView(
     val tugDelta: Double,
     val tugAfter: Double,
     val targetEffect: String?,
+    /** The buff or the debuff the moment put on or lifted, by its id. */
+    val status: String?,
 )
 
 /** A summon that came on the field: its serial, its kind - a summon's id, or `onTheLine` - and a thing on the line's name. */

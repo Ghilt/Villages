@@ -5,8 +5,8 @@ import kotlin.math.max
 /**
  * How what a moment asked for lands, in three passes: first the tug and the coffers move, as everything acted on the
  * state the moment began with; then the dead fall, so a summon both killed and turned is killed, and the room a death
- * leaves is there for what comes next; then summons turn and come, things come on the line, slices are worn and
- * summons silenced. Each change is said as it lands, a moment each. The rules that must hold are held here: no side
+ * leaves is there for what comes next; then summons turn and come, things come on the line, slices are worn, and buffs
+ * and debuffs go on. Each change is said as it lands, a moment each. The rules that must hold are held here: no side
  * ever has more summons than its slices let it have, and a thing on the line comes on it once. See decision record 0107.
  */
 internal fun Contest.land(changes: List<Change>) {
@@ -23,10 +23,7 @@ private fun Contest.landOne(change: Change) {
         is Change.Kill -> kill(change)
         is Change.Turn -> turn(change)
         is Change.OnTheLine -> comeOnTheLine(change)
-        is Change.Silence -> alive(change.target)?.let {
-            it.silencedUntil = max(it.silencedUntil, change.until)
-            say(What.SILENCED, it.side.other, change.actor, change.effect, it.actor, (change.until - second).toDouble())
-        }
+        is Change.PutOn -> putOn(change)
         is Change.Wear -> {
             val worn = integrity.getValue(change.side)
             worn.indices.forEach { worn[it] = max(0.0, worn[it] - change.amount) }

@@ -137,8 +137,9 @@ export const WHAT_SAID: Readonly<Record<string, string>> = {
   killed: 'killed',
   turned: 'turned',
   deserted: 'deserted',
-  silenced: 'silenced',
-  stopped: 'stopped',
+  buffed: 'buffed',
+  debuffed: 'debuffed',
+  lifted: 'lifted',
   cancelled: 'cancelled',
   integrityLost: 'wore integrity',
   auraOn: 'aura on',
@@ -192,3 +193,7 @@ export function tugBySecond(moments: readonly MomentView[], seconds: number): nu
   }
   return tugs;
 }
+
+/** A buff's or a debuff's name from the catalogue, or its id when the catalogue has none. */
+export const lastingSaid = (id: string, content: Challenges | null) =>
+  [...(content?.buffs ?? []), ...(content?.debuffs ?? [])].find((one) => one.id === id)?.name ?? id;

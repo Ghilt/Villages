@@ -87,6 +87,7 @@ internal fun Fought.toFrame(id: String, catalogue: String): ChallengeSimulated {
                 tugDelta = it.tugDelta,
                 tugAfter = it.tugAfter,
                 targetEffect = it.targetEffect,
+                status = it.status,
             )
         },
         summons = summons,

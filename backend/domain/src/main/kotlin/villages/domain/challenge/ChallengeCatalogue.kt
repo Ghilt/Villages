@@ -4,7 +4,7 @@ import villages.domain.Stat
 
 /**
  * The challenge's content as the rules read it, from `world/catalogues/challenges.json`: the effects a slice carries,
- * the summons they bring, and the kinds of challenge a progression is drawn from. The names and the words are the
+ * the summons they bring, the buffs and debuffs they put on, and the kinds of challenge a progression is drawn from. The names and the words are the
  * page's and are not here; an effect is known by its [ChallengeEffect.id] and its numbers by their names, which its
  * behaviour reads. A catalogue that breaks one of the rules below is refused whole. See decision record 0107.
  */
@@ -12,13 +12,23 @@ data class ChallengeCatalogue(
     val effects: List<ChallengeEffect>,
     val summons: Map<String, SummonSpec>,
     val kinds: Map<String, ChallengeKind>,
+    val buffs: Map<String, Lasting> = emptyMap(),
+    val debuffs: Map<String, Lasting> = emptyMap(),
 ) {
     init {
         require(effects.map { it.id }.toSet().size == effects.size) { "an effect has an id of its own" }
+        require(buffs.keys.none { it in debuffs }) { "a buff and a debuff have ids of their own, not ${buffs.keys.filter { it in debuffs }}" }
         effects.forEach { effect ->
             require(effect.summons == null || effect.summons in summons) { "${effect.id} summons ${effect.summons}, which is not a summon" }
+            require(effect.puts == null || lasting(effect.puts) != null) { "${effect.id} puts on ${effect.puts}, which is no buff or debuff" }
+        }
+        summons.forEach { (id, spec) ->
+            require(spec.puts == null || lasting(spec.puts) != null) { "$id puts on ${spec.puts}, which is no buff or debuff" }
         }
     }
+
+    /** A buff or a debuff by its id; none when it is neither. */
+    fun lasting(id: String): Lasting? = buffs[id] ?: debuffs[id]
 
     fun effect(id: String): ChallengeEffect? = effects.firstOrNull { it.id == id }
 
@@ -47,6 +57,8 @@ data class ChallengeEffect(
     val slot: ChallengeSlot? = null,
     /** Whether it needs a matching aspect: works only while the latest happening has its slice's aspect. */
     val matching: Boolean = false,
+    /** The buff or the debuff it puts on, by its id; none for one that puts nothing on. */
+    val puts: String? = null,
 ) {
     init {
         require(id.startsWith("${aspect.name.lowercase()}.")) { "an effect's id begins with its aspect, not $id" }
@@ -73,7 +85,13 @@ data class ChallengeSlot(val fits: Fits, val lends: Stat? = null, val onTheLine:
 
 /** One summon: its aspect, by which its boost is judged, and its numbers by name. */
 /** A kind of summon: its [aspect], its [numbers], and whether it needs a [matching] aspect - acts only while the happening has its own. */
-data class SummonSpec(val aspect: Aspect, val numbers: Map<String, Double> = emptyMap(), val matching: Boolean = false) {
+data class SummonSpec(
+    val aspect: Aspect,
+    val numbers: Map<String, Double> = emptyMap(),
+    val matching: Boolean = false,
+    /** The buff or the debuff its acts put on, by its id; none for one that puts nothing on. */
+    val puts: String? = null,
+) {
     init {
         require(numbers.values.all { it >= 0.0 && it.isFinite() }) { "a summon's numbers are nothing or more, not $numbers" }
     }
@@ -100,4 +118,19 @@ data class ChallengeKind(
         require(weights.values.all { it >= 0.0 && it.isFinite() }) { "a weight is nothing or more, not $weights" }
         require(weights.values.sum() > 0.0) { "some aspect weighs something" }
     }
+}
+
+/** What a buff or a debuff goes on. */
+enum class Bearer { SLICE, SUMMON }
+
+/**
+ * A buff, which helps, or a debuff, which hinders: what it goes [on] and its own [numbers]. An effect or a summon puts it
+ * on for the seconds they say; what it does while it is on is its behaviour's, in code, by its id.
+ */
+data class Lasting(val on: Bearer, val numbers: Map<String, Double> = emptyMap()) {
+    init {
+        require(numbers.values.all { it >= 0.0 && it.isFinite() }) { "a buff's or a debuff's numbers are nothing or more, not $numbers" }
+    }
+
+    fun number(name: String): Double = numbers[name] ?: error("a buff or a debuff has no number '$name'")
 }

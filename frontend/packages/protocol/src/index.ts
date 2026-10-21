@@ -5,7 +5,7 @@
  */
 
 /** Sent on the handshake so that the gateway can refuse a client it cannot speak to. */
-export const PROTOCOL_VERSION = 63;
+export const PROTOCOL_VERSION = 64;
 
 export {
   MAX_ZOOM,

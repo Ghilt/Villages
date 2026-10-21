@@ -18,9 +18,6 @@ interface EffectBehaviour {
 
     fun everySecond(scene: Scene): List<Change> = emptyList()
 
-    /** An enemy summon is about to act: true stops it. */
-    fun stops(scene: Scene, summon: Summon): Boolean = false
-
     fun enemyActed(scene: Scene, summon: Summon): List<Change> = emptyList()
 
     fun friendActed(scene: Scene, summon: Summon): List<Change> = emptyList()
@@ -108,6 +105,9 @@ interface Scene {
     /** How much [summon] pulls an act, boost and all. */
     fun pullOf(summon: Summon): Double
 
+    /** The buff or debuff this effect's or this summon's entry puts on, on [target] for [seconds], boosted and cut to whole seconds. */
+    fun putOn(target: Actor, seconds: Double): Change
+
     /** Who this is, as a moment names the doer: its slice, or the summon. */
     val actor: Actor
 
@@ -134,8 +134,9 @@ class Summon internal constructor(
         internal set
     var owner: Int = owner
         internal set
-    var silencedUntil: Int = -1
-        internal set
+
+    /** Its buffs and debuffs by their ids, each with the last second it lasts. */
+    internal val bearing = mutableMapOf<String, Int>()
     var coffer: Double = 0.0
         internal set
 
@@ -155,7 +156,8 @@ sealed interface Change {
 
     data class Turn(val target: Int, val toward: Side, val owner: Int, val actor: Actor, val effect: String) : Change
 
-    data class Silence(val target: Int, val until: Int, val actor: Actor, val effect: String?) : Change
+    /** [lasting], a buff or a debuff, goes on [target], a slice or a summon, until the second [until], put on by [actor] of [side]. */
+    data class PutOn(val side: Side, val target: Actor, val lasting: String, val until: Int, val actor: Actor, val effect: String?) : Change
 
     /** Every slice of [side] loses [amount] of integrity. */
     data class Wear(val side: Side, val amount: Double, val actor: Actor, val effect: String, val boosted: Boolean) : Change
@@ -180,7 +182,7 @@ sealed interface Change {
 }
 
 /**
- * Every effect's and summon's behaviour, by its id. The catalogue and the code are held to each other: every effect in
+ * Every effect's, summon's, buff's and debuff's behaviour, by its id. The catalogue and the code are held to each other: every effect in
  * the catalogue has a behaviour here with the numbers it reads, and every summon an effect brings has its own, which the
  * shelf holds as it takes a catalogue on; and every behaviour here has its entry in the real catalogue, which
  * `ChallengeBehavioursTest` holds.
@@ -191,8 +193,14 @@ object ChallengeBehaviours {
     val summons: Map<String, SummonBehaviour> =
         violenceAndDiplomacySummons + holyAndReasonSummons + authorityAndFreedomSummons + greedAndGenerositySummons + natureAndIndustrySummons
 
+    val lasting: Map<String, LastingBehaviour> = lastingBehaviours
+
     /** What [catalogue] asks of the code that the code lacks, a line a lack; none when the code has all of it. */
     fun unmatched(catalogue: ChallengeCatalogue): List<String> = buildList {
+        (catalogue.buffs + catalogue.debuffs).forEach { (id, spec) ->
+            val behaviour = lasting[id]
+            if (behaviour == null) add("$id has no behaviour in the code") else (behaviour.reads - spec.numbers.keys).forEach { add("$id gives no number '$it', which its behaviour reads") }
+        }
         catalogue.effects.forEach { effect ->
             val behaviour = effects[effect.id]
             if (behaviour == null) {

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { Challenges } from '@villages/world';
 import type { ChallengeSimulatedFrame } from '@villages/protocol';
 
-import { WHAT_SAID, effectSaid, numberSaid, summonNames, whoSaid } from './setup';
+import { WHAT_SAID, effectSaid, lastingSaid, numberSaid, summonNames, whoSaid } from './setup';
 import type { Draft } from './setup';
 
 /**
@@ -86,7 +86,10 @@ export function MomentsTable({
                 <td>{(challenge.progression.happenings[moment.happening] ?? []).join(' & ')}</td>
                 <td>{moment.side?.toUpperCase() ?? ''}</td>
                 <td>{whoSaid(moment.actor, draft, called)}</td>
-                <td>{WHAT_SAID[moment.what] ?? moment.what}</td>
+                <td>
+                  {WHAT_SAID[moment.what] ?? moment.what}
+                  {moment.status !== null && `: ${lastingSaid(moment.status, content).toLowerCase()}`}
+                </td>
                 <td>{effectSaid(moment.effect ?? moment.targetEffect, content)}</td>
                 <td>
                   {whoSaid(moment.target, draft, called)}

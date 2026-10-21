@@ -4,8 +4,8 @@ import { ASPECTS, antiOf, filledIn, parseChallenges } from '@villages/world';
 import type {
   ChallengeEffect,
   ChallengeKind,
+  ChallengeLasting,
   ChallengeSlot,
-  ChallengeSummon,
   Challenges as Content,
 } from '@villages/world';
 
@@ -26,8 +26,8 @@ const PAIRS = ASPECTS.filter((_, at) => at % 2 === 0).map((aspect) => [aspect, a
 /**
  * The challenge's content, `world/catalogues/challenges.json`, to read and to change: every effect a slice can carry,
  * in the five pairs of aspects, with its name, its words and its numbers, whether it needs a matching aspect, the slot
- * it brings and the summon it hires; every summon, and whether it needs one; and the kinds of challenge a progression
- * is drawn from. Every name, word and number is changed in
+ * it brings, the summon it hires and the buff or debuff it puts on; every summon, and whether it needs one; the chart
+ * of buffs and debuffs; and the kinds of challenge a progression is drawn from. Every name, word and number is changed in
  * place and saved through the game server, which takes it on at once. Below, the simulator has the server's engine
  * fight a challenge out on what is in force. See docs/plans/challenges.md and decision record 0107.
  */
@@ -56,6 +56,7 @@ export function Challenges() {
           {content.said[''] !== '' && <p className="inspect-said">{content.said['']}</p>}
           <Effects editor={editor} content={content} />
           <Summons editor={editor} content={content} />
+          <Lastings editor={editor} content={content} />
           <Kinds editor={editor} content={content} />
         </>
       )}
@@ -79,7 +80,7 @@ function Effects({ editor, content }: { editor: Editor; content: Content }) {
               {content.effects
                 .filter((effect) => effect.aspect === one)
                 .map((effect) => (
-                  <Effect key={effect.id} editor={editor} effect={effect} summons={content.summons} />
+                  <Effect key={effect.id} editor={editor} effect={effect} content={content} />
                 ))}
             </div>
           ))}
@@ -89,17 +90,10 @@ function Effects({ editor, content }: { editor: Editor; content: Content }) {
   );
 }
 
-function Effect({
-  editor,
-  effect,
-  summons,
-}: {
-  editor: Editor;
-  effect: ChallengeEffect;
-  summons: readonly ChallengeSummon[];
-}) {
+function Effect({ editor, effect, content }: { editor: Editor; effect: ChallengeEffect; content: Content }) {
   const at: Path = ['effects', effect.aspect, effect.key];
-  const summon = summons.find((one) => one.id === effect.summons);
+  const summon = content.summons.find((one) => one.id === effect.summons);
+  const puts = lastingOf(content, effect.puts);
   return (
     <div className="challenges-effect">
       <div className="challenges-effect__head">
@@ -122,7 +116,84 @@ function Effect({
           summons {article(summon.name)} {summon.name}: {filledIn(summon.words, summon.numbers)}
         </div>
       )}
+      {puts !== undefined && (
+        <div className="inspect-quiet">
+          puts on {puts.name.toLowerCase()}: {filledIn(puts.words, puts.numbers)}
+        </div>
+      )}
     </div>
+  );
+}
+
+/** A buff or a debuff by its id, whichever it is; none for none. */
+const lastingOf = (content: Content, id: string | null): ChallengeLasting | undefined =>
+  id === null ? undefined : [...content.buffs, ...content.debuffs].find((one) => one.id === id);
+
+/**
+ * The chart of buffs and debuffs: each one's name, whether it helps or hinders, what it goes on, what it does in words
+ * with its numbers filled in, and the effects and summons that put it on, debuffs first.
+ */
+function Lastings({ editor, content }: { editor: Editor; content: Content }) {
+  const rows = [
+    ...content.debuffs.map((lasting) => ({ lasting, section: 'debuffs', kind: 'debuff' })),
+    ...content.buffs.map((lasting) => ({ lasting, section: 'buffs', kind: 'buff' })),
+  ];
+  const putters = (id: string) =>
+    [
+      ...content.effects.filter((effect) => effect.puts === id).map((effect) => effect.name),
+      ...content.summons.filter((summon) => summon.puts === id).map((summon) => `the ${summon.name}`),
+    ].join(', ');
+  return (
+    <section className="inspect-group inspect-scroll" aria-label="buffs and debuffs">
+      <h2 className="inspect-group__title">buffs and debuffs</h2>
+      {content.said.debuffs !== '' && <p className="inspect-said">{content.said.debuffs}</p>}
+      {content.said.buffs !== '' && <p className="inspect-said">{content.said.buffs}</p>}
+      <table className="inspect-table challenges-lastings">
+        <thead>
+          <tr>
+            <th>name</th>
+            <th></th>
+            <th>on</th>
+            <th>what it does</th>
+            <th>put on by</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(({ lasting, section, kind }) => (
+            <tr key={lasting.id} className={`challenges-lastings__${kind}`}>
+              <th scope="row">
+                <WordsField
+                  editor={editor}
+                  path={[section, lasting.id, 'name']}
+                  label={`${lasting.id} name`}
+                />
+              </th>
+              <td>{kind}</td>
+              <td>{lasting.on}</td>
+              <td>
+                <WordsField
+                  editor={editor}
+                  path={[section, lasting.id, 'words']}
+                  label={`${lasting.id} words`}
+                  wide
+                />
+                <Numbers
+                  editor={editor}
+                  at={[section, lasting.id, 'numbers']}
+                  numbers={lasting.numbers}
+                  label={lasting.id}
+                />
+                {Object.keys(lasting.numbers).length > 0 && (
+                  <div>{filledIn(lasting.words, lasting.numbers)}</div>
+                )}
+              </td>
+              <td>{putters(lasting.id)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {content.buffs.length === 0 && <p className="inspect-quiet">no buffs yet</p>}
+    </section>
   );
 }
 

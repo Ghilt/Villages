@@ -165,3 +165,6 @@ recorded over. See decision record 0037. What each one changed:
 - **63** - `simulateMatchups`, answered by `matchupsSimulated`: every aspect's slice weighed against every other's, a
   batch of runs a pairing on progressions drawn from a challenge kind, or by `simulationRefused`. Instruments, refused
   while they are closed. See decision record 0107.
+- **64** - a moment in `challengeSimulated` names the buff or the debuff it put on or lifted, as `status`, with the new
+  moments `buffed`, `debuffed` and `lifted`; `silenced` and `stopped` are gone, the first now a debuff. See
+  `docs/plans/challenge-matching.md`.

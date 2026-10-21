@@ -3,14 +3,40 @@
   "id": "run-1",
   "seed": 20261020,
   "catalogue": "60410b0ff25e88bec6f2e90dbd2f40773741438745cda4ae61123354e97442c4",
-  "progression": { "seconds": 30, "happenings": [["violence"], ["holy", "diplomacy"]] },
+  "progression": {
+    "seconds": 30,
+    "happenings": [
+      [
+        "violence"
+      ],
+      [
+        "holy",
+        "diplomacy"
+      ]
+    ]
+  },
   "outcome": {
     "tug": -12.5,
     "ended": "timeRanOut",
     "second": 29,
     "wonBy": "b",
-    "gains": [{ "side": "b", "resource": "piety", "amount": 5, "effect": "holy.sanctuary" }],
-    "losses": [{ "side": "b", "name": "Cathedral of Lund", "became": "damaged", "effectiveness": 10, "effect": "holy.sanctuary" }]
+    "gains": [
+      {
+        "side": "b",
+        "resource": "piety",
+        "amount": 5,
+        "effect": "holy.sanctuary"
+      }
+    ],
+    "losses": [
+      {
+        "side": "b",
+        "name": "Cathedral of Lund",
+        "became": "damaged",
+        "effectiveness": 10,
+        "effect": "holy.sanctuary"
+      }
+    ]
   },
   "moments": [
     {
@@ -25,7 +51,8 @@
       "boosted": false,
       "tugDelta": 0,
       "tugAfter": 0,
-      "targetEffect": null
+      "targetEffect": null,
+      "status": null
     },
     {
       "second": 0,
@@ -39,7 +66,23 @@
       "boosted": true,
       "tugDelta": 21,
       "tugAfter": 21,
-      "targetEffect": null
+      "targetEffect": null,
+      "status": null
+    },
+    {
+      "second": 15,
+      "happening": 1,
+      "side": "b",
+      "actor": "#2",
+      "what": "debuffed",
+      "effect": null,
+      "target": "#1",
+      "amount": 3,
+      "boosted": false,
+      "tugDelta": 0,
+      "tugAfter": 21,
+      "targetEffect": null,
+      "status": "silenced"
     },
     {
       "second": 15,
@@ -53,8 +96,15 @@
       "boosted": true,
       "tugDelta": -30,
       "tugAfter": -9,
-      "targetEffect": null
+      "targetEffect": null,
+      "status": null
     }
   ],
-  "summons": [{ "serial": 1, "kind": "onTheLine", "called": "Cathedral of Lund" }]
+  "summons": [
+    {
+      "serial": 1,
+      "kind": "onTheLine",
+      "called": "Cathedral of Lund"
+    }
+  ]
 }
