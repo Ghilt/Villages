@@ -189,8 +189,11 @@ export function jettyFaces(axis: JettyAxis): Face[] {
   ];
 }
 
+/** How long a bridge's picture is drawn, end to end, in world units: the map scales it to each bridge's span. */
+export const BRIDGE_SPAN = 4;
+
 /** A bridge's deck along its axis, its middle at the frame's origin, and what holds it up: piers, or stone arches. */
-export function bridgeFaces(kind: BridgeKind, axis: BridgeAxis, span = 4): Face[] {
+export function bridgeFaces(kind: BridgeKind, axis: BridgeAxis, span = BRIDGE_SPAN): Face[] {
   const [da, db] =
     axis === 'u'
       ? [1, 0]

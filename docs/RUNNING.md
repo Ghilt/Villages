@@ -563,7 +563,10 @@ stage alone, with none of the debug panel in it (decision record 0079).
   settlements, how many paths join them and how many lanes the settlements took, and how many pieces of road it wears.
   The roads are the pieces of the `roads` layer the game server sent, worn along their lines wherever the ground is land
   and the house has revealed it, so a road stops where the revealed ground stops and the river under a bridge shows; no
-  tree grows on one, so a road through a forest is a clear way. A path is walked only
+  tree grows on one, so a road through a forest is a clear way. Where a road crosses a river it does so on a bridge,
+  its picture by its kind and axis from `public/art/settlements.webp`, hung at its deck's middle and drawn as long as
+  its span, standing among the trees on the strip of its deck from zoom 7.5 in; the log says under `roads` how many
+  bridges are held, and the probe `villagesBridges()` how many are drawn. A path is walked only
   once the flat tiles under it have come, keeps off open water, and is worn only on ground the house has revealed. They are the look's, Adam's to settle by eye at zoom 9 or 10
   over a few buildings, and are not kept across a reload. The yards come in at 7.5 with the buildings' pictures, and
   keep to the fog as the buildings do: Antarctica's structures show theirs with the fog off. Every building casts its

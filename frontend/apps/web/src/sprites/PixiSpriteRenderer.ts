@@ -3,6 +3,7 @@ import { Application, Container, Rectangle } from 'pixi.js';
 import type { CameraView } from '../geometry/cameraMath';
 import type { FogField } from '../fog/fogField';
 import { createUncolouring } from '../fog/uncolouring';
+import { createBridgesLayer, type BridgesLayer } from './bridges/BridgesLayer';
 import { hangDevHandles } from './devHandles';
 import { createCloudLayer } from './clouds/CloudLayer';
 import { createCritterLayer } from './critters/CritterLayer';
@@ -71,8 +72,9 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   /** Settled once the game has started: what is kept off the start, so as not to slow it, waits on it. */
   let hasStarted = () => {};
   const started = new Promise<void>((resolve) => (hasStarted = resolve));
-  /** The ground worn bare under the buildings, once there is a canvas to draw it on. */
+  /** The ground worn bare under the buildings, and the bridges, once there is a canvas to draw them on. */
   let ground: GroundLayer | null = null;
+  let bridges: BridgesLayer | null = null;
   /** What is on the map: the last scene handed in, which a renderer mounted late is given whole. */
   let scene: Scene = NOTHING;
   /**
@@ -245,6 +247,8 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
         },
         textures.settlements,
       );
+      // The bridges stand among the trees beside the marks, so both are handed over before the trees are cut.
+      bridges = createBridgesLayer(textures.settlements, scenery.standing);
       const ring = createRingLayer(marks, drawSoon);
       // The land moving in the wind and the light, on the ground under everything that stands on it.
       const land = createLandLayer(app.renderer, () => scene.scenery.tilesRoot, drawSoon);
@@ -282,6 +286,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
         trees,
         drawn: [
           marks,
+          bridges,
           ring,
           hazeLayer,
           uncolouringLayer,
@@ -311,6 +316,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
         marksInVision: () => layers?.marks.inVision() ?? 0,
         undulating: clock.undulating,
         sprites: () => layers?.marks.report() ?? {},
+        bridges: () => bridges?.report() ?? { bridges: 0, drawn: 0 },
       });
     },
 
@@ -347,6 +353,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       unpaint?.();
       scenery = null;
       ground = null;
+      bridges = null;
       unwatch?.();
       unwatch = null;
       layers = null;

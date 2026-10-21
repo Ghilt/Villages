@@ -44,7 +44,7 @@ import { standsReader } from './lib/stills.ts';
 /**
  * The roads of 1790: between the settlements, and from them to the ruined towns.
  *
- *   node bin/roadsWorld.ts [master] [--picture] [--around Q90,Q85] [--scale 1.5]
+ *   node bin/roadsWorld.ts [master] [--picture] [--around Q90,Q85] [--scale 1.5] [--near Q1792]
  *
  * Reads the master's settlement sites from `world/ground/<master>/settlements.json`, its ruined towns from its
  * names and its ruins' records, and its ground as its zoom-7 tiles have it - the class under every world unit, its
@@ -361,6 +361,8 @@ reportRoads({
   longestKm: file.longestKm,
   stoneFrom: file.bridges.stoneFrom,
   kmPerUnit,
+  width,
+  near: towns.find((town) => town.id === (flag('near') ?? 'Q1792')) ?? { x: width / 2, y: width / 2 },
   say,
 });
 say(`${entering} stretches of road over a building, a ruin's piece or water, which must be none`);

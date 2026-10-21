@@ -99,3 +99,11 @@ trees in front of those copies would have to be copied too, and theirs, down the
 drawn twice is darker than once.
 
 **A depth buffer.** Every picture would need its depth a pixel at a time, which a flat picture does not have.
+
+## Amendment, 2026-10-21: a settlement and a bridge stand among the trees too
+
+A settlement stands as one thing, whatever its buildings, on its square, so a view of many villages cuts the trees into
+one slice more a village and not one a building; its pieces are drawn in their own order within it. A bridge stands on
+the strip of its deck, the corner nearest the camera first. The bridges are handed to the layer beside the marks, each
+source's list kept apart and the two drawn as one stack (`StandingLayer.stand(things, from)`). See decision records 0114
+and 0115.

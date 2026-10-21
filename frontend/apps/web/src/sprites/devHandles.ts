@@ -8,11 +8,14 @@ export interface DevReadings {
   /** Whether the haze's slow clock is running, which it does only while there is haze to move. */
   undulating: () => boolean;
   sprites: () => Record<string, DrawnSprite>;
+  /** How many bridges are held, and how many drawn now. */
+  bridges: () => { bridges: number; drawn: number };
 }
 
 /**
  * The sprite canvas's handles on the window, in a development build only: `villagesFog`, what the fog is drawing
- * and from what, and `villagesSprites`, where every sprite actually ended up - for the console and for the
+ * and from what, `villagesSprites`, where every sprite actually ended up, and `villagesBridges`, how many bridges
+ * stand - for the console and for the
  * end-to-end test, which has no other way to ask a canvas what it drew.
  */
 export function hangDevHandles(readings: DevReadings): void {
@@ -22,6 +25,7 @@ export function hangDevHandles(readings: DevReadings): void {
   const handles = window as unknown as {
     villagesFog?: () => unknown;
     villagesSprites?: () => Record<string, DrawnSprite>;
+    villagesBridges?: () => { bridges: number; drawn: number };
   };
   handles.villagesFog = () => {
     const { drawing, field } = readings.fog();
@@ -36,4 +40,5 @@ export function hangDevHandles(readings: DevReadings): void {
     };
   };
   handles.villagesSprites = readings.sprites;
+  handles.villagesBridges = readings.bridges;
 }

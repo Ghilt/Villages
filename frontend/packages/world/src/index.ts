@@ -68,6 +68,7 @@ export { RUIN_PIECES } from './ruins.ts';
 export type { RuinPieceName, RuinsLook, RuinsMapFile } from './ruins.ts';
 export {
   BRIDGE_AXES,
+  BRIDGE_SPAN,
   BRIDGE_KINDS,
   JETTY_AXES,
   PIECE_SIDES,

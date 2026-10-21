@@ -58,8 +58,11 @@ export interface TreeParticles {
 export interface StandingLayer extends Layer, TreeParticles {
   /** The slices and what stands between them, in the world under the fog. */
   readonly view: Container;
-  /** Everything standing among the trees, handed over by the marks every frame they are drawn. */
-  stand(things: readonly StandingThing[]): void;
+  /**
+   * Everything standing among the trees that one source draws - the marks, the bridges - handed over every frame it
+   * draws, kept beside what the others handed over.
+   */
+  stand(things: readonly StandingThing[], from?: string): void;
   /** What the pointer is over, by its id, or null: the trees standing in its way fade out of it. */
   hover(id: string | null): void;
 }
@@ -75,6 +78,7 @@ export function createStandingLayer(
   let texture: Texture | null = null;
   let matrix: Matrix | null = null;
   let things: readonly StandingThing[] = [];
+  const bySource = new Map<string, readonly StandingThing[]>();
   /** What the slices were last cut for, and whether a tree has come or gone or moved since. */
   let cutFor = '';
   let unsliced = true;
@@ -197,8 +201,9 @@ export function createStandingLayer(
       for (const one of slices) one.setFromMatrix(next);
     },
 
-    stand(next: readonly StandingThing[]): void {
-      things = next;
+    stand(next: readonly StandingThing[], from = 'marks'): void {
+      bySource.set(from, next);
+      things = bySource.size === 1 ? next : [...bySource.values()].flat();
     },
     hover(id: string | null): void {
       hovered = id;
