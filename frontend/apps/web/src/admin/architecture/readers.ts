@@ -182,9 +182,16 @@ export const READERS: readonly Reader[] = [
   {
     id: 'folder-ground',
     program: 'server',
-    name: 'ground, for rolls and water',
+    name: 'ground, for rolls, water and where the house bots stand',
     where: 'FolderGround.kt',
     reads: ['ground'],
+  },
+  {
+    id: 'ruins-file',
+    program: 'server',
+    name: 'ruins, for how far each one reaches and the house bots stand past it',
+    where: 'RuinsFile.kt',
+    reads: ['ruins'],
   },
   { id: 'folder-names', program: 'server', name: 'names', where: 'FolderNames.kt', reads: ['names-server'] },
   {
