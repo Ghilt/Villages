@@ -29,7 +29,7 @@ class HolyReasonSpec : StringSpec({
         won.outcome.gains shouldBe listOf(Gain(Side.A, Resource.PIETY, 5.0, "holy.sanctuary"))
 
         val killers = listOf(slice(VIOLENCE, "violence.sellswords", "violence.noQuarter", power = 100.0))
-        val lost = fight(sanctuary, killers, 6, Happening(HOLY), catalogue = TEST_CATALOGUE.with("violence.noQuarter", "chance", 100.0))
+        val lost = fight(sanctuary, killers, 6, Happening(HOLY, VIOLENCE), catalogue = TEST_CATALOGUE.with("violence.noQuarter", "chance", 100.0))
         lost.saying(What.KILLED).single().target shouldBe Actor.OfSummon(1, Actor.ON_THE_LINE, "Cathedral of Lund")
         lost.outcome.losses shouldBe listOf(Loss(Side.A, "Cathedral of Lund", Fits.STRUCTURE, 10.0, "holy.sanctuary"))
         lost.outcome.gains shouldBe emptyList()
@@ -37,14 +37,14 @@ class HolyReasonSpec : StringSpec({
 
     "a building is harder to kill than its slice: its integrity is its slice's and half what it arrived with" {
         val killers = listOf(slice(VIOLENCE, "violence.sellswords", "violence.noQuarter", power = 55.0))
-        val result = fight(sanctuary, killers, 6, Happening(HOLY), catalogue = TEST_CATALOGUE.with("violence.noQuarter", "chance", 100.0))
+        val result = fight(sanctuary, killers, 6, Happening(HOLY, VIOLENCE), catalogue = TEST_CATALOGUE.with("violence.noQuarter", "chance", 100.0))
 
         result.saying(What.KILLED) shouldBe emptyList()
     }
 
     "the Priest pulls the integrity its side stands above the enemy's, and grows as Divine Rebuke wears the enemy down" {
         val holy = listOf(slice(HOLY, "holy.ordination", "holy.rebuke"))
-        val result = fight(holy, hiring, 5, Happening(HOLY), catalogue = TEST_CATALOGUE.with("holy.rebuke", "chance", 100.0))
+        val result = fight(holy, hiring, 5, Happening(HOLY), catalogue = ANYWHERE.with("holy.rebuke", "chance", 100.0))
 
         result.saying(What.PULLED).filter { it.side == Side.A }.map { it.amount } shouldBe listOf(0.0, 22.5, 45.0, 67.5)
         result.saying(What.INTEGRITY_LOST).map { it.amount } shouldBe List(4) { 15.0 }
@@ -72,8 +72,8 @@ class HolyReasonSpec : StringSpec({
         val counsel = listOf(slice(REASON, "reason.counsel", slotted = mapOf("reason.counsel" to agnes)))
         fight(counsel, IDLE, 2, Happening(REASON)).saying(What.LENT).single().amount shouldBe 18.0
 
-        val onTheLine = TEST_CATALOGUE.copy(
-            effects = TEST_CATALOGUE.effects.map { if (it.id == "reason.counsel") it.copy(slot = it.slot!!.copy(onTheLine = true)) else it },
+        val onTheLine = ANYWHERE.copy(
+            effects = ANYWHERE.effects.map { if (it.id == "reason.counsel") it.copy(slot = it.slot!!.copy(onTheLine = true)) else it },
         ).with("violence.noQuarter", "chance", 100.0)
         val killers = listOf(slice(VIOLENCE, "violence.sellswords", "violence.noQuarter", power = 100.0))
         val risked = fight(counsel, killers, 4, Happening(REASON), Happening(REASON), catalogue = onTheLine)

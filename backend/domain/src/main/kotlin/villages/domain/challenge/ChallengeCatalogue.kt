@@ -31,7 +31,7 @@ data class ChallengeCatalogue(
     }
 }
 
-/** Whether an effect fires each time a happening puts its slice on stage, or works for as long as it stays there. */
+/** Whether an effect fires as its slice meets each happening, or works from second to second. */
 enum class Fires { TRIGGER, PASSIVE }
 
 /**
@@ -45,6 +45,8 @@ data class ChallengeEffect(
     val numbers: Map<String, Double> = emptyMap(),
     val summons: String? = null,
     val slot: ChallengeSlot? = null,
+    /** Whether it needs a matching aspect: works only while the latest happening has its slice's aspect. */
+    val matching: Boolean = false,
 ) {
     init {
         require(id.startsWith("${aspect.name.lowercase()}.")) { "an effect's id begins with its aspect, not $id" }
@@ -70,7 +72,8 @@ data class ChallengeSlot(val fits: Fits, val lends: Stat? = null, val onTheLine:
 }
 
 /** One summon: its aspect, by which its boost is judged, and its numbers by name. */
-data class SummonSpec(val aspect: Aspect, val numbers: Map<String, Double> = emptyMap()) {
+/** A kind of summon: its [aspect], its [numbers], and whether it needs a [matching] aspect - acts only while the happening has its own. */
+data class SummonSpec(val aspect: Aspect, val numbers: Map<String, Double> = emptyMap(), val matching: Boolean = false) {
     init {
         require(numbers.values.all { it >= 0.0 && it.isFinite() }) { "a summon's numbers are nothing or more, not $numbers" }
     }

@@ -194,6 +194,13 @@
 /* Every aspect weighed against every other (Matchups.tsx): a grid of side A's share of the wins, each pair of aspects
    set apart by a rule, each aspect's mean at the ends. */
 
+/* What needs a matching aspect, beside an effect in the slice builder: quieter than its name, louder than its words. */
+.challenges-matching {
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
 .challenges-grid {
   border-collapse: collapse;
   font-size: 0.8rem;

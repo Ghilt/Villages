@@ -40,8 +40,8 @@ sealed interface StandIn {
 data class Happening(val aspects: List<Aspect>) {
     constructor(vararg aspects: Aspect) : this(aspects.toList())
 
-    /** Whether a thing of [aspect] is boosted in it: its aspect or its anti-aspect is among the happening's. */
-    fun boosts(aspect: Aspect): Boolean = aspects.any { it == aspect || it == aspect.anti }
+    /** Whether a thing of [aspect] matches it, and so is boosted in it: its aspect is among the happening's. */
+    fun matches(aspect: Aspect): Boolean = aspect in aspects
 }
 
 /** A challenge's happenings in order over its [seconds], the first at the start and the rest spaced evenly. */

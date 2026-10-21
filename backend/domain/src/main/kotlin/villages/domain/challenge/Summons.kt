@@ -79,7 +79,7 @@ private fun Contest.kill(change: Change.Kill) {
         losses += Loss(target.side, line.name, fits, rules.effectivenessLost, target.lineEffect!!)
     }
     Side.entries.forEach { side ->
-        onStageEffects(side).flatMap { (effect, behaviour) -> behaviour.killed(scene(side, effect), target, friend = target.side == side) }
+        working(side).flatMap { (slice, effect, behaviour) -> behaviour.killed(scene(side, slice, effect), target, friend = target.side == side) }
             .forEach { landOne(it) }
     }
 }

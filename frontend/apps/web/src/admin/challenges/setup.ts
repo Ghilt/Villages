@@ -125,7 +125,8 @@ export const numberSaid = (value: number) => (Number.isInteger(value) ? String(v
 /** What each kind of moment says, in words. */
 export const WHAT_SAID: Readonly<Record<string, string>> = {
   happeningBegan: 'happening began',
-  onStage: 'on stage',
+  matches: 'aspect matches',
+  idle: 'sat out, its aspect not matching',
   summoned: 'summoned',
   noRoom: 'no room',
   emptySlot: 'empty slot',

@@ -20,14 +20,22 @@ describe("the challenge's content", () => {
       'reason.counsel',
       'holy.sanctuary',
     ]);
-    expect(challenges.effects[0]).toMatchObject({ fires: 'trigger', summons: 'mercenary', slot: null });
+    expect(challenges.effects[0]).toMatchObject({
+      fires: 'trigger',
+      summons: 'mercenary',
+      slot: null,
+      matching: true,
+    });
     expect(challenges.effects[1]!.numbers).toEqual({ chance: 25 });
+    expect(challenges.effects[1]!.matching).toBe(false);
     expect(challenges.effects[2]!.slot).toEqual({ fits: 'keyFigure', lends: 'reason', onTheLine: false });
     expect(challenges.effects[3]!.slot).toEqual({ fits: 'structure', lends: null, onTheLine: true });
     expect(challenges.summons.find((summon) => summon.id === 'collector')).toMatchObject({
       aspect: 'greed',
       numbers: { costs: 3, deposits: 6.5 },
+      matching: false,
     });
+    expect(challenges.summons.find((summon) => summon.id === 'mercenary')!.matching).toBe(true);
     expect(challenges.kinds[0]).toMatchObject({ seconds: [30, 90], happenings: [3, 6], twoAspects: 20 });
     expect(challenges.kinds[0]!.weights).toMatchObject({ violence: 8, holy: 1, reason: 0 });
     expect(challenges.said.summons).toBe('Two summons.');
@@ -43,6 +51,9 @@ describe("the challenge's content", () => {
   it('refuses a field it cannot read, naming where', () => {
     expect(() => parseChallenges(fixture.replace('"passive"', '"sometimes"'))).toThrow(
       'world/catalogues/challenges.json: no effects.violence.noQuarter.fires the page can read',
+    );
+    expect(() => parseChallenges(fixture.replace('"matching": true', '"matching": "yes"'))).toThrow(
+      'world/catalogues/challenges.json: no effects.violence.sellswords.matching the page can read',
     );
   });
 

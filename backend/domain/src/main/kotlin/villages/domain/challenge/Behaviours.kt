@@ -2,18 +2,18 @@ package villages.domain.challenge
 
 /**
  * What an effect does, in code, keyed by its id in the catalogue, which gives it its numbers. Every hook does nothing
- * unless the effect says otherwise, and every hook but [gains] is asked only while the effect's slice is on stage,
- * because a passive works only there. A hook never changes the contest: it says what it asks for as [Change]s, which
+ * unless the effect says otherwise, and every hook but [gains] is asked only while the effect works: always, or, when
+ * it needs a matching aspect, while the latest happening has its slice's aspect. A hook never changes the contest: it says what it asks for as [Change]s, which
  * land together at the end of the moment, so everything in one second reads the state the second began with.
  */
 interface EffectBehaviour {
     /** The numbers it reads from its catalogue entry, which the catalogue must give it. */
     val reads: Set<String> get() = emptySet()
 
-    /** Its slice came on stage at a happening: [Scene.byDraw] when by the draw rather than by an aspect. */
+    /** Its slice met a happening as it began: [Scene.matches] when the slice's aspect matches it. */
     fun activated(scene: Scene): List<Change> = emptyList()
 
-    /** The happening is changing, before the new one chooses its slices: [Scene.previous] to [Scene.happening]. */
+    /** The happening is changing, before the slices meet the new one: [Scene.previous] to [Scene.happening]. */
     fun changed(scene: Scene): List<Change> = emptyList()
 
     fun everySecond(scene: Scene): List<Change> = emptyList()
@@ -34,8 +34,8 @@ interface EffectBehaviour {
     /** How much lower the opponent's power is right now; nothing when it does not hold. */
     fun aura(scene: Scene): Double = 0.0
 
-    /** At a change of happening, whether its slice stays on stage whatever the new aspects. */
-    fun keepsStage(scene: Scene): Boolean = false
+    /** At a change to a happening its slice's aspect does not match, whether the slice goes on matching anyway. */
+    fun keepsMatching(scene: Scene): Boolean = false
 
     /** What its side gains when the challenge ends, [won] or not; [onTheLine] when its slot's thing went on the line. */
     fun gains(scene: Scene, won: Boolean, onTheLine: Boolean): List<Gain> = emptyList()
@@ -67,8 +67,13 @@ interface Scene {
     /** The happening before this one, at a change; none at the first. */
     val previous: Happening?
 
-    /** Its slice came on stage by the draw, matching neither the happening's aspects nor their anti-aspects. */
-    val byDraw: Boolean
+    /**
+     * Whether its aspect matches: an effect's slice's, which Will of One's Own may hold, or a summon's own, against
+     * the happening of the moment.
+     */
+    val matches: Boolean
+
+    /** Whether the happening has its aspect, which alone gives the boost. */
     val boosted: Boolean
 
     fun number(name: String): Double
@@ -80,12 +85,10 @@ interface Scene {
 
     fun <T> pick(things: List<T>): T
 
-    /** The power of [side]'s slice on stage, lowered by any aura of the other side's. */
-    fun power(side: Side): Double
-
-    /** The power of one of this side's own slices, lowered by any aura against it: a summon's owner's. */
+    /** The power of one of this side's own slices, lowered by the auras against it: its own, or a summon's owner's. */
     fun ownPower(slice: Int): Double
 
+    /** [side]'s integrity: the mean of its slices'. */
     fun integrity(side: Side): Double
 
     /** Whether the tug strictly favours [side]. */

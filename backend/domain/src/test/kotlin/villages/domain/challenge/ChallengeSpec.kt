@@ -16,13 +16,14 @@ class ChallengeSpec : StringSpec({
 
     val hiring = listOf(slice(VIOLENCE, "violence.sellswords", summonCount = 1))
 
-    "a Mercenary pulls ten a second from the second after it is hired, half as much again in a happening of its pair" {
-        val unboosted = fight(hiring, IDLE, 5, Happening(REASON))
+    "a Mercenary pulls ten a second from the second after it is hired, half as much again in a happening of its own aspect, and no more in its anti-aspect's" {
+        val anywhere = TEST_CATALOGUE.marked("violence.sellswords", false)
+        val unboosted = fight(hiring, IDLE, 5, Happening(REASON), catalogue = anywhere)
         unboosted.saying(What.PULLED).map { it.second to it.amount } shouldBe (1..4).map { it to 10.0 }
         unboosted.outcome shouldBe Outcome(40.0, Ending.TIME_RAN_OUT, 4, Side.A, emptyList(), emptyList())
 
         fight(hiring, IDLE, 5, Happening(VIOLENCE)).outcome.tug shouldBe 60.0
-        fight(hiring, IDLE, 5, Happening(DIPLOMACY)).outcome.tug shouldBe 60.0
+        fight(hiring, IDLE, 5, Happening(DIPLOMACY), catalogue = anywhere).outcome.tug shouldBe 40.0
     }
 
     "pulled to an end, the challenge stops in that second, and its tug is the end" {
@@ -36,16 +37,20 @@ class ChallengeSpec : StringSpec({
         pulled.moments.sumOf { it.tugDelta } shouldBe 100.0
     }
 
-    "a happening puts on stage a slice of its aspect, else one of its anti-aspect, else one drawn from them all" {
+    "every slice meets every happening, and those whose aspect it has match it: as many as it has, or none" {
         val three = listOf(slice(VIOLENCE, "violence.sellswords"), slice(DIPLOMACY, "diplomacy.parley"), slice(HOLY, "holy.rebuke"))
-        val staged = fight(three, IDLE, 3, Happening(HOLY), Happening(REASON), Happening(GREED), seed = 11)
-            .saying(What.ON_STAGE).filter { it.side == Side.A }.map { (it.actor as Actor.OfSlice).index }
+        val matched = fight(three, IDLE, 3, Happening(HOLY), Happening(VIOLENCE, DIPLOMACY), Happening(GREED))
+            .saying(What.MATCHES).filter { it.side == Side.A }.map { it.happening to (it.actor as Actor.OfSlice).index }
 
-        staged.take(2) shouldBe listOf(2, 2)
-        val drawn = (1L..40L).map { seed ->
-            fight(three, IDLE, 1, Happening(GREED), seed = seed).saying(What.ON_STAGE).first { it.side == Side.A }.actor
-        }.toSet()
-        drawn.size shouldBe 3
+        matched shouldBe listOf(0 to 2, 1 to 0, 1 to 1)
+    }
+
+    "an effect that needs a matching aspect waits for one; one that does not works in every happening, boosted only in its own" {
+        val ines = StandIn.KeyFigure("Ines", mapOf(Stat.KINDNESS to 12))
+        val envoy = listOf(slice(DIPLOMACY, "diplomacy.envoy", slotted = mapOf("diplomacy.envoy" to ines)))
+        fight(envoy, IDLE, 4, Happening(REASON), Happening(DIPLOMACY)).saying(What.LENT).map { it.amount } shouldBe listOf(12.0, 18.0)
+
+        fight(hiring, IDLE, 4, Happening(REASON), Happening(VIOLENCE)).saying(What.SUMMONED).map { it.second } shouldBe listOf(2)
     }
 
     "a side has no more summons than its slices' summon counts together, and one past them has no room" {
@@ -55,13 +60,16 @@ class ChallengeSpec : StringSpec({
         result.saying(What.NO_ROOM).size shouldBe 2
     }
 
-    "summons stay when their slice steps aside, and a passive works only while its slice is on stage" {
+    "summons act on when their slice's aspect stops matching, and a passive that needs a matching aspect works only while it does" {
         val both = listOf(slice(VIOLENCE, "violence.sellswords"), slice(DIPLOMACY, "diplomacy.parley"))
-        val result = fight(both, hiring, 10, Happening(VIOLENCE), Happening(DIPLOMACY))
+        val anywhere = fight(both, hiring, 10, Happening(VIOLENCE), Happening(DIPLOMACY))
 
-        result.saying(What.PULLED).filter { it.effect == "diplomacy.parley" }.map { it.second } shouldBe (5..9).toList()
-        result.saying(What.PULLED).filter { it.side == Side.A && it.actor is Actor.OfSummon }.map { it.second } shouldBe (1..9).toList()
-        result.outcome.tug shouldBe 15.0
+        anywhere.saying(What.PULLED).filter { it.effect == "diplomacy.parley" }.map { it.amount } shouldBe List(5) { 2.0 } + List(5) { 3.0 }
+        anywhere.saying(What.PULLED).filter { it.side == Side.A && it.actor is Actor.OfSummon }.map { it.second } shouldBe (1..9).toList()
+        anywhere.outcome.tug shouldBe 25.0
+
+        fight(both, hiring, 10, Happening(VIOLENCE), Happening(DIPLOMACY), catalogue = TEST_CATALOGUE.marked("diplomacy.parley", true))
+            .saying(What.PULLED).filter { it.effect == "diplomacy.parley" }.map { it.second } shouldBe (5..9).toList()
     }
 
     "everything in a second reads the state it began with, so a summon killed in a second still acts in it" {
@@ -88,20 +96,20 @@ class ChallengeSpec : StringSpec({
     "Endless Parley pulls every second, and lowers the opponent's power while the tug favours them" {
         val result = fight(hiring, listOf(slice(DIPLOMACY, "diplomacy.parley")), 6, Happening(VIOLENCE))
 
-        result.saying(What.PULLED).filter { it.effect == "diplomacy.parley" }.map { it.amount } shouldBe List(6) { 3.0 }
+        result.saying(What.PULLED).filter { it.effect == "diplomacy.parley" }.map { it.amount } shouldBe List(6) { 2.0 }
         val on = result.saying(What.AURA_ON).single()
         on.second shouldBe 2
-        on.amount shouldBe 7.5
+        on.amount shouldBe 5.0
     }
 
-    "Spoils of the Field pays as the happening changes away from Violence, boosted by the happening it changes to" {
+    "Spoils of the Field pays as the happening changes away from Violence, never boosted, since the new one has not Violence" {
         val spoils = listOf(slice(VIOLENCE, "violence.spoils"))
-        fight(spoils, IDLE, 4, Happening(VIOLENCE), Happening(DIPLOMACY)).saying(What.PULLED).single().amount shouldBe 45.0
+        fight(spoils, IDLE, 4, Happening(VIOLENCE), Happening(DIPLOMACY)).saying(What.PULLED).single().amount shouldBe 30.0
         fight(spoils, IDLE, 4, Happening(VIOLENCE), Happening(REASON)).saying(What.PULLED).single().amount shouldBe 30.0
         fight(spoils, IDLE, 4, Happening(VIOLENCE), Happening(VIOLENCE, REASON)).saying(What.PULLED) shouldBe emptyList()
     }
 
-    "a key figure lends their stat as their slice comes on stage, and an empty slot says so" {
+    "a key figure lends their stat as their slice meets a happening, and an empty slot says so" {
         val ines = StandIn.KeyFigure("Ines", mapOf(Stat.KINDNESS to 12, Stat.REASON to 3))
         val lent = fight(listOf(slice(DIPLOMACY, "diplomacy.envoy", slotted = mapOf("diplomacy.envoy" to ines))), IDLE, 2, Happening(DIPLOMACY))
         lent.saying(What.LENT).single().amount shouldBe 18.0

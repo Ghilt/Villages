@@ -48,8 +48,11 @@ enum class What {
     /** A happening began; its aspects are the progression's. */
     HAPPENING_BEGAN,
 
-    /** A slice came on stage; [ChallengeMoment.effect] names what kept it there, when something did. */
-    ON_STAGE,
+    /** A slice's aspect matches the happening that began; [ChallengeMoment.effect] names what held it matching, when something did. */
+    MATCHES,
+
+    /** A summon whose kind needs a matching aspect sat out the seconds of a happening that does not have its own. */
+    IDLE,
     SUMMONED,
 
     /** A summon could not come: its side has as many as its slices let it have. */

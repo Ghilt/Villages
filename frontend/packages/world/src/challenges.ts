@@ -49,6 +49,8 @@ export interface ChallengeEffect {
   readonly numbers: Readonly<Record<string, number>>;
   readonly summons: string | null;
   readonly slot: ChallengeSlot | null;
+  /** Whether it needs a matching aspect: works only while the latest happening has its slice's aspect. */
+  readonly matching: boolean;
 }
 
 export interface ChallengeSummon {
@@ -57,6 +59,8 @@ export interface ChallengeSummon {
   readonly aspect: Aspect;
   readonly words: string;
   readonly numbers: Readonly<Record<string, number>>;
+  /** Whether it needs a matching aspect: acts only while the happening has its own aspect. */
+  readonly matching: boolean;
 }
 
 export interface ChallengeKind {
@@ -141,6 +145,7 @@ function effectOf(aspect: Aspect, key: string, node: unknown): ChallengeEffect {
     numbers: numbersOf(node.numbers, `${at}.numbers`),
     summons: summons ?? null,
     slot: slotOf(node.slot, `${at}.slot`),
+    matching: flagOf(node.matching, `${at}.matching`),
   };
 }
 
@@ -153,7 +158,14 @@ function summonOf(id: string, node: unknown): ChallengeSummon {
     aspect: aspectOf(node.aspect, `${at}.aspect`),
     words: word(node, 'words', at),
     numbers: numbersOf(node.numbers, `${at}.numbers`),
+    matching: flagOf(node.matching, `${at}.matching`),
   };
+}
+
+/** True or false, and false when it is not there. */
+function flagOf(value: unknown, at: string): boolean {
+  if (value !== undefined && typeof value !== 'boolean') refuse(at);
+  return value ?? false;
 }
 
 function kindOf(id: string, node: unknown): ChallengeKind {

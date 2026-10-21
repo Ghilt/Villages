@@ -909,10 +909,11 @@ and `-- --drop` takes them off; by hand only.
 - **`/admin/inspect-challenges`** is the challenge, which is not in the game yet: its content, from
   `world/catalogues/challenges.json`, and needs nothing else running to read. Every effect a slice can carry, in the
   five pairs of aspects, an aspect and its anti-aspect side by side, each effect's name, whether it is a trigger or a
-  passive, what it does in words with its numbers filled in, the slot it brings and the summon it hires; every summon,
-  its aspect and what it does; and the kinds of challenge, how long each lasts, how many happenings it has, how often
+  passive, whether it needs a matching aspect, what it does in words with its numbers filled in, the slot it brings and
+  the summon it hires; every summon, its aspect, what it does and whether it needs a matching aspect; and the kinds of challenge, how long each lasts, how many happenings it has, how often
   one has two aspects and what each aspect weighs. It reads the file through the dev server and again whenever it
-  changes on disk. Every name, word and number is a field, and whether a slot puts what is in it on the line a box;
+  changes on disk. Every name, word and number is a field, and whether a slot puts what is in it on the line, and whether an effect or
+  a summon needs a matching aspect, a box;
   changed in place, they are saved through the game server as every catalogue's page saves, and taken on at once. The
   game server reads the same file and refuses one it cannot read, or one that breaks a rule of the content - a summon
   that is not there, a slot that neither lends nor puts on the line - naming where, as it does every catalogue, said

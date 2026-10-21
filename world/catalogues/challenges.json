@@ -1,14 +1,15 @@
 {
   "$comment": "The challenge's content, Adam's to change: the effects a slice carries, the summons they bring, and the kinds of challenge progressions are drawn from. A first draft, planned with Adam on 2026-10-20, every name and number in it to be tuned. Not in the game yet: the simulator on /admin/inspect-challenges runs the server's engine on what is here, and shows and edits it; the game server takes on a change while it runs. The numbers that belong to no one entry are the balance's. See docs/plans/challenges.md and decision record 0107.",
   "effects": {
-    "$comment": "Each aspect's effects by their ids, three to an aspect, of which a slice of that aspect carries two. A trigger fires each time a happening puts its slice on stage; a passive works for as long as it stays there. An effect's words name its numbers in braces, which the page fills in; one that summons names the summon, whose own numbers are below; one with a slot fits a keyFigure, lending one of their stats, or a structure, and one whose slot is onTheLine puts what is in it into the challenge as a summon. The aspect boost, half as much again, grows what an effect does and never a chance or a cost. The names are a first draft for Adam to change.",
+    "$comment": "Each aspect's effects by their ids, three to an aspect, of which a slice of that aspect carries two. Every slice meets every happening: a trigger fires as it meets one, and a passive works from second to second. An effect marked matching does so only while the latest happening has its slice's aspect; one not marked, in every happening. An effect's words name its numbers in braces, which the page fills in; one that summons names the summon, whose own numbers are below; one with a slot fits a keyFigure, lending one of their stats, or a structure, and one whose slot is onTheLine puts what is in it into the challenge as a summon, once. The aspect boost, half as much again, grows what an effect does while the happening has its aspect, and never a chance or a cost. The names are a first draft for Adam to change.",
     "violence": {
-      "sellswords": { "name": "Sellswords", "fires": "trigger", "words": "Hires a Mercenary, who pulls for this side every second.", "summons": "mercenary" },
+      "sellswords": { "name": "Sellswords", "fires": "trigger", "words": "Hires a Mercenary, who pulls for this side every second.", "summons": "mercenary", "matching": true },
       "noQuarter": {
         "name": "No Quarter",
         "fires": "passive",
         "words": "Each Mercenary act: {chance}% chance to also kill an enemy summon it can beat.",
-        "numbers": { "chance": 25 }
+        "numbers": { "chance": 25 },
+        "matching": true
       },
       "spoils": {
         "name": "Spoils of the Field",
@@ -42,15 +43,17 @@
         "name": "Divine Rebuke",
         "fires": "passive",
         "words": "An enemy summon acts: {chance}% chance every enemy slice loses {integrity} integrity.",
-        "numbers": { "chance": 20, "integrity": 10 }
+        "numbers": { "chance": 20, "integrity": 10 },
+        "matching": true
       },
-      "ordination": { "name": "Ordination", "fires": "trigger", "words": "Ordains a Priest, who pulls by how far this side's integrity beats the enemy's.", "summons": "priest" },
+      "ordination": { "name": "Ordination", "fires": "trigger", "words": "Ordains a Priest, who pulls by how far this side's integrity beats the enemy's.", "summons": "priest", "matching": true },
       "sanctuary": {
         "name": "Sanctuary",
         "fires": "passive",
-        "words": "Puts the building on the line the first time on stage; +{piety} piety if won.",
+        "words": "Puts the building on the line the first time it works; +{piety} piety if won.",
         "slot": { "fits": "structure", "onTheLine": true },
-        "numbers": { "piety": 5 }
+        "numbers": { "piety": 5 },
+        "matching": true
       }
     },
     "reason": {
@@ -74,18 +77,20 @@
       }
     },
     "authority": {
-      "watch": { "name": "Raise the Watch", "fires": "trigger", "words": "Raises an Enforcer: costs this side, silences the enemy's hardest-pulling summon.", "summons": "enforcer" },
+      "watch": { "name": "Raise the Watch", "fires": "trigger", "words": "Raises an Enforcer: costs this side, silences the enemy's hardest-pulling summon.", "summons": "enforcer", "matching": true },
       "decree": {
         "name": "By Decree",
         "fires": "passive",
         "words": "{chance}% chance to stop each act of an enemy summon this slice's power beats.",
-        "numbers": { "chance": 25 }
+        "numbers": { "chance": 25 },
+        "matching": true
       },
       "firmHand": {
         "name": "The Firm Hand",
         "fires": "passive",
         "words": "While this side leads, the opponent's power is {power} lower.",
-        "numbers": { "power": 5 }
+        "numbers": { "power": 5 },
+        "matching": true
       }
     },
     "freedom": {
@@ -93,20 +98,21 @@
       "againstTheGrain": {
         "name": "Against the Grain",
         "fires": "passive",
-        "words": "+{amount} when on stage by the draw, matching no aspect of the happening.",
+        "words": "+{amount} at each happening whose aspect does not match this slice's.",
         "numbers": { "amount": 20 }
       },
-      "ownWill": { "name": "Will of One's Own", "fires": "passive", "words": "Once a challenge, at a change of happening, this slice stays on stage regardless." }
+      "ownWill": { "name": "Will of One's Own", "fires": "passive", "words": "Once a challenge, this slice's aspect goes on matching through a happening that does not have it." }
     },
     "greed": {
       "countingHouse": {
         "name": "Counting House",
         "fires": "trigger",
-        "words": "Puts the building on the line when on stage; +{wealth} wealth if won.",
+        "words": "Puts the building on the line; +{wealth} wealth if won.",
         "slot": { "fits": "structure", "onTheLine": true },
-        "numbers": { "wealth": 5 }
+        "numbers": { "wealth": 5 },
+        "matching": true
       },
-      "farmTaxes": { "name": "Farm the Taxes", "fires": "trigger", "words": "Hires a Collector: costs this side, fills a coffer that pours at the next happening or the end.", "summons": "collector" },
+      "farmTaxes": { "name": "Farm the Taxes", "fires": "trigger", "words": "Hires a Collector: costs this side, fills a coffer that pours at the next happening or the end.", "summons": "collector", "matching": true },
       "pickBones": {
         "name": "Pick the Bones",
         "fires": "passive",
@@ -130,13 +136,14 @@
       }
     },
     "nature": {
-      "wildHunt": { "name": "The Wild Hunt", "fires": "trigger", "words": "Looses a Predator, who pulls, or now and then kills an enemy summon it can beat.", "summons": "predator" },
+      "wildHunt": { "name": "The Wild Hunt", "fires": "trigger", "words": "Looses a Predator, who pulls, or now and then kills an enemy summon it can beat.", "summons": "predator", "matching": true },
       "teeming": {
         "name": "Teeming Wilds",
         "fires": "passive",
         "words": "An enemy summon acts: {chance}% chance a Creature comes to this side.",
         "summons": "creature",
-        "numbers": { "chance": 20 }
+        "numbers": { "chance": 20 },
+        "matching": true
       },
       "wildRemembers": {
         "name": "The Wild Remembers",
@@ -146,12 +153,13 @@
       }
     },
     "industry": {
-      "engines": { "name": "Raise the Engines", "fires": "trigger", "words": "Builds a Machine, which pulls for this side every second.", "summons": "machine" },
+      "engines": { "name": "Raise the Engines", "fires": "trigger", "words": "Builds a Machine, which pulls for this side every second.", "summons": "machine", "matching": true },
       "works": {
         "name": "Works and Forges",
         "fires": "trigger",
-        "words": "Puts the building on the line when on stage.",
-        "slot": { "fits": "structure", "onTheLine": true }
+        "words": "Puts the building on the line.",
+        "slot": { "fits": "structure", "onTheLine": true },
+        "matching": true
       },
       "wellOiled": {
         "name": "Well-Oiled",
@@ -162,7 +170,7 @@
     }
   },
   "summons": {
-    "$comment": "Each summon by its id: what it is called, its aspect, which its boost is judged by, and its numbers, which its words name. A summon acts once a second from the second after it arrives, until it is killed, turned or the challenge ends; its integrity is its slice's at the moment it was summoned. A building or a person put on the line is a summon too, made by the balance's rule rather than listed here.",
+    "$comment": "Each summon by its id: what it is called, its aspect, which its boost is judged by, and its numbers, which its words name. A summon acts once a second from the second after it arrives, until it is killed, turned or the challenge ends; its integrity is its slice's at the moment it was summoned. A building or a person put on the line is a summon too, made by the balance's rule rather than listed here. A summon marked matching acts only while the happening has its own aspect.",
     "mercenary": {
       "name": "Mercenary",
       "aspect": "violence",
@@ -209,7 +217,8 @@
       "name": "Creature",
       "aspect": "nature",
       "words": "Pulls {pulls} a second.",
-      "numbers": { "pulls": 3 }
+      "numbers": { "pulls": 3 },
+      "matching": true
     },
     "machine": {
       "name": "Machine",

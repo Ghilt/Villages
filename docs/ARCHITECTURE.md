@@ -634,19 +634,19 @@ domain's package `villages.domain.challenge`, is a pure function of what each si
 force and the balance's rules, and gives every **moment** of the challenge and its **outcome**. It runs second by
 second:
 
-1. **A happening begins**, when one is due: the passives of the slices still on stage say what changes away, coffers
-   pour, each side puts a slice on stage - one of the happening's aspect, else of its anti-aspect, else one drawn -
-   and the triggers of the slices on stage fire, unless the other side cancels one. What they asked for lands, and
-   the tug is looked at.
+1. **A happening begins**, when one is due: the working passives say what changes away, coffers pour, the slices
+   whose aspect the happening has match it, and every slice meets it, its working triggers firing unless the other
+   side cancels one. What they asked for lands, and the tug is looked at. What works is whatever needs no matching
+   aspect, and whatever does while its aspect matches.
 2. **Every summon acts**, and every passive that works each second does, all of them reading the state the moment
    began with, so a summon killed in a second still acts in it. What they asked for lands - the tug and the coffers
    moving first, then the dead, then whatever turns, comes or is worn - and the tug is looked at again. Pulled to an
    end, the challenge stops in that second.
 
 An effect's behaviour is code, keyed by its id; its words and numbers are the catalogue,
-`world/catalogues/challenges.json`. A behaviour hangs on hooks - its slice coming on stage, the happening changing,
+`world/catalogues/challenges.json`. A behaviour hangs on hooks - its slice meeting a happening, the happening changing,
 every second, an enemy summon about to act or having acted, a friend's acting, an enemy trigger, a summon killed, an
-aura on the other side's power, keeping its slice on stage - and answers with the changes it asks for, never touching
+aura on the other side's power, holding its slice matching - and answers with the changes it asks for, never touching
 the contest itself; `Contest` lands them. The shelf refuses a catalogue naming an effect the code has no behaviour
 for, or not giving a number a behaviour reads, and `ChallengeBehavioursTest` holds the other way, code no entry
 names. The engine's other half, `Progressions.draw`, draws a progression from a challenge kind of the catalogue -
@@ -663,7 +663,7 @@ Three things follow for the architecture:
   stream of its own, carrying its setup, its seed, the catalogue's version, the engine's - `Challenge.ENGINE` - and
   its outcome, which is the truth: the spectacle is the moments fought again from the rest, the same only while the
   engine is. Its five events' names are agreed in 0107.
-- **What must hold is held inside the run**: the tug within its ends, one slice on stage a side, no side past the sum
+- **What must hold is held inside the run**: the tug within its ends, a slice matching exactly while the happening has its aspect, no side past the sum
   of its slices' summon counts - checked as each summon comes - and a thing on the line on it once. A property spec
   fights hundreds of challenges made up at random against them, and a golden log keeps one challenge as a table.
 

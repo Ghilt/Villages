@@ -73,3 +73,21 @@ effectiveness before then.
   the code; this record and the plan hold them until then.
 - A seed replays a run only on the engine that made it. A stored challenge read after its engine changed shows
   its outcome as recorded and a spectacle that may differ, and the engine's version says so.
+
+## Amendment, 2026-10-21: every slice meets every happening
+
+The first rules put one slice of each side on stage at each happening - one of its aspect, else one of its
+anti-aspect, else one drawn - and only that slice did anything, boosted in its aspect's happenings and its
+anti-aspect's alike. The matchup grid showed what came of it: a slice was judged by which happenings found it, and an
+aspect whose effects needed the stage, Authority, lost almost everywhere.
+
+Adam's word replaced it. **Every slice meets every happening.** A slice's **aspect matches** while the latest
+happening has it, so a side may have several matching slices or none, and only a match is boosted. Whether an effect
+works where its aspect does not match is the effect's own, by a mark, **needs a matching aspect**, which kinds of
+summon carry too; the agent set the first marks and the page ticks them. The anti-aspect leaves the engine and becomes
+a rule of design: a slice is made to meet its anti-aspect's happenings well, through its effects, and not boosted
+there. *Against the Grain* and *Will of One's Own*, which leant on the draw, keep their nearest meaning.
+
+`Challenge.ENGINE` is 2. The moments say which slices match at each happening, and what sits out. No event changes:
+nothing is stored yet, and the agreed `ChallengeResolved` carries the engine's version. The plan is
+`docs/plans/challenge-matching.md`.

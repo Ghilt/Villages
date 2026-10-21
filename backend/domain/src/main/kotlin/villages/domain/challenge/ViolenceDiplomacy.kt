@@ -8,7 +8,7 @@ private object NoQuarter : EffectBehaviour {
 
     override fun friendActed(scene: Scene, summon: Summon): List<Change> {
         if (summon.kind != MERCENARY) return emptyList()
-        val beatable = scene.beatable(scene.power(scene.side))
+        val beatable = scene.beatable(scene.ownPower(scene.slice))
         if (beatable.isEmpty() || !scene.chance(scene.number("chance"))) return emptyList()
         return listOf(Change.Kill(scene.pick(beatable).serial, summon.actor, scene.effect))
     }
@@ -19,7 +19,7 @@ private object SweeterTerms : EffectBehaviour {
     override val reads = setOf("strong", "weak")
 
     override fun activated(scene: Scene): List<Change> = scene.summons(scene.side.other).filterNot { it.onTheLine }.mapNotNull { summon ->
-        val chance = scene.number(if (scene.power(scene.side) > summon.integrity) "strong" else "weak")
+        val chance = scene.number(if (scene.ownPower(scene.slice) > summon.integrity) "strong" else "weak")
         if (scene.chance(chance)) Change.Turn(summon.serial, scene.side, scene.slice, scene.actor, scene.effect!!) else null
     }
 }

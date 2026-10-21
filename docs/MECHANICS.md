@@ -1181,17 +1181,21 @@ It is the same whoever is watching: a player sees it from their own side, and a 
 **happening** after another, spaced over it, the first at once - *Violence, Violence, Holy and Violence* for a
 battle. A happening has one or more **aspects**, from ten in five linked pairs, each an aspect and its
 **anti-aspect**: Violence and Diplomacy, Holy and Reason, Authority and Freedom, Greed and Generosity, Nature and
-Industry. A pair is one dimension with two poles. **Challenge kinds** - a battle, a debate, a trade war, a
+Industry. A pair is one dimension with two poles, and what links them is how their effects are made: a slice is
+built to meet its anti-aspect's happenings well. **Challenge kinds** - a battle, a debate, a trade war, a
 sermon - each draw progressions of their own flavour.
 
 **Slices.** To enter a challenge a side brings one or more **slices**. A slice has an aspect, a **power**, an
 **integrity**, a **summon count**, two **effects** of its own aspect, and the slots its effects bring, which take
-a key figure or a structure. Each happening puts one slice of each side on stage: the one of its aspect, else the
-one of its anti-aspect, else one drawn at random. A slice whose aspect or anti-aspect the happening has gets the
-**aspect boost**, half as much again on whatever it does.
+a key figure or a structure. Every slice meets every happening. A slice's **aspect matches** while the latest
+happening has its aspect - several of a side's slices may match, or none - and a matching slice gets the **aspect
+boost**, half as much again on whatever it does. A Diplomacy slice in a battle gets no boost, and still does what its
+effects let it do there.
 
-**Effects** are **triggers**, which fire when a happening puts their slice on stage, and **passives**, which work
-while it stays there. Thirty to begin with, three to an aspect: Violence's Sellswords hire Mercenaries, Holy's
+**Effects** are **triggers**, which fire as their slice meets a happening, and **passives**, which work from second to
+second. An effect, or a kind of summon, that **needs a matching aspect** works only while its aspect matches; one
+that does not works in every happening. The mark is how an effect is balanced: what a house raises or builds waits
+for its moment, and a person's gift works anywhere. Thirty to begin with, three to an aspect: Violence's Sellswords hire Mercenaries, Holy's
 Divine Rebuke wears the enemy's integrity down for its Priests to feed on, Greed's Collector costs its side now
 and pours its **coffer** out later. Many **summon**: a Mercenary, a Rebel, a Machine, that stays on the field
 and pulls once a second until it is killed, turned, or the challenge ends, a side holding as many as its slices'

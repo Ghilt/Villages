@@ -12,10 +12,10 @@ import villages.domain.challenge.Aspect.VIOLENCE
 class GreedGenerositySpec : StringSpec({
 
     val killers = listOf(slice(VIOLENCE, "violence.sellswords", "violence.noQuarter", power = 100.0))
-    val certain = TEST_CATALOGUE.with("violence.noQuarter", "chance", 100.0)
+    val certain = ANYWHERE.with("violence.noQuarter", "chance", 100.0)
 
     "a Collector costs its side three a second and fills its coffer with six, which pours at the next change and at the end" {
-        val result = fight(listOf(slice(GREED, "greed.farmTaxes")), IDLE, 6, Happening(REASON), Happening(REASON))
+        val result = fight(listOf(slice(GREED, "greed.farmTaxes")), IDLE, 6, Happening(REASON), Happening(REASON), catalogue = ANYWHERE)
 
         result.saying(What.BANKED).take(2).map { it.amount } shouldBe listOf(6.0, 6.0)
         result.saying(What.COST).first().amount shouldBe -3.0
@@ -29,16 +29,16 @@ class GreedGenerositySpec : StringSpec({
         result.saying(What.POURED) shouldBe emptyList()
     }
 
-    "Pick the Bones pulls whenever an enemy summon is killed while its slice is on stage" {
+    "Pick the Bones pulls whenever an enemy summon is killed" {
         val hound = object : SummonBehaviour {
             override fun pull(scene: Scene, summon: Summon): Double = 0.0
 
             override fun act(scene: Scene, summon: Summon): List<Change> =
                 scene.summons(summon.side.other).take(1).map { Change.Kill(it.serial, summon.actor, null) }
         }
-        val kennel = TEST_CATALOGUE.copy(
-            effects = TEST_CATALOGUE.effects + ChallengeEffect("greed.kennel", GREED, Fires.TRIGGER, summons = "hound"),
-            summons = TEST_CATALOGUE.summons + ("hound" to SummonSpec(GREED)),
+        val kennel = ANYWHERE.copy(
+            effects = ANYWHERE.effects + ChallengeEffect("greed.kennel", GREED, Fires.TRIGGER, summons = "hound"),
+            summons = ANYWHERE.summons + ("hound" to SummonSpec(GREED)),
         )
         val setup = ChallengeSetup(
             listOf(slice(GREED, "greed.kennel", "greed.pickBones")),
@@ -60,12 +60,12 @@ class GreedGenerositySpec : StringSpec({
 
     "a Benefactor pulls five a second, and ten while its side is behind" {
         val hiring = listOf(slice(VIOLENCE, "violence.sellswords", summonCount = 1))
-        val result = fight(listOf(slice(GENEROSITY, "generosity.alms")), hiring, 4, Happening(REASON))
+        val result = fight(listOf(slice(GENEROSITY, "generosity.alms")), hiring, 4, Happening(REASON), catalogue = ANYWHERE)
 
         result.saying(What.PULLED).filter { it.side == Side.A }.map { it.amount } shouldBe listOf(5.0, 10.0, 10.0)
     }
 
-    "Counting House puts its building on the line as its slice comes on stage, and pays wealth when won" {
+    "Counting House puts its building on the line as it fires, and pays wealth when won" {
         val house = listOf(slice(GREED, "greed.countingHouse", slotted = mapOf("greed.countingHouse" to StandIn.Building("Fugger house", 3))))
         val result = fight(house, IDLE, 3, Happening(GREED))
 

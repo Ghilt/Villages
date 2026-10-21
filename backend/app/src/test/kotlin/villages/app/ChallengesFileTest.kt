@@ -27,6 +27,10 @@ class ChallengesFileTest {
         assertEquals(ChallengeSlot(Fits.STRUCTURE, onTheLine = true), challenges.effect("holy.sanctuary")?.slot)
         assertEquals(Aspect.GREED, challenges.summons.getValue("collector").aspect)
         assertEquals(6.5, challenges.summons.getValue("collector").number("deposits"))
+        assertEquals(true, challenges.effect("violence.sellswords")?.matching)
+        assertEquals(false, challenges.effect("violence.noQuarter")?.matching)
+        assertEquals(true, challenges.summons.getValue("mercenary").matching)
+        assertEquals(false, challenges.summons.getValue("collector").matching)
         val battle = challenges.kinds.getValue("battle")
         assertEquals(30..90, battle.seconds)
         assertEquals(3..6, battle.happenings)
@@ -52,6 +56,10 @@ class ChallengesFileTest {
         assertEquals(
             "world/catalogues/challenges.json: no effects.violence.sellswords.name the server can read",
             assertThrows<IllegalArgumentException> { ChallengesFile.parse(fixture.replace("\"name\": \"Sellswords\", ", "")) }.message,
+        )
+        assertEquals(
+            "world/catalogues/challenges.json: no effects.violence.sellswords.matching the server can read",
+            assertThrows<IllegalArgumentException> { ChallengesFile.parse(fixture.replace("\"matching\": true", "\"matching\": \"yes\"")) }.message,
         )
     }
 

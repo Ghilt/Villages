@@ -9,7 +9,7 @@ import kotlin.math.abs
  */
 object Challenge {
     /** The version of these rules: a seed replays a challenge only on the version that fought it. */
-    const val ENGINE = 1
+    const val ENGINE = 2
 
     fun resolve(
         setup: ChallengeSetup,
@@ -28,8 +28,10 @@ object Challenge {
 /**
  * One challenge being fought, second by second. Every second reads the state it began with and lands what it asked
  * for together at its end: first, when one is due, a happening begins - what changes away is said and coffers pour,
- * each side chooses its slice, and the slices' triggers fire - and the tug is looked at; then every summon acts and
- * every passive that works each second does, and the tug is looked at again. Pulled to an end, it stops there.
+ * the slices whose aspect it has match it, and every slice meets it, its working triggers firing - and the tug is
+ * looked at; then every summon acts and every working passive that works each second does, and the tug is looked at
+ * again. Pulled to an end, it stops there. What works is whatever needs no matching aspect, and whatever does while
+ * its aspect matches.
  */
 internal class Contest(
     val setup: ChallengeSetup,
@@ -41,8 +43,8 @@ internal class Contest(
 ) {
     val rng = Rng(seed)
     val integrity: Map<Side, DoubleArray> = Side.entries.associateWith { side -> setup.side(side).map { it.integrity }.toDoubleArray() }
-    val onStage = mutableMapOf<Side, Int>()
-    val drawn = mutableMapOf<Side, Boolean>()
+    /** Whether each of each side's slices' aspects matches the latest happening, as its slices are numbered. */
+    val matching: Map<Side, BooleanArray> = Side.entries.associateWith { side -> BooleanArray(setup.side(side).size) }
     val field = mutableListOf<Summon>()
     var serials = 0
     var tug = 0.0
@@ -54,8 +56,14 @@ internal class Contest(
 
     /** Each side's effects whose slot's thing came on the line. */
     val onTheLine = mutableSetOf<Pair<Side, String>>()
-    var auras = emptySet<Pair<Side, String>>()
+    var aurasOn = emptySet<Pair<Side, String>>()
     private val asked = mutableSetOf<Triple<Side, Int, String>>()
+
+    /** What works on each side, worked out once a happening, since only matching moves it; [match] forgets it. */
+    val works = mutableMapOf<Side, List<Triple<Int, ChallengeEffect, EffectBehaviour>>>()
+
+    /** The summons said to sit out a happening, by serial and happening, so each says it once a happening. */
+    private val idle = mutableSetOf<Pair<Int, Int>>()
     private var ending: Ending? = null
 
     val happening: Happening get() = setup.progression.happenings[at]
@@ -89,39 +97,47 @@ internal class Contest(
         say(What.HAPPENING_BEGAN, null, Actor.TheChallenge)
         val changes = mutableListOf<Change>()
         if (previous != null) {
-            Side.entries.forEach { side -> changes += onStageEffects(side).flatMap { (effect, behaviour) -> behaviour.changed(scene(side, effect)) } }
+            Side.entries.forEach { side -> changes += working(side).flatMap { (slice, effect, behaviour) -> behaviour.changed(scene(side, slice, effect)) } }
             changes += field.filter { it.coffer > 0.0 }.map { Change.Pour(it.serial) }
         }
-        Side.entries.forEach { choose(it) }
-        Side.entries.forEach { changes += activate(it) }
+        Side.entries.forEach { match(it) }
+        Side.entries.forEach { changes += meet(it) }
         land(changes)
     }
 
-    /** What [side]'s slice on stage asks for as it comes on: its triggers, unless the other side cancels one, and its passives' first word. */
-    private fun activate(side: Side): List<Change> = onStageEffects(side).flatMap { (effect, behaviour) ->
-        if (effect.fires == Fires.TRIGGER) {
-            val cancelling = onStageEffects(side.other).firstOrNull { (theirs, its) -> its.cancels(scene(side.other, theirs), effect) }
-            if (cancelling != null) {
-                return@flatMap listOf(Change.Say(What.CANCELLED, side.other, sliceActor(side.other), cancelling.first.id, sliceActor(side), targetEffect = effect.id))
+    /** What [side]'s slices ask for as they meet the happening: each working trigger, unless the other side cancels it, and each working passive's first word. */
+    private fun meet(side: Side): List<Change> {
+        val theirs = working(side.other)
+        return working(side).flatMap { (slice, effect, behaviour) ->
+            if (effect.fires == Fires.TRIGGER) {
+                val cancelling = theirs.firstOrNull { (by, their, its) -> its.cancels(scene(side.other, by, their), effect) }
+                if (cancelling != null) {
+                    val (by, their, _) = cancelling
+                    return@flatMap listOf(Change.Say(What.CANCELLED, side.other, Actor.OfSlice(side.other, by), their.id, Actor.OfSlice(side, slice), targetEffect = effect.id))
+                }
             }
+            behaviour.activated(scene(side, slice, effect))
         }
-        behaviour.activated(scene(side, effect))
     }
 
     private fun act() {
         val changes = mutableListOf<Change>()
-        Side.entries.forEach { side -> changes += onStageEffects(side).flatMap { (effect, behaviour) -> behaviour.everySecond(scene(side, effect)) } }
+        Side.entries.forEach { side -> changes += working(side).flatMap { (slice, effect, behaviour) -> behaviour.everySecond(scene(side, slice, effect)) } }
         field.toList().forEach { summon ->
             if (summon.arrived >= second || summon.silencedUntil >= second) return@forEach
+            if (catalogue.summons[summon.kind]?.matching == true && !happening.matches(summon.aspect)) {
+                if (idle.add(summon.serial to at)) changes += Change.Say(What.IDLE, summon.side, summon.actor, null)
+                return@forEach
+            }
             val enemy = summon.side.other
-            val stopping = onStageEffects(enemy).firstOrNull { (effect, behaviour) -> behaviour.stops(scene(enemy, effect), summon) }
+            val stopping = working(enemy).firstOrNull { (slice, effect, behaviour) -> behaviour.stops(scene(enemy, slice, effect), summon) }
             if (stopping != null) {
-                changes += Change.Say(What.STOPPED, enemy, sliceActor(enemy), stopping.first.id, summon.actor)
+                changes += Change.Say(What.STOPPED, enemy, Actor.OfSlice(enemy, stopping.first), stopping.second.id, summon.actor)
                 return@forEach
             }
             changes += actOf(summon)
-            changes += onStageEffects(enemy).flatMap { (effect, behaviour) -> behaviour.enemyActed(scene(enemy, effect), summon) }
-            changes += onStageEffects(summon.side).flatMap { (effect, behaviour) -> behaviour.friendActed(scene(summon.side, effect), summon) }
+            changes += working(enemy).flatMap { (slice, effect, behaviour) -> behaviour.enemyActed(scene(enemy, slice, effect), summon) }
+            changes += working(summon.side).flatMap { (slice, effect, behaviour) -> behaviour.friendActed(scene(summon.side, slice, effect), summon) }
         }
         land(changes)
     }
@@ -163,13 +179,16 @@ internal class Contest(
         return Outcome(tug, ending!!, second, wonBy, gains, losses.toList())
     }
 
-    /** The effects of [side]'s slice on stage, each with its behaviour. */
-    fun onStageEffects(side: Side): List<Pair<ChallengeEffect, EffectBehaviour>> = effectsOf(side, onStage.getValue(side))
+    /** [side]'s effects that work now, each with its slice and its behaviour: whatever needs no matching aspect, and whatever does while its slice's aspect matches. */
+    fun working(side: Side): List<Triple<Int, ChallengeEffect, EffectBehaviour>> = works.getOrPut(side) {
+        val matches = matching.getValue(side)
+        setup.side(side).indices.flatMap { slice ->
+            effectsOf(side, slice).filter { (effect, _) -> !effect.matching || matches[slice] }.map { (effect, behaviour) -> Triple(slice, effect, behaviour) }
+        }
+    }
 
     fun effectsOf(side: Side, slice: Int): List<Pair<ChallengeEffect, EffectBehaviour>> =
         setup.side(side)[slice].effects.map { id -> catalogue.effect(id)!! to effects.getValue(id) }
-
-    fun sliceActor(side: Side): Actor = Actor.OfSlice(side, onStage.getValue(side))
 
     fun cap(side: Side): Int = setup.side(side).sumOf { it.summonCount }
 
@@ -186,8 +205,6 @@ internal class Contest(
     ) {
         moments += ChallengeMoment(second, at, side, actor, what, effect, target, amount, boosted, tugDelta, tug, targetEffect)
     }
-
-    fun scene(side: Side, effect: ChallengeEffect): Scene = scene(side, onStage.getValue(side), effect)
 
     fun scene(side: Side, slice: Int, effect: ChallengeEffect): Scene =
         SceneOf(side, slice, effect.aspect, effect::number, Actor.OfSlice(side, slice), effect)
@@ -206,8 +223,8 @@ internal class Contest(
         override val second: Int get() = this@Contest.second
         override val happening: Happening get() = this@Contest.happening
         override val previous: Happening? get() = this@Contest.previous
-        override val byDraw: Boolean get() = drawn[side] == true
-        override val boosted: Boolean get() = happening.boosts(aspect)
+        override val matches: Boolean get() = if (entry != null) matching.getValue(side)[slice] else happening.matches(aspect)
+        override val boosted: Boolean get() = happening.matches(aspect)
         override val effect: String? get() = entry?.id
 
         override fun number(name: String): Double = numbers(name)
@@ -218,11 +235,9 @@ internal class Contest(
 
         override fun <T> pick(things: List<T>): T = rng.pick(things)
 
-        override fun power(side: Side): Double = powerOf(side, onStage.getValue(side))
-
         override fun ownPower(slice: Int): Double = powerOf(side, slice)
 
-        override fun integrity(side: Side): Double = this@Contest.integrity.getValue(side)[onStage.getValue(side)]
+        override fun integrity(side: Side): Double = this@Contest.integrity.getValue(side).average()
 
         override fun favours(side: Side): Boolean = if (side == Side.A) tug > 0.0 else tug < 0.0
 

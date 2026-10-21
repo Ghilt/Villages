@@ -25,8 +25,9 @@ const PAIRS = ASPECTS.filter((_, at) => at % 2 === 0).map((aspect) => [aspect, a
 
 /**
  * The challenge's content, `world/catalogues/challenges.json`, to read and to change: every effect a slice can carry,
- * in the five pairs of aspects, with its name, its words and its numbers, the slot it brings and the summon it hires;
- * every summon; and the kinds of challenge a progression is drawn from. Every name, word and number is changed in
+ * in the five pairs of aspects, with its name, its words and its numbers, whether it needs a matching aspect, the slot
+ * it brings and the summon it hires; every summon, and whether it needs one; and the kinds of challenge a progression
+ * is drawn from. Every name, word and number is changed in
  * place and saved through the game server, which takes it on at once. Below, the simulator has the server's engine
  * fight a challenge out on what is in force. See docs/plans/challenges.md and decision record 0107.
  */
@@ -106,6 +107,7 @@ function Effect({
         <span className="challenges-fires">{effect.fires}</span>{' '}
         <span className="inspect-key">{effect.id}</span>
       </div>
+      <FlagField editor={editor} path={[...at, 'matching']} label="needs a matching aspect" />
       <WordsField editor={editor} path={[...at, 'words']} label={`${effect.id} words`} wide />
       <Numbers editor={editor} at={[...at, 'numbers']} numbers={effect.numbers} label={effect.id} />
       <div>{filledIn(effect.words, effect.numbers)}</div>
@@ -170,6 +172,7 @@ function Summons({ editor, content }: { editor: Editor; content: Content }) {
             <th>summon</th>
             <th>aspect</th>
             <th>what it does</th>
+            <th>needs a matching aspect</th>
             <th>brought by</th>
           </tr>
         </thead>
@@ -198,6 +201,13 @@ function Summons({ editor, content }: { editor: Editor; content: Content }) {
                   label={summon.id}
                 />
                 <div>{filledIn(summon.words, summon.numbers)}</div>
+              </td>
+              <td>
+                <FlagField
+                  editor={editor}
+                  path={['summons', summon.id, 'matching']}
+                  label={summon.matching ? 'yes' : 'no'}
+                />
               </td>
               <td>
                 {content.effects

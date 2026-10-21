@@ -7,7 +7,7 @@ private object Decree : EffectBehaviour {
     override val reads = setOf("chance")
 
     override fun stops(scene: Scene, summon: Summon): Boolean =
-        scene.power(scene.side) > summon.integrity && scene.chance(scene.number("chance"))
+        scene.ownPower(scene.slice) > summon.integrity && scene.chance(scene.number("chance"))
 }
 
 /** The Firm Hand: while the tug favours its side, the opponent's power is `power` lower. */
@@ -17,20 +17,20 @@ private object FirmHand : EffectBehaviour {
     override fun aura(scene: Scene): Double = if (scene.favours(scene.side)) scene.boost(scene.number("power")) else 0.0
 }
 
-/** Against the Grain: `amount` when its slice comes on stage by the draw, matching neither aspect nor anti-aspect. */
+/** Against the Grain: `amount` at each happening its slice's aspect does not match, which is the only time it fires. */
 private object AgainstTheGrain : EffectBehaviour {
     override val reads = setOf("amount")
 
     override fun activated(scene: Scene): List<Change> =
-        if (scene.byDraw) listOf(Change.Pull(scene.side, scene.boost(scene.number("amount")), scene.actor, scene.effect, scene.boosted)) else emptyList()
+        if (!scene.matches) listOf(Change.Pull(scene.side, scene.boost(scene.number("amount")), scene.actor, scene.effect, scene.boosted)) else emptyList()
 }
 
 /**
- * Will of One's Own: once in a challenge, at a change of happening that would not keep its slice for its aspect, the
- * slice stays on stage anyway. A change that boosts the slice is not one it is spent on.
+ * Will of One's Own: once in a challenge, at a change to a happening its slice's aspect does not match, the slice
+ * goes on matching anyway, for that happening, though without the boost, which the happening alone gives.
  */
 private object OwnWill : EffectBehaviour {
-    override fun keepsStage(scene: Scene): Boolean = !scene.boosted && scene.once()
+    override fun keepsMatching(scene: Scene): Boolean = scene.once()
 }
 
 /**

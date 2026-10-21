@@ -51,9 +51,14 @@ object ChallengesFile {
                 numbers = numbers(node["numbers"], "$at.numbers"),
                 summons = node["summons"]?.let { it.takeIf { summon -> summon.isString }?.asString() ?: refuse("$at.summons") },
                 slot = node["slot"]?.let { slotOf(it, "$at.slot") },
+                matching = flag(node, "matching", at),
             )
         }
     }
+
+    /** [node]'s [name], true or false, and false when it is not there. */
+    private fun flag(node: JsonNode, name: String, at: String): Boolean =
+        node[name]?.let { it.takeIf { flag -> flag.isBoolean }?.asBoolean() ?: refuse("$at.$name") } ?: false
 
     private fun slotOf(node: JsonNode, at: String): ChallengeSlot {
         if (!node.isObject) refuse(at)
@@ -70,7 +75,7 @@ object ChallengesFile {
         word(node, "name", at)
         word(node, "words", at)
         val aspect = node["aspect"]?.takeIf { it.isString }?.asString()?.let(ASPECTS::get) ?: refuse("$at.aspect")
-        return checked(at) { SummonSpec(aspect, numbers(node["numbers"], "$at.numbers")) }
+        return checked(at) { SummonSpec(aspect, numbers(node["numbers"], "$at.numbers"), flag(node, "matching", at)) }
     }
 
     private fun kindOf(id: String, node: JsonNode): ChallengeKind {
