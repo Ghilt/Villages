@@ -18,7 +18,7 @@ export interface WorkedGroundSettings {
   reach: number;
   /** How much of a settlement's ground is trodden grass rather than earth, nought to one. */
   grass: number;
-  /** How wide the roads are worn, times the width the roads map gives each grade. */
+  /** How wide the roads are drawn, times the width the roads map gives each grade. */
   roadWidth: number;
   /** The colour of a road's packed dust, as `#rrggbb`. */
   road: string;

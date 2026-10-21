@@ -62,7 +62,7 @@ export function WorkedGroundLevers() {
         onChange={(event) => setWorkedGround({ grass: Number(event.target.value) })}
       />
       <label className="debug-map__label" htmlFor="worked-ground-road-width">
-        How wide the roads are worn
+        How wide the roads are drawn
       </label>
       <input
         id="worked-ground-road-width"

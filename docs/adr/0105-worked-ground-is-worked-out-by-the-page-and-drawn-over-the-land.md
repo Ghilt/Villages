@@ -95,6 +95,9 @@ Antarctica's sixteen and not the ones across a diagonal.
 
 ## Amendment, 2026-10-21: a settlement's ground, and a kind for roads
 
+(Later the same day the road's own kind went to the settlements' streets alone, and roads were drawn as shapes: see
+the last amendment.)
+
 A settlement (decision record 0114) is worn by its layout rather than as one footprint: its whole square as a kind of
 its own, the weakest, trodden grass more than earth, its rim ragged and fraying a couple of diamonds past it; its two
 streets, and the diamond where each leaves the square, as a **road**, a kind paler than a path and stronger than a
@@ -109,3 +112,11 @@ of a diamond either side, so a line at any angle across the lattice wears every 
 only on revealed ground (`sprites/ground/roads.ts`). How much of a
 settlement's ground is grass is a lever in the Structures section, beside the earth's colour. See
 `docs/plans/settlements-and-roads.md`.
+
+## Amendment, 2026-10-21: the wayside, kept clear and not drawn
+
+Adam found the roads worn a diamond at a time jagged. A road is now drawn as a smooth band over the ground by a layer of
+its own (`sprites/roads/`, decision record 0115 as amended), and the worked ground only keeps its ground clear: a kind
+weaker than every other, the **wayside**, under a road and a little either side of it for its roadside, which the
+ground's shader draws nothing for, but on which no tree grows. Every other kind moves up one; `road` is a settlement's
+street alone, straight along the lattice and so never jagged.

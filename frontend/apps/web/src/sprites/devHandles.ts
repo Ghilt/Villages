@@ -10,12 +10,14 @@ export interface DevReadings {
   sprites: () => Record<string, DrawnSprite>;
   /** How many bridges are held, and how many drawn now. */
   bridges: () => { bridges: number; drawn: number };
+  /** How many stretches of road are held to draw. */
+  roads: () => { strips: number };
 }
 
 /**
  * The sprite canvas's handles on the window, in a development build only: `villagesFog`, what the fog is drawing
- * and from what, `villagesSprites`, where every sprite actually ended up, and `villagesBridges`, how many bridges
- * stand - for the console and for the
+ * and from what, `villagesSprites`, where every sprite actually ended up, `villagesBridges`, how many bridges
+ * stand, and `villagesRoads`, how many stretches of road are drawn - for the console and for the
  * end-to-end test, which has no other way to ask a canvas what it drew.
  */
 export function hangDevHandles(readings: DevReadings): void {
@@ -26,6 +28,7 @@ export function hangDevHandles(readings: DevReadings): void {
     villagesFog?: () => unknown;
     villagesSprites?: () => Record<string, DrawnSprite>;
     villagesBridges?: () => { bridges: number; drawn: number };
+    villagesRoads?: () => { strips: number };
   };
   handles.villagesFog = () => {
     const { drawing, field } = readings.fog();
@@ -41,4 +44,5 @@ export function hangDevHandles(readings: DevReadings): void {
   };
   handles.villagesSprites = readings.sprites;
   handles.villagesBridges = readings.bridges;
+  handles.villagesRoads = readings.roads;
 }

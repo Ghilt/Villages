@@ -58,36 +58,37 @@ void main() {
   vec2 wander = vec2(noise(world * WANDER_FINE), noise(world * WANDER_FINE + 41.3)) - 0.5;
   vec2 read = lattice + wander * WANDER;
   ivec2 cell = ivec2(floor(read));
+  // Nought is unworn ground, and one the ground under a road, which the roads' own layer draws.
   int worn = wornAt(cell);
-  if (worn == 0) {
+  if (worn <= 1) {
     discard;
   }
   vec2 into = fract(read);
   float edge = 1.0;
-  if (wornAt(cell + ivec2(-1, 0)) == 0) edge = min(edge, into.x);
-  if (wornAt(cell + ivec2(1, 0)) == 0) edge = min(edge, 1.0 - into.x);
-  if (wornAt(cell + ivec2(0, -1)) == 0) edge = min(edge, into.y);
-  if (wornAt(cell + ivec2(0, 1)) == 0) edge = min(edge, 1.0 - into.y);
+  if (wornAt(cell + ivec2(-1, 0)) <= 1) edge = min(edge, into.x);
+  if (wornAt(cell + ivec2(1, 0)) <= 1) edge = min(edge, 1.0 - into.x);
+  if (wornAt(cell + ivec2(0, -1)) <= 1) edge = min(edge, into.y);
+  if (wornAt(cell + ivec2(0, 1)) <= 1) edge = min(edge, 1.0 - into.y);
   float soft = smoothstep(0.0, SOFT, edge);
 
-  // 1 a settlement's ground, 2 a path, 3 a ruin's ring, 4 a ring, 5 a road, 6 a ruin's footprint, 7 a footprint.
-  float how = worn == 7 ? 1.0
-    : worn == 6 ? 0.7
-    : worn == 5 ? 0.9
-    : worn == 4 ? 0.85
-    : worn == 3 ? 0.5
-    : worn == 2 ? 0.8
+  // 2 a settlement's ground, 3 a path, 4 a ruin's ring, 5 a ring, 6 a street, 7 a ruin's footprint, 8 a footprint.
+  float how = worn == 8 ? 1.0
+    : worn == 7 ? 0.7
+    : worn == 6 ? 0.9
+    : worn == 5 ? 0.85
+    : worn == 4 ? 0.5
+    : worn == 3 ? 0.8
     : 0.75;
   float tint = hash(cell, 7) - 0.5;
   float grain = noise(world * 6.0) - 0.5;
   vec3 colour = uEarth * (1.0 + tint * 0.12 + grain * 0.2);
-  if (worn == 3 || worn == 6) {
+  if (worn == 4 || worn == 7) {
     colour = mix(colour, GRASS, 0.35);
-  } else if (worn == 1) {
+  } else if (worn == 2) {
     // Trodden grass between the houses, not the bare earth of a yard.
     colour = mix(colour, GRASS * (1.0 + grain * 0.3), uGrass);
-  } else if (worn == 5) {
-    // A road is packed and dusty, paler than the earth of a path.
+  } else if (worn == 6) {
+    // A settlement's street is packed and dusty, paler than the earth of a path, as a road is.
     colour = uRoad * (1.0 + tint * 0.08 + grain * 0.12);
   }
   float alpha = how * soft * uStrength * uFade;

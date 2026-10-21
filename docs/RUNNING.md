@@ -557,16 +557,20 @@ stage alone, with none of the debug panel in it (decision record 0079).
   before, **how much of the earth covers the
   paint** is a slider from none to all of it, **how near two buildings stand for a path to join them** is the paths'
   reach in world units, nought for none, **how much of a settlement's ground is grass** is the trodden grass between
-  a village's houses against bare earth, **how wide the roads are worn** is a road's width times the roads map's
+  a village's houses against bare earth, **how wide the roads are drawn** is a road's width times the roads map's
   for its grade, **the roads** the colour of their packed dust, **the earth** is its colour, and **as it was** puts
   them all back. The line
   under them says what is drawn: `85% earth, #806040; paths between buildings within 12 units`. A settlement's ground
   is its whole square, its rim ragged, its two streets paler as a road, a yard under each building and a lane from
   each to its street. The log says under `ground` how many diamonds are worn under how many buildings and
-  settlements, how many paths join them and how many lanes the settlements took, and how many pieces of road it wears.
-  The roads are the pieces of the `roads` layer the game server sent, worn along their lines wherever the ground is land
-  and the house has revealed it, so a road stops where the revealed ground stops and the river under a bridge shows; no
-  tree grows on one, so a road through a forest is a clear way. Where a road crosses a river it does so on a bridge,
+  settlements, how many paths join them and how many lanes the settlements took, and how many pieces of road keep the
+  ground clear. The roads are the pieces of the `roads` layer the game server sent, drawn as smooth bands with round
+  ends over the ground (`sprites/roads/`), cut where the ground the house has revealed ends, so a road stops where the
+  revealed ground stops: from zoom 6, where their records first come, a thin line edged darker, every road the page
+  holds; from 7.5 in, packed earth as wide as its grade, its edge ragged and two ruts along it. Under a road and a
+  little either side of it, for its roadside, the ground is kept clear, a diamond at a time, as the wayside, which is
+  not drawn: no tree grows on it, so a road through a forest is a clear way. The log says under `roads` how many
+  stretches are drawn, and the probe `villagesRoads()` too. Where a road crosses a river it does so on a bridge,
   its picture by the way it runs from `public/art/settlements.webp`, hung at its deck's middle and stretched along its
   deck to its span, never wider or taller, standing among the trees on the strip of its deck from zoom 7.5 in; the log says under `roads` how many
   bridges are held, and the probe `villagesBridges()` how many are drawn. A path is walked only

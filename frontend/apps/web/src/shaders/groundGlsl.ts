@@ -19,7 +19,8 @@ void main() {
 }
 `;
 
-export const GROUND_GLSL = `
+/** The hash and the value noise alone, for a pass that places itself and needs no projection. */
+export const NOISE_GLSL = `
 float hash(ivec2 cell, int salt) {
   uvec3 u = uvec3(ivec3(cell, salt)) * uvec3(1597334673u, 3812015801u, 2798796415u);
   uint n = (u.x ^ u.y ^ u.z) * 1597334673u;
@@ -40,6 +41,10 @@ float noise(vec2 at) {
     w.y
   );
 }
+`;
+
+export const GROUND_GLSL = `
+${NOISE_GLSL}
 
 vec2 groundUnder(vec2 screen) {
   vec2 onScreen = screen - uSize * 0.5;

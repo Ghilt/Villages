@@ -18,13 +18,13 @@ const road = { ax: 1000, ay: 2000, bx: 1012, by: 2006.5, kind: roadKindByte('roa
 const under = (x: number, y: number) =>
   diamondKey(Math.floor(alongU(FRAME, x, y)), Math.floor(alongV(FRAME, x, y)));
 
-describe('the roads worn into the ground', () => {
-  it('wears every diamond along a piece as road, one after another with no gap', () => {
+describe('the ground the roads keep clear', () => {
+  it('keeps every diamond along a piece clear as the wayside, one after another with no gap', () => {
     const worn = wearRoads([road], WIDTHS, 1, land, null);
     for (let step = 0; step <= 40; step += 1) {
       const x = road.ax + ((road.bx - road.ax) * step) / 40;
       const y = road.ay + ((road.by - road.ay) * step) / 40;
-      expect(worn.get(under(x, y))).toBe(WORKED.road);
+      expect(worn.get(under(x, y))).toBe(WORKED.wayside);
     }
     // And not far off it.
     expect(worn.has(under(road.ax + 6, road.ay - 6))).toBe(false);

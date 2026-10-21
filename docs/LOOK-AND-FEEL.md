@@ -191,7 +191,7 @@ good land between them, each a cluster of small houses - cottages, a barn, a cha
 net racks and boats by the water - on ground of its own: trodden grass more than earth, a ragged rim, its two streets
 paler through the middle, a little yard at each door and a lane to the street. They read as small beside a castle and
 a ruined city, and further out than zoom 7.5 a village is one mark. **Roads join them**, and run on to the ruins'
-gates: worn earth a light brown, wider and paler than a path, packed so no tree stands on it, a track for one road's
+gates: worn earth a light brown, a smooth band with soft ragged edges and two faint ruts, wider and paler than a path, packed so no tree stands on it, a track for one road's
 worth of traffic and wider where several roads share the way, crossing open country and winding round hills, lakes and
 bogs, and coming into a village down its street. **A river is crossed only on a bridge**, the same humped stone bridge
 of three arches everywhere, laid straight along one of eight ways - the ground's axes, its diagonals and the four

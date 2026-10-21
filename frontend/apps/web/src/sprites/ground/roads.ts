@@ -7,11 +7,12 @@ import type { Worked } from './worked';
 import { diamondKey } from './workedGround';
 
 /*
- * The roads worn into the ground: every piece of road the game server sent, the `roads` layer of the stands, worn as
- * worked ground of the road's kind along its line, as wide as its grade is drawn, a diamond of the ground's lattice at a
- * time. Only on land - a bridge is drawn, not worn, and the river under it shows - and only where the house has
- * revealed the ground, so a road stops where the revealed ground stops though its piece runs on. No tree grows on it,
- * as on any worked ground (`growing.ts`). See docs/plans/settlements-and-roads.md and decision record 0115.
+ * The ground the roads keep clear: every piece of road the game server sent, the `roads` layer of the stands, worn as
+ * the wayside along its line, as wide as its grade is drawn and its roadside either side, a diamond of the ground's
+ * lattice at a time. Nothing of it is drawn - the road is, as a shape over it (`sprites/roads/`) - but no tree grows
+ * on it, as on any worked ground (`growing.ts`). Only on land - a bridge's piece keeps nothing clear, and the river
+ * under it shows - and only where the house has revealed the ground. See docs/plans/settlements-and-roads.md, docs/plans/houses-bridges-and-road-render.md and
+ * decision record 0115.
  */
 
 const FRAME = frameOf(GROUND_LATTICE);
@@ -20,6 +21,8 @@ const FRAME = frameOf(GROUND_LATTICE);
  * worn whatever way it runs; narrower, a line across the lattice breaks into dashes.
  */
 const LEAST_HALF = 0.75;
+/** How much further either side of a road's band the ground is kept clear, for its roadside, in world units. */
+export const ROADSIDE = 0.7;
 
 /** A piece of road as the page holds it: its two ends, in world units, and its kind byte. */
 export interface HeldPiece {
@@ -62,8 +65,8 @@ function awayFrom(x: number, y: number, piece: HeldPiece): number {
 }
 
 /**
- * The diamonds the pieces wear, by `diamondKey`, as roads: each diamond of land whose middle lies within half its
- * grade's width, times `scale`, of a piece, and that `revealed` says the house has seen - everywhere with the fog off,
+ * The diamonds the pieces keep clear, by `diamondKey`, as the wayside: each diamond of land whose middle lies within
+ * half its grade's width, times `scale`, and its roadside of a piece, and that `revealed` says the house has seen - everywhere with the fog off,
  * which is null. A bridge's piece wears nothing; a diamond whose ground is not known yet is left until it is.
  */
 export function wearRoads(
@@ -77,7 +80,7 @@ export function wearRoads(
   for (const piece of pieces) {
     const kind = readRoadKind(piece.kind);
     if (kind === null || 'bridge' in kind) continue;
-    const half = Math.max(LEAST_HALF, (widths[kind.road] / 2) * scale);
+    const half = Math.max(LEAST_HALF, (widths[kind.road] / 2) * scale + ROADSIDE);
     const us = [alongU(FRAME, piece.ax, piece.ay), alongU(FRAME, piece.bx, piece.by)];
     const vs = [alongV(FRAME, piece.ax, piece.ay), alongV(FRAME, piece.bx, piece.by)];
     for (let u = Math.floor(Math.min(...us) - half); u <= Math.floor(Math.max(...us) + half); u += 1) {
@@ -89,7 +92,7 @@ export function wearRoads(
         if (awayFrom(x, y, piece) > half) continue;
         if (ground(u, v) !== 'land') continue;
         if (revealed !== null && !revealed(x, y)) continue;
-        worn.set(key, WORKED.road);
+        worn.set(key, WORKED.wayside);
       }
     }
   }

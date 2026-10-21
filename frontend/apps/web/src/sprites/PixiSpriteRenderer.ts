@@ -10,7 +10,7 @@ import { createCritterLayer } from './critters/CritterLayer';
 import { createFogLayer } from './FogLayer';
 import { createFrameClock } from './frameClock';
 import { createGroundLayer, type GroundLayer } from './ground/GroundLayer';
-import { whereSceneryGrows } from './ground/growing';
+import { revealedBy, whereSceneryGrows } from './ground/growing';
 import { createHazeLayer } from './hazeLayer';
 import { createLandLayer } from './land/LandLayer';
 import { soonest, type Layer } from './layer';
@@ -18,6 +18,7 @@ import { buildMarkTextures } from './markTextures';
 import { watchStructureArt } from './structureAtlas';
 import { createMarksLayer, type MarksLayer } from './MarksLayer';
 import { createRingLayer, type RingLayer } from './RingLayer';
+import { createRoadsLayer, type RoadsLayer } from './roads/RoadsLayer';
 import { createSceneryDrawing } from './scenery/sceneryDrawing';
 import { createSceneryLayer } from './scenery/SceneryLayer';
 import type { CameraSource, FogHow, Scene, SpriteRenderer } from './SpriteRenderer';
@@ -75,6 +76,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   /** The ground worn bare under the buildings, and the bridges, once there is a canvas to draw them on. */
   let ground: GroundLayer | null = null;
   let bridges: BridgesLayer | null = null;
+  let roads: RoadsLayer | null = null;
   /** What is on the map: the last scene handed in, which a renderer mounted late is given whole. */
   let scene: Scene = NOTHING;
   /**
@@ -171,6 +173,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     if (field !== groundField) {
       groundField = field;
       scenery?.setGround(whereSceneryGrows(field, scene.worked));
+      roads?.setRevealed(revealedBy(field));
       // Only a house with revealed ground has any colour to take out, and the filter costs a pass.
       uncolouring?.show(field ?? null);
       world.filters = field === undefined || field === null ? null : [fog.uncolour];
@@ -195,6 +198,9 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
         next.scenery.tilesRoot !== was.scenery.tilesRoot)
     ) {
       scenery?.clear();
+    }
+    if (was === null || next.scenery.tilesRoot !== was.scenery.tilesRoot) {
+      roads?.setTilesRoot(next.scenery.tilesRoot);
     }
     if (was === null || next.sprites !== was.sprites) {
       layers.marks.setSprites(next.sprites);
@@ -254,11 +260,21 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       const land = createLandLayer(app.renderer, () => scene.scenery.tilesRoot, drawSoon);
       // The ground worn bare under the buildings, over the land's motion and under all that stands on it.
       ground = createGroundLayer(app.renderer, drawSoon);
+      // The roads over it, as shapes, from zoom 6 in.
+      roads = createRoadsLayer(app.renderer, drawSoon);
+      roads.setRevealed(revealedBy(groundField));
       // The critters' shadows under the scenery and the critters over it, only where the house sees now, and the
       // selection ring on the ground under the structures among its trees (0110); the world outside vision over them,
       // all losing their colour on ground only revealed; then the fog over them, and everything it must not cover.
       const critters = createCritterLayer(drawSoon, () => ({ scenery: scene.scenery, sight: groundField }));
-      world.addChild(land.sprite, ground.sprite, marks.shadows, critters.ground, scenery.container);
+      world.addChild(
+        land.sprite,
+        ground.sprite,
+        roads.sprite,
+        marks.shadows,
+        critters.ground,
+        scenery.container,
+      );
       world.addChild(ring.onTheGround, scenery.standing.view, critters.flying, marks.underTheFog);
       stage.addChild(world);
       // The clouds over the fog, and under every sign, the ring round one among them. See decision record 0098.
@@ -292,6 +308,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
           uncolouringLayer,
           land,
           ground,
+          roads,
           sceneryLayer,
           trees,
           critters,
@@ -317,6 +334,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
         undulating: clock.undulating,
         sprites: () => layers?.marks.report() ?? {},
         bridges: () => bridges?.report() ?? { bridges: 0, drawn: 0 },
+        roads: () => roads?.report() ?? { strips: 0 },
       });
     },
 
@@ -353,6 +371,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       unpaint?.();
       scenery = null;
       ground = null;
+      roads = null;
       bridges = null;
       unwatch?.();
       unwatch = null;
