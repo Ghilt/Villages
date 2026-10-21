@@ -5,7 +5,6 @@ import villages.application.Provenance
 import villages.application.StructureCommandExecutor
 import villages.application.StructuresByCell
 import villages.application.WorldClock
-import villages.application.fate.kmBetween
 import villages.domain.Location
 import villages.domain.RaiseStructure
 import villages.domain.StructureError
@@ -43,7 +42,7 @@ class Settlements(
     /** The settlements counted, as the World section of the debug panel shows them. */
     fun tally(): Tally {
         val here = sites()
-        val near = SeatsNear(seats(), clearKm())
+        val near = PlacesNear(seats(), clearKm())
         val ids = here.map { StructureId.ofSettlement(it.id) }.toSet()
         var stands = 0
         var passedOver = 0
@@ -61,7 +60,7 @@ class Settlements(
     fun open(): Opened {
         val here = sites()
         val clear = clearKm()
-        val near = SeatsNear(seats(), clear)
+        val near = PlacesNear(seats(), clear)
         var raised = 0
         var passedOver = 0
         val today = world.today()
@@ -86,31 +85,8 @@ class Settlements(
         return Opened(here.size, raised, passedOver)
     }
 
-    /** The seats a settlement keeps clear of, kept in squares of a degree so a site asks only the ones near it. */
-    private class SeatsNear(seats: List<Location>, private val km: Double) {
-        private val squares = seats.groupBy { keyOf(it.lat, it.lon) }
-
-        fun within(place: Location): Boolean {
-            if (km <= 0.0) return false
-            val reach = 1 + (km / KM_A_DEGREE).toInt()
-            for (dLat in -reach..reach) {
-                for (dLon in -reach..reach) {
-                    val seats = squares[keyOf(place.lat + dLat, place.lon + dLon)] ?: continue
-                    if (seats.any { kmBetween(it, place) < km }) return true
-                }
-            }
-            return false
-        }
-
-        private fun keyOf(lat: Double, lon: Double): Long =
-            Math.floor(lat).toLong() * 1_000 + Math.floorMod(Math.floor(lon).toLong(), 360L)
-    }
-
     private companion object {
         /** The story every opening's raising of settlements is told in: the same each time, as only the first writes. */
         val RAISING: UUID = UUID.nameUUIDFromBytes("villages:opening:settlements".toByteArray(Charsets.UTF_8))
-
-        /** Kilometres a degree of latitude spans, near enough for which squares to ask. */
-        const val KM_A_DEGREE = 111.0
     }
 }

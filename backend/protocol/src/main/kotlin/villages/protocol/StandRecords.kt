@@ -37,6 +37,15 @@ object StandRecords {
     /** How far record `at` reaches from its middle, in world units. */
     fun reach(records: ByteArray, at: Int): Double = (records[at * BYTES + 4].toInt() and BYTE) / REACH_STEP
 
+    /**
+     * How far a road's piece runs from its middle to one end, across and down, in world units: the two signed bytes after
+     * its reach, in eighths, which only the `roads` layer's records carry. Its other end is as far the other way. See
+     * decision record 0115.
+     */
+    fun halfAcross(records: ByteArray, at: Int): Double = records[at * BYTES + 5] / PLACE_STEP
+
+    fun halfDown(records: ByteArray, at: Int): Double = records[at * BYTES + 6] / PLACE_STEP
+
     /** The records `keep` says yes to, in their order, byte for byte. */
     fun only(records: ByteArray, keep: (Int) -> Boolean): ByteArray {
         val kept = (0 until count(records)).filter(keep)

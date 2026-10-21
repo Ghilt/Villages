@@ -54,6 +54,16 @@ class HouseBotPlacesSpec : StringSpec({
         listOf("Q4", "Q5", "Q6").none { it in ids } shouldBe true
     }
 
+    "a seat keeps clear of a settlement's site and a road, turning on to the next direction, or the town is passed over" {
+        val east = HouseBotPlaces.of(towns, ground, ruins, bots).single { it.town == "Q1" }.seat
+        // Everything east of the capital is kept clear: its seat turns until it stands west of it.
+        val west = HouseBotPlaces.of(towns, ground, ruins, bots, keepClear = { it.lon >= capital.at.lon }).single { it.town == "Q1" }
+        (west.seat.lon < capital.at.lon) shouldBe true
+        (east == west.seat) shouldBe (east.lon < capital.at.lon)
+        // Kept clear everywhere, no town has a seat.
+        HouseBotPlaces.of(towns, ground, ruins, bots, keepClear = { true }) shouldBe emptyList()
+    }
+
     "no more than the balance's count are taken, and none at all for nought" {
         HouseBotPlaces.of(towns, ground, ruins, bots.copy(count = 1)).map { it.town } shouldBe listOf("Q1")
         HouseBotPlaces.of(towns, ground, ruins, bots.copy(count = 0)) shouldBe emptyList()

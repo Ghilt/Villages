@@ -31,6 +31,17 @@ class RoadRecordsSpec : StringSpec({
         }
     }
 
+    "reads both ends of every piece, as far each way from its middle" {
+        pieces.forEachIndexed { at, piece ->
+            val mx = StandRecords.x(records, at, tileX)
+            val my = StandRecords.y(records, at, tileY)
+            mx - StandRecords.halfAcross(records, at) shouldBe piece["ax"].asDouble()
+            my - StandRecords.halfDown(records, at) shouldBe piece["ay"].asDouble()
+            mx + StandRecords.halfAcross(records, at) shouldBe piece["bx"].asDouble()
+            my + StandRecords.halfDown(records, at) shouldBe piece["by"].asDouble()
+        }
+    }
+
     "is a layer the gateway sends" {
         ("roads" in STAND_LAYERS) shouldBe true
     }

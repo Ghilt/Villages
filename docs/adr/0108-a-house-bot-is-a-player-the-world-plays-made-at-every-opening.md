@@ -76,3 +76,13 @@ same bots everywhere. **A player is not told** which houses are bots; the debug 
   bot unknown, and nothing in the history would say the world plays it.
 - **Founding them from the browser**, as the seed does. The world's own act would wait on a page being open.
 - **Seats from the hand-kept gazetteer.** Fourteen places, for a few hundred houses.
+
+## Amendment, 2026-10-21: a bot's seat keeps clear of the settlements and the roads
+
+A bot's seat, turned an eighth at a time from the direction its town's id picks until it stands on land, is now turned
+on past land within the balance's `settlements.clearKm` of a settlement's site or of a road, as `world:roads` laid them,
+so a fresh world stands no castle on a village or across a road; a town with no such land at its reach has no bot. The
+settlements keep the same clearance of a bot's seat at the opening (decision record 0114), so now a site is passed over
+only where a bot had nowhere else to stand. A bot founded before this keeps its seat, which the world's history holds: a
+world opened before it may still have a castle on a road, and before alpha a wipe is the answer. See
+`docs/plans/settlements-and-roads.md`.

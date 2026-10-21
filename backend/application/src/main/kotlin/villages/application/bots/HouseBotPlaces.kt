@@ -23,17 +23,24 @@ data class HouseBotPlace(val town: String, val name: HouseName, val seat: Locati
  * master twice, where Adam copied land from one place on Earth to two, is taken once, at its copy furthest north and
  * then west, because a bot is its town's and stands by it once. Each one's seat stands
  * [Balance.HouseBots.beyondRuinKm] past the edge of its ruin, in a direction its id picks, turned an eighth at a time
- * until it stands on land. A town is passed over when it has no land at
+ * until it stands on land that [keepClear][of] does not keep it off - a settlement's site, a road (0114, 0115). A town
+ * is passed over when it has no such land at
  * that reach, when its name is not a house name, or when its seat would stand nearer another bot's than
  * [Balance.HouseBots.apartKm]; the rest are taken until there are [Balance.HouseBots.count].
  */
 object HouseBotPlaces {
-    fun of(towns: List<PlaceName>, ground: GroundMap, ruins: RuinReach, bots: Balance.HouseBots): List<HouseBotPlace> {
+    fun of(
+        towns: List<PlaceName>,
+        ground: GroundMap,
+        ruins: RuinReach,
+        bots: Balance.HouseBots,
+        keepClear: (Location) -> Boolean = { false },
+    ): List<HouseBotPlace> {
         val placed = mutableListOf<HouseBotPlace>()
         for (town in mostImportantFirst(towns, ruins)) {
             if (placed.size >= bots.count) break
             val name = nameOf(town) ?: continue
-            val seat = seatOf(town, ruins.kmOf(town.id, town.at) + bots.beyondRuinKm, ground) ?: continue
+            val seat = seatOf(town, ruins.kmOf(town.id, town.at) + bots.beyondRuinKm, ground, keepClear) ?: continue
             if (placed.any { kmBetween(it.seat, seat) < bots.apartKm }) continue
             placed += HouseBotPlace(town.id, name, seat)
         }
@@ -58,12 +65,15 @@ object HouseBotPlaces {
             null
         }
 
-    /** The first place [km] from the town, in the directions its id picks, that is land and no river. */
-    private fun seatOf(town: PlaceName, km: Double, ground: GroundMap): Location? {
+    /** The first place [km] from the town, in the directions its id picks, that is land, no river, and not kept clear. */
+    private fun seatOf(town: PlaceName, km: Double, ground: GroundMap, keepClear: (Location) -> Boolean): Location? {
         val first = Math.floorMod(town.id.hashCode(), FULL_TURN)
         return (0 until TRIES).asSequence()
             .map { turn -> along(town.at, km, (first + turn * FULL_TURN / TRIES).toDouble()) }
-            .firstOrNull { ground.at(it).terrain.let { terrain -> terrain !in GroundMap.WATER && terrain != RIVER } }
+            .firstOrNull { place ->
+                ground.at(place).terrain.let { terrain -> terrain !in GroundMap.WATER && terrain != RIVER } &&
+                    !keepClear(place)
+            }
     }
 
     /** The place [km] from [from] toward [degrees], clockwise from north: flat on the ground, near enough at this reach. */

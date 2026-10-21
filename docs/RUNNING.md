@@ -500,7 +500,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   shows one `villages.world.botCreated.v1` for each, then each bot's `villages.house.founded.v1` and its castle; a
   restart over a world kept in MongoDB makes none twice, and the server's log says `the world is open, with 300 house
   bots`. The World section's players list counts them under **house bots**. They never act. Another house's castle is seen only through the fog, so *see everything* shows them all;
-  the balance page tunes how many, how far apart and how far past the ruin. `--villages.house-bots=false` leaves them
+  the balance page tunes how many, how far apart and how far past the ruin. A seat keeps as clear of a settlement's
+  site and of a road as `settlements.clearKm` says, turning to the next direction past them, so a fresh world, or one
+  wiped, stands no castle on a village or across a road. `--villages.house-bots=false` leaves them
   out. See decision record 0108 and `docs/plans/house-bots.md`.
 - The world's own villages: **settlements**. The world opens with them too, after the house bots: a village or a
   fishing village held by nobody on every settlement site `world:settlements` chose for the world's master, under
