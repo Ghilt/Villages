@@ -294,6 +294,9 @@ Adam on 2026-10-21, once he had run batches:
 | 13 | **A batch drawn whole**, protocol 61: where every run stood each second as a heatmap, the two ends rows of their own, where the runs ended beside it, the seed's run over it | 👀 run 10000, and the heatmap reads; 👀 a cell and a bar say what they hold |
 | 14 | **A matchup grid**, protocol 63: every aspect's slice against every other's, a batch a pairing on an even kind, drawn as a grid of who wins how often | 👀 weigh 900 a pairing, and the grid reads; 👀 a cell says the whole of it |
 
+The second iteration, steps 15 to 19 - matching aspect in place of one slice a side on stage, and buffs and debuffs -
+is planned in `challenge-matching.md`, agreed by Adam on 2026-10-21.
+
 ## Not in this plan
 
 - Challenges in the game: who raises one, when, what a house brings, the pane, the spectacle played on it.
