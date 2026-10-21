@@ -7,6 +7,7 @@ import { hangDevHandles } from './devHandles';
 import { createCloudLayer } from './clouds/CloudLayer';
 import { createCritterLayer } from './critters/CritterLayer';
 import { createFogLayer } from './FogLayer';
+import { createFrameClock } from './frameClock';
 import { createGroundLayer, type GroundLayer } from './ground/GroundLayer';
 import { whereSceneryGrows } from './ground/growing';
 import { createHazeLayer } from './hazeLayer';
@@ -87,41 +88,9 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
   let canvasWas = { width: 0, height: 0 };
   /** When the last frame was drawn, so a trade moves on by real time rather than by frames. */
   let lastFrameAt = 0;
-  /** A frame owed: asked for, and not yet drawn. The camera may not be moving, so nobody else will ask. */
-  let owed: number | null = null;
-  /**
-   * The haze's slow clock: one frame at a time, twelve a second, while there is haze on the screen to move and
-   * none otherwise; nothing else on the map has a clock of its own. Still for anyone who has asked for less
-   * motion. See step 7 of docs/plans/fog-of-war.md.
-   */
-  let undulation: ReturnType<typeof setTimeout> | null = null;
-
-  /**
-   * Asks for one frame, however often it is asked before the frame comes: what every change here does - a
-   * mark, the ring, the fog, the scenery - and a trade still running. The map may not be moving, so its
-   * \`render\` may not be coming. A still map with nothing changing on it still draws nothing, and thirty
-   * cells answered in one burst draw once rather than a frame a setter a cell.
-   */
-  function drawSoon(): void {
-    if (owed !== null || disposed) {
-      return;
-    }
-    owed = requestAnimationFrame(() => {
-      owed = null;
-      frame();
-    });
-  }
-
-  /** Asks for a frame this many milliseconds from now: the haze's twelve a second. */
-  function drawIn(ms: number): void {
-    if (undulation !== null || disposed) {
-      return;
-    }
-    undulation = setTimeout(() => {
-      undulation = null;
-      frame();
-    }, ms);
-  }
+  /** When the next frame is drawn: on the next animation frame, or the haze's later one. */
+  const clock = createFrameClock(() => frame());
+  const drawSoon = (): void => clock.soon();
 
   function artCut(): void {
     scenery?.artChanged(drawSoon);
@@ -188,7 +157,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     if (wants === 0) {
       drawSoon();
     } else if (wants !== null) {
-      drawIn(wants);
+      clock.after(wants);
     }
   }
 
@@ -340,7 +309,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       hangDevHandles({
         fog: () => fog.report(),
         marksInVision: () => layers?.marks.inVision() ?? 0,
-        undulating: () => undulation !== null,
+        undulating: clock.undulating,
         sprites: () => layers?.marks.report() ?? {},
       });
     },
@@ -370,10 +339,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
 
     destroy(): void {
       disposed = true;
-      if (undulation !== null) {
-        clearTimeout(undulation);
-        undulation = null;
-      }
+      clock.stop();
       for (const layer of layers?.drawn ?? [hazeLayer]) {
         layer.destroy();
       }
@@ -383,10 +349,6 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       ground = null;
       unwatch?.();
       unwatch = null;
-      if (owed !== null) {
-        cancelAnimationFrame(owed);
-        owed = null;
-      }
       layers = null;
       if (app.renderer !== null && app.renderer !== undefined) {
         app.destroy(true, { children: true });
