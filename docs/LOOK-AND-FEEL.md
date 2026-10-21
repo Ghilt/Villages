@@ -146,8 +146,8 @@ thing in it and the anchor both of a thing's forms share: a building's is the fr
 little right of its middle, drawn on a corner of the diamonds. **A building stands among the trees**: a tree whose
 foot is south of the line from its footprint's left corner to its right one is drawn in front of it, and one north of
 that line behind it, and since the diamonds are turned that line runs up the screen to the right, so a tree beside a
-castle's left wall can stand in front of it while a tree beside its right wall, lower on the screen, stands behind;
-decision record 0110. It carries its own colour and is never tinted. A sprite is between twenty and about
+castle's left wall can stand in front of it while a tree beside its right wall, lower on the screen, stands behind.
+A person stands among them too, on their foot; decision record 0110. It carries its own colour and is never tinted. A sprite is between twenty and about
 ninety pixels tall wherever it is drawn, so **its outline is what reads**: what tells one kind from another has to
 be its shape. No picture has an outline, and **no sprite carries a shadow**: a picture drawn standing on a
 plinth brings one, and it goes with the plinth, because a shadow drawn into a sprite darkens whatever it is
@@ -334,8 +334,8 @@ the one exception to two drawings, and a placeholder.
 
 **The fog of war covers ground forms and never icons.** An icon is the sign for a thing rather than the
 thing, so it is drawn over the fog wherever it stands; a ground form is part of the world, and is under the
-fog unless it stands in the house's vision. A structure's stands among the trees, under the fog with them, which
-is clear over both in vision. A new kind of thing on the map gets this for nothing by having the
+fog unless it stands in the house's vision. A structure's and a person's stand among the trees, under the fog
+with them, which is clear over them all in vision. A new kind of thing on the map gets this for nothing by having the
 two forms. See decision records 0063 and 0110.
 
 **Revealed ground is the same country gone grey.** Its colour is taken out and its brightness kept, so pale

@@ -184,7 +184,7 @@ export function createStandingLayer(
       const now = shown.map(({ id }) => id).join(' ');
       if (now !== said) {
         said = now;
-        const many = shown.length === 1 ? 'one structure stands' : `${shown.length} structures stand`;
+        const many = shown.length === 1 ? 'one mark stands' : `${shown.length} marks stand`;
         note(
           'scenery',
           shown.length === 0

@@ -47,7 +47,11 @@ behind it. No one height of the building says both.
 - **So a structure's ground form is under the fog wherever it stands**, with the trees about it
   (`groundSideOf` in `sprites/fogLayering.ts`). In vision the fog is clear over it and the trees alike; the clouds are
   drawn only from zoom 7 out, where no ground form is. Its pennant flies with the form it is over: among the trees
-  with the building close in, over the fog with the pin far out. A person keeps to 0063.
+  with the building close in, over the fog with the pin far out.
+- **A person stands among the trees too**, on their foot, a footprint of a point (amended 2026-10-21, Adam's word:
+  *"Stand people among the trees too, by the same draw order"*): sorted against a tree as one tree is against another,
+  and under the fog with them wherever they are. Every kind with a ground form stands among the trees now, so 0063's
+  side of the fog for a ground form is kept for a kind that would not.
 - **The ring under what is selected lies on the ground with it**, round its footprint, a circle on the ground squashed
   as the ground is - round a person's patch of ground for a person - between the trees' shadows and the trees, so the
   building and the trees in front of it stand over it. It was a picture over every tree, centred on the building's foot
@@ -70,8 +74,10 @@ While something is selected the sprite canvas is drawn twenty-four times a secon
 The order follows the footprint the catalogue gives, not the picture: a picture painted bigger or smaller than its
 footprint sorts by the footprint, as its yard is worn by it. Tuning one is tuning both, on `/admin/inspect-structures`.
 
-The log says under `scenery` how many structures stand among the trees when that changes, and `villagesScenery()`
+The log says under `scenery` how many marks stand among the trees when that changes, and `villagesScenery()`
 says how many slices there are.
+
+Every person on the screen is a slice break as a building is, so a crowd of people in a wood costs a draw each.
 
 ## Alternatives considered
 

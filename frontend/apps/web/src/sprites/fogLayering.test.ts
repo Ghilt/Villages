@@ -13,13 +13,13 @@ describe('which side of the fog of war a thing is drawn on', () => {
     expect(overTheFog('ground', false)).toBe(false);
   });
 
-  it("stands a structure's ground form among the trees, wherever it is, and nothing else's", () => {
+  it("stands a structure's ground form and a person's among the trees, wherever they are", () => {
     expect(standsAmongTheTrees('structure')).toBe(true);
-    expect(standsAmongTheTrees('character')).toBe(false);
+    expect(standsAmongTheTrees('character')).toBe(true);
     expect(standsAmongTheTrees('candidate')).toBe(false);
     expect(groundSideOf('structure', true)).toBe('among');
     expect(groundSideOf('structure', false)).toBe('among');
-    expect(groundSideOf('character', true)).toBe('over');
-    expect(groundSideOf('character', false)).toBe('under');
+    expect(groundSideOf('character', true)).toBe('among');
+    expect(groundSideOf('character', false)).toBe('among');
   });
 });

@@ -5,7 +5,7 @@
 - Supersedes the placement half of 0062, which drew the fog as a canvas of its own over the map and every
   sprite; its distance field, its camera and its look stand
 - Amended 2026-10-21: a structure's ground form is on neither side of the fog of its own; it stands among the trees,
-  in the scenery's stack under the fog, wherever it is. A person's keeps to the rule below. The ring under a selected
+  in the scenery's stack under the fog, wherever it is, and so does a person's. The ring under a selected
   mark lies on the ground with the trees close in, and over the fog only round a sign. See decision record 0110.
 
 ## Context

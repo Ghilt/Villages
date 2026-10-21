@@ -6,9 +6,9 @@ import { footprintAt } from './footprint';
 import type { StandingThing } from './StandingLayer';
 
 /**
- * A structure as it stands among the trees: its picture, and its pennant while that flies over it, the footprint the
- * catalogue gives it at its level laid on the ground from its foot, and whether it is drawn standing at all. Null for
- * a mark that is not a structure.
+ * A structure or a person as they stand among the trees: the picture, and the pennant while that flies over it, the
+ * footprint the catalogue gives a structure at its level laid on the ground from its foot - a person's is the foot
+ * alone - and whether it is drawn standing at all. Null for a mark that does not stand among them.
  */
 export function standingOf(entry: Entry): StandingThing | null {
   const { ground, look, pennant, spec } = entry;

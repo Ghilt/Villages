@@ -20,13 +20,13 @@ export function overTheFog(form: Form, inVision: boolean): boolean {
 
 /**
  * Whether a kind of thing's ground form stands among the trees instead, on no side of the fog of its own: a
- * structure's does, because the trees about it are drawn in front of it and behind it, and the trees are under the
- * fog. In vision the fog is clear over the trees and over it, so a structure in sight is still never hidden; the
- * clouds pass over it as they pass over the trees. A person stands on a point and keeps to the rule above. See
- * decision record 0110.
+ * structure's and a person's do, because the trees about them are drawn in front of them and behind them, and the
+ * trees are under the fog. In vision the fog is clear over the trees and over them, so a thing in sight is still never
+ * hidden by it; no cloud is drawn close in. The rule above is for a kind with a ground form that does not stand among
+ * them, of which there is none today. See decision record 0110.
  */
 export function standsAmongTheTrees(kind: MapSprite['kind']): boolean {
-  return kind === 'structure';
+  return kind === 'structure' || kind === 'character';
 }
 
 /** Where a kind of thing's ground form is drawn, standing in vision or not: among the trees, over the fog or under it. */
