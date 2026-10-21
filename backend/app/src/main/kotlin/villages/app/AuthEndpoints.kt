@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import villages.accounts.Accounts
 import villages.accounts.Keeping
+import villages.accounts.Outbox
 import villages.accounts.SignIn
 import villages.accounts.browserOf
 import villages.domain.HouseId
@@ -29,6 +30,7 @@ import java.util.UUID
 class AuthEndpoints(
     private val accounts: Accounts,
     private val cookie: SignInCookie,
+    private val outbox: Outbox,
     @Value("\${villages.instruments:true}") private val instrumentsOpen: Boolean,
 ) {
     /**
@@ -85,6 +87,28 @@ class AuthEndpoints(
         return ResponseEntity.ok(Me.of(begun.signIn, guest = true))
     }
 
+    /**
+     * Adam's lever, standing in for time: this browser's sign-in ends now, as one left unused past its time does, and
+     * its windows are stood down. The cookie stays in the browser, as it would, and names nothing now.
+     */
+    @PostMapping("/runout")
+    fun runOut(request: HttpServletRequest): ResponseEntity<Any> {
+        if (!instrumentsOpen) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(mapOf("refused" to "instrumentsClosed"))
+        }
+        endThisBrowsers(request)
+        return ResponseEntity.ok(Me.NOBODY)
+    }
+
+    /** Every mail sent, the newest last: Adam's instrument, since it holds live links. */
+    @GetMapping("/outbox")
+    fun outbox(): ResponseEntity<Any> =
+        if (instrumentsOpen) {
+            ResponseEntity.ok(outbox.mail().map { MailView(it.to, it.subject, it.text, it.link, it.sent.toEpochMilli()) })
+        } else {
+            ResponseEntity.status(HttpStatus.FORBIDDEN).body(mapOf("refused" to "instrumentsClosed"))
+        }
+
     /** Ends the sign-in this browser's cookie names, if it names one: a browser has one sign-in at a time. */
     private fun endThisBrowsers(request: HttpServletRequest) {
         cookie.read(request)?.let(accounts.signIns::find)?.let { accounts.signIns.end(it.id) }
@@ -96,6 +120,9 @@ data class GuestAsked(val adopt: String? = null)
 
 /** Which player the instruments would have this browser be. */
 data class BecomeAsked(val player: String)
+
+/** A mail sent, as the debug panel lists it. */
+data class MailView(val to: String, val subject: String, val text: String, val link: String?, val sent: Long)
 
 /** Who a browser is, as `/auth/me` answers it: a player and their house, or nobody at all. Times are milliseconds. */
 data class Me(val player: String?, val house: String?, val guest: Boolean, val signIn: SignInView?) {

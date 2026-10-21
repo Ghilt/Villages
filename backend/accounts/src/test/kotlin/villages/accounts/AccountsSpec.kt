@@ -29,7 +29,7 @@ class AccountsSpec : StringSpec({
 
     "the socket is told the player and the sign-in, and nothing for a secret that is not one" {
         val player = PlayerId(UUID.randomUUID())
-        val accounts = Accounts(InMemoryAccounts(), HandClock()) { player }
+        val accounts = Accounts(InMemoryAccounts(), HandClock(), newPlayer = { player })
         val begun = accounts.newcomer("Chrome on Windows")
 
         val signedIn = accounts.signedIn(begun.secret).shouldNotBeNull()

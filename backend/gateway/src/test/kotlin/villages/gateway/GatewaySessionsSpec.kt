@@ -14,6 +14,7 @@ import villages.protocol.ErrorFrame
 import villages.protocol.FoundAtView
 import villages.protocol.Pong
 import villages.protocol.ServerFrame
+import villages.protocol.SignedOut
 import villages.protocol.TakenOver
 import villages.protocol.Welcome
 import villages.protocol.WorldWiped
@@ -112,6 +113,21 @@ class GatewaySessionsSpec : StringSpec({
         Rig().gateway.connect { sent += it }.receive(hello)
 
         sent.map { it.shouldBeInstanceOf<ErrorFrame>().code } shouldBe listOf("notSignedIn")
+    }
+
+    "a window whose sign-in ends is stood down, and a window of another sign-in plays on" {
+        val rig = Rig()
+        val ending = mutableListOf<ServerFrame>()
+        val other = mutableListOf<ServerFrame>()
+        rig.connect { ending += it }.receive(hello)
+        val playingOn = rig.connect(UUID.randomUUID().toString()) { other += it }.also { it.receive(hello) }
+
+        rig.gateway.signInEnded(signedInAs(TOKEN).signIn)
+
+        ending.last() shouldBe SignedOut("this browser's sign-in has ended")
+        other.filterIsInstance<SignedOut>().shouldBeEmpty()
+        playingOn.receive("""{"type":"ping","t0":1}""")
+        other.last().shouldBeInstanceOf<Pong>()
     }
 
     "a window plays as the player its sign-in is, which hello does not name" {

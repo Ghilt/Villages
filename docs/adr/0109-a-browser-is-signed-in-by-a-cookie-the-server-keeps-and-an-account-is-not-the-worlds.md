@@ -54,7 +54,10 @@ whom is there, and `app` holds only the cookie and the shapes of the answers. No
 - A browser that clears its cookies loses a guest's house, as it lost one by clearing local storage; a guest is told
   plainly that an account keeps it.
 - Every tree's sign-ins are kept apart, and a test's game server keeps its own because it keeps its own database.
-- An ended sign-in is never accepted again: one found past its end is deleted there and then.
+- An ended sign-in is never accepted again: one found past its end is deleted there and then. **A window belongs to
+  a live sign-in**: the accounts tell the gateway of every sign-in that ends, however it ends, and the gateway stands
+  its windows down with `signedOut` (protocol 63), as a takeover stands one down. Until the frame lands the window can
+  still send a command, and it is that player's own, so the moment between is harmless.
 
 ## Alternatives considered
 

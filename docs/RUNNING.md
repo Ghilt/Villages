@@ -1088,6 +1088,16 @@ and `-- --drop` takes them off; by hand only.
   local storage before there were sign-ins, `villages.playerToken`, is made a guest of that same player the first time,
   house and all, and the key is gone from local storage after; the log says it under `player`. The seeder's twenty
   houses play as players of their own through `playAs` in hello, which only the instruments honour.
+- **The debug panel's Accounts section**, under World, says who this browser is: the player and the house it plays
+  as, its sign-in - a guest's, always remembered; remembered; or until the browser closes - in which browser, and when
+  it ends unless it is used again; its bar's reading says *a guest*, *signed in* or *nobody* folded or open. Under it,
+  the **outbox**: every mail the game server sent, the newest last, with its link to press, because in development
+  nothing could deliver one. *ask again* asks the game server afresh, as coming back to the window does. Its one lever,
+  **let this sign-in run out**, stands in for time: the sign-in ends now, as one left unused past its time does, the
+  window dims under a **Signed out** box that nothing puts away but *Play as a guest*, and the log says
+  `accounts: this browser's sign-in has ended; this window is no longer playing`. Every window of that sign-in is
+  stood down so, and one of another sign-in plays on. The section, the outbox and the lever are Adam's instruments,
+  refused while they are closed, because the mail holds live links.
 - **It is kept where the world is**: in the tree's own database, in the collections `signIns` and `players` beside
   `events`, when the world is kept in MongoDB, so a restart of the game server forgets no sign-in; in memory, and gone
   with the server, when the world is.

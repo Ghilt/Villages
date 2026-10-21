@@ -52,10 +52,11 @@ data class Used(val signIn: SignIn, val cookieAgain: Boolean)
 
 /**
  * The sign-ins, begun, found by their secret, used and ended. A sign-in found past its end is ended there and then,
- * so nothing hands an ended one on. The secret is never swapped while a sign-in is used: two tabs racing to swap it is
- * the classic way remember me breaks, one tab given the new secret and the other signed out.
+ * so nothing hands an ended one on, and whatever [ended] tells - the gateway, which stands its windows down - hears of
+ * every one that ends, however it ends. The secret is never swapped while a sign-in is used: two tabs racing to swap
+ * it is the classic way remember me breaks, one tab given the new secret and the other signed out.
  */
-class SignIns(private val store: SignInStore, private val clock: Clock) {
+class SignIns(private val store: SignInStore, private val clock: Clock, private val ended: (SignInId) -> Unit = {}) {
     fun begin(player: PlayerId, keeping: Keeping, browser: String): Begun {
         val secret = Secrets.fresh()
         val now = now()
@@ -70,7 +71,7 @@ class SignIns(private val store: SignInStore, private val clock: Clock) {
         if (found.ends.isAfter(now())) {
             return found
         }
-        store.remove(found.id)
+        end(found.id)
         return null
     }
 
@@ -94,8 +95,8 @@ class SignIns(private val store: SignInStore, private val clock: Clock) {
     /** Every sign-in of [player], the newest first. */
     fun of(player: PlayerId): List<SignIn> = store.of(player).sortedByDescending { it.lastUsed }
 
-    /** Ends [id]; false when there was no such sign-in. */
-    fun end(id: SignInId): Boolean = store.remove(id)
+    /** Ends [id], and says so; false when there was no such sign-in. */
+    fun end(id: SignInId): Boolean = store.remove(id).also { if (it) ended(id) }
 
     /** Now, to the millisecond, which is as finely as MongoDB keeps a time: what is put is what is read back. */
     private fun now(): Instant = clock.instant().truncatedTo(ChronoUnit.MILLIS)

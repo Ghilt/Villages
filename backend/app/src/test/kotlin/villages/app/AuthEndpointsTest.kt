@@ -97,6 +97,17 @@ class AuthEndpointsTest {
     }
 
     @Test
+    fun `the lever lets this browser's sign-in run out, and the outbox can be read`() {
+        val cookie = setCookie(post("/auth/guest")).substringBefore(';')
+
+        assertEquals(200, post("/auth/runout", cookie = cookie).statusCode())
+
+        assertTrue(body(ask("/auth/me", cookie))["player"].isNull)
+        assertEquals(200, ask("/auth/outbox").statusCode())
+        assertTrue(body(ask("/auth/outbox")).isArray)
+    }
+
+    @Test
     fun `a request from a page that is not ours is refused, and so is one that names no page`() {
         assertEquals(403, post("/auth/guest", origin = "http://example.com").statusCode())
         assertEquals(403, post("/auth/guest", origin = null).statusCode())

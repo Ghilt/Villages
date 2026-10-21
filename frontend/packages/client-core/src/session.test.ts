@@ -99,6 +99,37 @@ describe('the session, folded from what each mechanic folds', () => {
     ]).toEqual([null, null, null, null, null, null]);
   });
 
+  it('signed out, forgets the house as a taken-over window does, because the browser plays as nobody now', () => {
+    const signedOut = endState(heardEverything(), 'signedOut');
+
+    expect(signedOut.connection).toBe('signedOut');
+    expect(cellsHeld(signedOut.onTheMap)).toEqual([]);
+    expect([signedOut.yourHouse, signedOut.yourChoice, signedOut.houseHeard]).toEqual([null, null, false]);
+  });
+
+  it('a window told its sign-in ended closes its socket, and the close is not said as the server going away', () => {
+    const closed: string[] = [];
+    const socket = fakeSocket();
+    const session = createSession({
+      schedule: { after: () => () => undefined },
+      newId: () => 'c-1',
+      standsArrived: () => undefined,
+      followStands: () => undefined,
+      arriveAnew: () => undefined,
+      note: () => undefined,
+    });
+    session.observe({ closed: () => closed.push('closed') });
+
+    session.connect({ socket: socket.socket, protocolVersion: 1, address: 'ws://here' });
+    socket.opens();
+    socket.says(welcome);
+    socket.says({ type: 'signedOut', message: "this browser's sign-in has ended" });
+
+    expect(session.state().connection).toBe('signedOut');
+    expect(socket.closedByClient()).toBe(true);
+    expect(closed).toEqual([]);
+  });
+
   it('a step refused is said under its dialogue, and an answer to anything else leaves it be', () => {
     const stepping = { commandId: 'c-1', dialogueId: 'd-1', lineId: 'accept' };
     const out: SessionState = { ...INITIAL_SESSION, acting: 'c-1', stepping };

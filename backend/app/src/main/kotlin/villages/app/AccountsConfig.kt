@@ -7,6 +7,8 @@ import villages.accounts.AccountStores
 import villages.accounts.Accounts
 import villages.accounts.InMemoryAccounts
 import villages.accounts.MongoAccounts
+import villages.accounts.Outbox
+import villages.gateway.Gateway
 import java.nio.file.Path
 import java.time.Clock
 
@@ -27,8 +29,14 @@ class AccountsConfig {
         else -> InMemoryAccounts()
     }
 
+    /** Told of every sign-in that ends, the gateway stands its windows down: a window belongs to a live sign-in. */
     @Bean
-    fun accounts(stores: AccountStores, clock: Clock): Accounts = Accounts(stores, clock)
+    fun accounts(stores: AccountStores, clock: Clock, gateway: Gateway): Accounts =
+        Accounts(stores, clock, ended = gateway::signInEnded)
+
+    /** Where every mail goes in development, which the debug panel shows: nothing here could deliver one. */
+    @Bean
+    fun outbox(): Outbox = Outbox()
 
     /** The sign-in's cookie, named for the world this server keeps, which is named for its tree. */
     @Bean

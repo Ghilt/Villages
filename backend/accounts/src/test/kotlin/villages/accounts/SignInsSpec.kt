@@ -131,6 +131,21 @@ class SignInsSpec : StringSpec({
         signIns.find(begun.secret)?.hash shouldBe begun.signIn.hash
     }
 
+    "every sign-in that ends is told, whether it is ended or found run out" {
+        val clock = HandClock()
+        val told = mutableListOf<villages.application.SignInId>()
+        val signIns = SignIns(InMemoryAccounts().signIns, clock) { told += it }
+        val ended = signIns.begin(player, Keeping.REMEMBERED, "Chrome on Windows")
+        val runOut = signIns.begin(player, Keeping.FOR_NOW, "Chrome on Windows")
+
+        signIns.end(ended.signIn.id)
+        signIns.end(ended.signIn.id)
+        clock.pass(Duration.ofHours(13))
+        signIns.find(runOut.secret)
+
+        told shouldBe listOf(ended.signIn.id, runOut.signIn.id)
+    }
+
     "a browser is named as a person would name it" {
         browserOf(
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0 Safari/537.36",

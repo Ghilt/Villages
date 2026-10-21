@@ -1,5 +1,6 @@
 package villages.accounts
 
+import villages.application.SignInId
 import villages.application.SignedIn
 import villages.application.SignedInPlayers
 import villages.domain.PlayerId
@@ -15,8 +16,10 @@ class Accounts(
     private val stores: AccountStores,
     private val clock: Clock,
     private val newPlayer: () -> PlayerId = { PlayerId(UUID.randomUUID()) },
+    /** Told of every sign-in that ends, however it ends: the gateway, which stands its windows down. */
+    ended: (SignInId) -> Unit = {},
 ) : SignedInPlayers {
-    val signIns = SignIns(stores.signIns, clock)
+    val signIns = SignIns(stores.signIns, clock, ended)
 
     /** Where the accounts are kept, as the debug panel says it. */
     val keptIn: String get() = stores.keptIn

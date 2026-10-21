@@ -172,3 +172,5 @@ recorded over. See decision record 0037. What each one changed:
   cannot read, so `playerToken` is gone. `playAs` is the one way left to name a player, honoured only while the
   instruments are open, for the seeder and the swarm; refused `instrumentsClosed` otherwise, and `notSignedIn` for a
   hello from a browser signed in to nobody. See decision record 0109.
+- **66** - `signedOut`, the browser's sign-in ended - signed out, run out, or ended from another browser - and the
+  window stood down as a taken-over one is. See decision record 0109.

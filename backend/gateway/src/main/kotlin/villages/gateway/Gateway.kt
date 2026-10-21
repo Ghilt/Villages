@@ -7,6 +7,7 @@ import villages.application.CharactersByCell
 import villages.application.Faults
 import villages.application.HousesByCell
 import villages.application.Later
+import villages.application.SignInId
 import villages.application.SignedIn
 import villages.application.StructuresByCell
 import villages.application.WorldClock
@@ -24,6 +25,7 @@ import villages.protocol.PROTOCOL_VERSION
 import villages.protocol.ProtocolJson
 import villages.protocol.Resync
 import villages.protocol.ServerFrame
+import villages.protocol.SignedOut
 import villages.protocol.SubscribeCells
 import villages.protocol.TakenOver
 import villages.protocol.UnsubscribeCells
@@ -114,16 +116,15 @@ class Gateway(
         parts.forEach { it.register(commands, frames) }
     }
 
+    /** A fault, told to every window: see [toldEveryWindow]. */
+    private val faulted: AutoCloseable = toldEveryWindow(faults) { live.map { it.out } }
+
     /**
-     * Anything acting on its own that threw is told to every window, because the debug panel in each is where
-     * it is seen, and a read model missing an event is otherwise only a map that is quietly wrong. The stack
-     * is in the server's log; this is the one line of it. See decision records 0023 and 0029.
+     * Stands down every window of [signIn], which has ended - signed out, run out, or ended from another browser -
+     * with `signedOut`, as a takeover stands one down: a window belongs to a live sign-in. See decision record 0109.
      */
-    private val faulted: AutoCloseable = faults.watch { fault ->
-        val told = ErrorFrame("fault", fault.describe())
-        for (connection in live) {
-            connection.out.send(told)
-        }
+    fun signInEnded(signIn: SignInId) {
+        live.filter { it.isOf(signIn) }.forEach { it.finish(SignedOut("this browser's sign-in has ended")) }
     }
 
     /** A connection, signed in as [signedIn] when the browser that opened it is signed in: see [arrivingAs]. */
@@ -174,6 +175,9 @@ class Gateway(
         /** What [part] keeps of this connection, made by [make] the first time it is asked for. */
         @Suppress("UNCHECKED_CAST")
         internal fun <T : Any> keptBy(part: Part, make: () -> T): T = kept.computeIfAbsent(part) { make() } as T
+
+        /** Whether this window is one of [signIn]'s, whoever it arrived as. */
+        internal fun isOf(signIn: SignInId): Boolean = signedIn?.signIn == signIn
 
         /** Whether this session is over, by a takeover or by the socket going away. */
         internal val isFinished: Boolean get() = finished
@@ -265,16 +269,13 @@ class Gateway(
             parts.forEach { it.greet(this, who) }
         }
 
-        /**
-         * Ends this session without ending its socket: it holds no cells, hears nothing more and accepts
-         * nothing more. The gateway does not close sockets - `Outbound` says frames and nothing else - so
-         * the client is told and closes its own. One that does not is left holding something inert.
-         */
+        /** Ends this session because another window took its player over: see [finish]. */
         internal fun standDown() = finish(TakenOver("another window took this player over"))
 
         /**
-         * Ends this session without ending its socket, and says why. The gateway does not close sockets;
-         * the client is told and closes its own.
+         * Ends this session without ending its socket, and says why: it holds no cells, hears nothing more and accepts
+         * nothing more. The gateway does not close sockets - `Outbound` says frames and nothing else - so the client
+         * is told and closes its own. One that does not is left holding something inert.
          */
         internal fun finish(why: ServerFrame) {
             synchronized(lock) {

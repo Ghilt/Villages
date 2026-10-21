@@ -21,7 +21,7 @@ import tools.jackson.databind.JsonNode
  * It goes up whenever a frame or a field changes, and `ProtocolShapeSpec` makes sure of that: every frame's shape
  * is recorded in contracts/protocol-v<n>.txt, and what each version changed is in contracts/README.md.
  */
-const val PROTOCOL_VERSION = 65
+const val PROTOCOL_VERSION = 66
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -227,6 +227,7 @@ class WipeWorld : ClientFrame {
     JsonSubTypes.Type(YourDialogues::class, name = "yourDialogues"),
     JsonSubTypes.Type(YourQuests::class, name = "yourQuests"),
     JsonSubTypes.Type(TakenOver::class, name = "takenOver"),
+    JsonSubTypes.Type(SignedOut::class, name = "signedOut"),
     JsonSubTypes.Type(WorldWiped::class, name = "worldWiped"),
     JsonSubTypes.Type(StandsFrame::class, name = "stands"),
     JsonSubTypes.Type(RollDrawn::class, name = "rollDrawn"),
@@ -299,6 +300,12 @@ data class YourHouse(val yours: YourHouseView?) : ServerFrame
  * more and accepts no commands. A player plays from one place. See decision record 0028.
  */
 data class TakenOver(val message: String) : ServerFrame
+
+/**
+ * The browser's sign-in has ended - signed out here or from another browser, run out, or the account gone - and this
+ * session is finished as a taken-over one is. A window belongs to a live sign-in. See decision record 0109.
+ */
+data class SignedOut(val message: String) : ServerFrame
 
 /**
  * What this player has to decide, or null when they have nothing. Sent after welcome and again whenever

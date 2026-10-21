@@ -39,7 +39,7 @@ const kept = {
  * Asks the game server something under `/auth`, which the dev server passes through to this tree's game server, so
  * the page talks to its own address and the sign-in's cookie is the page's own. What a refusal says is thrown.
  */
-async function ask(method: 'GET' | 'POST', path: string, body?: object): Promise<Me> {
+async function ask<T = Me>(method: 'GET' | 'POST', path: string, body?: object): Promise<T> {
   const response = await fetch(`/auth/${path}`, {
     method,
     credentials: 'same-origin',
@@ -51,7 +51,7 @@ async function ask(method: 'GET' | 'POST', path: string, body?: object): Promise
     const refused = (await response.json().catch(() => ({}))) as { refused?: string };
     throw new Error(refused.refused ?? `/auth/${path} answered ${response.status}`);
   }
-  return (await response.json()) as Me;
+  return (await response.json()) as T;
 }
 
 let signingIn: Promise<Me> | null = null;
@@ -99,6 +99,35 @@ export function signIn(): Promise<Me> {
  */
 export async function startOver(): Promise<void> {
   await ask('POST', 'guest', {});
+}
+
+/** Asks again who this browser is, for the debug panel: what the page knew at its load may have ended since. */
+export async function whoAmI(): Promise<Me> {
+  const me = await ask('GET', 'me');
+  known.set({ me });
+  return me;
+}
+
+/**
+ * Adam's lever, standing in for time: this browser's sign-in ends now, as one left unused past its time does, and the
+ * game server stands its windows down. Refused while the instruments are closed.
+ */
+export async function runOut(): Promise<void> {
+  await ask('POST', 'runout');
+}
+
+/** A mail the game server sent, as its outbox has it. */
+export interface Mail {
+  to: string;
+  subject: string;
+  text: string;
+  link: string | null;
+  sent: number;
+}
+
+/** Every mail the game server sent, the newest last: Adam's instrument, since the mail holds live links. */
+export function outbox(): Promise<Mail[]> {
+  return ask<Mail[]>('GET', 'outbox');
 }
 
 /**

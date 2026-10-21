@@ -15,6 +15,7 @@ import { note } from './log/log';
 import { inspect } from './inspect/opening';
 import { WaterClicks } from './inspect/WaterClicks';
 import { RippleAlongWater } from './inspect/RippleAlongWater';
+import { SignedOut } from './account/SignedOut';
 import { signIn } from './net/auth';
 import { sessionStore, gateway } from './net/gateway';
 import { followMap } from './net/followMap';
@@ -356,6 +357,7 @@ export function App({ master, devTools }: AppProps) {
         overlays={
           <>
             <StoodDown />
+            <SignedOut />
             <StartupScreen />
           </>
         }

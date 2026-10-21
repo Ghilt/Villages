@@ -214,6 +214,9 @@ export const sessionLog: GatewayListener = {
       case 'takenOver':
         note('gateway', `${frame.message}; this window is no longer playing`);
         return;
+      case 'signedOut':
+        note('accounts', `${frame.message}; this window is no longer playing`);
+        return;
       case 'event': // A player's window never asks for stored events; they have a page of their own (0023).
         return;
       // A player's window never reads or saves a catalogue: the inspect pages do, with no session (0097).

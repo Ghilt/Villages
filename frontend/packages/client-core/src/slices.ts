@@ -18,7 +18,7 @@ import type { OnTheMapState } from './onTheMap';
 
 /** What the page knows of the world and of its own house, as the gateway has told it. */
 export interface SessionState {
-  connection: 'connecting' | 'open' | 'closed' | 'takenOver';
+  connection: 'connecting' | 'open' | 'closed' | 'takenOver' | 'signedOut';
   playerId?: string;
   /** The player's own house and what only they can see of it, or null when they have none. */
   yourHouse: YourHouseView | null;
@@ -104,7 +104,7 @@ export interface SessionState {
  * two differ on purpose: a closed connection keeps what the house had on its cards, for whoever reads them after,
  * and a window taken over forgets it, because somebody else is playing it now. See decision record 0028.
  */
-export type EndCause = 'closed' | 'takenOver';
+export type EndCause = 'closed' | 'takenOver' | 'signedOut';
 
 export type FrameType = ServerFrame['type'];
 export type FrameOf<T extends FrameType> = Extract<ServerFrame, { type: T }>;
@@ -121,11 +121,11 @@ export interface Slice<K extends keyof SessionState> {
   onReset(state: Pick<SessionState, K>, cause: EndCause): Pick<SessionState, K>;
 }
 
-/** A part that keeps its state through a close, and forgets it to a takeover. */
+/** A part that keeps its state through a close, and forgets it to a takeover or a sign-in ending. */
 const forgottenWhenTakenOver =
   <K extends keyof SessionState>(initial: Pick<SessionState, K>) =>
   (state: Pick<SessionState, K>, cause: EndCause): Pick<SessionState, K> =>
-    cause === 'takenOver' ? initial : state;
+    cause === 'closed' ? state : initial;
 
 const SLICES = {
   connection: {

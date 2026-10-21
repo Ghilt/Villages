@@ -207,6 +207,8 @@ export function createSession(ports: SessionPorts): Session {
     worldWiped: () => ports.arriveAnew(),
     // A player plays from one place. This window is finished; the socket goes with it. See 0028.
     takenOver: () => connection?.close(),
+    // A window belongs to a live sign-in, and this one's has ended: finished as a taken-over one is. See 0109.
+    signedOut: () => connection?.close(),
     // A player's window never asks for stored events; they have a page of their own. See 0023.
     event: () => undefined,
     rollDrawn: () => undefined,
@@ -235,8 +237,8 @@ export function createSession(ports: SessionPorts): Session {
       inFlight = answer.inFlight;
       answeredIn = answer.area;
     }
-    if (frame.type === 'takenOver') {
-      end('takenOver');
+    if (frame.type === 'takenOver' || frame.type === 'signedOut') {
+      end(frame.type);
     } else {
       store.set(foldFrame(was, frame));
     }
@@ -265,9 +267,10 @@ export function createSession(ports: SessionPorts): Session {
         ...(options.master === undefined ? {} : { master: options.master }),
       });
       connection.onClose(() => {
-        // A window that was taken over closed its own socket on purpose. Saying "the connection closed, is
-        // the backend running?" over the top of that would be the panel telling a plain lie; see 0023.
-        if (store.get().connection === 'takenOver') {
+        // A window that was taken over, or signed out, closed its own socket on purpose. Saying "the connection
+        // closed, is the backend running?" over the top of that would be the panel telling a plain lie; see 0023.
+        const ended = store.get().connection;
+        if (ended === 'takenOver' || ended === 'signedOut') {
           return;
         }
         end('closed');

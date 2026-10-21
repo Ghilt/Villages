@@ -317,6 +317,7 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('yourQuests'), quests: z.array(questViewSchema) }),
   /** Another window took this player over; this session is finished. */
   z.object({ type: z.literal('takenOver'), message: z.string() }),
+  z.object({ type: z.literal('signedOut'), message: z.string() }),
   /** The world was emptied and this session is finished with it. Everyone is told. See 0036. */
   z.object({ type: z.literal('worldWiped'), message: z.string() }),
   /** One layer of the sprite map's stands in one zoom 7 tile, as far as the fog lets them through. See `standTiles.ts`. */

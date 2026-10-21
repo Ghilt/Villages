@@ -1,4 +1,4 @@
-/* The debug panel's Worktrees and Debug map sections. */
+/* The debug panel's Worktrees, Debug map and Accounts sections. */
 
 /*
  * Which worktree is on the screen, and what else is up. One tree a row: its name, the branch it is on
@@ -150,4 +150,18 @@
   gap: 0.5rem;
   font-size: 0.72rem;
   color: var(--ink-soft);
+}
+
+/* The mail the game server sent, one a row, its link pressable: the Accounts section's outbox. See docs/adr/0109. */
+.accounts__outbox {
+  margin: 0.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  max-height: 11rem;
+  color: var(--ink-soft);
+}
+
+.accounts__outbox li {
+  padding: 0.18rem 0.25rem;
 }

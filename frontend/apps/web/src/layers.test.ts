@@ -24,7 +24,7 @@ const ROWS: readonly (readonly string[])[] = [
   // What stands on the ground, and the room around the desk.
   ['sprites', 'room'],
   // The game's own surfaces: the panes and windows a player reads and presses, and the loading screen over them.
-  ['house', 'figures', 'holdings', 'choice', 'dialogues', 'quests', 'areas', 'inspect', 'startup'],
+  ['house', 'figures', 'holdings', 'choice', 'dialogues', 'quests', 'areas', 'inspect', 'startup', 'account'],
   // What puts it all together, and the instruments beside it.
   ['(root)', 'debug', 'admin'],
 ];
@@ -104,9 +104,18 @@ function rowOf(folder: string): number {
  * will: until one has, it draws its own controls and may not reach into `ui`. The choice roll was the first,
  * with its rarity cards and Take action (0083); the inspect window the second, with the tag beside a window's name
  * saying how fresh what it shows is (0089); later the quests, and the marks on the map with the card a crowd of them
- * opens into (0096); and the loading screen the game starts up under.
+ * opens into (0096); the loading screen the game starts up under; and the account's screens, which were drawn from it
+ * from the first (0109).
  */
-const TAKEN_UP: readonly string[] = ['choice', 'inspect', 'holdings', 'quests', 'sprites', 'startup'];
+const TAKEN_UP: readonly string[] = [
+  'choice',
+  'inspect',
+  'holdings',
+  'quests',
+  'sprites',
+  'startup',
+  'account',
+];
 
 /** Whether the rows let one folder import another. */
 export function mayImport(from: string, to: string): boolean {

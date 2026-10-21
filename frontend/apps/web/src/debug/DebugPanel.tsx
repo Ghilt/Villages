@@ -5,6 +5,7 @@ import { FLAT_MAX_ZOOM, TILE } from '../geometry/world';
 import { forgetPaintedTally } from '../map/painterlyTiles';
 import { flatWindow, sheetCoversView, sheetOnScreen } from '../map/sheet';
 import { WORLD_MASTER_WIDTH } from '../geometry/world';
+import { AccountsSection } from './AccountsSection';
 import { AreasSection } from './AreasSection';
 import { BuildBadge } from '../version/BuildBadge';
 import { CameraSection } from './CameraSection';
@@ -257,6 +258,7 @@ export function DebugPanel({ map, worldRoot, master, renderer, onRenderer }: Deb
           <AreasSection map={map} worldRoot={worldRoot} />
 
           <WorldSection map={map} />
+          <AccountsSection />
           <ResourcesSection />
           <StructuresSection map={map} />
           <CharactersSection map={map} />
