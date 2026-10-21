@@ -143,6 +143,9 @@ export class WorldTiles {
     return id === null ? 'ocean' : (this.names[id] ?? 'ocean');
   };
 
+  /** The class's id at a point of world space, the ocean's off the world's top and bottom: no name looked up. */
+  classIdAt = (x: number, y: number): number => this.sample('classes', x, y) ?? 0;
+
   /** The height in metres at a point of world space; nought on the sea. */
   heightAt = (x: number, y: number): number => this.sample('heights', x, y) ?? 0;
 

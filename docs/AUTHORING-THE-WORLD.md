@@ -123,6 +123,17 @@ a marsh over one and it goes, and the sites more than two spacings away stay whe
 the settlement the world raised on one is never raised again somewhere else. `levels` is how many of them are
 villages and large villages rather than hamlets. See `docs/plans/settlements-and-roads.md`.
 
+**And the roads between them follow the ground you painted.** Nobody paints a road either: `world:roads` lays them
+by `world/roads.json`. `longestKm` is the longest road there is, so a village further than that from anyone stands
+alone. `ground` is what a step costs on each class beside farmland, one or more - a forest dearer, a marsh dearer
+still - and `climb` what a metre up or down costs, so a road goes round a hill or a bog when the way round is
+cheaper. `trunk` is the share of a step along a road already there, so roads share ground. A river is crossed only
+by a bridge: `bridges.longestSpan` is the most river one spans, `biggestRiver` the biggest river by `world:flow`'s
+size it crosses at all, `stoneFrom` the span from which it is stone. Paint a lake across a road and it goes round;
+paint a river too wide to bridge and the villages either side are joined on their own banks. `shape` is how straight
+and how smooth a road is drawn, `grades` how many roads share a stretch for it to be a road and a trunk rather than a
+track, and `widths` how wide each is drawn. See `docs/plans/settlements-and-roads.md`.
+
 ## Seeing your edit
 
 Save the image, alt-tab to the running app, and pick it in the **Debug map** part of the debug panel,

@@ -34,6 +34,7 @@
     "world:culture": "npm run culture --workspace @villages/world --",
     "world:ruins": "npm run ruins --workspace @villages/world --",
     "world:settlements": "npm run settlements --workspace @villages/world --",
+    "world:roads": "npm run roads --workspace @villages/world --",
     "world:structures": "npm run structures --workspace @villages/world --",
     "world:height": "npm run height --workspace @villages/world --",
     "world:scenery": "npm run scenery --workspace @villages/world --",

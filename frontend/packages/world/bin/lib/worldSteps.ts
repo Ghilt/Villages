@@ -22,7 +22,8 @@ export type StepName =
   | 'culture'
   | 'ruins'
   | 'height'
-  | 'settlements';
+  | 'settlements'
+  | 'roads';
 
 /** A file a step is made from. */
 export interface MadeFrom {
@@ -275,6 +276,22 @@ export const WORLD_STEPS: readonly WorldStep[] = [
     makes: [{ path: 'world/ground/<m>/settlements.json', is: 'settlements-server' }],
     doing: 'choosing where the settlements stand',
     done: 'the settlements have their sites',
+  },
+  {
+    name: 'roads',
+    tool: `${BIN}/roadsWorld.ts`,
+    options: [],
+    memory: 4096,
+    heavy: false,
+    perMaster: true,
+    from: [{ path: 'world/roads.json', is: 'roads' }, PALETTE, RENDER],
+    after: ['tile', 'flow', 'names', 'ruins', 'height', 'settlements'],
+    makes: [
+      { path: `${M}/sprites/roads`, is: 'roads-map', folder: true },
+      { path: 'world/stands/<m>/roads', is: 'roads-stands', folder: true },
+    ],
+    doing: 'laying the roads between the settlements',
+    done: 'the roads are laid',
   },
 ];
 

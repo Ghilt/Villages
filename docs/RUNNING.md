@@ -805,8 +805,25 @@ and `-- --drop` takes them off; by hand only.
   tiles, the flow, the height, the names, the cultures, `world/ruins.json`, the structures' catalogue or
   `world/settlements.json` changed. `-- --picture` draws the sites over the ground around Paris, Grand Cairo, Jeddo,
   New Orleans and Vienna into `world/painterly/settlements/` - white in open country, orange beside a ruin, blue a
-  fishing village, larger a level up, every ruin a faint ring; `--around` and `--scale` as the ruins'. Nothing raises
-  them yet: see `docs/plans/settlements-and-roads.md`.
+  fishing village, larger a level up, every ruin a faint ring; `--around` and `--scale` as the ruins'. The game
+  server raises a settlement on each at the opening: see `docs/plans/settlements-and-roads.md`.
+- The roads of 1790: `npm run world:roads --prefix frontend` joins every settlement site to its neighbours and to the
+  ruined towns near it, by `world/roads.json`: two places are joined when no third stands nearer both, no further
+  apart than the longest road and never one ruin to another, each road the cheapest way over the zoom-7 tiles by
+  their ground and their climb, the cheaper along a road already there so roads merge, a river crossed only by a
+  bridge straight along one of the ground lattice's four axes, into a settlement by its streets and into a ruin by
+  its gates or past its outline, never over a square or a ruin's piece. The roads are joined into one network, cut
+  into stretches between junctions, ends and bridges, each shaped once and graded a track, a road or a trunk by how
+  many roads use it, and written as pieces of the stands' eight bytes into `world/stands/<master>/roads/`, which only
+  the game server reads, with how to read them in the master's `sprites/roads/map.json`. It prints how much road of
+  each grade, the bridges of each kind on each axis, the settlements no road reaches and why, and the stretches over a
+  building, a ruin's piece or water, which must be none; on the master of 2026-10-03, 340,000 km of road and 2,131
+  bridges between 10,838 places, 880 settlements left alone - 798 with no place within 90 km, in the far north and
+  the deserts - in a minute and a quarter. `world:ready` makes it again whenever the tiles, the flow, the height, the
+  names, the ruins, the settlements or `world/roads.json` changed. `-- --picture` draws the roads over the ground
+  around Paris, Grand Cairo, Jeddo, New Orleans, Vienna and Dantzic into `world/painterly/roads/` - a track brown, a
+  road pale, a trunk yellow, a bridge red, a settlement a pale square, a ruin's pieces grey; `--around` and `--scale`
+  as the ruins'. Nothing draws them on the map yet: see `docs/plans/settlements-and-roads.md`.
 - How high the ground is, for the relief: `npm run world:height --prefix frontend` reads ETOPO 2022's whole world,
   a height every 60 arc-seconds, through the master's origin map, so every point of the master has the height of
   where on Earth it was cut from, and invented land is given ground of the kind the master paints on it, and

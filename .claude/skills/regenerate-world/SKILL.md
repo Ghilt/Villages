@@ -1,6 +1,6 @@
 ---
 name: regenerate-world
-description: Rebuild everything a change made stale in the world - tiles, rivers' flow, sprite map, ground, origin map and names, culture map, height, scenery stills, painted views - then say what moved with a number and a picture. Use whenever a step changes the master, world/palette.json, world/render.json, world/painterly.json, world/biomes.json, world/names/, world/cultures.json, world/ruins.json, or any tool or code the tiles, the paint or the maps go through; also when a worktree has no world cut yet. Never offered as an option: it is part of the step.
+description: Rebuild everything a change made stale in the world - tiles, rivers' flow, sprite map, ground, origin map and names, culture map, height, settlement sites, roads, scenery stills, painted views - then say what moved with a number and a picture. Use whenever a step changes the master, world/palette.json, world/render.json, world/painterly.json, world/biomes.json, world/names/, world/cultures.json, world/ruins.json, world/settlements.json, world/roads.json, or any tool or code the tiles, the paint or the maps go through; also when a worktree has no world cut yet. Never offered as an option: it is part of the step.
 ---
 
 # Regenerate the world
@@ -63,6 +63,9 @@ when it was made; `-- --only <step> --force` makes it again to read all of it:
   sea. `-- --picture` draws every town's ruins as rings around a few great cities into `world/painterly/ruins/`.
 - `world:settlements`: how many settlement sites, of each type, level and culture, and how many beside the ruins.
   `-- --picture` draws them over the ground around a few towns into `world/painterly/settlements/`.
+- `world:roads`: how much road of each grade, how many bridges of each kind on each axis, the settlements no road
+  reaches and why, and the stretches of road over a building, a ruin's piece or water, which must be none: a number
+  above nought is a fault to fix, not a number to report. `-- --picture` draws them into `world/painterly/roads/`.
 - `world:sprites`: the density of every biome against experiment 0006's ceiling. Without a sprite map a
   master draws no scenery at all.
 - `world:scenery`: the counts beside every picture. Say which places moved and by how much.
