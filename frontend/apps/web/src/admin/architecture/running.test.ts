@@ -37,13 +37,15 @@ describe('the running game, as the architecture page draws it', () => {
   it('lights the pieces a piece talks to, and only those, when it is chosen', () => {
     const { cards, arrows } = runningGraph();
     const lit = related(runCard('rabbitmq'), arrows, cards);
-    expect([...lit].sort()).toEqual([runCard('rabbitmq'), runCard('bridge'), runCard('projections')].sort());
+    expect([...lit].sort()).toEqual(
+      [runCard('rabbitmq'), runCard('eventBridge'), runCard('projections')].sort(),
+    );
   });
 
   it('lights every piece inside a group when the group is chosen', () => {
     const { cards, arrows } = runningGraph();
     const lit = related(groupCard('events'), arrows, cards);
-    for (const id of ['occurrent', 'mongodb', 'memory', 'bridge', 'rabbitmq'])
+    for (const id of ['occurrent', 'mongodb', 'memory', 'eventBridge', 'rabbitmq'])
       expect(lit.has(runCard(id))).toBe(true);
     expect(lit.has(runCard('gateway'))).toBe(false);
   });

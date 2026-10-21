@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
 /**
- * The broker feed (decision record 0094): a follower handed the history from the store and then what the bridge
+ * The broker feed (decision record 0094): a follower handed the history from the store and then what the event bridge
  * publishes, through a queue of its own, against a MongoDB and a RabbitMQ of the spec's own. Nothing missed, nothing
  * twice, a wipe that waits for it, and a broker that goes away caught up from the store.
  *
@@ -53,7 +53,7 @@ class BrokerLiveDockerSpec : StringSpec({
     val mongo by lazy { DockerStack.mongo }
     val rabbit by lazy { DockerStack.rabbit }
 
-    /** A world carried by RabbitMQ, the bridge running, and a feed over it that follows the broker. */
+    /** A world carried by RabbitMQ, the event bridge running, and a feed over it that follows the broker. */
     class Carried(val world: MongoWorld, val carried: CarriedWorld, val faults: FaultBoard, broker: Broker) : AutoCloseable {
         val feed = world.follow(BrokerLive(broker, faults))
         override fun close() = carried.close()

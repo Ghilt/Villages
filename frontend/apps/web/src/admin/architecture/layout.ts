@@ -64,7 +64,7 @@ const CLUSTER = { pad: 24, head: 64 };
  * talks down to the gateway and up to the parts drawing what it is told, and beside it the sign-in, which opens it. In
  * the game server and the event store, a column of three and a row of two: the gateway is above what feeds it, and
  * the accounts out to its right, clear of the projections, so what they keep runs down past the event store to
- * MongoDB; Occurrent above what keeps its events, the bridge beside it and above the broker it publishes to, and the
+ * MongoDB; Occurrent above what keeps its events, the event bridge beside it and above the broker it publishes to, and the
  * feed runs up.
  */
 const SPOTS: Record<string, { readonly col: number; readonly row: number }> = {
@@ -88,7 +88,7 @@ const SPOTS: Record<string, { readonly col: number; readonly row: number }> = {
   projections: { col: 2, row: 1 },
   accounts: { col: 3, row: 0 },
   occurrent: { col: 1, row: 0 },
-  bridge: { col: 2, row: 0 },
+  eventBridge: { col: 2, row: 0 },
   memory: { col: 0, row: 1 },
   mongodb: { col: 1, row: 1 },
   rabbitmq: { col: 2, row: 1 },

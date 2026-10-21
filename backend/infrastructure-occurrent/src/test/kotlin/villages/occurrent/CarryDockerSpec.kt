@@ -25,7 +25,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * The store followed durably, which the bridge to the broker rides (decision record 0094): handed every event written
+ * The store followed durably, which the event bridge to the broker rides (decision record 0094): handed every event written
  * since its name first followed the store, its place kept in MongoDB, so nothing written while it was not running is
  * missed. Against a replica set of the spec's own, each case in a database of its own.
  *

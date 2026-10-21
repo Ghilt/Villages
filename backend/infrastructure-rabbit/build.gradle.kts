@@ -2,7 +2,7 @@ plugins {
     id("villages.kotlin-module")
 }
 
-// The broker topology and the bridge from the event store to the exchange, on RabbitMQ's own Java client, as the
+// The broker topology and the event bridge from the event store to the exchange, on RabbitMQ's own Java client, as the
 // store is on MongoDB's own driver. Every AMQP type lives in this module and nowhere else. See decision 0094.
 dependencies {
     implementation(project(":application"))

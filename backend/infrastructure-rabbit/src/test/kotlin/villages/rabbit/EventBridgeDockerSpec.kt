@@ -29,14 +29,14 @@ import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 
 /**
- * The bridge from the store to the broker (decision record 0094), against a MongoDB and a RabbitMQ of the spec's own:
- * every stored event published once, under its key, as the store holds it, and nothing lost while the bridge or the
+ * The event bridge from the store to the broker (decision record 0094), against a MongoDB and a RabbitMQ of the spec's own:
+ * every stored event published once, under its key, as the store holds it, and nothing lost while the event bridge or the
  * broker is down. What it publishes is read from a queue of the spec's own, bound to everything and durable, so that
- * it outlives the bridge's connections and the broker's restart.
+ * it outlives the event bridge's connections and the broker's restart.
  *
  * It needs Docker, says so in its names, and is skipped with the reason when Docker is not running.
  */
-class BridgeDockerSpec : StringSpec({
+class EventBridgeDockerSpec : StringSpec({
     val docker = DockerClientFactory.instance().isDockerAvailable
     val needsDocker: (TestCase) -> Enabled = {
         if (docker) Enabled.enabled else Enabled.disabled("needs Docker, and Docker is not running")
@@ -74,11 +74,11 @@ class BridgeDockerSpec : StringSpec({
     }
 
     fun bridged(world: MongoWorld, broker: Broker): AutoCloseable {
-        val bridge = Bridge(broker, keys)
-        val carrier = world.carry("bridge") { bridge.carry(it, world.eventIn(it)) }
+        val eventBridge = EventBridge(broker, keys)
+        val carrier = world.carry("bridge") { eventBridge.carry(it, world.eventIn(it)) }
         return AutoCloseable {
             carrier.close()
-            bridge.close()
+            eventBridge.close()
         }
     }
 
@@ -115,7 +115,7 @@ class BridgeDockerSpec : StringSpec({
             }
         }
 
-    "an event written while the bridge was down is published when it is back, and nothing twice (needs Docker)"
+    "an event written while the event bridge was down is published when it is back, and nothing twice (needs Docker)"
         .config(enabledOrReasonIf = needsDocker) {
             val broker = broker("villages-bridge-down")
             val queue = everything(broker)
@@ -169,7 +169,7 @@ class BridgeDockerSpec : StringSpec({
             }
         }
 
-    "a broker stopped and started again loses nothing, and the bridge says so once (needs Docker)"
+    "a broker stopped and started again loses nothing, and the event bridge says so once (needs Docker)"
         .config(enabledOrReasonIf = needsDocker) {
             val broker = broker("villages-bridge-restart")
             val queue = everything(broker)

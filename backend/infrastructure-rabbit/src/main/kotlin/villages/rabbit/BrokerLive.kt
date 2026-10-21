@@ -14,7 +14,7 @@ import kotlin.concurrent.thread
 /**
  * A feed's live half taken from the broker (decision record 0094): each follower listens through a queue of its own,
  * exclusive, bound to everything on `villages.events`, over a connection of its own named after it, so that the
- * management page says who is behind. What it is handed is the stored event as the bridge published it.
+ * management page says who is behind. What it is handed is the stored event as the event bridge published it.
  *
  * A queue lives as long as its connection, and what is published while it is gone is lost to it. So when the
  * connection goes, or the queue is deleted from under it, the follower says so once, and makes a connection and a

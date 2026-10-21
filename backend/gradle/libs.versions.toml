@@ -34,7 +34,7 @@ occurrent-subscription-inmemory = { module = "org.occurrent:occurrent-subscripti
 # subscriptions as change streams. See decision record 0092.
 occurrent-eventstore-mongodb = { module = "org.occurrent:occurrent-eventstore-mongodb-native" }
 occurrent-subscription-mongodb = { module = "org.occurrent:occurrent-subscription-mongodb-native-blocking" }
-# A subscription that keeps its place in MongoDB and resumes from it, which the bridge to the broker rides,
+# A subscription that keeps its place in MongoDB and resumes from it, which the event bridge to the broker rides,
 # so an event written while the server was down is carried when it is back. See decision record 0094.
 occurrent-subscription-durable = { module = "org.occurrent:occurrent-subscription-durable-blocking" }
 occurrent-checkpoint-mongodb = { module = "org.occurrent:occurrent-subscription-mongodb-native-blocking-checkpoint-storage" }

@@ -128,7 +128,7 @@ class MongoWorld(
     private val carriers = CopyOnWriteArrayList<AutoCloseable>()
 
     /**
-     * Follows the store durably under [name], for the bridge to the broker (decision record 0094). [carry] is handed
+     * Follows the store durably under [name], for the event bridge to the broker (decision record 0094). [carry] is handed
      * every event written since that name first followed this world, markers too, one at a time, in the order they
      * were written, on a thread of its own. Once it returns, the place it reached is kept in `checkpoints`, so a
      * server started again goes on from there, and an event written while it was down is handed on when it is back.

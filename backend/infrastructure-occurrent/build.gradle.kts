@@ -25,7 +25,7 @@ dependencies {
     // In MongoDB when the app is told to keep its world there, behind the same ports. See decision 0092.
     implementation(libs.occurrent.eventstore.mongodb)
     implementation(libs.occurrent.subscription.mongodb)
-    // And followed durably, its place kept in the same database, for the bridge to the broker. See 0094.
+    // And followed durably, its place kept in the same database, for the event bridge to the broker. See 0094.
     implementation(libs.occurrent.subscription.durable)
     implementation(libs.occurrent.checkpoint.mongodb)
 

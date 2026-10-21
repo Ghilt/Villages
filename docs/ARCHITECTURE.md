@@ -117,7 +117,7 @@ violation when the rule was introduced.
 | `application` | Use cases and the ports they need: command execution, read model queries, the clock, who a browser's sign-in plays as (`SignedInPlayers`) |
 | `protocol` | The client and server message types, shared with the frontend through checked-in JSON fixtures, and the version of the wire, whose shape is recorded in `contracts/protocol-v<n>.txt` (0037) |
 | `infrastructure-occurrent` | CloudEvent conversion and type mapping, the MongoDB event store, the application service, durable subscriptions |
-| `infrastructure-rabbit` | The tree's virtual host and the exchange, the bridge that publishes stored events, the routing key, and the broker feed the read models follow (0094) |
+| `infrastructure-rabbit` | The tree's virtual host and the exchange, the event bridge that publishes stored events, the routing key, and the broker feed the read models follow (0094) |
 | `projections` | Read models: the structures and people by cell, which the map is drawn from, the houses, the choices, the dialogues; the sight is what every house can see, which the fog of war is drawn from |
 | `gateway` | Player connections, cell subscriptions, snapshots, coalesced deltas, command intake through one registry, `Commands`, each mechanic a part of its own made from the `GatewayMechanic` its configuration hands over (0075), and Adam's instruments, whose levers are each mechanic's and whose looks are a part of their own, `Instruments`, all closed by `villages.instruments` (0076) |
 | `accounts` | Who a browser is signed in as: the sign-ins, kept by the hash of their secret and how long each is kept, and every player's record, in memory or beside the events in the tree's own database, never among them. Nothing of the game reaches it (0111) |
@@ -161,7 +161,7 @@ at once never see each other's world. The quick start starts the stack when it i
 debug panel prints.
 
 With `villages.broker=rabbit`, which needs MongoDB and which the quick start passes with it, the world is a
-`CarriedWorld`: **the bridge** follows the store durably and publishes every event it stores to RabbitMQ's
+`CarriedWorld`: **the event bridge** follows the store durably and publishes every event it stores to RabbitMQ's
 `villages.events`, in a virtual host of the tree's own that the server makes as it starts (decision record
 0094). The read models, the recent events and the events log then follow **the broker feed**: the same feed,
 its live half taken from RabbitMQ, each follower through an exclusive queue named after it. The reactions follow
@@ -237,7 +237,7 @@ Increment 0.7 compiled and ran the plan's riskiest assumption, on Occurrent 0.33
   exceptions for ever, backing off to five seconds, and gives up at once on anything else, saying so through
   `onError`, whose `ErrorInfo.isRetryable` is false only on the last. A subscription given up on is stopped for
   good. See decision record 0036.
-- The bridge to the broker rides a durable subscription, `DurableSubscriptionModel` over the native model, its
+- The event bridge to the broker rides a durable subscription, `DurableSubscriptionModel` over the native model, its
   place kept by `NativeMongoCheckpointStorage` in `checkpoints` (`occurrent-subscription-durable-blocking`,
   `occurrent-subscription-mongodb-native-blocking-checkpoint-storage`). It keeps the place once the subscriber
   returns, and a subscriber that throws is handed the same event again. Starting with
@@ -255,7 +255,7 @@ flowchart LR
   G -->|use case| A[Application]
   A -->|decide| D[Domain]
   A -->|append with expected version| ES[(Event store)]
-  ES -->|durable subscription| BR[Bridge]
+  ES -->|durable subscription| BR[Event bridge]
   ES -->|subscription| RE[Reactions]
   RE -->|commands| A
   BR -->|publish, confirmed| X{{villages.events: routing key per cell}}
@@ -276,7 +276,7 @@ decision, at consecutive versions and under one correlation id, and the map's re
 founding out of that. See decision records 0034 and 0035.
 
 A player founds a house. The gateway hands the command to the application, which loads the stream, calls `decide`,
-and appends the resulting events with the stream version as the write condition. The bridge follows the store from
+and appends the resulting events with the stream version as the write condition. The event bridge follows the store from
 there and publishes each event to the broker with a routing key that carries the cell, and the read models follow
 the broker, each through a queue of its own, while the reactions follow the store itself (decision record 0094).
 The gateway watches the read models, matches each change against the cells its sessions are watching, and pushes a

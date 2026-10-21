@@ -73,8 +73,8 @@ export const GROUPS: readonly Group[] = [
   {
     id: 'events',
     name: 'The event store',
-    where: 'Occurrent · MongoDB · the bridge · RabbitMQ',
-    what: 'How the world is kept and passed on, by four pieces with one job. Occurrent writes each event once and hands it on, MongoDB keeps it for good, and the bridge publishes every one to RabbitMQ, which carries it to the read models. Nothing is ever changed once written; everything else is worked out from it.',
+    where: 'Occurrent · MongoDB · the event bridge · RabbitMQ',
+    what: 'How the world is kept and passed on, by four pieces with one job. Occurrent writes each event once and hands it on, MongoDB keeps it for good, and the event bridge publishes every one to RabbitMQ, which carries it to the read models. Nothing is ever changed once written; everything else is worked out from it.',
   },
 ];
 
@@ -274,8 +274,8 @@ export const PIECES: readonly Piece[] = [
     what: "Where the events are kept when Docker is not running, and in every test. It is Occurrent's own store in the server's memory, behind the same ports, so nothing else can tell. Gone when the server stops, and a restart begins the world again.",
   },
   {
-    id: 'bridge',
-    name: 'The bridge',
+    id: 'eventBridge',
+    name: 'The event bridge',
     where: 'backend/infrastructure-rabbit',
     runs: 'server',
     group: 'events',
@@ -310,8 +310,8 @@ export const TALKS: readonly Talk[] = [
   { from: 'reactions', to: 'rules', says: 'commands, too' },
   { from: 'occurrent', to: 'projections', says: 'the history' },
   { from: 'projections', to: 'gateway', says: 'the world now' },
-  { from: 'occurrent', to: 'bridge', says: 'every event, from where it stopped' },
-  { from: 'bridge', to: 'rabbitmq', says: 'published, by cell' },
+  { from: 'occurrent', to: 'eventBridge', says: 'every event, from where it stopped' },
+  { from: 'eventBridge', to: 'rabbitmq', says: 'published, by cell' },
   { from: 'rabbitmq', to: 'projections', says: 'every event, a queue each' },
 ];
 

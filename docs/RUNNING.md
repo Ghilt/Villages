@@ -1013,7 +1013,7 @@ and `-- --drop` takes them off; by hand only.
   panes and the fog what the house has and sees, and beside it **the sign-in**, who this browser plays as, which opens
   it; choosing the shaders' box lights every shader in it. **The game server** box holds the gateway, the rules, the
   reactions, the projections and **the accounts**, who a browser is signed in as, kept in MongoDB beside the events, and
-  the baked files it reads arrive at the box; **the event store** box holds Occurrent, MongoDB, the bridge,
+  the baked files it reads arrive at the box; **the event store** box holds Occurrent, MongoDB, the event bridge,
   RabbitMQ and the in-memory store used without Docker, the last dashed because it is used only instead of
   MongoDB. Every arrow between running pieces says what passes along it - commands, the history, every event a
   queue each, the world now - and choosing a piece lights the pieces it talks to, a box the pieces in it. Their
@@ -1046,16 +1046,16 @@ and `-- --drop` takes them off; by hand only.
 - RabbitMQ is `localhost:5672`, and its management page is **http://localhost:15672**, signed into as
   `villages` / `villages`: what exchanges and queues exist and what is flowing through them. A tree's messages
   keep to a virtual host named as its database is, which the server makes as it starts and the page's menu at
-  the top right picks between. In it, **the bridge** publishes every event the world stores to the exchange
+  the top right picks between. In it, **the event bridge** publishes every event the world stores to the exchange
   `villages.events`, under a routing key of its type and the cell where it happened (`EVENTS.md`), over a
-  connection named *villages: the bridge*; the exchange's page shows the rate as houses are founded. The read
+  connection named *villages: the event bridge*; the exchange's page shows the rate as houses are founded. The read
   models, the recent events and the events log follow it: the Queues page lists one queue for each, named after
   it with a suffix, `HousesProjection.3f2a9c1b`, each over a connection of its own, *villages: HousesProjection*,
   and gone when the server stops. The reactions - the castle raised at a founding, the income and sight of what
   a house holds - follow the store and have none. Closing a follower's connection on the Connections page puts
   `error fault` in the debug panel; the follower makes its connection and queue again and reads the history, so
   nothing on the map goes missing. A queue bound by hand to `#` on the exchange's page fills with every event
-  from then on, and fills again with what was written while the server was down once it is back, because the
+  from then on, and fills again with what was written while the server was down once it is back, because the event
   bridge keeps its place in the tree's database, in `checkpoints`. Delete such a queue when done. See decision
   record 0094.
 - `docker compose -f infra/docker-compose.yml ps` says whether both are up and healthy; Docker Desktop's

@@ -5,6 +5,8 @@
 - Amends 0003: one queue per follower, bound to everything, until a gateway filters by cell; and the routing
   key's shape. Amends 0029: the bridge has the checkpoint 0029 found missing, and a feed's live half is a
   parameter. Amends 0092: the server makes its own virtual host, and `drop-gone-worlds` drops a gone tree's.
+- Amended 2026-10-21: the bridge is called the **event bridge**, `EventBridge`, since the word *bridge* went to
+  the river's (0115); it keeps its place under the name `bridge`, so it goes on from where it was.
 
 ## Context
 
