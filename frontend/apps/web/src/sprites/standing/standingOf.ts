@@ -2,6 +2,7 @@ import { toMercatorExact } from '../../geometry/cameraMath';
 import { WORLD_MASTER_WIDTH } from '../../geometry/world';
 import { standsAmongTheTrees } from '../fogLayering';
 import type { Entry } from '../markEntry';
+import { settlementStanding } from '../settlements/settlementDress';
 import { footprintAt } from './footprint';
 import type { StandingThing } from './StandingLayer';
 
@@ -11,6 +12,9 @@ import type { StandingThing } from './StandingLayer';
  * alone - and whether it is drawn standing at all. Null for a mark that does not stand among them.
  */
 export function standingOf(entry: Entry): StandingThing | null {
+  // A settlement stands as its buildings, once its layout is known; until then as its one picture.
+  const settled = settlementStanding(entry);
+  if (settled !== null) return settled;
   const { ground, look, pennant, spec } = entry;
   const tall = look.forms.groundHeight;
   if (!standsAmongTheTrees(spec.kind) || ground === null || tall === undefined) {

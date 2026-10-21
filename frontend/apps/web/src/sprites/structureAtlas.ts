@@ -2,6 +2,8 @@ import type { StructureAtlasFile } from '@villages/world';
 
 import { note } from '../log/log';
 import { readAtlas } from './atlas';
+import { loadSettlementArt } from './settlements/settlementPictures';
+import type { SettlementPictures } from './settlements/settlementPictures';
 import type { StructurePictures } from './structurePictures';
 
 /** Where `world:structures` puts the atlas of structures' pictures, beside the scenery's. */
@@ -19,9 +21,18 @@ export const STRUCTURES_CUT = 'villages:structures-cut';
  * Reads the atlas now, and again whenever the dev server says it cut it again, calling [painted] each time it has,
  * until the function it returns is called.
  */
-export function watchStructureArt(pictures: StructurePictures, painted: () => void): () => void {
+export function watchStructureArt(
+  pictures: StructurePictures,
+  painted: () => void,
+  settlements?: SettlementPictures,
+): () => void {
   let stopped = false;
-  const read = () => void loadStructureArt(pictures).then((done) => done && !stopped && painted());
+  // The settlements' pieces are cut by the same tool, so read again on the same word.
+  const read = () =>
+    void Promise.all([
+      loadStructureArt(pictures),
+      settlements === undefined ? false : loadSettlementArt(settlements),
+    ]).then((done) => done.some(Boolean) && !stopped && painted());
   read();
   import.meta.hot?.on(STRUCTURES_CUT, read);
   return () => {

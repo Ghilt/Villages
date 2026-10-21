@@ -43,10 +43,12 @@ export function yardOf(sprite: MapSprite): Yard | null {
   const at = toMercator(sprite.at);
   const x = at.x * WORLD_MASTER_WIDTH;
   const y = at.y * WORLD_MASTER_WIDTH;
+  // A settlement's place is its middle, its square laid round it (`settlementSquare`); another structure's is its foot.
+  const back = sprite.structure?.settlement === undefined ? 0 : side - Math.floor(side / 2);
   return {
     id: sprite.id,
-    u: Math.round(alongU(FRAME, x, y)),
-    v: Math.round(alongV(FRAME, x, y)),
+    u: Math.round(alongU(FRAME, x, y)) + back,
+    v: Math.round(alongV(FRAME, x, y)) + back,
     side,
     ruin: sprite.structure?.ruin === true,
   };

@@ -1,3 +1,5 @@
+import { buildSettlementPictures } from './settlements/settlementPictures';
+import type { SettlementPictures } from './settlements/settlementPictures';
 import { Graphics } from 'pixi.js';
 import type { Texture } from 'pixi.js';
 
@@ -33,6 +35,8 @@ export interface Textures {
   bust: Texture;
   /** Every type of structure's picture, and a plain house for a type with none. */
   structures: StructurePictures;
+  /** The pieces of the settlements and the bridges, once the atlas they are cut into is read. */
+  settlements: SettlementPictures;
   /** The pennant a held structure flies, tinted its holder's field. */
   pennant: Texture;
 }
@@ -97,6 +101,7 @@ export function buildMarkTextures(rasterise: Rasterise): Textures {
     figure: rasterise(figure),
     bust: rasterise(bust),
     structures: buildStructurePictures(rasterise),
+    settlements: buildSettlementPictures(),
     pennant: drawPennant(rasterise),
   };
   candidate.destroy();

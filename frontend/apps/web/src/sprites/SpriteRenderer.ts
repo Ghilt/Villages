@@ -1,4 +1,5 @@
 import type { Coverage } from '@villages/protocol';
+import type { Culture, LaidOut, SettlementType } from '@villages/world';
 
 import type { FogField } from '../fog/fogField';
 
@@ -29,7 +30,16 @@ export interface MapSprite {
    * whose yard is going back to grass (docs/plans/worked-ground.md). Its tint is white, because a structure is drawn
    * in its own colours. Absent for every other kind.
    */
-  structure?: { picture: string; groundHeight?: number; footprint?: number; ruin?: boolean };
+  structure?: {
+    picture: string;
+    groundHeight?: number;
+    footprint?: number;
+    ruin?: boolean;
+    /** A settlement, which the page lays out in buildings: its type, its level and the culture under it. */
+    settlement?: { type: SettlementType; level: number; culture: Culture };
+    /** The buildings a settlement is laid out in, once the ground about it is known. See `useSettlementLayouts`. */
+    laid?: LaidOut;
+  };
   /**
    * A structure the player's house controls, or one of its key figures: far out it becomes its mark, a type's pin
    * or a bust, and is drawn at every zoom. Anyone else's stays itself, shrinks with the map and fades at the floor.
@@ -178,4 +188,6 @@ export interface DrawnSprite {
   groundOverTheFog: boolean;
   /** Whether a pennant is flown over it, for a structure held by a house; absent for a mark that has none. */
   pennant?: boolean;
+  /** How many of a settlement's pieces are drawn, for a settlement drawn as its buildings. */
+  pieces?: number;
 }

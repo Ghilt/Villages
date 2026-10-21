@@ -504,8 +504,12 @@ stage alone, with none of the debug panel in it (decision record 0079).
   castle than the balance's `settlements.clearKm`. Each is a `villages.structure.raised.v1` in the events log; the
   server's log says `the world is open, with 300 house bots and 7387 settlement sites: 7337 settlements raised, 48
   passed over for a seat, in 69.7 s` on a fresh world, measured on 2026-10-21, and a restart over a world kept in
-  MongoDB raises none twice, in a second. Until the page lays them out each is drawn as the plain house every type
-  without a picture is, and is seen only through the fog, so *see everything* shows them all.
+  MongoDB raises none twice, in a second. From zoom 7.5 in the page lays each out in its buildings by `settlementIn`,
+  once the ground about it has come, and draws them from `public/art/settlements.webp`, all of them one thing among
+  the trees on its square; further out, and until its ground has come, it is its one mark. A click on any of its
+  buildings opens its window. The log's `settlements` line says how many are laid out and in how many buildings, and
+  the probe's `villagesSprites()` how many of a settlement's pieces are drawn. Each is seen only through the fog, so
+  *see everything* shows them all.
   `--villages.settlements=false` leaves them out, as the tests that start a server and the end-to-end test do. See
   decision record 0114 and `docs/plans/settlements-and-roads.md`.
 - Every type standing at once: **Antarctica**. While the instruments are open the game server raises one structure of

@@ -9,6 +9,7 @@ import { sessionStore } from '../net/gateway';
 import { focusOn } from '../map/focus';
 import { CrowdCard } from './CrowdCard';
 import { revealedBy } from './ground/growing';
+import { useSettlementLayouts } from './settlements/useSettlementLayouts';
 import { useWorkedGround } from './ground/useWorkedGround';
 import { cameraOf } from './mapCamera';
 import { createPixiSpriteRenderer } from './PixiSpriteRenderer';
@@ -54,7 +55,16 @@ interface SpriteOverlayProps {
  * Holds the renderer for as long as the map lives, and hands it whatever should be on the map. The
  * renderer type is the only thing this file knows about Pixi, so swapping it is a one-line change here.
  */
-export function SpriteOverlay({ map, sprites, worldRoot, picked: top, onPick, started }: SpriteOverlayProps) {
+export function SpriteOverlay({
+  map,
+  sprites: given,
+  worldRoot,
+  picked: top,
+  onPick,
+  started,
+}: SpriteOverlayProps) {
+  // Every settlement laid out in its buildings once the ground about it is known, before anything reads them.
+  const sprites = useSettlementLayouts(given, worldRoot);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const uncolouringRef = useRef<HTMLCanvasElement | null>(null);
   // Held in state, so that a renderer made after a switch was thrown is handed it the moment it exists.

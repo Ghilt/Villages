@@ -1,3 +1,5 @@
+import { hideSettlement, undressSettlement } from './settlements/settlementDress';
+import type { SettlementDress } from './settlements/settlementDress';
 import { Sprite } from 'pixi.js';
 import type { Container, Texture } from 'pixi.js';
 
@@ -53,6 +55,8 @@ export interface Entry {
    * See `fogLayering.ts`.
    */
   inVision: boolean;
+  /** A settlement's buildings, which stand in for its one picture once its layout is known. Null for the rest. */
+  settlement: SettlementDress | null;
 }
 
 /**
@@ -85,6 +89,7 @@ export function hide(entry: Entry): void {
     }
   }
   entry.badge?.hide();
+  hideSettlement(entry);
 }
 
 /** Lets go of every sprite of a mark that has gone. */
@@ -94,6 +99,7 @@ export function letGo(entry: Entry): void {
   entry.pennant?.destroy();
   entry.shadow?.destroy();
   entry.badge?.destroy();
+  undressSettlement(entry);
 }
 
 /**
@@ -127,16 +133,20 @@ export function flyPennant(
 export function drawnOf(entry: Entry, overIt: Container): DrawnSprite {
   const onGround = entry.ground?.visible === true;
   const asIcon = entry.icon?.visible === true;
-  const above = onGround ? entry.ground : entry.icon;
+  const shown = entry.settlement?.pieces.filter((piece) => piece.sprite.visible) ?? [];
+  const pieces = shown.length;
+  // A settlement drawn as its buildings is where its first piece stands.
+  const above = onGround ? entry.ground : asIcon ? entry.icon : (shown[0]?.sprite ?? null);
   return {
     x: above?.x ?? 0,
     y: above?.y ?? 0,
-    visible: onGround || asIcon,
+    visible: onGround || asIcon || pieces > 0,
     form: onGround && asIcon ? 'both' : onGround ? 'ground' : asIcon ? 'icon' : 'none',
     height: above === null || above === undefined ? 0 : above.height,
     presence: entry.presence,
     groundOverTheFog: entry.ground !== null && entry.ground.parent === overIt,
     ...(entry.pennant === null ? {} : { pennant: entry.pennant.visible }),
+    ...(entry.settlement === null ? {} : { pieces }),
   };
 }
 

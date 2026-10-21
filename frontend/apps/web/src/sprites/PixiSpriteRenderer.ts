@@ -268,10 +268,14 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       scenery.setGround(whereSceneryGrows(groundField, scene.worked));
       const marks = createMarksLayer(camera, textures, () => scene.scenery.shadows, scenery.standing);
       // The structures' pictures cut into an atlas, once they are read: until then, and without one, drawn in code.
-      unpaint = watchStructureArt(textures.structures, () => {
-        marks.setSprites(scene.sprites);
-        drawSoon();
-      });
+      unpaint = watchStructureArt(
+        textures.structures,
+        () => {
+          marks.setSprites(scene.sprites);
+          drawSoon();
+        },
+        textures.settlements,
+      );
       const ring = createRingLayer(marks, drawSoon);
       // The land moving in the wind and the light, on the ground under everything that stands on it.
       const land = createLandLayer(app.renderer, () => scene.scenery.tilesRoot, drawSoon);

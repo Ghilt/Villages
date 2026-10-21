@@ -10,6 +10,7 @@ import type { Layer } from './layer';
 import { castShadow, dress, drawnOf, flyPennant, hide, letGo, show, wearBadge } from './markEntry';
 import type { Entry } from './markEntry';
 import { groupMarks } from './markGroups';
+import { hitAmong } from './markHits';
 import type { Groups, Placed } from './markGroups';
 import { lookOf } from './markLooks';
 import type { Textures } from './markTextures';
@@ -18,7 +19,8 @@ import { ringUnder } from './ringPlace';
 import type { RingPlace } from './ringPlace';
 import type { StandingLayer } from './standing/StandingLayer';
 import { standingOf } from './standing/standingOf';
-import { PRESENCE_MS, alphasFor, easeTowards, formForHit, midTrade, sizesAt, wantedForm } from './twoForms';
+import { dressSettlement, placeSettlement } from './settlements/settlementDress';
+import { PRESENCE_MS, alphasFor, easeTowards, midTrade, sizesAt, wantedForm } from './twoForms';
 
 /**
  * The marks: every house, person, structure and offered seat, in both of its forms, a structure's pennant over it.
@@ -115,6 +117,7 @@ export function createMarksLayer(
       grouped: 1,
       badge: null,
       inVision: standsInVision(spec.at),
+      settlement: null,
     };
 
     if (look.ground !== null) {
@@ -128,6 +131,7 @@ export function createMarksLayer(
       entry.ground = sprite;
     }
     dress(entry, textures.pennant, overIt, shadows);
+    dressSettlement(entry, textures.settlements, amongTheTrees.view, shadows);
     return entry;
   }
 
@@ -236,6 +240,7 @@ export function createMarksLayer(
         show(entry.ground, sizes.ground, alphas.ground * here);
         show(entry.icon, sizes.icon, alphas.icon * here);
         castShadow(entry, sizes.ground, alphas.ground * here * dark, point);
+        placeSettlement(entry, point, view, alphas.ground * here, dark);
 
         for (const sprite of [entry.ground, entry.icon]) {
           if (sprite !== null && sprite.visible) {
@@ -302,6 +307,7 @@ export function createMarksLayer(
             existing.ground.tint = spec.tint;
           }
           dress(existing, textures.pennant, overIt, shadows);
+          dressSettlement(existing, textures.settlements, amongTheTrees.view, shadows);
           // A person who moved may have walked into vision or out of it.
           sideOfTheFog(existing);
         }
@@ -322,50 +328,7 @@ export function createMarksLayer(
       }
     },
 
-    hitTest(point: { x: number; y: number }): string | null {
-      let nearest: { id: string; away: number } | null = null;
-
-      // A crowd's badge sits over the marks, so it answers first.
-      for (const [id, entry] of entries) {
-        const badge = entry.badge?.view;
-        if (badge?.visible === true && !entry.leaving) {
-          const box = badge.getBounds();
-          if (point.x >= box.minX && point.x <= box.maxX && point.y >= box.minY && point.y <= box.maxY) {
-            return `group:${id}`;
-          }
-        }
-      }
-
-      for (const [id, entry] of entries) {
-        // A mark on its way out takes no clicks: it is not a thing on the map any more, it is the
-        // last of a picture of one.
-        // A candidate is a place being offered rather than a thing standing in the world, so it is not
-        // one; a house and a person are.
-        // A mark hidden in a crowd is not there to be clicked: its leader stands for it.
-        if (entry.spec.kind === 'candidate' || entry.leaving || entry.grouped < 0.5) {
-          continue;
-        }
-        // One form answers, and the switch is at the crossover where the two are the same size, so the
-        // thing you can hit never changes size either. Hitting whichever is more opaque would move the
-        // target about mid-fade; hitting both would let an all-but-invisible ghost take a click.
-        const which = formForHit(entry.blend);
-        const sprite = which === 'ground' ? entry.ground : entry.icon;
-        if (sprite === null || !sprite.visible) {
-          continue;
-        }
-        const box = sprite.getBounds();
-        if (point.x < box.minX || point.x > box.maxX || point.y < box.minY || point.y > box.maxY) {
-          continue;
-        }
-        // Two marks can overlap where two houses are close. The nearer one is the one meant.
-        const away = Math.hypot(point.x - sprite.x, point.y - sprite.y);
-        if (nearest === null || away < nearest.away) {
-          nearest = { id, away };
-        }
-      }
-
-      return nearest?.id ?? null;
-    },
+    hitTest: (point) => hitAmong(entries, point),
 
     groupOf(leader: string): readonly string[] {
       return groups.led.get(leader) ?? [];

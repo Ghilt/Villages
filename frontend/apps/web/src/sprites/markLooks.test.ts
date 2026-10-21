@@ -14,6 +14,7 @@ const PIN = picture(100, 130);
 /** The mill's shadow as the cutter lays it, its foot towards its right, where the light comes from. */
 const MILL_SHADOW = { texture: picture(190, 90), foot: { x: 0.65, y: 0.7 } };
 const TEXTURES = {
+  settlements: { of: () => null, read: false, paint: () => undefined },
   candidate: picture(44, 64),
   figure: picture(80, 160),
   bust: picture(60, 64),
