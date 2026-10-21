@@ -1,0 +1,158 @@
+/*
+ * A figure on a challenge's field, standing on its foot at its box's bottom middle: its pool of shadow under it, or of
+ * gilt light while it is Empowered; its body drawn in its side's colour with the ink every drawn thing has; over it its
+ * aspect's disc and its pips, and what it pulled rising and fading; under it its name. Fallen, it lies down in a third
+ * of a second and greys.
+ */
+
+@layer ui {
+  .ui-field-figure {
+    position: relative;
+    display: inline-block;
+    flex: none;
+  }
+
+  .ui-field-figure__ground {
+    position: absolute;
+    left: -30%;
+    right: -30%;
+    bottom: -9%;
+    height: 22%;
+    border-radius: 50%;
+    background: radial-gradient(
+      ellipse at center,
+      color-mix(in srgb, var(--ui-night) 42%, transparent) 0%,
+      transparent 70%
+    );
+    transition: background 0.3s ease;
+  }
+
+  .ui-field-figure__ground--lit {
+    left: -45%;
+    right: -45%;
+    bottom: -14%;
+    height: 32%;
+    background: radial-gradient(
+      ellipse at center,
+      var(--ui-focus) 0%,
+      color-mix(in srgb, var(--ui-gilt-light) 80%, transparent) 38%,
+      color-mix(in srgb, var(--ui-gilt) 35%, transparent) 62%,
+      transparent 74%
+    );
+    box-shadow: 0 0 12px 2px color-mix(in srgb, var(--ui-focus) 55%, transparent);
+  }
+
+  .ui-field-figure__body {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    transform-origin: 50% 97%;
+    transition:
+      transform 0.3s ease,
+      opacity 0.3s ease;
+  }
+
+  .ui-field-figure__cloak {
+    fill: var(--ui-field-figure-cloak);
+    stroke: var(--ui-ink);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+  }
+
+  .ui-field-figure__head {
+    fill: var(--ui-parchment-light);
+    stroke: var(--ui-ink);
+    stroke-width: 1.5;
+  }
+
+  .ui-field-figure__head--circlet {
+    stroke: var(--ui-gilt-light);
+    stroke-width: 3;
+  }
+
+  .ui-field-figure__hair {
+    fill: var(--ui-ink-soft);
+  }
+
+  .ui-field-figure__eye {
+    fill: var(--ui-ink);
+  }
+
+  .ui-field-figure__staff {
+    stroke: var(--ui-ink-soft);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+  }
+
+  .ui-field-figure--fallen .ui-field-figure__body {
+    opacity: 0.6;
+    transform: rotate(-78deg);
+  }
+
+  .ui-field-figure--fallen .ui-field-figure__ground {
+    opacity: 0.5;
+  }
+
+  .ui-field-figure__over {
+    position: absolute;
+    bottom: calc(100% + 3px);
+    left: 50%;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+
+  .ui-field-figure__pulled {
+    position: absolute;
+    bottom: calc(100% + 1.8em);
+    left: 50%;
+    padding: 0 0.4em;
+    border-radius: 0.6em;
+    font-family: var(--ui-font-text);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--ui-cream);
+    white-space: nowrap;
+    background: color-mix(in srgb, var(--ui-night) 85%, transparent);
+    box-shadow: 0 0 0 1px var(--ui-gilt-deep);
+    animation: ui-field-figure-rise 1.4s ease-out forwards;
+    pointer-events: none;
+  }
+
+  @keyframes ui-field-figure-rise {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, 0.6em);
+    }
+    15% {
+      opacity: 1;
+    }
+    70% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translate(-50%, -1.1em);
+    }
+  }
+
+  .ui-field-figure__name {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 50%;
+    font-family: var(--ui-font-text);
+    font-size: 0.8rem;
+    line-height: 1.1;
+    color: var(--ui-ink);
+    white-space: nowrap;
+    transform: translateX(-50%);
+    text-shadow:
+      0 0 3px var(--ui-parchment-light),
+      0 0 2px var(--ui-parchment-light);
+  }
+}

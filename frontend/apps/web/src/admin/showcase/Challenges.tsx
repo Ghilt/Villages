@@ -1,3 +1,4 @@
+import { ChallengeFigures } from './ChallengeFigures';
 import { ChallengeReadouts } from './ChallengeReadouts';
 import { ChallengeSlices } from './ChallengeSlices';
 
@@ -7,6 +8,7 @@ export function Challenges() {
     <>
       <ChallengeSlices />
       <ChallengeReadouts />
+      <ChallengeFigures />
     </>
   );
 }

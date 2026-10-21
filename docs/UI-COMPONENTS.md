@@ -449,6 +449,14 @@ A line each: what it is for, its variants, and where on the page it is.
   the arrow keys step a second at a time. Held by whoever shows it; `useReplayClock` is the clock, counted from when
   it began rather than ticked, stopping at the last second and starting again from the first. In the `bar.replay`
   recipe. `ui/replay/replayClock.ts` is its arithmetic. *Challenges*.
+- **`FieldFigure`**, `ui/fieldFigure/FieldFigure.tsx`: a figure on a challenge's field, a head over a cloak that
+  widens to the hem as the map draws a person, in its side's colour or, for one of the **townsfolk**, in none. It is
+  turned `east` or `west` and no other way, its hair at the back of its head and its eye on its face saying which;
+  west is the same drawing mirrored, so a summon needs one picture (decision record 0116). A summon carries a staff
+  and its aspect's disc over its head, a key figure a gilt circlet. Lit from under its feet while Empowered, with the
+  pips of what it bears; what it `pulled` rises over it on a pill of night and fades, again each time its key
+  changes; `fallen`, it lies down grey. Its box's bottom middle is its foot. Drawn, until a summon has a picture.
+  *Challenges*.
 - **`Dialog`** and **`DialogBox`**, `ui/dialog/Dialog.tsx`: a question that has to be answered before
   anything else - kill this key figure? - over the whole page, the page behind dimmed with night and out of
   reach. The browser's own modal dialog is under it, so it is drawn over everything, the keyboard stays in
