@@ -45,10 +45,8 @@ export const SPRITES_DIR = resolve(REPO, 'world', 'sprites');
 export const STRUCTURES_DIR = resolve(SPRITES_DIR, 'structures');
 /** The pieces a settlement is laid out in, each in every culture, and the jetties: `world:structures` cuts them. */
 export const SETTLEMENTS_DIR = resolve(SPRITES_DIR, 'settlements');
-/** The bridge on its eight ways, cut into the settlements' atlas. */
+/** The bridges, two kinds on four axes, cut into the settlements' atlas. */
 export const BRIDGES_DIR = resolve(SPRITES_DIR, 'bridges');
-/** The roadside's walls, two styles on eight ways, cut into the settlements' atlas. */
-export const ROADSIDE_DIR = resolve(SPRITES_DIR, 'roadside');
 /**
  * The marks of structures, one a type and the ruin's, which `world:structures` cuts into the same atlas, with a
  * record of placeholders of their own. A folder inside `marks/`, which `world:art` passes over.

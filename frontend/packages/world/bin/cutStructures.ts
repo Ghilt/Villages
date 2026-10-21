@@ -1,3 +1,5 @@
+import { resolve } from 'node:path';
+
 import { facesSvg } from '../src/blockOut.ts';
 import { BRIDGE_WAYS } from '../src/bridgeModel.ts';
 import { renderBridge } from '../src/bridgeRender.ts';
@@ -40,8 +42,8 @@ import {
 import {
   ART_DIR,
   BRIDGES_DIR,
-  ROADSIDE_DIR,
   SETTLEMENTS_DIR,
+  SPRITES_DIR,
   STRUCTURE_MARKS_DIR,
   STRUCTURES_DIR,
 } from './lib/paths.ts';
@@ -78,7 +80,8 @@ const pictures = await folderOf(STRUCTURES_DIR, keyOfStructureFile);
 const marks = await folderOf(STRUCTURE_MARKS_DIR, keyOfStructureMarkFile);
 const pieces = await folderOf(SETTLEMENTS_DIR, keyOfSettlementFile);
 const bridges = await folderOf(BRIDGES_DIR, keyOfBridgeFile);
-const roadside = await folderOf(ROADSIDE_DIR, keyOfRoadsideFile);
+// Here rather than beside the other folders in paths.ts, which every world step's fingerprint reads.
+const roadside = await folderOf(resolve(SPRITES_DIR, 'roadside'), keyOfRoadsideFile);
 
 // Draw what is missing, never over a file that is there.
 let drawn = 0;
