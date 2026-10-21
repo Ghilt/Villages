@@ -456,7 +456,9 @@ A line each: what it is for, its variants, and where on the page it is.
   and its aspect's disc over its head, a key figure a gilt circlet. Lit from under its feet while Empowered, with the
   pips of what it bears; what it `pulled` rises over it on a pill of night and fades, again each time its key
   changes; `fallen`, it lies down grey. Its box's bottom middle is its foot. Drawn, until a summon has a picture.
-  *Challenges*.
+  **`FieldTag`**, beside it, says the same of a thing put on the line, which stands as a building of the map's that
+  cannot say it itself: its name under its foot, its ground lit while Empowered, what it pulled rising; set just behind
+  the picture, its glow lies under it. *Challenges*.
 - **`Diorama`**, `ui/diorama/Diorama.tsx`: a small piece of the world drawn as the map draws it, from the south and
   above, in a scene of its own units scaled to cover its box or stand whole inside it (decision record 0116). Its
   `ground` lies under everything; the map's own `pictures`, each cut from its sheet as the map's atlases are, stand

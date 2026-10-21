@@ -156,3 +156,16 @@
       0 0 2px var(--ui-parchment-light);
   }
 }
+
+@layer ui {
+  .ui-field-tag {
+    position: relative;
+    display: inline-block;
+    flex: none;
+    pointer-events: none;
+  }
+
+  .ui-field-tag__pulled {
+    bottom: calc(100% + 0.3em);
+  }
+}

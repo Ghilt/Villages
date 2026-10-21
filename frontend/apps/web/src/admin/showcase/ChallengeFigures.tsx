@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 
 import { FieldFigure } from '../../ui/fieldFigure/FieldFigure';
+import { FieldTag } from '../../ui/fieldFigure/FieldTag';
 import { BRANNOCK, EMPOWERED, HOLY, INDUSTRY, VARGA, VIOLENCE, WEAKENED } from './challengeSamples';
 import { Part, Specimen, Specimens } from './Specimen';
 
@@ -117,6 +118,31 @@ export function ChallengeFigures() {
           <Ground>
             <FieldFigure kind="townsperson" facing="west" height={52} />
             <FieldFigure kind="townsperson" facing="east" height={52} />
+          </Ground>
+        </Specimen>
+        <Specimen
+          name="FieldTag"
+          note="a thing on the line, which the map’s picture cannot say: lit, pulling, its name"
+        >
+          <Ground>
+            <span style={{ position: 'relative', display: 'inline-flex', alignItems: 'flex-end' }}>
+              <span
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'rgba(110, 84, 52, 0.25)',
+                  borderRadius: 4,
+                }}
+                aria-hidden="true"
+              />
+              <FieldTag
+                name="the Cathedral of Varga"
+                width={90}
+                height={110}
+                lit
+                pulled={{ amount: 1.5, key: 1 }}
+              />
+            </span>
           </Ground>
         </Specimen>
         <Specimen name="FieldFigure height" note="40, 64 and 96 pixels" wide>
