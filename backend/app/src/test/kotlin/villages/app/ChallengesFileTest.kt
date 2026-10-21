@@ -10,6 +10,7 @@ import villages.domain.challenge.ChallengeSlot
 import villages.domain.challenge.Fires
 import villages.domain.challenge.Fits
 import villages.domain.challenge.Lasting
+import villages.domain.challenge.Needs
 import java.io.File
 
 /** The challenge's content as the server reads it, held to the fixture the world package's reader is held to. */
@@ -29,10 +30,10 @@ class ChallengesFileTest {
         assertEquals(ChallengeSlot(Fits.STRUCTURE, onTheLine = true), challenges.effect("holy.sanctuary")?.slot)
         assertEquals(Aspect.GREED, challenges.summons.getValue("collector").aspect)
         assertEquals(6.5, challenges.summons.getValue("collector").number("deposits"))
-        assertEquals(true, challenges.effect("violence.sellswords")?.matching)
-        assertEquals(false, challenges.effect("violence.noQuarter")?.matching)
-        assertEquals(true, challenges.summons.getValue("mercenary").matching)
-        assertEquals(false, challenges.summons.getValue("collector").matching)
+        assertEquals(Needs.MATCH, challenges.effect("violence.sellswords")?.needs)
+        assertEquals(null, challenges.effect("violence.noQuarter")?.needs)
+        assertEquals(Needs.ANTI, challenges.summons.getValue("mercenary").needs)
+        assertEquals(null, challenges.summons.getValue("collector").needs)
         assertEquals("weakened", challenges.effect("violence.noQuarter")?.puts)
         assertEquals("hastened", challenges.summons.getValue("collector").puts)
         assertEquals(Lasting(setOf(Bearer.SUMMON, Bearer.SLICE), mapOf("rate" to 50.0)), challenges.buffs.getValue("hastened"))
@@ -48,7 +49,7 @@ class ChallengesFileTest {
     fun `the real one reads, three or four effects to every aspect, and is in the one form`() {
         val challenges = ChallengesFile.parse(real)
 
-        assertEquals(Aspect.entries.associateWith { if (it in setOf(Aspect.DIPLOMACY, Aspect.GREED, Aspect.INDUSTRY)) 3 else 4 }, Aspect.entries.associateWith { challenges.effectsOf(it).size })
+        assertEquals(Aspect.entries.associateWith { if (it in setOf(Aspect.REASON, Aspect.AUTHORITY)) 5 else 4 }, Aspect.entries.associateWith { challenges.effectsOf(it).size })
         assertEquals(setOf("battle", "debate", "tradeWar", "sermon", "even"), challenges.kinds.keys)
         assertEquals(real, CatalogueText.format(real))
     }
@@ -64,8 +65,8 @@ class ChallengesFileTest {
             assertThrows<IllegalArgumentException> { ChallengesFile.parse(fixture.replace("\"name\": \"Sellswords\", ", "")) }.message,
         )
         assertEquals(
-            "world/catalogues/challenges.json: no effects.violence.sellswords.matching the server can read",
-            assertThrows<IllegalArgumentException> { ChallengesFile.parse(fixture.replace("\"matching\": true", "\"matching\": \"yes\"")) }.message,
+            "world/catalogues/challenges.json: no effects.violence.sellswords.needs the server can read",
+            assertThrows<IllegalArgumentException> { ChallengesFile.parse(fixture.replace("\"needs\": \"match\"", "\"needs\": \"never\"")) }.message,
         )
     }
 

@@ -45,9 +45,9 @@ class NatureIndustrySpec : StringSpec({
         result.saying(What.IDLE).map { it.second to it.actor.toString() } shouldBe listOf(3 to "#2", 3 to "#3")
     }
 
-    "The Wild Remembers closes the briars as the happening leaves Nature, eroding an enemy summon: each act costs integrity from an enemy summon until it is gone, and Pick the Bones hears of it" {
-        val wild = listOf(slice(NATURE, "nature.wildRemembers"), slice(GREED, "greed.pickBones"))
-        val result = fight(wild, hiring, 9, Happening(NATURE, VIOLENCE), Happening(REASON), Happening(REASON), catalogue = TEST_CATALOGUE.withDebuff("eroding", "integrity", 20.0))
+    "Overgrowth answers Industry, eroding the enemy's summons: each act costs integrity until one is gone, and Pick the Bones hears of it" {
+        val wild = listOf(slice(NATURE, "nature.overgrowth"), slice(GREED, "greed.pickBones"))
+        val result = fight(wild, hiring, 9, Happening(VIOLENCE), Happening(INDUSTRY), Happening(INDUSTRY), catalogue = TEST_CATALOGUE.withDebuff("eroding", "integrity", 20.0))
 
         result.saying(What.DEBUFFED).single().let { it.second to it.status } shouldBe (3 to "eroding")
         result.saying(What.WORN).map { it.second to it.amount } shouldBe listOf(3 to 20.0, 4 to 20.0, 5 to 10.0)

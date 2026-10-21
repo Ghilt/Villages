@@ -53,12 +53,6 @@ class GreedGenerositySpec : StringSpec({
         result.saying(What.PULLED).filter { it.effect == "greed.pickBones" }.map { it.amount } shouldBe listOf(10.0)
     }
 
-    "Remembered Kindness pulls whenever a summon of its own side is killed" {
-        val result = fight(listOf(slice(GENEROSITY, "generosity.alms", "generosity.remembered")), killers, 4, Happening(REASON), catalogue = certain)
-
-        result.saying(What.PULLED).filter { it.effect == "generosity.remembered" }.map { it.second to it.amount } shouldBe listOf(1 to 15.0)
-    }
-
     "a Benefactor pulls five a second, and ten while its side is behind" {
         val hiring = listOf(slice(VIOLENCE, "violence.sellswords", summonCount = 1))
         val result = fight(listOf(slice(GENEROSITY, "generosity.alms")), hiring, 4, Happening(REASON), catalogue = ANYWHERE)
@@ -88,5 +82,22 @@ class GreedGenerositySpec : StringSpec({
         result.saying(What.DEBUFFED).single().let { it.second to it.status } shouldBe (4 to "aspectBound")
         result.saying(What.CLEANSED).single().let { Triple(it.second, it.status, it.target.toString()) } shouldBe Triple(4, "aspectBound", "#1")
         result.saying(What.PULLED).filter { it.side == Side.A }.map { it.second } shouldBe (1..11).toList()
+    }
+
+    "Debt Forgiveness answers Greed: in a Greed happening, every coffer the enemy's summons hold pours its side's way, before their own" {
+        val forgiving = listOf(slice(GENEROSITY, "generosity.forgiveness"))
+        val taxing = listOf(slice(GREED, "greed.farmTaxes", summonCount = 1))
+        val result = fight(forgiving, taxing, 8, Happening(GREED), Happening(GREED))
+
+        result.saying(What.POURED).map { listOf(it.second, it.side, it.amount, it.effect) } shouldBe
+            listOf(listOf(4, Side.A, 27.0, "generosity.forgiveness"), listOf(7, Side.B, 36.0, null))
+    }
+
+    "Profiteering answers Generosity: in a Generosity happening, so much for each summon on the field" {
+        val profiting = listOf(slice(GREED, "greed.profiteering"))
+        val giving = listOf(slice(GENEROSITY, "generosity.alms", summonCount = 1))
+        val result = fight(profiting, giving, 6, Happening(GENEROSITY), Happening(GENEROSITY))
+
+        result.saying(What.PULLED).filter { it.effect == "greed.profiteering" }.map { it.second to it.amount } shouldBe listOf(3 to 5.0)
     }
 })

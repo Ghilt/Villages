@@ -22,6 +22,23 @@ private class OnAKilling(private val friendly: Boolean) : EffectBehaviour {
         if (friend == friendly) listOf(Change.Pull(scene.side, scene.boost(scene.number("amount")), scene.actor, scene.effect, scene.boosted)) else emptyList()
 }
 
+/** Debt Forgiveness: every coffer the enemy's summons hold pours its side's way. */
+private object Forgives : EffectBehaviour {
+    override fun activated(scene: Scene): List<Change> =
+        scene.summons(scene.side.other).filter { it.coffer > 0.0 }.map { Change.Pour(it.serial, scene.side, scene.effect) }
+}
+
+/** Profiteering: `amount` for each summon on the field, whichever side's. */
+private object Profits : EffectBehaviour {
+    override val reads = setOf("amount")
+
+    override fun activated(scene: Scene): List<Change> {
+        val count = scene.summons(Side.A).size + scene.summons(Side.B).size
+        if (count == 0) return emptyList()
+        return listOf(Change.Pull(scene.side, scene.boost(scene.number("amount") * count), scene.actor, scene.effect, scene.boosted))
+    }
+}
+
 /** Tend the Wounded: every debuff on its side, on its slices and its summons, is lifted. */
 private object Tends : EffectBehaviour {
     override fun activated(scene: Scene): List<Change> = listOf(Change.Cleanse(scene.side, scene.actor, scene.effect))
@@ -48,8 +65,9 @@ internal val greedAndGenerosity: Map<String, EffectBehaviour> = mapOf(
     "greed.pickBones" to OnAKilling(friendly = false),
     "generosity.patron" to Slotted,
     "generosity.alms" to Hires,
-    "generosity.remembered" to OnAKilling(friendly = true),
     "generosity.tend" to Tends,
+    "generosity.forgiveness" to Forgives,
+    "greed.profiteering" to Profits,
 )
 
 internal val greedAndGenerositySummons: Map<String, SummonBehaviour> = mapOf("collector" to Collector, "benefactor" to PullsHarderBehind)

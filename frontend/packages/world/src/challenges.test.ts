@@ -24,18 +24,18 @@ describe("the challenge's content", () => {
       fires: 'trigger',
       summons: 'mercenary',
       slot: null,
-      matching: true,
+      needs: 'match',
     });
     expect(challenges.effects[1]!.numbers).toEqual({ chance: 25 });
-    expect(challenges.effects[1]!.matching).toBe(false);
+    expect(challenges.effects[1]!.needs).toBeNull();
     expect(challenges.effects[2]!.slot).toEqual({ fits: 'keyFigure', lends: 'reason', onTheLine: false });
     expect(challenges.effects[3]!.slot).toEqual({ fits: 'structure', lends: null, onTheLine: true });
     expect(challenges.summons.find((summon) => summon.id === 'collector')).toMatchObject({
       aspect: 'greed',
       numbers: { costs: 3, deposits: 6.5 },
-      matching: false,
+      needs: null,
     });
-    expect(challenges.summons.find((summon) => summon.id === 'mercenary')!.matching).toBe(true);
+    expect(challenges.summons.find((summon) => summon.id === 'mercenary')!.needs).toBe('anti');
     expect(challenges.effects[1]!.puts).toBe('weakened');
     expect(challenges.effects[0]!.puts).toBeNull();
     expect(challenges.summons.find((summon) => summon.id === 'collector')!.puts).toBe('hastened');
@@ -59,15 +59,15 @@ describe("the challenge's content", () => {
     const challenges = parseChallenges(world);
     expect(
       ASPECTS.map((aspect) => challenges.effects.filter((effect) => effect.aspect === aspect).length),
-    ).toEqual(ASPECTS.map((aspect) => (['diplomacy', 'greed', 'industry'].includes(aspect) ? 3 : 4)));
+    ).toEqual(ASPECTS.map((aspect) => (['reason', 'authority'].includes(aspect) ? 5 : 4)));
   });
 
   it('refuses a field it cannot read, naming where', () => {
     expect(() => parseChallenges(fixture.replace('"passive"', '"sometimes"'))).toThrow(
       'world/catalogues/challenges.json: no effects.violence.noQuarter.fires the page can read',
     );
-    expect(() => parseChallenges(fixture.replace('"matching": true', '"matching": "yes"'))).toThrow(
-      'world/catalogues/challenges.json: no effects.violence.sellswords.matching the page can read',
+    expect(() => parseChallenges(fixture.replace('"needs": "match"', '"needs": "never"'))).toThrow(
+      'world/catalogues/challenges.json: no effects.violence.sellswords.needs the page can read',
     );
   });
 

@@ -30,6 +30,9 @@ export function antiOf(aspect: Aspect): Aspect {
 export const LENT_STATS = ['piety', 'reason', 'kindness', 'physical'] as const;
 export type LentStat = (typeof LENT_STATS)[number];
 
+/** What an effect or a kind of summon needs of the happening to work: a matching aspect, its anti-aspect, or nothing. */
+export type Needs = 'match' | 'anti' | null;
+
 export interface ChallengeSlot {
   readonly fits: 'keyFigure' | 'structure';
   readonly lends: LentStat | null;
@@ -49,8 +52,8 @@ export interface ChallengeEffect {
   readonly numbers: Readonly<Record<string, number>>;
   readonly summons: string | null;
   readonly slot: ChallengeSlot | null;
-  /** Whether it needs a matching aspect: works only while the latest happening has its slice's aspect. */
-  readonly matching: boolean;
+  /** What it needs of the latest happening to work: its slice's aspect, its anti-aspect, or nothing. */
+  readonly needs: Needs;
   /** The buff or the debuff it puts on, by its id; none for one that puts nothing on. */
   readonly puts: string | null;
 }
@@ -61,8 +64,8 @@ export interface ChallengeSummon {
   readonly aspect: Aspect;
   readonly words: string;
   readonly numbers: Readonly<Record<string, number>>;
-  /** Whether it needs a matching aspect: acts only while the happening has its own aspect. */
-  readonly matching: boolean;
+  /** What it needs of the happening to act: its own aspect, its anti-aspect, or nothing. */
+  readonly needs: Needs;
   /** The buff or the debuff its acts put on, by its id; none for one that puts nothing on. */
   readonly puts: string | null;
 }
@@ -161,7 +164,7 @@ function effectOf(aspect: Aspect, key: string, node: unknown): ChallengeEffect {
     numbers: numbersOf(node.numbers, `${at}.numbers`),
     summons: summons ?? null,
     slot: slotOf(node.slot, `${at}.slot`),
-    matching: flagOf(node.matching, `${at}.matching`),
+    needs: needsOf(node.needs, `${at}.needs`),
     puts: putsOf(node.puts, `${at}.puts`),
   };
 }
@@ -175,7 +178,7 @@ function summonOf(id: string, node: unknown): ChallengeSummon {
     aspect: aspectOf(node.aspect, `${at}.aspect`),
     words: word(node, 'words', at),
     numbers: numbersOf(node.numbers, `${at}.numbers`),
-    matching: flagOf(node.matching, `${at}.matching`),
+    needs: needsOf(node.needs, `${at}.needs`),
     puts: putsOf(node.puts, `${at}.puts`),
   };
 }
@@ -206,10 +209,10 @@ function putsOf(value: unknown, at: string): string | null {
   return value ?? null;
 }
 
-/** True or false, and false when it is not there. */
-function flagOf(value: unknown, at: string): boolean {
-  if (value !== undefined && typeof value !== 'boolean') refuse(at);
-  return value ?? false;
+/** What an entry needs of the happening, `match` or `anti`, and nothing when it says nothing. */
+function needsOf(value: unknown, at: string): Needs {
+  if (value !== undefined && value !== 'match' && value !== 'anti') refuse(at);
+  return value ?? null;
 }
 
 function kindOf(id: string, node: unknown): ChallengeKind {

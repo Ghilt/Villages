@@ -17,7 +17,7 @@ class ChallengeSpec : StringSpec({
     val hiring = listOf(slice(VIOLENCE, "violence.sellswords", summonCount = 1))
 
     "a Mercenary pulls ten a second from the second after it is hired, half as much again in a happening of its own aspect, and no more in its anti-aspect's" {
-        val anywhere = TEST_CATALOGUE.marked("violence.sellswords", false)
+        val anywhere = TEST_CATALOGUE.marked("violence.sellswords", null)
         val unboosted = fight(hiring, IDLE, 5, Happening(REASON), catalogue = anywhere)
         unboosted.saying(What.PULLED).map { it.second to it.amount } shouldBe (1..4).map { it to 10.0 }
         unboosted.outcome shouldBe Outcome(40.0, Ending.TIME_RAN_OUT, 4, Side.A, emptyList(), emptyList())
@@ -68,7 +68,7 @@ class ChallengeSpec : StringSpec({
         anywhere.saying(What.PULLED).filter { it.side == Side.A && it.actor is Actor.OfSummon }.map { it.second } shouldBe (1..9).toList()
         anywhere.outcome.tug shouldBe 25.0
 
-        fight(both, hiring, 10, Happening(VIOLENCE), Happening(DIPLOMACY), catalogue = TEST_CATALOGUE.marked("diplomacy.parley", true))
+        fight(both, hiring, 10, Happening(VIOLENCE), Happening(DIPLOMACY), catalogue = TEST_CATALOGUE.marked("diplomacy.parley", Needs.MATCH))
             .saying(What.PULLED).filter { it.effect == "diplomacy.parley" }.map { it.second } shouldBe (5..9).toList()
     }
 
@@ -102,11 +102,12 @@ class ChallengeSpec : StringSpec({
         on.amount shouldBe 5.0
     }
 
-    "Spoils of the Field pays as the happening changes away from Violence, never boosted, since the new one has not Violence" {
-        val spoils = listOf(slice(VIOLENCE, "violence.spoils"))
-        fight(spoils, IDLE, 4, Happening(VIOLENCE), Happening(DIPLOMACY)).saying(What.PULLED).single().amount shouldBe 30.0
-        fight(spoils, IDLE, 4, Happening(VIOLENCE), Happening(REASON)).saying(What.PULLED).single().amount shouldBe 30.0
-        fight(spoils, IDLE, 4, Happening(VIOLENCE), Happening(VIOLENCE, REASON)).saying(What.PULLED) shouldBe emptyList()
+    "an effect that needs its anti-aspect works only in its anti-aspect's happenings, and unboosted there: a Ceasefire in a battle" {
+        val ceasefire = listOf(slice(DIPLOMACY, "diplomacy.ceasefire"))
+        val result = fight(ceasefire, hiring, 9, Happening(VIOLENCE), Happening(VIOLENCE), Happening(DIPLOMACY))
+
+        result.saying(What.DEBUFFED).map { Triple(it.second, it.status, it.amount) } shouldBe listOf(Triple(3, "stunned", 4.0))
+        result.saying(What.PULLED).filter { it.side == Side.B }.map { it.second } shouldBe listOf(1, 2, 8)
     }
 
     "a key figure lends their stat as their slice meets a happening, and an empty slot says so" {
@@ -119,7 +120,7 @@ class ChallengeSpec : StringSpec({
 
     "the same seed fights the same challenge, and the changes of its moments add up to its tug" {
         val a = listOf(slice(VIOLENCE, "violence.sellswords", "violence.noQuarter"), slice(DIPLOMACY, "diplomacy.parley"))
-        val b = listOf(slice(DIPLOMACY, "diplomacy.sweeterTerms", "diplomacy.parley"), slice(VIOLENCE, "violence.sellswords", "violence.spoils"))
+        val b = listOf(slice(DIPLOMACY, "diplomacy.sweeterTerms", "diplomacy.parley"), slice(VIOLENCE, "violence.sellswords", "violence.warDrums"))
         (1L..30L).forEach { seed ->
             val once = fight(a, b, 40, Happening(VIOLENCE), Happening(DIPLOMACY), Happening(VIOLENCE, DIPLOMACY), Happening(REASON), seed = seed)
             fight(a, b, 40, Happening(VIOLENCE), Happening(DIPLOMACY), Happening(VIOLENCE, DIPLOMACY), Happening(REASON), seed = seed) shouldBe once

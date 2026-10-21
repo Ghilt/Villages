@@ -2,14 +2,6 @@ package villages.domain.challenge
 
 /** The six effects of the Authority-Freedom pair, the Enforcer and the Rebel. See `docs/plans/challenges.md`. */
 
-/** Against the Grain: `amount` at each happening its slice's aspect does not match, which is the only time it fires. */
-private object AgainstTheGrain : EffectBehaviour {
-    override val reads = setOf("amount")
-
-    override fun activated(scene: Scene): List<Change> =
-        if (!scene.matches) listOf(Change.Pull(scene.side, scene.boost(scene.number("amount")), scene.actor, scene.effect, scene.boosted)) else emptyList()
-}
-
 /**
  * Will of One's Own: once in a challenge, at a change to a happening its slice's aspect does not match, the slice
  * goes on matching anyway, for that happening, though without the boost, which the happening alone gives.
@@ -41,11 +33,12 @@ internal val authorityAndFreedom: Map<String, EffectBehaviour> = mapOf(
     "authority.watch" to Hires,
     "authority.curfew" to Afflicts(Own.SUMMONS),
     "authority.fealty" to Rallies(Own.SUMMONS),
+    "authority.martialLaw" to Afflicts(Own.SUMMONS, pulls = true),
     "authority.firmHand" to Afflicts(Own.SLICES),
     "freedom.commons" to Hires,
-    "freedom.againstTheGrain" to AgainstTheGrain,
     "freedom.ownWill" to OwnWill,
     "freedom.wordSpreads" to Rallies(Own.SLICES),
+    "freedom.defiance" to Rallies(Own.SUMMONS, pulls = true),
 )
 
 internal val authorityAndFreedomSummons: Map<String, SummonBehaviour> = mapOf("enforcer" to Enforcer, "rebel" to PullsHarderBehind)

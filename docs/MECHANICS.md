@@ -1195,8 +1195,11 @@ effects let it do there.
 
 **Effects** are **triggers**, which fire as their slice meets a happening, and **passives**, which work from second to
 second. An effect, or a kind of summon, that **needs a matching aspect** works only while its aspect matches; one
-that does not works in every happening. The mark is how an effect is balanced: what a house raises or builds waits
-for its moment, and a person's gift works anywhere. Thirty to begin with, three to an aspect: Violence's Sellswords hire Mercenaries, Holy's
+that **needs its anti-aspect** works only while the happening has its anti-aspect; one that needs neither works in
+every happening. The mark is how an effect is balanced: what a house raises or builds waits for its moment, a person's
+gift works anywhere, and each aspect has an effect that answers its anti-aspect - Diplomacy's Ceasefire stuns the
+summons of a battle, Freedom's Defiance pulls and hastens in Authority's hour, Reason sows doubt in a sermon - so a
+slice can meet its opposite's ground without the boost. Forty-two to begin with, four or five to an aspect: Violence's Sellswords hire Mercenaries, Holy's
 Divine Rebuke wears the enemy's integrity down for its Priests to feed on, Greed's Collector costs its side now
 and pours its **coffer** out later. Many **summon**: a Mercenary, a Rebel, a Machine, that stays on the field
 and pulls once a second until it is killed, turned, or the challenge ends, a side holding as many as its slices'

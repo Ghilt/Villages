@@ -26,11 +26,13 @@ class BuffsSpec : StringSpec({
             .saying(What.PULLED).map { it.amount } shouldBe listOf(20.0, 20.0)
     }
 
-    "Blessing empowers its side's slices whatever the happening, so a key figure lends half as much again" {
+    "a Miracle answers Reason: it pulls and empowers its side's slices, so a key figure lends half as much again, and the next Miracle pulls more" {
         val ines = StandIn.KeyFigure("Ines", mapOf(Stat.KINDNESS to 12))
-        val blessed = listOf(slice(HOLY, "holy.blessing"), slice(DIPLOMACY, "diplomacy.envoy", slotted = mapOf("diplomacy.envoy" to ines)))
+        val blessed = listOf(slice(HOLY, "holy.miracle"), slice(DIPLOMACY, "diplomacy.envoy", slotted = mapOf("diplomacy.envoy" to ines)))
+        val result = fight(blessed, IDLE, 8, Happening(REASON), Happening(REASON))
 
-        fight(blessed, IDLE, 8, Happening(REASON), Happening(REASON)).saying(What.LENT).map { it.amount } shouldBe listOf(12.0, 18.0)
+        result.saying(What.LENT).map { it.amount } shouldBe listOf(12.0, 18.0)
+        result.saying(What.PULLED).filter { it.effect == "holy.miracle" }.map { it.amount } shouldBe listOf(25.0, 37.5)
     }
 
     "War Drums hastens its side's summons, and a hastened summon acts again in some of its seconds" {

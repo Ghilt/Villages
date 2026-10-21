@@ -146,7 +146,7 @@ internal class Contest(
         Side.entries.forEach { side -> changes += working(side).flatMap { (slice, effect, behaviour) -> behaviour.everySecond(scene(side, slice, effect)) } }
         field.toList().forEach { summon ->
             if (summon.arrived >= second || stunned(summon)) return@forEach
-            if (needsMatch(summon) && !happening.matches(summon.aspect)) {
+            if (sitsOut(summon)) {
                 if (idle.add(summon.serial to at)) changes += Change.Say(What.IDLE, summon.side, summon.actor, null)
                 return@forEach
             }
@@ -201,11 +201,18 @@ internal class Contest(
         return Outcome(tug, ending!!, second, wonBy, gains, losses.toList())
     }
 
-    /** [side]'s effects that work now, each with its slice and its behaviour: whatever needs no matching aspect, and whatever does while its slice's aspect matches. */
+    /** [side]'s effects that work now, each with its slice and its behaviour: whatever needs nothing, and whatever needs a matching aspect or its anti-aspect while the happening has it. */
     fun working(side: Side): List<Triple<Int, ChallengeEffect, EffectBehaviour>> = works.getOrPut(side) {
         val matches = matching.getValue(side)
         setup.side(side).indices.flatMap { slice ->
-            effectsOf(side, slice).filter { (effect, _) -> !effect.matching || matches[slice] }.map { (effect, behaviour) -> Triple(slice, effect, behaviour) }
+            val anti = happening.matches(setup.side(side)[slice].aspect.anti)
+            effectsOf(side, slice).filter { (effect, _) ->
+                when (effect.needs) {
+                    null -> true
+                    Needs.MATCH -> matches[slice]
+                    Needs.ANTI -> anti
+                }
+            }.map { (effect, behaviour) -> Triple(slice, effect, behaviour) }
         }
     }
 

@@ -19,7 +19,7 @@ class GoldenLogSpec : StringSpec({
             a = listOf(slice(Aspect.VIOLENCE, "violence.sellswords", "violence.noQuarter", power = 60.0)),
             b = listOf(
                 slice(Aspect.DIPLOMACY, "diplomacy.envoy", "diplomacy.sweeterTerms", summonCount = 2, slotted = mapOf("diplomacy.envoy" to ines)),
-                slice(Aspect.VIOLENCE, "violence.sellswords", "violence.spoils", integrity = 40.0),
+                slice(Aspect.VIOLENCE, "violence.sellswords", "violence.warDrums", integrity = 40.0),
             ),
             seconds = 24,
             Happening(Aspect.VIOLENCE),

@@ -70,7 +70,7 @@ export const SAMPLE: Draft = {
       aspect: 'violence',
       ...FIRST_SLICE,
       integrity: 40,
-      effects: ['violence.sellswords', 'violence.spoils'],
+      effects: ['violence.sellswords', 'violence.noQuarter'],
       slotted: {},
     },
   ],

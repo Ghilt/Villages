@@ -14,7 +14,7 @@ class AuthorityFreedomSpec : StringSpec({
     val hiring = listOf(slice(VIOLENCE, "violence.sellswords", summonCount = 1))
 
     "an Enforcer costs its side five a second, unboosted, and keeps the enemy summon pulling hardest stunned" {
-        val anywhere = TEST_CATALOGUE.marked("authority.watch", false).marked("violence.sellswords", false)
+        val anywhere = TEST_CATALOGUE.marked("authority.watch", null).marked("violence.sellswords", null)
         val result = fight(listOf(slice(AUTHORITY, "authority.watch")), hiring, 8, Happening(REASON), catalogue = anywhere)
 
         result.saying(What.COST).map { it.second to it.amount } shouldBe (1..7).map { it to -5.0 }
@@ -27,7 +27,7 @@ class AuthorityFreedomSpec : StringSpec({
     }
 
     "a stunned summon does not act until the stun is lifted, and a stun put on again lasts from then" {
-        val anywhere = TEST_CATALOGUE.marked("authority.watch", false).marked("violence.sellswords", false)
+        val anywhere = TEST_CATALOGUE.marked("authority.watch", null).marked("violence.sellswords", null)
         val result = fight(listOf(slice(AUTHORITY, "authority.watch")), hiring, 9, Happening(REASON), catalogue = anywhere)
 
         result.saying(What.DEBUFFED).map { it.second to it.target.toString() } shouldBe (1..8).map { it to "#2" }
@@ -36,7 +36,7 @@ class AuthorityFreedomSpec : StringSpec({
 
     "Curfew makes every enemy summon aspect-bound: it sits out a happening without its own aspect until that lifts" {
         val curfew = listOf(slice(AUTHORITY, "authority.curfew"))
-        val anywhere = TEST_CATALOGUE.marked("violence.sellswords", false).with("authority.curfew", "seconds", 4.0)
+        val anywhere = TEST_CATALOGUE.marked("violence.sellswords", null).with("authority.curfew", "seconds", 4.0)
         val result = fight(curfew, hiring, 15, Happening(AUTHORITY), Happening(AUTHORITY), Happening(REASON), catalogue = anywhere)
 
         result.saying(What.DEBUFFED).map { Triple(it.second, it.status, it.amount) } shouldBe listOf(Triple(5, "aspectBound", 6.0))
@@ -62,10 +62,12 @@ class AuthorityFreedomSpec : StringSpec({
         result.saying(What.PULLED).filter { it.side == Side.A }.map { it.amount } shouldBe listOf(5.0, 10.0, 10.0, 10.0)
     }
 
-    "Against the Grain pays at each happening its slice's aspect does not match, and not at one it does" {
-        val grain = listOf(slice(FREEDOM, "freedom.againstTheGrain"))
-        fight(grain, IDLE, 3, Happening(REASON), Happening(FREEDOM), Happening(AUTHORITY)).saying(What.PULLED).map { it.second to it.amount } shouldBe
-            listOf(0 to 20.0, 2 to 20.0)
+    "Defiance answers Authority: in an Authority happening, and only there, it pulls, unboosted, and hastens its side's summons" {
+        val defiant = listOf(slice(FREEDOM, "freedom.commons", "freedom.defiance", summonCount = 1))
+        val result = fight(defiant, IDLE, 9, Happening(FREEDOM), Happening(AUTHORITY), Happening(REASON))
+
+        result.saying(What.PULLED).filter { it.effect == "freedom.defiance" }.map { it.second to it.amount } shouldBe listOf(3 to 20.0)
+        result.saying(What.BUFFED).filter { it.status == "hastened" }.map { it.second to it.target.toString() } shouldBe listOf(3 to "#1")
     }
 
     "Will of One's Own keeps its slice's aspect matching once, at a change to a happening that does not have it, and its triggers that need a match fire there" {
@@ -76,7 +78,7 @@ class AuthorityFreedomSpec : StringSpec({
             Happening(FREEDOM),
             Happening(VIOLENCE),
             Happening(VIOLENCE),
-            catalogue = TEST_CATALOGUE.marked("freedom.commons", true),
+            catalogue = TEST_CATALOGUE.marked("freedom.commons", Needs.MATCH),
         )
 
         result.saying(What.MATCHES).filter { it.side == Side.A }.map { it.actor.toString() to it.effect } shouldBe

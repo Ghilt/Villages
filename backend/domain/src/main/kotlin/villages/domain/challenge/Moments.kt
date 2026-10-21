@@ -53,7 +53,7 @@ enum class What {
     /** A slice's aspect matches the happening that began; [ChallengeMoment.effect] names what held it matching, when something did. */
     MATCHES,
 
-    /** A summon whose kind needs a matching aspect sat out the seconds of a happening that does not have its own. */
+    /** A summon sat out the seconds of a happening it may not act in: its kind's need, or a debuff binding it to its aspect. */
     IDLE,
     SUMMONED,
 

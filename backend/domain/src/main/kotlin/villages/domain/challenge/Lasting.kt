@@ -191,9 +191,19 @@ internal fun Contest.cleanse(change: Change.Cleanse) {
 /** Whether [summon] bears something that stuns it. */
 internal fun stunned(summon: Summon): Boolean = summon.bearing.keys.any { lastingBehaviours[it]?.stuns == true }
 
-/** Whether [summon] acts only while the happening has its own aspect: by its kind's mark, or by a debuff it bears. */
-internal fun Contest.needsMatch(summon: Summon): Boolean =
-    catalogue.summons[summon.kind]?.matching == true || summon.bearing.keys.any { lastingBehaviours[it]?.needsMatch == true }
+/**
+ * Whether [summon] sits out the happening going on: one it may not act in, because a debuff binds it to its own aspect,
+ * or its kind needs its own aspect or its anti-aspect, and the happening has not the one it needs.
+ */
+internal fun Contest.sitsOut(summon: Summon): Boolean {
+    val bound = summon.bearing.keys.any { lastingBehaviours[it]?.needsMatch == true }
+    val needs = if (bound) Needs.MATCH else catalogue.summons[summon.kind]?.needs
+    return when (needs) {
+        null -> false
+        Needs.MATCH -> !happening.matches(summon.aspect)
+        Needs.ANTI -> !happening.matches(summon.aspect.anti)
+    }
+}
 
 /** Puts [change]'s buff or debuff on its bearer until its second, the later of two ends when it is on already, and says so. */
 internal fun Contest.putOn(change: Change.PutOn) {

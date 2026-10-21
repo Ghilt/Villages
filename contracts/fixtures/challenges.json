@@ -3,7 +3,7 @@
   "effects": {
     "$comment": "Three aspects, an effect of every shape.",
     "violence": {
-      "sellswords": { "name": "Sellswords", "fires": "trigger", "words": "Hires a Mercenary.", "summons": "mercenary", "matching": true },
+      "sellswords": { "name": "Sellswords", "fires": "trigger", "words": "Hires a Mercenary.", "summons": "mercenary", "needs": "match" },
       "noQuarter": {
         "name": "No Quarter",
         "fires": "passive",
@@ -37,7 +37,7 @@
       "aspect": "violence",
       "words": "Pulls {pulls} a second.",
       "numbers": { "pulls": 10 },
-      "matching": true
+      "needs": "anti"
     },
     "collector": {
       "name": "Collector",

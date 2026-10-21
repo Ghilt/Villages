@@ -39,11 +39,12 @@ private const val MERCENARY = "mercenary"
 internal val violenceAndDiplomacy: Map<String, EffectBehaviour> = mapOf(
     "violence.sellswords" to Hires,
     "violence.noQuarter" to NoQuarter,
-    "violence.spoils" to ChangingAway(Aspect.VIOLENCE),
+    "violence.saberRattling" to Afflicts(Own.SLICES, pulls = true),
     "violence.warDrums" to Rallies(Own.SUMMONS),
     "diplomacy.envoy" to Slotted,
     "diplomacy.sweeterTerms" to SweeterTerms,
     "diplomacy.parley" to Parley,
+    "diplomacy.ceasefire" to Afflicts(Own.SUMMONS),
 )
 
 internal val violenceAndDiplomacySummons: Map<String, SummonBehaviour> = mapOf(MERCENARY to Pulls)

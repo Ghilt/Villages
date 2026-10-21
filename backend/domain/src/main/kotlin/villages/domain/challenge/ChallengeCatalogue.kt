@@ -41,6 +41,12 @@ data class ChallengeCatalogue(
     }
 }
 
+/**
+ * What an effect or a kind of summon needs of the latest happening to work: its [MATCH]ing aspect, or its [ANTI]-aspect,
+ * the second being how a slice is made to meet its anti-aspect's happenings. Neither, it works in every happening.
+ */
+enum class Needs { MATCH, ANTI }
+
 /** Whether an effect fires as its slice meets each happening, or works from second to second. */
 enum class Fires { TRIGGER, PASSIVE }
 
@@ -55,8 +61,8 @@ data class ChallengeEffect(
     val numbers: Map<String, Double> = emptyMap(),
     val summons: String? = null,
     val slot: ChallengeSlot? = null,
-    /** Whether it needs a matching aspect: works only while the latest happening has its slice's aspect. */
-    val matching: Boolean = false,
+    /** What it needs to work: a matching aspect, or its anti-aspect, in the latest happening; none to work in any. */
+    val needs: Needs? = null,
     /** The buff or the debuff it puts on, by its id; none for one that puts nothing on. */
     val puts: String? = null,
 ) {
@@ -84,11 +90,11 @@ data class ChallengeSlot(val fits: Fits, val lends: Stat? = null, val onTheLine:
 }
 
 /** One summon: its aspect, by which its boost is judged, and its numbers by name. */
-/** A kind of summon: its [aspect], its [numbers], and whether it needs a [matching] aspect - acts only while the happening has its own. */
+/** A kind of summon: its [aspect], its [numbers], and what it [needs] to act - its own aspect, or its anti-aspect, in the happening; none to act in any. */
 data class SummonSpec(
     val aspect: Aspect,
     val numbers: Map<String, Double> = emptyMap(),
-    val matching: Boolean = false,
+    val needs: Needs? = null,
     /** The buff or the debuff its acts put on, by its id; none for one that puts nothing on. */
     val puts: String? = null,
 ) {

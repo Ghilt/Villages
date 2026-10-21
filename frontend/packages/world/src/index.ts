@@ -77,6 +77,7 @@ export type {
   ChallengeEffect,
   ChallengeKind,
   ChallengeLasting,
+  Needs,
   ChallengeSlot,
   ChallengeSummon,
   Challenges,

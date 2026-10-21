@@ -4,7 +4,7 @@ import kotlin.math.max
 
 /**
  * How what a moment asked for lands, in passes: first the tug and the coffers move, as everything acted on the
- * state the moment began with; then the dead fall, so a summon both killed and turned is killed, and the room a death
+ * state the moment began with, a coffer forgiven pouring the forgiver's way before its own side's pour of the second; then the dead fall, so a summon both killed and turned is killed, and the room a death
  * leaves is there for what comes next; then buffs go on, so that a ward or a stand put on in a second holds against a
  * debuff or a turn of the same second; then summons turn and come, things come on the line, slices are worn, and
  * debuffs go on; and last the cleansings, so that one lifts a debuff of its own second too. Whichever side asked comes
@@ -13,7 +13,7 @@ import kotlin.math.max
  */
 internal fun Contest.land(changes: List<Change>) {
     val (moving, rest) = changes.partition { it is Change.Pull || it is Change.Say || it is Change.Deposit || it is Change.Pour }
-    moving.forEach { landOne(it) }
+    moving.sortedBy { if (it is Change.Pour && it.toward != null) 0 else 1 }.forEach { landOne(it) }
     rest.filterIsInstance<Change.Kill>().forEach { landOne(it) }
     val buffs = rest.filter { it is Change.PutOn && it.lasting in catalogue.buffs }
     buffs.forEach { landOne(it) }
@@ -48,7 +48,7 @@ private fun Contest.landOne(change: Change) {
         is Change.Pour -> alive(change.target)?.takeIf { it.coffer > 0.0 }?.let {
             val poured = it.coffer
             it.coffer = 0.0
-            pull(Change.Pull(it.side, poured, it.actor, null, false, What.POURED))
+            pull(Change.Pull(change.toward ?: it.side, poured, it.actor, change.effect, false, What.POURED))
         }
         is Change.Say -> say(change.what, change.side, change.actor, change.effect, change.target, change.amount, targetEffect = change.targetEffect, status = change.status)
     }

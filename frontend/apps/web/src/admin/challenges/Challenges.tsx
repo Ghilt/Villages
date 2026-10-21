@@ -9,7 +9,7 @@ import type {
   Challenges as Content,
 } from '@villages/world';
 
-import { FlagField, LevelsField, NumberField, WordsField } from '../frame/Fields';
+import { ChoiceField, FlagField, LevelsField, NumberField, WordsField } from '../frame/Fields';
 import { InspectPage } from '../frame/InspectPage';
 import { SaveBar, WholeFile } from '../frame/SaveBar';
 import { useCatalogueEditor } from '../frame/useCatalogueEditor';
@@ -25,7 +25,7 @@ const PAIRS = ASPECTS.filter((_, at) => at % 2 === 0).map((aspect) => [aspect, a
 
 /**
  * The challenge's content, `world/catalogues/challenges.json`, to read and to change: every effect a slice can carry,
- * in the five pairs of aspects, with its name, its words and its numbers, whether it needs a matching aspect, the slot
+ * in the five pairs of aspects, with its name, its words and its numbers, what it needs of the happening, the slot
  * it brings, the summon it hires and the buff or debuff it puts on; every summon, and whether it needs one; the chart
  * of buffs and debuffs; and the kinds of challenge a progression is drawn from. Every name, word and number is changed in
  * place and saved through the game server, which takes it on at once. Below, the simulator has the server's engine
@@ -101,7 +101,10 @@ function Effect({ editor, effect, content }: { editor: Editor; effect: Challenge
         <span className="challenges-fires">{effect.fires}</span>{' '}
         <span className="inspect-key">{effect.id}</span>
       </div>
-      <FlagField editor={editor} path={[...at, 'matching']} label="needs a matching aspect" />
+      <div className="inspect-quiet">
+        works in{' '}
+        <ChoiceField editor={editor} path={[...at, 'needs']} label={`${effect.id} needs`} choices={NEEDS} />
+      </div>
       <WordsField editor={editor} path={[...at, 'words']} label={`${effect.id} words`} wide />
       <Numbers editor={editor} at={[...at, 'numbers']} numbers={effect.numbers} label={effect.id} />
       <div>{filledIn(effect.words, effect.numbers)}</div>
@@ -224,6 +227,13 @@ function Numbers({
   );
 }
 
+/** What an effect or a summon may need of the happening, as the page offers it. */
+const NEEDS = [
+  { value: null, said: 'any happening' },
+  { value: 'match', said: 'a matching aspect' },
+  { value: 'anti', said: 'its anti-aspect' },
+] as const;
+
 /** `a` or `an`, as the name after it sounds: an Enforcer, a Mercenary. */
 const article = (name: string) => (/^[AEIOU]/i.test(name) ? 'an' : 'a');
 
@@ -244,7 +254,7 @@ function Summons({ editor, content }: { editor: Editor; content: Content }) {
             <th>summon</th>
             <th>aspect</th>
             <th>what it does</th>
-            <th>needs a matching aspect</th>
+            <th>acts in</th>
             <th>brought by</th>
           </tr>
         </thead>
@@ -275,10 +285,11 @@ function Summons({ editor, content }: { editor: Editor; content: Content }) {
                 <div>{filledIn(summon.words, summon.numbers)}</div>
               </td>
               <td>
-                <FlagField
+                <ChoiceField
                   editor={editor}
-                  path={['summons', summon.id, 'matching']}
-                  label={summon.matching ? 'yes' : 'no'}
+                  path={['summons', summon.id, 'needs']}
+                  label={`${summon.id} needs`}
+                  choices={NEEDS}
                 />
               </td>
               <td>

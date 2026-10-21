@@ -12,6 +12,7 @@ import villages.domain.challenge.ChallengeSlot
 import villages.domain.challenge.Fires
 import villages.domain.challenge.Fits
 import villages.domain.challenge.Lasting
+import villages.domain.challenge.Needs
 import villages.domain.challenge.SummonSpec
 
 /**
@@ -28,6 +29,7 @@ object ChallengesFile {
     private val FIRES = Fires.entries.associateBy { it.name.lowercase() }
     private val FITS = mapOf("keyFigure" to Fits.KEY_FIGURE, "structure" to Fits.STRUCTURE)
     private val BEARERS = Bearer.entries.associateBy { it.name.lowercase() }
+    private val NEEDS = Needs.entries.associateBy { it.name.lowercase() }
 
     fun parse(text: String): ChallengeCatalogue {
         val root = json.readTree(text)
@@ -56,15 +58,15 @@ object ChallengesFile {
                 numbers = numbers(node["numbers"], "$at.numbers"),
                 summons = node["summons"]?.let { it.takeIf { summon -> summon.isString }?.asString() ?: refuse("$at.summons") },
                 slot = node["slot"]?.let { slotOf(it, "$at.slot") },
-                matching = flag(node, "matching", at),
+                needs = needsOf(node, at),
                 puts = node["puts"]?.let { it.takeIf { lasting -> lasting.isString }?.asString() ?: refuse("$at.puts") },
             )
         }
     }
 
-    /** [node]'s [name], true or false, and false when it is not there. */
-    private fun flag(node: JsonNode, name: String, at: String): Boolean =
-        node[name]?.let { it.takeIf { flag -> flag.isBoolean }?.asBoolean() ?: refuse("$at.$name") } ?: false
+    /** What [node] needs of the happening, `match` or `anti`, and nothing when it says nothing. */
+    private fun needsOf(node: JsonNode, at: String): Needs? =
+        node["needs"]?.let { it.takeIf { needs -> needs.isString }?.asString()?.let(NEEDS::get) ?: refuse("$at.needs") }
 
     private fun slotOf(node: JsonNode, at: String): ChallengeSlot {
         if (!node.isObject) refuse(at)
@@ -82,7 +84,7 @@ object ChallengesFile {
         word(node, "words", at)
         val aspect = node["aspect"]?.takeIf { it.isString }?.asString()?.let(ASPECTS::get) ?: refuse("$at.aspect")
         val puts = node["puts"]?.let { it.takeIf { lasting -> lasting.isString }?.asString() ?: refuse("$at.puts") }
-        return checked(at) { SummonSpec(aspect, numbers(node["numbers"], "$at.numbers"), flag(node, "matching", at), puts) }
+        return checked(at) { SummonSpec(aspect, numbers(node["numbers"], "$at.numbers"), needsOf(node, at), puts) }
     }
 
     private fun lastingOf(at: String, node: JsonNode): Lasting {

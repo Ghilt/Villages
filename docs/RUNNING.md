@@ -915,8 +915,9 @@ and `-- --drop` takes them off; by hand only.
   matching aspect; the chart of buffs and debuffs, each one's name, whether it helps or hinders, whether it goes on a
   slice or a summon, what it does, and the effects and summons that put it on; and the kinds of challenge, how long each lasts, how many happenings it has, how often
   one has two aspects and what each aspect weighs. It reads the file through the dev server and again whenever it
-  changes on disk. Every name, word and number is a field, and whether a slot puts what is in it on the line, and whether an effect or
-  a summon needs a matching aspect, a box;
+  changes on disk. Every name, word and number is a field, whether a slot puts what is in it on the line a box, and
+  what an effect or a summon needs of the happening a choice of three - any happening, a matching aspect, its
+  anti-aspect;
   changed in place, they are saved through the game server as every catalogue's page saves, and taken on at once. The
   game server reads the same file and refuses one it cannot read, or one that breaks a rule of the content - a summon
   that is not there, a slot that neither lends nor puts on the line - naming where, as it does every catalogue, said

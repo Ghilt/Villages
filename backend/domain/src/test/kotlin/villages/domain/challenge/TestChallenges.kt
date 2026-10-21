@@ -7,43 +7,48 @@ import villages.domain.Stat
  */
 val TEST_CATALOGUE = ChallengeCatalogue(
     effects = listOf(
-        ChallengeEffect("violence.sellswords", Aspect.VIOLENCE, Fires.TRIGGER, summons = "mercenary", matching = true),
-        ChallengeEffect("violence.noQuarter", Aspect.VIOLENCE, Fires.PASSIVE, mapOf("chance" to 25.0), matching = true),
-        ChallengeEffect("violence.spoils", Aspect.VIOLENCE, Fires.PASSIVE, mapOf("amount" to 30.0)),
+        ChallengeEffect("violence.sellswords", Aspect.VIOLENCE, Fires.TRIGGER, summons = "mercenary", needs = Needs.MATCH),
+        ChallengeEffect("violence.noQuarter", Aspect.VIOLENCE, Fires.PASSIVE, mapOf("chance" to 25.0), needs = Needs.MATCH),
         ChallengeEffect("diplomacy.envoy", Aspect.DIPLOMACY, Fires.TRIGGER, slot = ChallengeSlot(Fits.KEY_FIGURE, Stat.KINDNESS)),
         ChallengeEffect("diplomacy.sweeterTerms", Aspect.DIPLOMACY, Fires.TRIGGER, mapOf("strong" to 50.0, "weak" to 20.0)),
         ChallengeEffect("diplomacy.parley", Aspect.DIPLOMACY, Fires.PASSIVE, mapOf("perSecond" to 2.0, "power" to 5.0)),
-        ChallengeEffect("holy.rebuke", Aspect.HOLY, Fires.PASSIVE, mapOf("chance" to 20.0, "integrity" to 10.0), matching = true),
-        ChallengeEffect("holy.ordination", Aspect.HOLY, Fires.TRIGGER, summons = "priest", matching = true),
-        ChallengeEffect("holy.sanctuary", Aspect.HOLY, Fires.PASSIVE, mapOf("piety" to 5.0), slot = ChallengeSlot(Fits.STRUCTURE, onTheLine = true), matching = true),
+        ChallengeEffect("holy.rebuke", Aspect.HOLY, Fires.PASSIVE, mapOf("chance" to 20.0, "integrity" to 10.0), needs = Needs.MATCH),
+        ChallengeEffect("holy.ordination", Aspect.HOLY, Fires.TRIGGER, summons = "priest", needs = Needs.MATCH),
+        ChallengeEffect("holy.sanctuary", Aspect.HOLY, Fires.PASSIVE, mapOf("piety" to 5.0), slot = ChallengeSlot(Fits.STRUCTURE, onTheLine = true), needs = Needs.MATCH),
         ChallengeEffect("reason.counsel", Aspect.REASON, Fires.TRIGGER, slot = ChallengeSlot(Fits.KEY_FIGURE, Stat.REASON)),
         ChallengeEffect("reason.refutation", Aspect.REASON, Fires.PASSIVE, mapOf("chance" to 20.0)),
         ChallengeEffect("reason.seenThrough", Aspect.REASON, Fires.PASSIVE, mapOf("chance" to 20.0, "seconds" to 10.0), puts = "weakened"),
-        ChallengeEffect("authority.watch", Aspect.AUTHORITY, Fires.TRIGGER, summons = "enforcer", matching = true),
-        ChallengeEffect("authority.curfew", Aspect.AUTHORITY, Fires.TRIGGER, mapOf("seconds" to 8.0), matching = true, puts = "aspectBound"),
-        ChallengeEffect("authority.firmHand", Aspect.AUTHORITY, Fires.TRIGGER, mapOf("seconds" to 10.0), matching = true, puts = "penalised"),
-        ChallengeEffect("nature.dread", Aspect.NATURE, Fires.TRIGGER, mapOf("seconds" to 8.0), matching = true, puts = "weakened"),
+        ChallengeEffect("authority.watch", Aspect.AUTHORITY, Fires.TRIGGER, summons = "enforcer", needs = Needs.MATCH),
+        ChallengeEffect("authority.curfew", Aspect.AUTHORITY, Fires.TRIGGER, mapOf("seconds" to 8.0), needs = Needs.MATCH, puts = "aspectBound"),
+        ChallengeEffect("authority.firmHand", Aspect.AUTHORITY, Fires.TRIGGER, mapOf("seconds" to 10.0), needs = Needs.MATCH, puts = "penalised"),
+        ChallengeEffect("nature.dread", Aspect.NATURE, Fires.TRIGGER, mapOf("seconds" to 8.0), needs = Needs.MATCH, puts = "weakened"),
         ChallengeEffect("freedom.commons", Aspect.FREEDOM, Fires.TRIGGER, summons = "rebel"),
-        ChallengeEffect("freedom.againstTheGrain", Aspect.FREEDOM, Fires.PASSIVE, mapOf("amount" to 20.0)),
         ChallengeEffect("freedom.ownWill", Aspect.FREEDOM, Fires.PASSIVE),
-        ChallengeEffect("greed.countingHouse", Aspect.GREED, Fires.TRIGGER, mapOf("wealth" to 5.0), slot = ChallengeSlot(Fits.STRUCTURE, onTheLine = true), matching = true),
-        ChallengeEffect("greed.farmTaxes", Aspect.GREED, Fires.TRIGGER, summons = "collector", matching = true),
+        ChallengeEffect("greed.countingHouse", Aspect.GREED, Fires.TRIGGER, mapOf("wealth" to 5.0), slot = ChallengeSlot(Fits.STRUCTURE, onTheLine = true), needs = Needs.MATCH),
+        ChallengeEffect("greed.farmTaxes", Aspect.GREED, Fires.TRIGGER, summons = "collector", needs = Needs.MATCH),
         ChallengeEffect("greed.pickBones", Aspect.GREED, Fires.PASSIVE, mapOf("amount" to 10.0)),
         ChallengeEffect("generosity.patron", Aspect.GENEROSITY, Fires.TRIGGER, slot = ChallengeSlot(Fits.KEY_FIGURE, Stat.KINDNESS)),
         ChallengeEffect("generosity.alms", Aspect.GENEROSITY, Fires.TRIGGER, summons = "benefactor"),
-        ChallengeEffect("generosity.remembered", Aspect.GENEROSITY, Fires.PASSIVE, mapOf("amount" to 15.0)),
         ChallengeEffect("generosity.tend", Aspect.GENEROSITY, Fires.TRIGGER),
-        ChallengeEffect("nature.wildHunt", Aspect.NATURE, Fires.TRIGGER, summons = "predator", matching = true),
-        ChallengeEffect("nature.teeming", Aspect.NATURE, Fires.PASSIVE, mapOf("chance" to 20.0), summons = "creature", matching = true),
-        ChallengeEffect("nature.wildRemembers", Aspect.NATURE, Fires.PASSIVE, mapOf("seconds" to 10.0), puts = "eroding"),
-        ChallengeEffect("industry.engines", Aspect.INDUSTRY, Fires.TRIGGER, summons = "machine", matching = true),
-        ChallengeEffect("industry.works", Aspect.INDUSTRY, Fires.TRIGGER, slot = ChallengeSlot(Fits.STRUCTURE, onTheLine = true), matching = true),
+        ChallengeEffect("nature.wildHunt", Aspect.NATURE, Fires.TRIGGER, summons = "predator", needs = Needs.MATCH),
+        ChallengeEffect("nature.teeming", Aspect.NATURE, Fires.PASSIVE, mapOf("chance" to 20.0), summons = "creature", needs = Needs.MATCH),
+        ChallengeEffect("industry.engines", Aspect.INDUSTRY, Fires.TRIGGER, summons = "machine", needs = Needs.MATCH),
+        ChallengeEffect("industry.works", Aspect.INDUSTRY, Fires.TRIGGER, slot = ChallengeSlot(Fits.STRUCTURE, onTheLine = true), needs = Needs.MATCH),
         ChallengeEffect("industry.wellOiled", Aspect.INDUSTRY, Fires.PASSIVE, mapOf("chance" to 20.0, "seconds" to 10.0), puts = "hastened"),
-        ChallengeEffect("violence.warDrums", Aspect.VIOLENCE, Fires.TRIGGER, mapOf("seconds" to 10.0), matching = true, puts = "hastened"),
-        ChallengeEffect("holy.blessing", Aspect.HOLY, Fires.TRIGGER, mapOf("seconds" to 8.0), puts = "empowered"),
-        ChallengeEffect("reason.foresight", Aspect.REASON, Fires.TRIGGER, mapOf("seconds" to 8.0), matching = true, puts = "warded"),
-        ChallengeEffect("authority.fealty", Aspect.AUTHORITY, Fires.TRIGGER, mapOf("seconds" to 15.0), matching = true, puts = "steadfast"),
+        ChallengeEffect("violence.warDrums", Aspect.VIOLENCE, Fires.TRIGGER, mapOf("seconds" to 10.0), needs = Needs.MATCH, puts = "hastened"),
+        ChallengeEffect("reason.foresight", Aspect.REASON, Fires.TRIGGER, mapOf("seconds" to 8.0), needs = Needs.MATCH, puts = "warded"),
+        ChallengeEffect("authority.fealty", Aspect.AUTHORITY, Fires.TRIGGER, mapOf("seconds" to 15.0), needs = Needs.MATCH, puts = "steadfast"),
         ChallengeEffect("freedom.wordSpreads", Aspect.FREEDOM, Fires.TRIGGER, mapOf("seconds" to 15.0), puts = "echoing"),
+        ChallengeEffect("violence.saberRattling", Aspect.VIOLENCE, Fires.TRIGGER, mapOf("seconds" to 10.0, "amount" to 15.0), needs = Needs.ANTI, puts = "weakened"),
+        ChallengeEffect("diplomacy.ceasefire", Aspect.DIPLOMACY, Fires.TRIGGER, mapOf("seconds" to 4.0), needs = Needs.ANTI, puts = "stunned"),
+        ChallengeEffect("holy.miracle", Aspect.HOLY, Fires.TRIGGER, mapOf("seconds" to 8.0, "amount" to 25.0), needs = Needs.ANTI, puts = "empowered"),
+        ChallengeEffect("reason.doubt", Aspect.REASON, Fires.TRIGGER, mapOf("seconds" to 10.0, "amount" to 15.0), needs = Needs.ANTI, puts = "weakened"),
+        ChallengeEffect("authority.martialLaw", Aspect.AUTHORITY, Fires.TRIGGER, mapOf("seconds" to 4.0, "amount" to 20.0), needs = Needs.ANTI, puts = "stunned"),
+        ChallengeEffect("freedom.defiance", Aspect.FREEDOM, Fires.TRIGGER, mapOf("seconds" to 8.0, "amount" to 20.0), needs = Needs.ANTI, puts = "hastened"),
+        ChallengeEffect("greed.profiteering", Aspect.GREED, Fires.TRIGGER, mapOf("amount" to 5.0), needs = Needs.ANTI),
+        ChallengeEffect("generosity.forgiveness", Aspect.GENEROSITY, Fires.TRIGGER, needs = Needs.ANTI),
+        ChallengeEffect("nature.overgrowth", Aspect.NATURE, Fires.TRIGGER, mapOf("seconds" to 10.0), needs = Needs.ANTI, puts = "eroding"),
+        ChallengeEffect("industry.clearLand", Aspect.INDUSTRY, Fires.TRIGGER, mapOf("seconds" to 10.0, "amount" to 15.0), needs = Needs.ANTI, puts = "weakened"),
     ),
     summons = mapOf(
         "mercenary" to SummonSpec(Aspect.VIOLENCE, mapOf("pulls" to 10.0)),
@@ -54,7 +59,7 @@ val TEST_CATALOGUE = ChallengeCatalogue(
         "benefactor" to SummonSpec(Aspect.GENEROSITY, mapOf("pulls" to 5.0, "behind" to 10.0)),
         "machine" to SummonSpec(Aspect.INDUSTRY, mapOf("pulls" to 10.0)),
         "predator" to SummonSpec(Aspect.NATURE, mapOf("pulls" to 5.0, "kills" to 20.0)),
-        "creature" to SummonSpec(Aspect.NATURE, mapOf("pulls" to 3.0), matching = true),
+        "creature" to SummonSpec(Aspect.NATURE, mapOf("pulls" to 3.0), needs = Needs.MATCH),
     ),
     kinds = emptyMap(),
     buffs = mapOf(
@@ -82,13 +87,13 @@ fun ChallengeCatalogue.withSummon(summon: String, number: String, value: Double)
 
 /** The test catalogue with no marks: every effect and summon works in every happening, as a spec of what one does wants. */
 val ANYWHERE = TEST_CATALOGUE.copy(
-    effects = TEST_CATALOGUE.effects.map { it.copy(matching = false) },
-    summons = TEST_CATALOGUE.summons.mapValues { (_, spec) -> spec.copy(matching = false) },
+    effects = TEST_CATALOGUE.effects.map { it.copy(needs = null) },
+    summons = TEST_CATALOGUE.summons.mapValues { (_, spec) -> spec.copy(needs = null) },
 )
 
-/** The test catalogue with one effect's mark set: whether it needs a matching aspect. */
-fun ChallengeCatalogue.marked(effect: String, matching: Boolean): ChallengeCatalogue = copy(
-    effects = effects.map { if (it.id == effect) it.copy(matching = matching) else it },
+/** The test catalogue with one effect's mark set: what it needs of the happening, nothing to work in any. */
+fun ChallengeCatalogue.marked(effect: String, needs: Needs?): ChallengeCatalogue = copy(
+    effects = effects.map { if (it.id == effect) it.copy(needs = needs) else it },
 )
 
 /** The test catalogue with one of a buff's numbers changed. */

@@ -211,3 +211,33 @@ export function FlagField({
     </label>
   );
 }
+
+/** One of a few, a select: set at once, and a field left out of the file is the choice whose value is none. */
+export function ChoiceField({
+  editor,
+  path,
+  label,
+  choices,
+}: {
+  editor: CatalogueEditor<unknown>;
+  path: Path;
+  label: string;
+  choices: readonly { readonly value: string | null; readonly said: string }[];
+}) {
+  const value = editor.at(path);
+  return (
+    <label className={`inspect-pick${editor.isEdited(path) ? ' is-edited' : ''}`}>
+      <select
+        aria-label={label}
+        value={typeof value === 'string' ? value : ''}
+        onChange={(event) => editor.set(path, event.target.value === '' ? undefined : event.target.value)}
+      >
+        {choices.map((choice) => (
+          <option key={choice.value ?? ''} value={choice.value ?? ''}>
+            {choice.said}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}

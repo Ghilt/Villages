@@ -140,7 +140,10 @@ function SliceBuilder({
                 onChange={(event) => toggle(effect, event.target.checked)}
               />{' '}
               {effect.name} <span className="challenges-fires">{effect.fires}</span>
-              {effect.matching && <span className="challenges-matching"> needs a matching aspect</span>}
+              {effect.needs === 'match' && (
+                <span className="challenges-matching"> needs a matching aspect</span>
+              )}
+              {effect.needs === 'anti' && <span className="challenges-matching"> needs its anti-aspect</span>}
             </label>
             <div
               className="challenges-choice__words"

@@ -175,7 +175,8 @@ sealed interface Change {
 
     data class Deposit(val target: Int, val amount: Double, val boosted: Boolean) : Change
 
-    data class Pour(val target: Int) : Change
+    /** A coffer pours into the tug: its summon's side's way, or [toward] another's, by [effect]. */
+    data class Pour(val target: Int, val toward: Side? = null, val effect: String? = null) : Change
 
     /** A building or a person comes on the line for [side], bringing [arrives] before any boost and paying [paid], [boosted] or not. */
     data class OnTheLine(val side: Side, val owner: Int, val effect: String, val standIn: StandIn, val arrives: Double, val paid: Double, val boosted: Boolean) : Change
