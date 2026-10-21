@@ -251,7 +251,7 @@ class GatewayCellsSpec : StringSpec({
         val rig = Rig()
         val sent = mutableListOf<ServerFrame>()
         var tookOver = false
-        val first = rig.gateway.connect { frame ->
+        val first = rig.connect { frame ->
             sent += frame
             // The player's other window says hello while this one is still being answered for what it asked.
             if (frame is Snapshot && !tookOver) {

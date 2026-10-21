@@ -7,7 +7,7 @@ import villages.application.CharactersByCell
 import villages.application.Faults
 import villages.application.HousesByCell
 import villages.application.Later
-import villages.application.PlayerTokens
+import villages.application.SignedIn
 import villages.application.StructuresByCell
 import villages.application.WorldClock
 import villages.domain.PlayerId
@@ -48,7 +48,6 @@ import villages.protocol.WorldWiped
  * `Fog` is asked of everything before it goes (0061), the scenery's stands included (0067).
  */
 class Gateway(
-    private val tokens: PlayerTokens,
     faults: Faults,
     private val houses: HousesByCell,
     private val clock: Clock,
@@ -127,7 +126,8 @@ class Gateway(
         }
     }
 
-    fun connect(out: Outbound): Connection = Connection(out).also { live += it }
+    /** A connection, signed in as [signedIn] when the browser that opened it is signed in: see [arrivingAs]. */
+    fun connect(signedIn: SignedIn? = null, out: Outbound): Connection = Connection(out, signedIn).also { live += it }
 
     /** How many cells somebody holds, for the tests that hold the index to letting go. */
     internal val cellsHeld: Int get() = holding.size
@@ -143,7 +143,7 @@ class Gateway(
         faulted.close()
     }
 
-    inner class Connection(private val transport: Outbound) {
+    inner class Connection(private val transport: Outbound, private val signedIn: SignedIn?) {
         /**
          * Every frame to this connection goes out through here, queued and sent one at a time, and nothing a send
          * throws gets past it. The fan-outs send from inside the read models' watchers, where a throw would skip
@@ -243,11 +243,9 @@ class Gateway(
                 out.send(ErrorFrame("protocolVersion", "this gateway speaks version $PROTOCOL_VERSION"))
                 return
             }
-            val who = try {
-                tokens.playerOf(frame.playerToken)
-            } catch (bad: IllegalArgumentException) {
-                out.send(ErrorFrame("playerToken", bad.message ?: "not a player token"))
-                return
+            val who = when (val arriving = arrivingAs(frame, signedIn, instrumentsOpen)) {
+                is Arriving.Refused -> return out.send(arriving.why)
+                is Arriving.As -> arriving.player
             }
             player = who
             parts.forEach { it.arrive(this, frame, who) }

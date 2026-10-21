@@ -12,7 +12,7 @@ class GatewayPlayersSpec : StringSpec({
 
     fun asked(rig: Rig): List<ServerFrame> {
         val sent = mutableListOf<ServerFrame>()
-        val window = rig.gateway.connect { sent += it }.also { it.receive(hello) }
+        val window = rig.connect { sent += it }.also { it.receive(hello) }
         sent.clear()
         window.receive("""{"type":"listPlayers"}""")
         return sent

@@ -22,7 +22,7 @@ class GatewayKeyFiguresSpec : StringSpec({
 
     "hello also says which key figures the house holds, which is none before it holds any" {
         val sent = mutableListOf<ServerFrame>()
-        Rig().gateway.connect { sent += it }.receive(hello)
+        Rig().connect { sent += it }.receive(hello)
 
         sent[2] shouldBe YourKeyFigures(emptyList())
     }

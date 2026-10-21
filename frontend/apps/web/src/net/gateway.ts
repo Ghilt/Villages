@@ -1,9 +1,10 @@
-import { becomePlayer, createSession, ensurePlayerToken, forgetPlayerToken } from '@villages/client-core';
+import { createSession } from '@villages/client-core';
 import type { Connection, Looking, Readable, SessionListener, SessionState } from '@villages/client-core';
 import { PROTOCOL_VERSION } from '@villages/protocol';
 import type { ChoiceView, CommandPayload, OptionView, Point } from '@villages/protocol';
 
 import { note } from '../log/log';
+import { becomePlayer, startOver } from './auth';
 import { followStandsUnder, standsArrived } from './stands';
 import { GATEWAY_URL } from './address';
 import { browserSocket } from './browserSocket';
@@ -31,8 +32,14 @@ const session = createSession({
   followStands: followStandsUnder,
   // Arriving anew as the player who made the save this window loaded, when it loaded one. See 0101.
   arriveAnew: () => {
-    if (becoming !== null) becomePlayer(tokens, becoming);
-    window.location.reload();
+    if (becoming === null) {
+      window.location.reload();
+      return;
+    }
+    void becomePlayer(becoming).then(
+      () => window.location.reload(),
+      (refused: unknown) => note('player', `could not arrive as the save's maker: ${String(refused)}`),
+    );
   },
   note,
 });
@@ -42,22 +49,16 @@ export const sessionStore: Readable<SessionState> = { get: session.state, watch:
 
 let connection: Connection | null = null;
 
-/** The browser's storage, where who this browser plays as is kept. See `identity.ts` in the client core. */
-const tokens = {
-  get: (key: string) => localStorage.getItem(key),
-  set: (key: string, value: string) => localStorage.setItem(key, value),
-};
-
 /**
  * Connects once, the first time anything asks, to draw `master`: said in hello, so the gateway sends that
  * world's stands and no other. See decision record 0067. Not watching events: those are read on their own page,
- * which watches without playing. See 0023.
+ * which watches without playing. See 0023. Who it plays as is the browser's sign-in, which the socket's handshake
+ * carries, so the page signs in first: `signIn` in `auth.ts`, and decision record 0109.
  */
 export function gateway(master: string): Connection {
   if (connection !== null) return connection;
   connection = session.connect({
     socket: browserSocket(GATEWAY_URL),
-    playerToken: ensurePlayerToken(tokens, () => crypto.randomUUID()),
     protocolVersion: PROTOCOL_VERSION,
     master,
     address: GATEWAY_URL,
@@ -141,13 +142,16 @@ export function listPlayers(): void {
 }
 
 /**
- * Plays as another player of this world from now on: this browser takes their token and reloads, arriving as them.
- * A debug affordance, as starting over is: a token is all a player is until accounts exist. See decision record 0101.
+ * Plays as another player of this world from now on: this browser is signed in as them and reloads, arriving as
+ * them. Adam's instrument, as starting over is a debug affordance; refused while the instruments are closed. See
+ * decision record 0101.
  */
 export function switchPlayer(player: string): void {
-  becomePlayer(tokens, player);
   note('player', 'switching to another player of this world');
-  window.location.reload();
+  void becomePlayer(player).then(
+    () => window.location.reload(),
+    (refused: unknown) => note('player', `could not switch: ${String(refused)}`),
+  );
 }
 
 /**
@@ -205,16 +209,18 @@ export function collectReward(questId: string, nodeId: string, described: string
 }
 
 /**
- * Starts over as a new player: forgets who this browser was and reloads.
+ * Starts over as a new player: this browser's sign-in ended, a newcomer's begun, and a reload.
  *
  * The house the old player founded stays in the world as somebody's, because events are never deleted.
  * A reload rather than a fresh socket, because a page carries the old player in more places than the
  * connection: the houses it holds, the day it is looking at, what it thinks its house is. See 0036.
  */
 export function restart(): void {
-  forgetPlayerToken(tokens);
   note('player', 'starting over as somebody new');
-  window.location.reload();
+  void startOver().then(
+    () => window.location.reload(),
+    (refused: unknown) => note('player', `could not start over: ${String(refused)}`),
+  );
 }
 
 /**

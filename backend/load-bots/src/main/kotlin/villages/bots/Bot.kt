@@ -58,7 +58,9 @@ class Bot(
     @Synchronized
     fun opened() {
         trips.started(Trip.WELCOME, token, now())
-        say(ProtocolJson.encode(Hello(token, PROTOCOL_VERSION)))
+        // A bot plays as a player of its own, which only the instruments honour: a swarm measures a server that runs
+        // them open, and a sign-in for each of ten thousand bots would measure the accounts instead of the game.
+        say(ProtocolJson.encode(Hello(PROTOCOL_VERSION, playAs = token)))
     }
 
     @Synchronized

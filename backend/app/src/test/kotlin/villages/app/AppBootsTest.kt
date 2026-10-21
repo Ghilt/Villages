@@ -94,7 +94,7 @@ class AppBootsTest {
      * tests on one token would be one player, and whichever ran second would find a house already there.
      */
     private val arriving = "5e3a91c4-2b60-4f18-9d73-08ac1e6f5b27"
-    private val hello = """{"type":"hello","playerToken":"$token","protocolVersion":$PROTOCOL_VERSION}"""
+    private val hello = """{"type":"hello","playAs":"$token","protocolVersion":$PROTOCOL_VERSION}"""
     private val founding =
         """{"type":"command","commandId":"$founding1","command":{"type":"foundHouse","name":"Ravenscar",""" +
             """"seat":{"lat":59.33,"lon":18.07},""" +
@@ -107,7 +107,7 @@ class AppBootsTest {
     fun `a player arrives, takes one of the seats offered, and the house stands where it promised`() {
         val window = Window(port)
         window.say("""{"type":"watchEvents","on":true}""")
-        window.say("""{"type":"hello","playerToken":"$arriving","protocolVersion":$PROTOCOL_VERSION}""")
+        window.say("""{"type":"hello","playAs":"$arriving","protocolVersion":$PROTOCOL_VERSION}""")
         window.until("a choice") { frames -> frames.any { it is YourChoice } }
 
         val offered = window.last<YourChoice>().choice!!
@@ -166,7 +166,7 @@ class AppBootsTest {
         val keeper = "7d2e5f10-3c4b-4a8d-9e6f-1a2b3c4d5e6f"
         val window = Window(port)
         window.say("""{"type":"watchEvents","on":true}""")
-        window.say("""{"type":"hello","playerToken":"$keeper","protocolVersion":$PROTOCOL_VERSION}""")
+        window.say("""{"type":"hello","playAs":"$keeper","protocolVersion":$PROTOCOL_VERSION}""")
         window.until("the key figures") { frames -> frames.any { it is YourKeyFigures } }
         assertEquals(emptyList<KeyFigureView>(), window.last<YourKeyFigures>().keyFigures)
 
@@ -221,7 +221,7 @@ class AppBootsTest {
     fun `a speaker's death ends the dialogue they speak in, and the player is told it was lost, and why`() {
         val teller = "7d2e5f10-3c4b-4a8d-9e6f-1a2b3c4d5e70"
         val window = Window(port)
-        window.say("""{"type":"hello","playerToken":"$teller","protocolVersion":$PROTOCOL_VERSION}""")
+        window.say("""{"type":"hello","playAs":"$teller","protocolVersion":$PROTOCOL_VERSION}""")
         window.until("the dialogues") { frames -> frames.any { it is YourDialogues } }
 
         // Far from every other test's house, because they share one world and some of them count a cell.
@@ -264,7 +264,7 @@ class AppBootsTest {
         val wipers = "house:" + java.util.UUID.nameUUIDFromBytes("villages:house:$wiper".toByteArray())
         val first = Window(port)
         first.say("""{"type":"watchEvents","on":true}""")
-        first.say("""{"type":"hello","playerToken":"$wiper","protocolVersion":$PROTOCOL_VERSION}""")
+        first.say("""{"type":"hello","playAs":"$wiper","protocolVersion":$PROTOCOL_VERSION}""")
         first.until("a choice") { frames -> frames.any { it is YourChoice } }
         val offered = first.last<YourChoice>().choice!!
         first.say(
@@ -284,7 +284,7 @@ class AppBootsTest {
         // Arriving again, in a world with nothing in it: no house, and the founding choice afresh.
         val second = Window(port)
         second.say("""{"type":"watchEvents","on":true}""")
-        second.say("""{"type":"hello","playerToken":"$wiper","protocolVersion":$PROTOCOL_VERSION}""")
+        second.say("""{"type":"hello","playAs":"$wiper","protocolVersion":$PROTOCOL_VERSION}""")
         second.until("a choice again") { frames -> frames.any { it is YourChoice } }
 
         assertNull(second.last<YourHouse>().yours, "the house went with the world")
@@ -368,14 +368,14 @@ class AppBootsTest {
         // other test looks, because the world is one for every test here.
         val helsinki = Cell.of(60.17, 24.94).at(8).quadkey
         val looking = Window(port)
-        looking.say("""{"type":"hello","playerToken":"${UUID.randomUUID()}","protocolVersion":$PROTOCOL_VERSION}""")
+        looking.say("""{"type":"hello","playAs":"${UUID.randomUUID()}","protocolVersion":$PROTOCOL_VERSION}""")
         looking.until("a welcome") { frames -> frames.any { it is Welcome } }
         looking.say("""{"type":"fogOfWar","on":false}""")
         looking.say("""{"type":"subscribeCells","cells":["$helsinki"]}""")
         looking.until("a snapshot") { frames -> frames.any { it is Snapshot } }
 
         val founding = Window(port)
-        founding.say("""{"type":"hello","playerToken":"${UUID.randomUUID()}","protocolVersion":$PROTOCOL_VERSION}""")
+        founding.say("""{"type":"hello","playAs":"${UUID.randomUUID()}","protocolVersion":$PROTOCOL_VERSION}""")
         founding.until("a welcome") { frames -> frames.any { it is Welcome } }
         founding.say(
             """{"type":"command","commandId":"${UUID.randomUUID()}","command":{"type":"foundHouse","name":"Hollin",""" +

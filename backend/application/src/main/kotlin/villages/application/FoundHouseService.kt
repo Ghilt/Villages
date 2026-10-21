@@ -40,12 +40,3 @@ class FoundHouseService(
         )
     }
 }
-
-/** Anonymous tokens are the player's UUID as text, made in the browser. Anything else is refused. */
-object AnonymousTokens : PlayerTokens {
-    override fun playerOf(token: String): PlayerId =
-        PlayerId(
-            runCatching { java.util.UUID.fromString(token) }
-                .getOrElse { throw IllegalArgumentException("not a player token: $token") },
-        )
-}

@@ -40,7 +40,7 @@ class GatewaySavesSpec : StringSpec({
 
     fun window(rig: Rig): Pair<Gateway.Connection, MutableList<ServerFrame>> {
         val sent = mutableListOf<ServerFrame>()
-        return rig.gateway.connect { sent += it }.also { it.receive(hello) } to sent
+        return rig.connect { sent += it }.also { it.receive(hello) } to sent
     }
 
     "a save is made by the player who asked, and answered to that window with every save there is" {

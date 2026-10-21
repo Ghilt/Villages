@@ -67,7 +67,7 @@ class GatewayDialoguesSpec : StringSpec({
 
     "hello also says which dialogues the house has, after what it sees, which is none before it is offered any" {
         val sent = mutableListOf<ServerFrame>()
-        Rig().gateway.connect { sent += it }.receive(hello)
+        Rig().connect { sent += it }.receive(hello)
 
         sent[5] shouldBe YourDialogues(emptyList())
     }

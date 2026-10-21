@@ -28,7 +28,20 @@ beforeEach(() => {
     removeItem: (key: string) => kept.delete(key),
   });
   vi.stubGlobal('window', { location: { reload: vi.fn() } });
+  asked.length = 0;
+  vi.stubGlobal('fetch', (path: string, init?: RequestInit) => {
+    asked.push({
+      path,
+      body: init?.body === undefined ? undefined : (JSON.parse(String(init.body)) as unknown),
+    });
+    return Promise.resolve(
+      new Response(JSON.stringify({ player: null, house: null, guest: false, signIn: null })),
+    );
+  });
 });
+
+/** What the page asked the game server's `/auth`, in order: where, and what it sent. */
+const asked: { path: string; body: unknown }[] = [];
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -80,7 +93,6 @@ describe("the page's saves of the world", () => {
 
   it('loads a save and arrives anew as the player who made it, and a refused load changes nobody', async () => {
     const page = await arrived();
-    const was = localStorage.getItem('villages.playerToken');
     page.gateway.listSaves();
     expect(page.socket.sent.at(-1)).toEqual({ type: 'listSaves' });
     page.socket.says({ ...fixture('savesListed'), saved: null });
@@ -89,15 +101,17 @@ describe("the page's saves of the world", () => {
     page.socket.says({ type: 'error', code: 'saveRefused', message: 'there is no save called never-made' });
     page.gateway.loadSave('completed-many-quests');
     expect(page.socket.sent.at(-1)).toEqual({ type: 'loadSave', name: 'completed-many-quests' });
-    expect(localStorage.getItem('villages.playerToken')).toBe(was);
+    expect(asked).toEqual([]);
 
     page.socket.says({
       type: 'worldWiped',
       message: 'the world is the save completed-many-quests now, 412 events',
     });
 
-    expect(localStorage.getItem('villages.playerToken')).toBe('0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d');
-    expect(window.location.reload).toHaveBeenCalledOnce();
+    expect(asked).toEqual([
+      { path: '/auth/become', body: { player: '0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d' } },
+    ]);
+    await vi.waitFor(() => expect(window.location.reload).toHaveBeenCalledOnce());
   });
 
   it('lists the players of the world, and switching to one plays as them from the reload on', async () => {
@@ -112,7 +126,9 @@ describe("the page's saves of the world", () => {
 
     page.gateway.switchPlayer('094720f5-dff6-3fb6-a21e-e676e0455afd');
 
-    expect(localStorage.getItem('villages.playerToken')).toBe('094720f5-dff6-3fb6-a21e-e676e0455afd');
-    expect(window.location.reload).toHaveBeenCalledOnce();
+    expect(asked).toEqual([
+      { path: '/auth/become', body: { player: '094720f5-dff6-3fb6-a21e-e676e0455afd' } },
+    ]);
+    await vi.waitFor(() => expect(window.location.reload).toHaveBeenCalledOnce());
   });
 });

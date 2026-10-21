@@ -39,7 +39,7 @@ class SocketCrowdTest {
             client.execute(
                 object : TextWebSocketHandler() {
                     override fun afterConnectionEstablished(session: WebSocketSession) {
-                        session.sendMessage(TextMessage("""{"type":"hello","playerToken":"$token","protocolVersion":$PROTOCOL_VERSION}"""))
+                        session.sendMessage(TextMessage("""{"type":"hello","playAs":"$token","protocolVersion":$PROTOCOL_VERSION}"""))
                     }
 
                     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {

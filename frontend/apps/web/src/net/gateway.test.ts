@@ -95,10 +95,7 @@ describe("the page's conversation with the gateway", () => {
 
     expect(page.sent()).toEqual([]);
     page.socket.opens();
-    const token = page.gateway.sessionStore.get().playerToken;
-    expect(page.sent()).toEqual([
-      { type: 'hello', playerToken: token, protocolVersion: PROTOCOL_VERSION, master: 'terrain' },
-    ]);
+    expect(page.sent()).toEqual([{ type: 'hello', protocolVersion: PROTOCOL_VERSION, master: 'terrain' }]);
 
     page.socket.says(fixture('welcome'));
     expect(page.sent(1)).toEqual([{ type: 'subscribeCells', cells: Z8 }]);

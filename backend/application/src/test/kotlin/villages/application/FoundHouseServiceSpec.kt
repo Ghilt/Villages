@@ -81,9 +81,4 @@ class FoundHouseServiceSpec : StringSpec({
         started.correlationId shouldBe commandId
         started.commandId shouldBe commandId
     }
-
-    "an anonymous token is the player's id as text" {
-        AnonymousTokens.playerOf("0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d") shouldBe player
-        shouldThrow<IllegalArgumentException> { AnonymousTokens.playerOf("not-a-uuid") }
-    }
 })

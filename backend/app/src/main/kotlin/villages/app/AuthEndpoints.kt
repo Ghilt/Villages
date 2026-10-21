@@ -2,8 +2,12 @@ package villages.app
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import villages.accounts.Accounts
@@ -11,6 +15,8 @@ import villages.accounts.Keeping
 import villages.accounts.SignIn
 import villages.accounts.browserOf
 import villages.domain.HouseId
+import villages.domain.PlayerId
+import java.util.UUID
 
 /**
  * Who a browser is, over plain HTTP under `/auth`, which the page asks before it opens the socket: the socket's
@@ -20,7 +26,11 @@ import villages.domain.HouseId
  */
 @RestController
 @RequestMapping("/auth")
-class AuthEndpoints(private val accounts: Accounts, private val cookie: SignInCookie) {
+class AuthEndpoints(
+    private val accounts: Accounts,
+    private val cookie: SignInCookie,
+    @Value("\${villages.instruments:true}") private val instrumentsOpen: Boolean,
+) {
     /**
      * Who this browser is signed in as, or nobody. Asked at every load, which is what keeps a remembered sign-in's
      * cookie alive: given its lifetime again here at most once a day.
@@ -40,17 +50,52 @@ class AuthEndpoints(private val accounts: Accounts, private val cookie: SignInCo
     }
 
     /**
-     * A newcomer: a player of their own and a guest's sign-in for this browser. A browser has one sign-in, so one it
-     * had already is ended first.
+     * A newcomer: a player of their own and a guest's sign-in for this browser. A page that kept a player's id in local
+     * storage before there were sign-ins says it in `adopt`, and is made a guest of that same player once, so its house
+     * is still its own. A browser has one sign-in, so one it had already is ended first.
      */
     @PostMapping("/guest")
-    fun guest(request: HttpServletRequest, response: HttpServletResponse): Me {
-        cookie.read(request)?.let(accounts.signIns::find)?.let { accounts.signIns.end(it.id) }
-        val begun = accounts.newcomer(browserOf(request.getHeader("User-Agent")))
+    fun guest(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        @RequestBody(required = false) asked: GuestAsked?,
+    ): Me {
+        endThisBrowsers(request)
+        val browser = browserOf(request.getHeader("User-Agent"))
+        val old = asked?.adopt?.let { runCatching { PlayerId(UUID.fromString(it)) }.getOrNull() }
+        val begun = old?.let { accounts.adopt(it, browser) } ?: accounts.newcomer(browser)
         cookie.write(response, request, begun.secret, begun.signIn.keeping)
         return Me.of(begun.signIn, guest = true)
     }
+
+    /**
+     * Adam's instrument: this browser signed in as another player, which is how the debug panel switches player and
+     * arrives as the maker of a save it loaded. Refused while the instruments are closed.
+     */
+    @PostMapping("/become")
+    fun become(request: HttpServletRequest, response: HttpServletResponse, @RequestBody asked: BecomeAsked): ResponseEntity<Any> {
+        if (!instrumentsOpen) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(mapOf("refused" to "instrumentsClosed"))
+        }
+        val player = runCatching { PlayerId(UUID.fromString(asked.player)) }.getOrNull()
+            ?: return ResponseEntity.badRequest().body(mapOf("refused" to "notAPlayer"))
+        endThisBrowsers(request)
+        val begun = accounts.become(player, browserOf(request.getHeader("User-Agent")))
+        cookie.write(response, request, begun.secret, begun.signIn.keeping)
+        return ResponseEntity.ok(Me.of(begun.signIn, guest = true))
+    }
+
+    /** Ends the sign-in this browser's cookie names, if it names one: a browser has one sign-in at a time. */
+    private fun endThisBrowsers(request: HttpServletRequest) {
+        cookie.read(request)?.let(accounts.signIns::find)?.let { accounts.signIns.end(it.id) }
+    }
 }
+
+/** What a newcomer's page says: the player's id it kept in local storage before there were sign-ins, if it kept one. */
+data class GuestAsked(val adopt: String? = null)
+
+/** Which player the instruments would have this browser be. */
+data class BecomeAsked(val player: String)
 
 /** Who a browser is, as `/auth/me` answers it: a player and their house, or nobody at all. Times are milliseconds. */
 data class Me(val player: String?, val house: String?, val guest: Boolean, val signIn: SignInView?) {

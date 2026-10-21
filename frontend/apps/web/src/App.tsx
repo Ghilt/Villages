@@ -15,6 +15,7 @@ import { note } from './log/log';
 import { inspect } from './inspect/opening';
 import { WaterClicks } from './inspect/WaterClicks';
 import { RippleAlongWater } from './inspect/RippleAlongWater';
+import { signIn } from './net/auth';
 import { sessionStore, gateway } from './net/gateway';
 import { followMap } from './net/followMap';
 import { FOUNDING_ZOOM, arriving } from './house/arrival';
@@ -154,9 +155,10 @@ export function App({ master, devTools }: AppProps) {
     [drawn, catalogue, cultures, people, yours, yourChoice],
   );
 
-  // The one connection to the gateway, opened as the app mounts.
+  // The one connection to the gateway, opened as the app mounts, once the browser is signed in: the socket's
+  // handshake is what carries the sign-in to the game. See `net/auth.ts` and decision record 0109.
   useEffect(() => {
-    gateway(master);
+    void signIn().then(() => gateway(master));
   }, [master]);
 
   // The gateway follows the camera: the cells covering the view, at the view's own zoom.

@@ -6,7 +6,7 @@
  * Everything from the outside world arrives as an injected dependency.
  */
 
-export { PLAYER_TOKEN_KEY, becomePlayer, ensurePlayerToken, forgetPlayerToken } from './identity';
+export { PLAYER_TOKEN_KEY, forgetOldPlayerToken, oldPlayerToken } from './identity';
 export type { TokenStore } from './identity';
 
 export { connect } from './connection';

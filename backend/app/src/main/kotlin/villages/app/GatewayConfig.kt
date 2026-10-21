@@ -3,7 +3,6 @@ package villages.app
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import villages.application.AnonymousTokens
 import villages.application.Antarctica
 import villages.application.Faults
 import villages.application.ScheduledLater
@@ -56,7 +55,6 @@ class GatewayConfig {
         own: List<GatewayMechanic>,
         @Value("\${villages.instruments:true}") instruments: Boolean,
     ): Gateway = Gateway(
-        tokens = AnonymousTokens,
         faults = faults,
         houses = houses,
         clock = clock,

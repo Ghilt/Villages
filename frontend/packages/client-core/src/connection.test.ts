@@ -31,24 +31,30 @@ const token = '9f1c2b3a-4d5e-4f60-8a7b-1c2d3e4f5a6b';
 describe('the connection', () => {
   it('introduces itself as soon as the socket opens, and asks to watch events when told to', () => {
     const fake = fakeSocket();
-    connect({ socket: fake.socket, playerToken: token, protocolVersion: 1, watchEvents: true });
+    connect({ socket: fake.socket, playing: true, protocolVersion: 1, watchEvents: true });
 
     expect(fake.sent).toEqual([]);
     fake.gatewayOpens();
     expect(fake.sent).toEqual([
-      { type: 'hello', playerToken: token, protocolVersion: 1 },
+      { type: 'hello', protocolVersion: 1 },
       { type: 'watchEvents', on: true },
     ]);
   });
 
   it('says in hello which master the page draws, when it draws one, so the gateway sends its stands', () => {
     const fake = fakeSocket();
-    connect({ socket: fake.socket, playerToken: token, protocolVersion: 1, master: 'terrain2' });
+    connect({ socket: fake.socket, playing: true, protocolVersion: 1, master: 'terrain2' });
 
     fake.gatewayOpens();
-    expect(fake.sent).toEqual([
-      { type: 'hello', playerToken: token, protocolVersion: 1, master: 'terrain2' },
-    ]);
+    expect(fake.sent).toEqual([{ type: 'hello', protocolVersion: 1, master: 'terrain2' }]);
+  });
+
+  it('names a player to play as only when told to, which is how the seeder founds its houses', () => {
+    const fake = fakeSocket();
+    connect({ socket: fake.socket, playAs: token, protocolVersion: 1 });
+
+    fake.gatewayOpens();
+    expect(fake.sent).toEqual([{ type: 'hello', protocolVersion: 1, playAs: token }]);
   });
 
   it('says nothing about a player when there is none, so a viewer takes nobody over', () => {
@@ -73,9 +79,7 @@ describe('the connection', () => {
   it('hands decoded frames to whoever is listening', () => {
     const fake = fakeSocket();
     const heard: ServerFrame[] = [];
-    connect({ socket: fake.socket, playerToken: token, protocolVersion: 1 }).onFrame((frame) =>
-      heard.push(frame),
-    );
+    connect({ socket: fake.socket, playing: true, protocolVersion: 1 }).onFrame((frame) => heard.push(frame));
 
     fake.gatewaySays({
       type: 'welcome',
@@ -98,7 +102,7 @@ describe('the connection', () => {
     const fake = fakeSocket();
     const heard: ServerFrame[] = [];
     const problems: string[] = [];
-    const connection = connect({ socket: fake.socket, playerToken: token, protocolVersion: 1 });
+    const connection = connect({ socket: fake.socket, playing: true, protocolVersion: 1 });
     connection.onFrame((frame) => heard.push(frame));
     connection.onProblem((problem) => problems.push(problem));
 
@@ -112,7 +116,7 @@ describe('the connection', () => {
   it('refuses to send a frame that fails the schema', () => {
     const fake = fakeSocket();
     const problems: string[] = [];
-    const connection = connect({ socket: fake.socket, playerToken: token, protocolVersion: 1 });
+    const connection = connect({ socket: fake.socket, playing: true, protocolVersion: 1 });
     connection.onProblem((problem) => problems.push(problem));
 
     connection.send({ type: 'subscribeCells', cells: ['not-a-cell'] });
@@ -123,7 +127,7 @@ describe('the connection', () => {
 
   it('knows whether it is open', () => {
     const fake = fakeSocket();
-    const connection = connect({ socket: fake.socket, playerToken: token, protocolVersion: 1 });
+    const connection = connect({ socket: fake.socket, playing: true, protocolVersion: 1 });
 
     expect(connection.state()).toBe('connecting');
     fake.gatewayOpens();

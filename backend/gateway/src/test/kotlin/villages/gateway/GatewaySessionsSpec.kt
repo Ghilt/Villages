@@ -33,7 +33,7 @@ class GatewaySessionsSpec : StringSpec({
 
         // Arriving again, as a second window of the same player: everything the house has is said to it.
         val sent = mutableListOf<ServerFrame>()
-        rig.gateway.connect { sent += it }.receive(hello)
+        rig.connect { sent += it }.receive(hello)
 
         sent.map { it::class.simpleName }.take(8) shouldBe listOf(
             "Welcome", "YourHouse", "YourKeyFigures", "YourHoldings", "YourSight", "YourDialogues", "YourQuests", "YourChoice",
@@ -42,7 +42,7 @@ class GatewaySessionsSpec : StringSpec({
 
     "hello is answered with welcome, the house this player has, and the choice they have to make" {
         val sent = mutableListOf<ServerFrame>()
-        Rig().gateway.connect { sent += it }.receive(hello)
+        Rig().connect { sent += it }.receive(hello)
 
         sent.take(2) shouldBe listOf(
             Welcome(
@@ -60,7 +60,7 @@ class GatewaySessionsSpec : StringSpec({
 
     "and that choice offers three seats, in three different parts of the world" {
         val sent = mutableListOf<ServerFrame>()
-        Rig().gateway.connect { sent += it }.receive(hello)
+        Rig().connect { sent += it }.receive(hello)
 
         val choice = sent.filterIsInstance<YourChoice>().single().choice!!
         choice.options shouldHaveSize 3
@@ -76,7 +76,7 @@ class GatewaySessionsSpec : StringSpec({
         founder.disconnected()
         val sent = mutableListOf<ServerFrame>()
 
-        rig.gateway.connect { sent += it }.receive(hello)
+        rig.connect { sent += it }.receive(hello)
 
         sent.filterIsInstance<YourChoice>().single().choice shouldBe null
     }
@@ -89,22 +89,48 @@ class GatewaySessionsSpec : StringSpec({
         founder.disconnected()
         val sent = mutableListOf<ServerFrame>()
 
-        rig.gateway.connect { sent += it }.receive(hello)
+        rig.connect { sent += it }.receive(hello)
 
         val mine = sent.filterIsInstance<YourHouse>().last().yours?.house
         mine?.name shouldBe "Ravenscar"
         mine?.cell shouldBe STOCKHOLM_Z10
     }
 
-    "a client of another protocol version, or with no token, is told so and not welcomed" {
+    "a client of another protocol version, or playing as nobody that could be a player, is told so and not welcomed" {
         val sent = mutableListOf<ServerFrame>()
-        val connection = Rig().gateway.connect { sent += it }
+        val connection = Rig().connect { sent += it }
 
-        connection.receive("""{"type":"hello","playerToken":"$TOKEN","protocolVersion":${PROTOCOL_VERSION + 1}}""")
-        connection.receive("""{"type":"hello","playerToken":"nope","protocolVersion":$PROTOCOL_VERSION}""")
+        connection.receive("""{"type":"hello","protocolVersion":${PROTOCOL_VERSION + 1}}""")
+        connection.receive(helloAs("nope"))
         connection.receive("this is not json")
 
-        sent.map { it.shouldBeInstanceOf<ErrorFrame>().code } shouldBe listOf("protocolVersion", "playerToken", "unreadable")
+        sent.map { it.shouldBeInstanceOf<ErrorFrame>().code } shouldBe listOf("protocolVersion", "playAs", "unreadable")
+    }
+
+    "a window signed in to nobody is told so at hello, and not welcomed" {
+        val sent = mutableListOf<ServerFrame>()
+        Rig().gateway.connect { sent += it }.receive(hello)
+
+        sent.map { it.shouldBeInstanceOf<ErrorFrame>().code } shouldBe listOf("notSignedIn")
+    }
+
+    "a window plays as the player its sign-in is, which hello does not name" {
+        val sent = mutableListOf<ServerFrame>()
+        val player = UUID.randomUUID().toString()
+        Rig().connect(player) { sent += it }.receive(hello)
+
+        sent.filterIsInstance<Welcome>().single().playerId shouldBe player
+    }
+
+    "playing as somebody else is honoured while the instruments are open, and refused while they are closed" {
+        val somebody = UUID.randomUUID()
+        val open = mutableListOf<ServerFrame>()
+        Rig().connect { open += it }.receive(helloAs(somebody))
+        val closed = mutableListOf<ServerFrame>()
+        Rig(instrumentsOpen = false).connect { closed += it }.receive(helloAs(somebody))
+
+        open.filterIsInstance<Welcome>().single().playerId shouldBe somebody.toString()
+        closed.map { it.shouldBeInstanceOf<ErrorFrame>().code } shouldBe listOf("instrumentsClosed")
     }
 
     "wiping the world empties it and finishes every session, whoever asked" {
@@ -140,7 +166,7 @@ class GatewaySessionsSpec : StringSpec({
 
     "a command before hello is rejected, because nobody is speaking" {
         val sent = mutableListOf<ServerFrame>()
-        Rig().gateway.connect { sent += it }.receive(founding())
+        Rig().connect { sent += it }.receive(founding())
 
         sent.single() shouldBe CommandRejected(COMMAND_ONE, "notIntroduced")
     }

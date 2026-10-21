@@ -28,6 +28,16 @@ import { worktreeHere } from './vite/worktreePort.ts';
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 const tree = worktreeHere(REPO);
 
+// Where this tree's game server answers HTTP, which the dev server passes `/auth` through to, so the page talks to its
+// own address and the sign-in's cookie is the page's own: the game server's of the socket an explicit VITE_GATEWAY_URL
+// names, as the end-to-end test names its own, or else the tree's. See decision record 0109.
+const named = process.env['VITE_GATEWAY_URL'];
+const GAME =
+  named === undefined
+    ? `http://localhost:${tree.gamePort}`
+    : named.replace(/^ws/, 'http').replace(/\/ws$/, '');
+const SIGN_IN = { '/auth': { target: GAME } };
+
 export default defineConfig({
   // worldApi is the dev server's own answer to "what masters are there, and cut me that one", and worldFiles
   // sends the cut world itself, unwatched, because fifty thousand watched tiles slowed every answer;
@@ -78,5 +88,8 @@ export default defineConfig({
     // about rather than drifting silently onto a port somebody has bookmarked for something else.
     port: tree.port,
     strictPort: true,
+    proxy: SIGN_IN,
   },
+  // A built page served to be measured signs in the same way. See `performanceApi` and decision record 0106.
+  preview: { proxy: SIGN_IN },
 });

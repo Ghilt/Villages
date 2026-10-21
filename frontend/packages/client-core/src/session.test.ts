@@ -129,7 +129,7 @@ describe('the session, folded from what each mechanic folds', () => {
       closed: () => heard.push('closed'),
     });
 
-    session.connect({ socket: socket.socket, playerToken: 't', protocolVersion: 1, address: 'ws://here' });
+    session.connect({ socket: socket.socket, protocolVersion: 1, address: 'ws://here' });
     socket.opens();
     socket.says(welcome);
     socket.says({ type: 'worldWiped', message: 'the world was emptied' });
@@ -166,7 +166,7 @@ describe('the session, folded from what each mechanic folds', () => {
     expect(session.state()).toMatchObject({ seeAll: true, fogOfWar: false });
     expect(told).toBe(2);
 
-    session.connect({ socket: socket.socket, playerToken: 't', protocolVersion: 1, address: 'ws://here' });
+    session.connect({ socket: socket.socket, protocolVersion: 1, address: 'ws://here' });
     socket.opens();
     socket.says(welcome);
     expect(socket.sent.slice(1)).toEqual([
@@ -191,7 +191,7 @@ describe('the session, folded from what each mechanic folds', () => {
       arriveAnew: () => undefined,
       note: () => undefined,
     });
-    session.connect({ socket: socket.socket, playerToken: 't', protocolVersion: 1, address: 'ws://here' });
+    session.connect({ socket: socket.socket, protocolVersion: 1, address: 'ws://here' });
     socket.opens();
     session.inspect('house', 'kestrel');
     expect(socket.sent.some((frame) => frame.type === 'inspect')).toBe(false);
@@ -232,7 +232,7 @@ describe('the session, folded from what each mechanic folds', () => {
     session.inspectAt({ lat: 52.25, lon: 21 });
     expect(session.state().inspectedAt).toBeNull();
 
-    session.connect({ socket: socket.socket, playerToken: 't', protocolVersion: 1, address: 'ws://here' });
+    session.connect({ socket: socket.socket, protocolVersion: 1, address: 'ws://here' });
     socket.opens();
     socket.says(welcome);
     session.inspectAt({ lat: 52.25, lon: 21 });
@@ -264,7 +264,7 @@ describe('the session, folded from what each mechanic folds', () => {
     session.saveWorld('too-soon');
     expect(notes).toEqual([]);
 
-    session.connect({ socket: socket.socket, playerToken: 't', protocolVersion: 1, address: 'ws://here' });
+    session.connect({ socket: socket.socket, protocolVersion: 1, address: 'ws://here' });
     socket.opens();
     socket.says(welcome);
     session.saveWorld('first-test');
@@ -288,7 +288,7 @@ describe('the session, folded from what each mechanic folds', () => {
     session.listPlayers();
     expect(socket.sent).toEqual([]);
 
-    session.connect({ socket: socket.socket, playerToken: 't', protocolVersion: 1, address: 'ws://here' });
+    session.connect({ socket: socket.socket, protocolVersion: 1, address: 'ws://here' });
     socket.opens();
     socket.says(welcome);
     session.listSaves();

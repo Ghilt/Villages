@@ -44,8 +44,8 @@ class GatewaySendingSpec : StringSpec({
 
             // One window that takes every frame it is given, looking at Stockholm.
             val heard = CopyOnWriteArrayList<ServerFrame>()
-            val fast = rig.gateway.connect { heard += it }
-            fast.receive("""{"type":"hello","playerToken":"${UUID.randomUUID()}","protocolVersion":$PROTOCOL_VERSION}""")
+            val fast = rig.connect { heard += it }
+            fast.receive("""{"type":"hello","playAs":"${UUID.randomUUID()}","protocolVersion":$PROTOCOL_VERSION}""")
             fast.receive(fogOfWar(false))
             fast.receive(subscribe(STOCKHOLM_Z10))
             heard.waitFor("the fast window's snapshot") { frames -> frames.any { it is Snapshot } }
@@ -53,11 +53,11 @@ class GatewaySendingSpec : StringSpec({
             // And one that stops taking frames once it has arrived: whatever is sent to it then waits.
             val stuckHeard = CopyOnWriteArrayList<ServerFrame>()
             val stuck = AtomicBoolean(false)
-            val slow = rig.gateway.connect { frame ->
+            val slow = rig.connect { frame ->
                 if (stuck.get()) letGo.await()
                 stuckHeard += frame
             }
-            slow.receive("""{"type":"hello","playerToken":"${UUID.randomUUID()}","protocolVersion":$PROTOCOL_VERSION}""")
+            slow.receive("""{"type":"hello","playAs":"${UUID.randomUUID()}","protocolVersion":$PROTOCOL_VERSION}""")
             stuckHeard.waitFor("the slow window's choice") { frames -> frames.any { it is YourChoice } }
             stuck.set(true)
 
@@ -93,7 +93,7 @@ class GatewaySendingSpec : StringSpec({
         val held = mutableListOf<Runnable>()
         val rig = Rig(sendOn = { held += it })
         val sent = CopyOnWriteArrayList<ServerFrame>()
-        val window = rig.gateway.connect { sent += it }
+        val window = rig.connect { sent += it }
         window.receive(hello)
         window.receive(subscribe(STOCKHOLM_Z10))
         while (held.isNotEmpty()) held.removeAt(0).run()

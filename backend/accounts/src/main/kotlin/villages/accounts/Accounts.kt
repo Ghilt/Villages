@@ -31,6 +31,27 @@ class Accounts(
         return signIns.begin(player, Keeping.GUEST, browser)
     }
 
+    /**
+     * A browser that played before there were sign-ins, by the id it kept in local storage: made a guest of that same
+     * player, so the house it founded is still its own. Once only, and only for a player nobody is signed in as yet:
+     * every player signed in has a record, so a record already there refuses it, and null says so.
+     */
+    fun adopt(old: PlayerId, browser: String): Begun? {
+        if (!stores.players.add(PlayerRecord(old, clock.instant()))) {
+            return null
+        }
+        return signIns.begin(old, Keeping.GUEST, browser)
+    }
+
+    /**
+     * Adam's instrument, never a player's: this browser signed in as [player], whoever that is, which is how switching
+     * player and loading a save arrive as somebody else. The endpoint refuses it while the instruments are closed.
+     */
+    fun become(player: PlayerId, browser: String): Begun {
+        stores.players.add(PlayerRecord(player, clock.instant()))
+        return signIns.begin(player, Keeping.REMEMBERED, browser)
+    }
+
     /** Who [secret] is signed in as, used now, or null when it is no sign-in or one that has ended. */
     fun who(secret: String, cookie: Boolean = false): Who? {
         val signIn = signIns.find(secret) ?: return null

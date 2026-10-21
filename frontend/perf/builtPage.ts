@@ -1,5 +1,5 @@
 import { createReadStream, existsSync, statSync } from 'node:fs';
-import { createServer } from 'node:http';
+import { createServer, request as forward } from 'node:http';
 import { extname, join, normalize } from 'node:path';
 
 import { build } from 'vite';
@@ -11,7 +11,8 @@ import { freePort } from './devServer.ts';
  * the build first and the app's public folder behind it, where the world's tiles are. Building copies nothing of the
  * public folder - hundreds of megabytes of tiles - into the build, which is what a deploy would do and what this need
  * not. Nothing of the dev server's own answers is there, as on a built page; the page is told its game server is the
- * tool's.
+ * tool's, and `/auth` is passed through to it, as whatever serves the page to a player must, so it signs in at its own
+ * address (decision record 0109).
  */
 export interface BuiltPage {
   readonly url: string;
@@ -59,6 +60,19 @@ export async function builtPage(tree: string, into: string, gamePort: number): P
   };
   const server = createServer((request, response) => {
     const path = decodeURIComponent((request.url ?? '/').split('?')[0]!);
+    if (path.startsWith('/auth/')) {
+      const toGame = { port: gamePort, path: request.url, method: request.method, headers: request.headers };
+      const asked = forward(toGame, (answer) => {
+        response.writeHead(answer.statusCode ?? 502, answer.headers);
+        answer.pipe(response);
+      });
+      asked.on('error', () => {
+        response.statusCode = 502;
+        response.end();
+      });
+      request.pipe(asked);
+      return;
+    }
     // A path that is no file is the page, as a host serving a single-page app answers it.
     const file = fileFor(path) ?? (extname(path) === '' ? join(into, 'index.html') : null);
     if (file === null) {

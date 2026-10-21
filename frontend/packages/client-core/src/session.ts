@@ -46,8 +46,8 @@ export interface SessionPorts {
 }
 
 export interface ConnectOptions {
+  /** A socket whose handshake carries the browser's sign-in, which is who it plays as. See decision record 0109. */
   socket: SocketLike;
-  playerToken: string;
   protocolVersion: number;
   /** The master the page draws, said in hello so the gateway sends that world's stands. See 0067. */
   master?: string;
@@ -257,11 +257,10 @@ export function createSession(ports: SessionPorts): Session {
 
     connect: (options) => {
       if (connection !== null) return connection;
-      store.set({ playerToken: options.playerToken });
       for (const listener of listening) listener.connecting?.(options.address);
       connection = connect({
         socket: options.socket,
-        playerToken: options.playerToken,
+        playing: true,
         protocolVersion: options.protocolVersion,
         ...(options.master === undefined ? {} : { master: options.master }),
       });

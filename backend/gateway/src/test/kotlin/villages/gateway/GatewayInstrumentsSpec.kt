@@ -72,7 +72,7 @@ class GatewayInstrumentsSpec : StringSpec({
     "closed, the welcome does not say where the world is kept, and open it does" {
         fun welcomeFrom(rig: Rig): Welcome {
             val sent = mutableListOf<ServerFrame>()
-            rig.gateway.connect { sent += it }.receive(hello)
+            rig.connect { sent += it }.receive(hello)
             return sent.filterIsInstance<Welcome>().single()
         }
 
@@ -88,7 +88,7 @@ class GatewayInstrumentsSpec : StringSpec({
                 Unreadable(events = 3, of = 120, first = "a villages.house.founded.v1 on house:x (KotlinInvalidNullException)")
         }
         fun errorsAtHello(rig: Rig) = mutableListOf<ServerFrame>()
-            .also { sent -> rig.gateway.connect { sent += it }.receive(hello) }
+            .also { sent -> rig.connect { sent += it }.receive(hello) }
             .filterIsInstance<ErrorFrame>()
 
         val told = errorsAtHello(Rig(worldKept = oldShapes)).single()

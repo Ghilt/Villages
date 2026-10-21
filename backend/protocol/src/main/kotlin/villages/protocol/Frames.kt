@@ -21,7 +21,7 @@ import tools.jackson.databind.JsonNode
  * It goes up whenever a frame or a field changes, and `ProtocolShapeSpec` makes sure of that: every frame's shape
  * is recorded in contracts/protocol-v<n>.txt, and what each version changed is in contracts/README.md.
  */
-const val PROTOCOL_VERSION = 64
+const val PROTOCOL_VERSION = 65
 
 data class Point(val lat: Double, val lon: Double)
 
@@ -137,13 +137,15 @@ data class WorldNow(val today: Long, val earliest: Long)
 sealed interface ClientFrame
 
 /**
- * Who is playing, and which wire they speak. `master` is the world the page draws, by its name in the Debug map
- * section, so that the gateway sends that world's stands; left out, it sends none. The gateway checks it against
- * the masters it has stands for rather than trusting it as a name. See decision records 0025 and 0067.
+ * A window arriving to play, and which wire it speaks. Who it plays as is not said: the socket's handshake carried the
+ * browser's sign-in, and that is who (decision record 0109). `playAs` is the one exception, a player's id that the
+ * seeder and the swarm play as and that only Adam's instruments honour. `master` is the world the page draws, by its
+ * name in the Debug map section, so that the gateway sends that world's stands; left out, it sends none. The gateway
+ * checks it against the masters it has stands for rather than trusting it as a name. See decision records 0025 and 0067.
  */
 data class Hello(
-    val playerToken: String,
     val protocolVersion: Int,
+    @get:JsonInclude(JsonInclude.Include.NON_NULL) val playAs: String? = null,
     @get:JsonInclude(JsonInclude.Include.NON_NULL) val master: String? = null,
 ) : ClientFrame
 

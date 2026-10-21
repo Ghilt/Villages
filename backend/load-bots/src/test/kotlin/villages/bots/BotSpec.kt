@@ -57,7 +57,7 @@ class BotSpec : StringSpec({
     "says hello as a player of its own, on the protocol's version, and times the welcome" {
         val rig = Rig()
         rig.bot.opened()
-        rig.sent.single() shouldBe Hello(rig.bot.token, PROTOCOL_VERSION)
+        rig.sent.single() shouldBe Hello(PROTOCOL_VERSION, playAs = rig.bot.token)
 
         rig.clock += 40
         rig.bot.heard(server("welcome"))

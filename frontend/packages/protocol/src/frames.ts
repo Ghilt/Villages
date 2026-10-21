@@ -227,13 +227,13 @@ export const commandPayloadSchema = z.discriminatedUnion('type', [
 
 export const clientFrameSchema = z.discriminatedUnion('type', [
   /**
-   * Who is playing and which wire they speak, and the master the page draws, by its name, so the gateway sends
-   * that world's stands. Absent, it sends none. See decision records 0025 and 0067.
+   * A window arriving to play, and the master it draws, so the gateway sends that world's stands. Who it plays as is
+   * its sign-in, which the socket's handshake carried; `playAs` is the seeder's, honoured only by the instruments.
    */
   z.object({
     type: z.literal('hello'),
-    playerToken: z.string(),
     protocolVersion: z.number().int(),
+    playAs: z.string().optional(),
     master: z.string().optional(),
   }),
   z.object({ type: z.literal('subscribeCells'), cells: z.array(cellSchema) }),

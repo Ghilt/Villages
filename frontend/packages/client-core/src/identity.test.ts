@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { PLAYER_TOKEN_KEY, ensurePlayerToken, forgetPlayerToken } from './identity';
+import { PLAYER_TOKEN_KEY, forgetOldPlayerToken, oldPlayerToken } from './identity';
 import type { TokenStore } from './identity';
 
 function fakeStore(initial: Record<string, string> = {}): TokenStore & { contents: Record<string, string> } {
@@ -8,46 +8,25 @@ function fakeStore(initial: Record<string, string> = {}): TokenStore & { content
   return {
     contents,
     get: (key) => contents[key] ?? null,
-    set: (key, value) => {
-      contents[key] = value;
+    remove: (key) => {
+      delete contents[key];
     },
   };
 }
 
-describe('the player token', () => {
-  it('is created and kept when the store is empty', () => {
-    const store = fakeStore();
-
-    const token = ensurePlayerToken(store, () => 'first-token');
-
-    expect(token).toBe('first-token');
-    expect(store.contents[PLAYER_TOKEN_KEY]).toBe('first-token');
-  });
-
-  it('is reused on a later visit, so the same browser keeps the same house', () => {
-    const store = fakeStore({ [PLAYER_TOKEN_KEY]: 'kept-token' });
-
-    const token = ensurePlayerToken(store, () => {
-      throw new Error('a new token must not be generated when one is already stored');
-    });
-
-    expect(token).toBe('kept-token');
-  });
-
-  it('replaces a blank stored value rather than handing it out', () => {
-    const store = fakeStore({ [PLAYER_TOKEN_KEY]: '   ' });
-
-    const token = ensurePlayerToken(store, () => 'replacement');
-
-    expect(token).toBe('replacement');
-    expect(store.contents[PLAYER_TOKEN_KEY]).toBe('replacement');
-  });
-
-  it('is forgotten on request, so the next visit arrives as somebody new', () => {
+describe('the player a browser kept before there were sign-ins', () => {
+  it('is read as it was kept, and kept until it is forgotten', () => {
     const store = fakeStore({ [PLAYER_TOKEN_KEY]: 'the-old-player' });
 
-    forgetPlayerToken(store);
+    expect(oldPlayerToken(store)).toBe('the-old-player');
+    expect(oldPlayerToken(store)).toBe('the-old-player');
+    forgetOldPlayerToken(store);
+    expect(oldPlayerToken(store)).toBeNull();
+    expect(store.contents[PLAYER_TOKEN_KEY]).toBeUndefined();
+  });
 
-    expect(ensurePlayerToken(store, () => 'the-new-player')).toBe('the-new-player');
+  it('is nobody when the browser kept none, or kept a blank one', () => {
+    expect(oldPlayerToken(fakeStore())).toBeNull();
+    expect(oldPlayerToken(fakeStore({ [PLAYER_TOKEN_KEY]: '   ' }))).toBeNull();
   });
 });

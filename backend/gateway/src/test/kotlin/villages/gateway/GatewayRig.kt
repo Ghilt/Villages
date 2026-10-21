@@ -4,7 +4,6 @@ import villages.application.Catalogues
 import villages.application.Antarctica
 import villages.application.QuestService
 import villages.application.StructureService
-import villages.application.AnonymousTokens
 import villages.application.Arrival
 import villages.application.FaultBoard
 import villages.application.FoundHouseService
@@ -169,7 +168,6 @@ internal class Rig(
     private val antarctica = Antarctica(world, { RIG_CATALOGUE }, { noon }, worldClock)
 
     val gateway = Gateway(
-        tokens = AnonymousTokens,
         faults = faults,
         houses = houses,
         clock = Clock.fixed(noon, ZoneOffset.UTC),
@@ -280,6 +278,12 @@ internal class Rig(
         ),
     )
 
+    /**
+     * A window of the player of [token], signed in as them the way a browser's cookie signs its socket in at the
+     * handshake, so its hello needs to name nobody.
+     */
+    fun connect(token: String = TOKEN, out: Outbound): Gateway.Connection = gateway.connect(signedInAs(token), out)
+
     /** The choice a player is holding, as the gateway would send it. */
     fun pending(token: String = TOKEN) = choices.pendingOf(PlayerId(UUID.fromString(token)))?.choice
 
@@ -298,9 +302,9 @@ internal class Rig(
         master: String? = null,
     ): Pair<Gateway.Connection, MutableList<ServerFrame>> {
         val sent = mutableListOf<ServerFrame>()
-        val connection = gateway.connect { sent += it }
+        val connection = connect(token) { sent += it }
         val drawing = master?.let { ""","master":"$it"""" } ?: ""
-        connection.receive("""{"type":"hello","playerToken":"$token","protocolVersion":$PROTOCOL_VERSION$drawing}""")
+        connection.receive("""{"type":"hello","protocolVersion":$PROTOCOL_VERSION$drawing}""")
         if (fogLifted) {
             connection.receive(fogOfWar(false))
         }
@@ -319,10 +323,10 @@ internal class Rig(
      */
     fun someoneLeaving(vararg first: String): Gateway.Connection {
         var closing = false
-        val connection = gateway.connect {
+        val connection = connect(UUID.randomUUID().toString()) {
             if (closing) throw IllegalStateException("the WebSocket session has been closed")
         }
-        connection.receive("""{"type":"hello","playerToken":"${UUID.randomUUID()}","protocolVersion":$PROTOCOL_VERSION}""")
+        connection.receive(hello)
         first.forEach(connection::receive)
         closing = true
         return connection

@@ -19,7 +19,7 @@ class GatewayTimelineSpec : StringSpec({
         rig.aHouseIsFounded()
         val sent = mutableListOf<ServerFrame>()
 
-        rig.gateway.connect { sent += it }.receive(hello)
+        rig.connect { sent += it }.receive(hello)
 
         sent.first().shouldBeInstanceOf<Welcome>().world shouldBe WorldNow(today = today.day, earliest = today.day)
     }

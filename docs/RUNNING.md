@@ -284,8 +284,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   under the fog; Antarctica's sixteen are seen through it while the instruments are open. A new tab would take the player over from any other
   game tab. *Back* loads the page again rather than showing it as it was left: a page the browser restores from its
   back/forward cache has lost its connection, and would sit *closed* drawing nothing. The `found a house here` button in it sends a
-  real command and is how to make an event happen on purpose. The `restart` button beside `copy` forgets
-  this browser's player and reloads, so the opening can be tried again from nothing; the house the old
+  real command and is how to make an event happen on purpose. The `restart` button beside `copy` ends
+  this browser's sign-in, makes it a newcomer's, and reloads, so the opening can be tried again from nothing; the house the old
   player founded stays in the world, because events are never deleted. `wipe` beside it empties the world
   for everyone connected to it, and every window reloads and arrives anew, on a world opened again as at a start: its
   catalogues recorded and its house bots made. See `docs/adr/0036`.
@@ -297,9 +297,10 @@ stage alone, with none of the debug panel in it (decision record 0079).
   arrives anew on it, this one as the player who made it. The clock runs on, so a save a week old wakes seven
   months on. A save this code cannot read is listed and cannot be picked. Under it, the players of the world, every
   one with a house, by the house's name, this browser's marked `you`, the people first and the world's own after them
-  under **house bots** and how many there are, which the dropdown's hover says too: `switch` makes this browser the
-  one picked and reloads as them, which is how to look at a world from a seeded house's seat, or a bot's. See decision
-  records 0101 and 0108.
+  under **house bots** and how many there are, which the dropdown's hover says too: `switch` signs this browser in as
+  the one picked and reloads as them, which is how to look at a world from a seeded house's seat, or a bot's; `load`
+  arrives as a save's maker the same way, and both are refused while the instruments are closed. See decision records
+  0101, 0108 and 0109.
   What the log says is what was worth saying, through `note(area, message)` in `apps/web/src/log/log.ts`:
   moving the camera about writes nothing, and the cells a move brought back are counted and said in one line
   only when they carried something. `window.villagesPainterly()` gives the paint counters from a console.
@@ -1082,6 +1083,11 @@ and `-- --drop` takes them off; by hand only.
   `villages-signin` in the main checkout, so trees on the same machine never sign each other out. The browser's
   developer tools show it under Application, Cookies, `http://localhost`: HttpOnly, SameSite Lax, and four hundred
   days for a guest.
+- **The socket plays as the sign-in its handshake carries**: the page asks `/auth/me` as it loads and opens the socket
+  only once it knows, and a newcomer is made a guest first, so `hello` names nobody. A browser that kept a player in
+  local storage before there were sign-ins, `villages.playerToken`, is made a guest of that same player the first time,
+  house and all, and the key is gone from local storage after; the log says it under `player`. The seeder's twenty
+  houses play as players of their own through `playAs` in hello, which only the instruments honour.
 - **It is kept where the world is**: in the tree's own database, in the collections `signIns` and `players` beside
   `events`, when the world is kept in MongoDB, so a restart of the game server forgets no sign-in; in memory, and gone
   with the server, when the world is.

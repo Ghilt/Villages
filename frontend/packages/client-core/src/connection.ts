@@ -18,13 +18,16 @@ export type ConnectionState = 'connecting' | 'open' | 'closed';
 export interface ConnectionOptions {
   socket: SocketLike;
   /**
-   * Who is playing, or absent for a connection that is not playing at all.
+   * Whether this connection plays, saying hello as it opens: as whoever the browser is signed in as, which the
+   * socket's handshake carried (decision record 0109), or as [playAs] when that is given.
    *
-   * Without a token no hello is sent, and the gateway therefore knows of no player: nothing is founded,
-   * nothing is asked, and no session is taken over. That is what an event viewer is. A player plays from
-   * one place (decision 0028), and a watcher is not in that place.
+   * Not playing, no hello is sent, and the gateway therefore knows of no player: nothing is founded, nothing is
+   * asked, and no session is taken over. That is what an event viewer is. A player plays from one place (decision
+   * 0028), and a watcher is not in that place.
    */
-  playerToken?: string;
+  playing?: boolean;
+  /** A player to play as whoever the browser is signed in as: the seeder's, honoured only by the instruments. */
+  playAs?: string;
   protocolVersion: number;
   /** The master the page draws, said in hello so the gateway sends that world's stands. See 0067. */
   master?: string;
@@ -72,10 +75,10 @@ export function connect(options: ConnectionOptions): Connection {
 
   socket.onOpen(() => {
     state = 'open';
-    const playing = options.playerToken;
-    if (playing !== undefined) {
+    if (options.playing === true || options.playAs !== undefined) {
+      const as = options.playAs === undefined ? {} : { playAs: options.playAs };
       const drawing = options.master === undefined ? {} : { master: options.master };
-      send({ type: 'hello', playerToken: playing, protocolVersion: options.protocolVersion, ...drawing });
+      send({ type: 'hello', protocolVersion: options.protocolVersion, ...as, ...drawing });
     }
     if (options.watchEvents === true) send({ type: 'watchEvents', on: true });
     if (options.watchCatalogues === true) send({ type: 'watchCatalogues', on: true });

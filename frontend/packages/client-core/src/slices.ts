@@ -78,7 +78,6 @@ export interface SessionState {
   onTheMap: OnTheMapState;
   /** Where the world's clock stands, as welcome said, or null until it has. */
   world: { today: number; earliest: number } | null;
-  playerToken: string;
   /**
    * Whether this window has asked to see everything: every house in the cells it holds, whatever its
    * significance, which is Adam's switch and not the player's eye. Off at every load. See decision record 0038.
@@ -130,7 +129,7 @@ const forgottenWhenTakenOver =
 
 const SLICES = {
   connection: {
-    initial: { connection: 'connecting', playerId: undefined, world: null, playerToken: '' },
+    initial: { connection: 'connecting', playerId: undefined, world: null },
     onFrame: {
       welcome: (state, frame) => ({
         ...state,
@@ -140,7 +139,7 @@ const SLICES = {
       }),
     },
     onReset: (state, cause) => ({ ...state, connection: cause }),
-  } satisfies Slice<'connection' | 'playerId' | 'world' | 'playerToken'>,
+  } satisfies Slice<'connection' | 'playerId' | 'world'>,
 
   /** The cells followed and what is in them, which the map draws. Gone with any end: nobody is updating them. */
   cells: {

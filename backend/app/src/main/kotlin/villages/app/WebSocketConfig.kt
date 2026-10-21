@@ -1,13 +1,19 @@
 package villages.app
 
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.server.ServerHttpRequest
+import org.springframework.http.server.ServerHttpResponse
 import org.springframework.web.socket.CloseStatus
+import org.springframework.web.socket.WebSocketHandler
 import org.springframework.web.socket.TextMessage
 import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.config.annotation.EnableWebSocket
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 import org.springframework.web.socket.handler.TextWebSocketHandler
+import org.springframework.web.socket.server.HandshakeInterceptor
+import villages.application.SignedIn
+import villages.application.SignedInPlayers
 import villages.gateway.Gateway
 import villages.protocol.ProtocolJson
 import villages.protocol.ServerFrame
@@ -22,13 +28,43 @@ import kotlin.concurrent.withLock
  * on: the main checkout's dev server is on 5173 and every worktree's is on a port of its own, see decision
  * 0031. Any port, but only localhost: `*` would let any site a browser here visits open a socket to the game
  * server. GatewayOriginTest holds both halves.
+ *
+ * Who the socket plays as is read off its handshake, which carries the browser's sign-in cookie: see
+ * [SignedInAtTheHandshake].
  */
 @Configuration
 @EnableWebSocket
-class WebSocketConfig(private val gateway: Gateway) : WebSocketConfigurer {
+class WebSocketConfig(
+    private val gateway: Gateway,
+    private val signedIn: SignedInPlayers,
+    private val cookie: SignInCookie,
+) : WebSocketConfigurer {
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
-        registry.addHandler(GatewaySocket(gateway), "/ws").setAllowedOriginPatterns(OUR_PAGES)
+        registry.addHandler(GatewaySocket(gateway), "/ws")
+            .addInterceptors(SignedInAtTheHandshake(signedIn, cookie))
+            .setAllowedOriginPatterns(OUR_PAGES)
     }
+}
+
+/**
+ * Who the browser opening a socket is signed in as, read off the handshake's cookie and kept on the session for the
+ * gateway's connection: the one place a player comes from, because the page holds no secret it could send in hello.
+ * A handshake signed in to nobody still opens, for the pages that only watch; its hello is refused. See decision
+ * record 0109.
+ */
+internal class SignedInAtTheHandshake(private val signedIn: SignedInPlayers, private val cookie: SignInCookie) : HandshakeInterceptor {
+    override fun beforeHandshake(
+        request: ServerHttpRequest,
+        response: ServerHttpResponse,
+        handler: WebSocketHandler,
+        attributes: MutableMap<String, Any>,
+    ): Boolean {
+        cookie.read(request.headers)?.let(signedIn::signedIn)?.let { attributes[SIGNED_IN] = it }
+        return true
+    }
+
+    override fun afterHandshake(request: ServerHttpRequest, response: ServerHttpResponse, handler: WebSocketHandler, failed: Exception?) =
+        Unit
 }
 
 /**
@@ -50,7 +86,9 @@ class GatewaySocket(private val gateway: Gateway) : TextWebSocketHandler() {
 
     override fun afterConnectionEstablished(session: WebSocketSession) {
         session.attributes[SENDING] = ReentrantLock()
-        connections[session.id] = gateway.connect { frame -> session.sendUnlessGoing(frame) }
+        connections[session.id] = gateway.connect(session.attributes[SIGNED_IN] as? SignedIn) { frame ->
+            session.sendUnlessGoing(frame)
+        }
     }
 
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
@@ -111,3 +149,6 @@ private fun WebSocketSession.send(message: TextMessage) {
 
 /** The attribute a session's sending lock is kept under. */
 private const val SENDING = "villages.sending"
+
+/** The attribute who a session is signed in as is kept under, by [SignedInAtTheHandshake]. */
+private const val SIGNED_IN = "villages.signedIn"

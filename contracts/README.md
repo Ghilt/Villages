@@ -168,3 +168,7 @@ recorded over. See decision record 0037. What each one changed:
 - **64** - a moment in `challengeSimulated` names the buff or the debuff it put on or lifted, as `status`, with the new
   moments `buffed`, `debuffed` and `lifted`; `silenced` and `stopped` are gone, the first now the debuff `stunned`. See
   `docs/plans/challenge-matching.md`.
+- **65** - `hello` names nobody: who a window plays as is the sign-in its socket's handshake carried, a cookie the page
+  cannot read, so `playerToken` is gone. `playAs` is the one way left to name a player, honoured only while the
+  instruments are open, for the seeder and the swarm; refused `instrumentsClosed` otherwise, and `notSignedIn` for a
+  hello from a browser signed in to nobody. See decision record 0109.

@@ -5,6 +5,9 @@ import villages.protocol.Cell
 import villages.protocol.PROTOCOL_VERSION
 import java.time.Instant
 import java.util.UUID
+import villages.application.SignInId
+import villages.application.SignedIn
+import villages.domain.PlayerId
 import villages.application.VisionSource
 import villages.domain.VisionId
 
@@ -15,7 +18,20 @@ internal val noon = Instant.parse("2026-09-04T12:00:00Z")
 /** The twenty-fourth of June, year 1246: the world-day every test stands on. */
 internal val today = WorldTime(454901)
 internal const val TOKEN = "0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d"
-internal val hello = """{"type":"hello","playerToken":"$TOKEN","protocolVersion":$PROTOCOL_VERSION}"""
+
+/**
+ * A window arriving to play. It names nobody: the connection is signed in as whoever the rig's [Rig.connect] says, the
+ * way a browser's cookie signs its socket in at the handshake.
+ */
+internal val hello = """{"type":"hello","protocolVersion":$PROTOCOL_VERSION}"""
+
+/** Arriving as [player] whatever the connection is signed in as: the seeder's and the swarm's way, an instrument. */
+internal fun helloAs(player: Any) = """{"type":"hello","playAs":"$player","protocolVersion":$PROTOCOL_VERSION}"""
+
+/** A browser signed in as the player of [token], as its socket's handshake would say it. */
+internal fun signedInAs(token: String) =
+    SignedIn(PlayerId(UUID.fromString(token)), SignInId(UUID.nameUUIDFromBytes(token.toByteArray())))
+
 internal const val RAVENSCAR = "6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a"
 
 /** A command id is a UUID: it becomes the causation of what the command writes. See 0035. */

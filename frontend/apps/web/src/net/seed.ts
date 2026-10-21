@@ -11,8 +11,8 @@ import { GATEWAY_URL } from './address';
  *
  * A player founds one house and plays from one place (decision record 0028), so seeding a region cannot
  * be one session founding twenty times - that is one house and nineteen refusals. It is twenty players
- * with one house apiece, which is what seeding a world means anyway. Each opens a short connection with a
- * freshly made token, founds, and goes.
+ * with one house apiece, which is what seeding a world means anyway. Each opens a short connection playing as a
+ * freshly made player, which only the instruments honour (decision record 0109), founds, and goes.
  *
  * Deliberately the real path: hello, a command, the same schema checks as any other client, and no
  * privileged "found as anyone" frame that would exist only for this. It is also the shape the NPC houses
@@ -33,7 +33,7 @@ export function foundAsSomeoneNew(seedling: Seedling): Promise<boolean> {
     const socket = browserSocket(GATEWAY_URL);
     const connection = connect({
       socket,
-      playerToken: crypto.randomUUID(),
+      playAs: crypto.randomUUID(),
       protocolVersion: PROTOCOL_VERSION,
     });
 
