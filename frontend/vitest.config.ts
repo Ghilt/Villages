@@ -1,5 +1,15 @@
 import { defineConfig } from 'vitest/config';
 
+/**
+ * How long a test may run before it is called hung, twenty seconds, Adam's number of 2026-10-21, and a hook that
+ * readies one sixty, because a hook loads cold what the tests then share; Vitest's own are five and ten. The limit is
+ * there to catch a test that never ends, not to time one: how long the tests take is kept and charted by `check.ts
+ * --record` (decision record 0106). Every tree on this machine shares its cores, and another tree's end-to-end test
+ * draws the game in software on nine of them, which made a test of two seconds take six and fail for no fault of its
+ * own, six of them in one run on 2026-10-21. See docs/TESTING.md.
+ */
+const PATIENCE = { testTimeout: 20_000, hookTimeout: 60_000 };
+
 export default defineConfig({
   test: {
     projects: [
@@ -8,6 +18,7 @@ export default defineConfig({
           name: 'protocol',
           root: 'packages/protocol',
           environment: 'node',
+          ...PATIENCE,
           include: ['src/**/*.test.ts'],
         },
       },
@@ -16,6 +27,7 @@ export default defineConfig({
           name: 'client-core',
           root: 'packages/client-core',
           environment: 'node',
+          ...PATIENCE,
           include: ['src/**/*.test.ts'],
         },
       },
@@ -24,6 +36,7 @@ export default defineConfig({
           name: 'world',
           root: 'packages/world',
           environment: 'node',
+          ...PATIENCE,
           // `bin/` too: how the tools treat a link, and what the world cache files a step under, are rules
           // every tree's world depends on rather than details of a tool.
           include: ['src/**/*.test.ts', 'bin/**/*.test.ts'],
@@ -34,6 +47,7 @@ export default defineConfig({
           name: 'web',
           root: 'apps/web',
           environment: 'node',
+          ...PATIENCE,
           // The stylesheets are read as text by the checks - the component library's, and the folder rule's,
           // which follows a stylesheet's imports - and Vitest hands any stylesheet it is not told about over
           // as an empty string, `?raw` or not.
@@ -49,6 +63,7 @@ export default defineConfig({
           name: 'perf',
           root: 'perf',
           environment: 'node',
+          ...PATIENCE,
           include: ['**/*.test.ts'],
         },
       },
@@ -58,6 +73,7 @@ export default defineConfig({
           name: 'tools',
           root: 'tools',
           environment: 'node',
+          ...PATIENCE,
           include: ['**/*.test.ts'],
         },
       },

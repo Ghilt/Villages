@@ -62,14 +62,17 @@ describe('the renders page', () => {
   it('is the land of each square inside it, and the open sea between', () => {
     const layout = rendersLayout(PALETTE.classes, GROUPS, 8);
     const classAt = classAtOf(layout);
+    // Made once: the paint's is a grid of the whole page, which made once a square was most of this test's time.
+    const squareAt = squareAtOf(layout);
+    const paintedClassAt = paintedClassAtOf(layout);
     for (const square of squaresOf(layout)) {
       expect(classAt(square.x + SQUARE / 2, square.y + SQUARE / 2)).toBe(square.id);
       expect(classAt(square.x + 0.01, square.y + SQUARE - 0.01)).toBe(square.id);
       expect(classAt(square.x - 0.5, square.y + SQUARE / 2)).toBe(BETWEEN);
-      expect(squareAtOf(layout)(square.x + 1, square.y + 1)).toBe(square);
-      expect(squareAtOf(layout)(square.x - 0.5, square.y + 1)).toBeNull();
+      expect(squareAt(square.x + 1, square.y + 1)).toBe(square);
+      expect(squareAt(square.x - 0.5, square.y + 1)).toBeNull();
       // The paint sees the square's own land a little past its edge, so it paints no shore there.
-      expect(paintedClassAtOf(layout)(square.x - 0.5, square.y + SQUARE / 2)).toBe(square.id);
+      expect(paintedClassAt(square.x - 0.5, square.y + SQUARE / 2)).toBe(square.id);
     }
   });
 

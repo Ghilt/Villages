@@ -46,6 +46,16 @@ Every increment lands with the test that proves it. The tests are the reason we 
   gateway module over `fakeSocket()` from `@villages/client-core/testing`, which keeps every handler it is given
   as a browser's socket does, and it does not change when the code under it moves: a move that changes it has
   changed the conversation.
+- A test fails for what it found, never for a busy machine. Every tree here shares its cores, and another tree's
+  end-to-end test draws the game in software on nine of them: on 2026-10-21 that made a test of two seconds take six,
+  and the check red six times in one run for no fault. So each project of the frontend's tests gives a test twenty
+  seconds, Adam's number of 2026-10-21, and a hook sixty, because a hook loads cold what the tests then share
+  (`PATIENCE` in `frontend/vitest.config.ts`, held by `frontend/tools/patience.test.ts`), where Vitest's own are five
+  and ten: long enough that only a hung test runs out. How long the tests take is not
+  their limit's to say; it is kept and charted by `check.ts --record` (decision record 0106). With eighteen of the
+  machine's twenty threads kept busy, the slowest test took six seconds. A test that loads a great deal fresh for
+  every case loads it once first in a `beforeAll`, on a hook's time, as `stage/phone.test.ts` does, and a lookup a
+  test asks of many times is made once, not once a case.
 - MapLibre and Pixi are never instantiated in unit tests. Their maths is pure and tested directly; their pixels get
   one end-to-end smoke test.
 - A test that needs Docker says so in its name, and is skipped with a clear message when Docker is absent.

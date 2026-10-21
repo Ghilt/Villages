@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SETTINGS_PANE } from '../account/pane';
 import { HOUSE_PANE } from '../house/pane';
@@ -29,6 +29,10 @@ async function fresh() {
 
 const KETTLEBY = { kind: 'house', id: 'kettleby' } as const;
 const TAGUS = { kind: 'river', id: 'tagus' } as const;
+
+// The stage and every pane loaded once, on a hook's time, before any test loads them fresh: cold, that load was
+// most of the first test's time, and twenty-five seconds of it with the machine's cores busy. See vitest.config.ts.
+beforeAll(() => fresh());
 
 beforeEach(() => {
   vi.resetModules();
