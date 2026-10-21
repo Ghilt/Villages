@@ -165,6 +165,14 @@ little towards the eye, and its walls hide what falls behind them. Whether a spr
 disappears into the painted forest is a question for the eye. How to hand one over is `AUTHORING-THE-ART.md`; why it works this way is
 decision record 0059.
 
+**A picture in a diorama.** Where a piece of the world is shown apart from the map - a challenge's venue - it is
+seen as the map sees it, from the south and above, and built from the map's own pictures standing on their feet in
+front of what is behind them. **A figure is turned toward us or across, never away**: it is drawn once, facing
+south-east, and turned the other way by mirroring, so two sides facing off stand on the left and the right, each turned
+three-quarters toward us, and never one above the other, where the near one would show its back. Held wide the two
+banks are wide; held deep they are deep, the ranks one behind another up the screen. **A building is never mirrored**,
+because its light would move to the upper left. Decision record 0116.
+
 **What is selected stands in a ring of light.** Close in, a line of warm light lies on the ground round what was
 picked - a building's footprint, a person's patch of ground - a circle on the ground squashed as the ground is, under the
 building and under the trees standing in front of it, with a thin edge of ink so it still reads on gold ground. Round

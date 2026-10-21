@@ -1247,13 +1247,30 @@ the choice is.
 
 ### Look and feel
 
-Not designed: there is no pane yet. The spectacle is the one thing settled - resolved at once and played out,
-so the player sees what happened and why, the way a report card shows the scoring of a level.
+Resolved at once and played out, so the player sees what happened and why. **It is played out in a diorama**: a
+small piece of the world seen as the map sees it, from the south and above, built from the map's own pictures, where
+the summons stand, act and fall and the tug is drawn on the ground. Each kind of challenge has a **venue** of its own,
+and the first is **the square**: a sermon in a town square, each house's speaker on a platform at the back of its bank
+and the townsfolk between them, who walk over to whoever is winning them - so the tug is a share of the crowd, and a
+swing is people crossing the square.
+
+**Each house holds a bank**, left or right, turned three-quarters toward us, so no figure is ever seen from behind.
+Held wide the stage is wide; held deep, on a tall screen, the same banks are deep, the ranks one behind another.
+
+**Round it, everything folds away.** Each house's slices are chips in its tray along the bottom, lit while their
+aspect matches, dim while nothing they carry can work, with the pips of what they bear; tap one and it opens to say
+what each of its effects needs and whether it works now, tap the house's name and the tray folds to it. The tug is a
+bar at the top in the two houses' colours, and under it the happening of the moment and whom it lights. Along the
+bottom the replay: play and pause, its pace, to the end, the happenings as bands with the tug drawn over them, and a
+scrub to any second. The history, the tug second by second and what happened in the second shown, opens behind a
+mark. Every control is a mark. Decision record 0116 is the shape; the steps are in `docs/plans/challenge-spectacle.md`.
 
 ### Not decided
 
 - **Who raises a challenge, and when**: a battle over a structure, a debate a dialogue starts, a rival.
-- **The pane and the spectacle**: how a challenge is shown to the player, and how a side chooses its slices.
+- **The pane**: where a player watches a challenge in the game, and how a side chooses its slices. The spectacle
+  itself is designed, above.
+- **The other venues**: a ford, a siege, a trial were drawn; which kind is shown in which, and how many there are.
 - **How a house comes by slices**: every house starts with the same one, and others are unlocked "in different
   ways" that are not named yet.
 - **What damage and fatigue do in the world** beyond the number, and how either is mended.
@@ -1270,7 +1287,9 @@ second, with all thirty effects, and buildings and people put on the line. On th
 both sides and a progression, or has one drawn from a challenge kind, has the engine fight them out through one of his instruments, and reads every moment of
 it, the tug drawn, and what it came to; a seed fights the same challenge again, and a batch of a hundred or ten
 thousand says how often each side wins; a grid of matchups weighs every aspect against every other. Decision record 0107 is the shape and
-`docs/plans/challenges.md` the rules as settled and the steps, one commit each.
+`docs/plans/challenges.md` the rules as settled and the steps, one commit each. Its second part, matching aspect with
+buffs and debuffs, is built too, in `docs/plans/challenge-matching.md`. The spectacle, the square watched on the same
+page, is planned on 2026-10-21 in `docs/plans/challenge-spectacle.md`, and none of it is built.
 
 ---
 

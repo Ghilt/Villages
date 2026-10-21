@@ -35,9 +35,9 @@ character dialogue; the UI component library is built and waiting on Adam's eye,
 and so is the origin map, the first of real names on the edited world. Structures are planned and not
 started; the world cache is built and waiting on Adam's eye; quests are built and on main, waiting on Adam's
 eye for their experiment; catalogues are built and waiting on Adam's eye; ruined cities are planned and not
-started; worked ground is planned and not started; challenges are planned and not started; settlements and roads are
-built and on main; and houses, bridges and the road render, the newest, are built and on main, the Roads renderer
-waiting on Adam's eye.
+started; worked ground is planned and not started; challenges are built on their admin page and on main, and their
+spectacle is planned and not started; settlements and roads are built and on main; and houses, bridges and the road
+render, the newest, are built and on main, the Roads renderer waiting on Adam's eye.
 
 - **Characters and key figures**: the people of the world, each with a history of their own, and the
   house's tie to the few it acts through, shown in a pane in the corner beside the house status. The shape
@@ -189,13 +189,16 @@ waiting on Adam's eye.
   in `docs/plans/worked-ground.md`; all eight are built, every building standing in its yard on the map, no tree on
   it, paths between near ones, and its shadow cast from its base (decision record 0105). Asked for by Adam on
   2026-10-18.
-- **Challenges**: two sides measuring their strength against each other - a battle, a debate, a trade war, a
-  sermon - each bringing slices that pull one tug of war from -100 to +100 over a progression of happenings, ten
-  aspects in five pairs deciding which slice stands forward and which is boosted; resolved at once and played
-  back as a spectacle. Its first iteration is not in the game: an engine on the server and a simulator on
+- **Challenges**: two sides measuring their strength against each other - a sermon, a debate, a trade war, a
+  battle - each bringing slices that pull one tug of war from -100 to +100 over a progression of happenings, ten
+  aspects in five pairs deciding which slices match and are boosted; resolved at once and played back as a
+  spectacle. Its first iteration is not in the game: an engine on the server and a simulator on
   `/admin/inspect-challenges`, where Adam builds slices, runs them and tunes the numbers. The shape is decision
-  record 0107, and the rules as settled and the steps, one commit each, are in `docs/plans/challenges.md`; none is
-  built. Adam's own mechanic, planned with him on 2026-10-20.
+  record 0107; the rules and the steps are in `docs/plans/challenges.md` and `docs/plans/challenge-matching.md`, all
+  built and on main. The spectacle - the challenge played out in a diorama seen as the map is, the square first, the
+  townsfolk walking to whoever is winning them - is decision record 0116 and twelve steps in
+  `docs/plans/challenge-spectacle.md`; none is built. Adam's own mechanic, planned with him on 2026-10-20, its
+  spectacle on 2026-10-21.
 - **House bots**: the world begins populated, with a few hundred houses whose player is the world itself, each
   standing outside the ruin of a town of 1790 and named after it, made at every opening - as the server starts,
   after a wipe, after a load - and never twice. In this first version they never act; their AI waits on the
