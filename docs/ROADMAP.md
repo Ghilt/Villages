@@ -247,7 +247,10 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
 - **Neighbours**: awareness of nearby houses, and the first thing two houses can do to each other.
 - **The workbench**: the desk the map lies on becomes a place, with the house's papers on it and the map a
   quarter of it, hovered and scrolled into. The same camera; see experiment 0003.
-- **Accounts** behind the identity port.
+- **Accounts** behind the identity port: a newcomer plays at once as a guest behind a sign-in the server keeps,
+  and creates an account later with an email and a password, or Google or Discord, keeping the house; the email
+  verified, a remember me that outlasts the browser, a settings mark and its menu, and the instruments opened to
+  Adam alone at the end. Thirteen steps in `docs/plans/accounts.md`, planned 2026-10-21.
 - **World persistence**, after which the event store is never wiped and event changes need upcasters.
 - **The biome sprite map**: the first half of the world-generator, and the half that needs nothing said
   about people. A program that reads the master, decides what kind of place every part of the world is,
