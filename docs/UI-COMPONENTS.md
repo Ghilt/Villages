@@ -268,7 +268,8 @@ A line each: what it is for, its variants, and where on the page it is.
   word of 2026-10-15, `deliver`, `pledge`, `collect` and `quests`, drawn placeholders too; and the marks a pane is
   known by, named for the pane, the game's own drawings: `house`, `figures`, `letter`, `dialogues`, `map` and
   `recent`, the clock turned back that the trail is known by; and the rest a window's subject is known by,
-  `area`, `river`, `lake` and `sea`. *Marks and readouts*.
+  `area`, `river`, `lake` and `sea`; and `settings`, the gear that opens what is not the game's, a mark on Adam's
+  word of 2026-10-21, a drawn placeholder until `world/ui/marks/settings` is painted. *Marks and readouts*.
 - **`TextButton`**, `ui/button/Button.tsx`: words on a face that stretches between its end caps to fit
   them. `face` is a picture in `world/ui/controls/`, `primary` unless it says otherwise; `size` is `small`,
   `regular` or `large`, 32, 44 or 60 pixels tall. *Buttons*.

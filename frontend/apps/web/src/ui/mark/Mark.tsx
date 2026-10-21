@@ -314,6 +314,21 @@ const DRAWN = {
       />
     </>
   ),
+  // The settings, which are not the game's: a wheel of eight square teeth round a hole, as a clockmaker's gear.
+  settings: (
+    <>
+      <circle cx="12" cy="12" r="6.2" className="ui-mark__line" />
+      <circle cx="12" cy="12" r="2.4" className="ui-mark__line" />
+      {[0, 45, 90, 135].map((turn) => (
+        <path
+          key={turn}
+          d="M10.6 5.8 V2.9 H13.4 V5.8 M10.6 18.2 V21.1 H13.4 V18.2"
+          transform={`rotate(${turn} 12 12)`}
+          className="ui-mark__line"
+        />
+      ))}
+    </>
+  ),
   // A glass and its handle, the moodboard's search: the handle to the bottom right, as it is held.
   search: (
     <>
