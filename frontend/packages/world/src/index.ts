@@ -66,6 +66,26 @@ export type { OriginFile, OriginGrid, WhereFrom } from './originFile.ts';
 export { namesAt } from './names.ts';
 export { RUIN_PIECES } from './ruins.ts';
 export type { RuinPieceName, RuinsLook, RuinsMapFile } from './ruins.ts';
+export {
+  BRIDGE_AXES,
+  BRIDGE_KINDS,
+  JETTY_AXES,
+  PIECE_SIDES,
+  SETTLEMENT_PIECES,
+  bridgeKey,
+  jettyKey,
+  settlementPieceKey,
+} from './settlementLooks.ts';
+export type { BridgeAxis, BridgeKind, JettyAxis, SettlementPiece } from './settlementLooks.ts';
+export {
+  SETTLEMENT_TYPES,
+  inSquare,
+  isASettlement,
+  onStreet,
+  settlementSquare,
+  streetEnds,
+} from './settlements.ts';
+export type { SettlementSquare, SettlementType } from './settlements.ts';
 export { ruinFrameKey } from './ruinLooks.ts';
 export { CULTURES, STRUCTURE_RESOURCES, parseStructureCatalogue } from './structures.ts';
 export { RARITIES, parseBalance } from './balance.ts';

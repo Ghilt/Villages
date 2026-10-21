@@ -27,6 +27,7 @@ const PINS = 'structures/';
 export function Pictures() {
   const scenery = useAtlas('scenery');
   const structures = useAtlas('structures');
+  const settlements = useAtlas('settlements');
   const critters = useAtlas<CritterAtlas>('critters');
   const marks = useJson<{ marks: { key: string; placeholder: boolean }[] }>('/sprite-marks/');
   const portraits = useJson<{ portraits: string[] }>('/portraits/');
@@ -60,6 +61,16 @@ export function Pictures() {
           <Missing what="world:structures" />
         ) : (
           structures !== null && <StructuresTable atlas={structures} />
+        )}
+      </Section>
+      <Section
+        title="settlements and bridges"
+        source="world/sprites/settlements/ and world/sprites/bridges/, cut to public/art/settlements.webp"
+      >
+        {settlements === 'missing' ? (
+          <Missing what="world:structures" />
+        ) : (
+          settlements !== null && <AtlasGrid name="settlements" atlas={settlements} />
         )}
       </Section>
       <Section title="critters" source="world/sprites/critters/, cut to public/art/critters.webp">

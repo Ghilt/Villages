@@ -21,6 +21,13 @@ export interface StructureFrame {
   flagY: number;
   /** Where it stands on the ground across its width, as a fraction from the left: the front corner of its base. */
   footX: number;
+  /**
+   * Where it stands down its height, as a fraction from the top, for a picture that does not stand on its bottom edge:
+   * a bridge, on the middle of its deck between its two ends. Absent for one that stands on its bottom.
+   */
+  footY?: number;
+  /** How many world units it stands, for a picture cut at a scale rather than to one height: a settlement's pieces. */
+  tall?: number;
   /** Still the placeholder drawn for it, not a picture painted over it. */
   placeholder: boolean;
   /** The file it was cut from, under `world/sprites/structures/`. */
@@ -115,6 +122,26 @@ export function footOfBuilding(image: Rgba): number {
     }
   }
   return sum / weight / image.width;
+}
+
+/**
+ * Where a bridge stands: on the ground under the middle of its deck, halfway between where its two ends meet the banks
+ * - the lowest solid pixel at its leftmost columns and at its rightmost - as fractions of its width and its height. A
+ * bridge reads the same from either end, so its ends rest on the ground alike. See docs/plans/settlements-and-roads.md.
+ */
+export function footOfBridge(image: Rgba): { x: number; y: number } {
+  const solid = (x: number, y: number) => image.data[(y * image.width + x) * 4 + 3]! > 127;
+  const end = (from: number, step: number): { x: number; y: number } => {
+    for (let x = from; x >= 0 && x < image.width; x += step) {
+      for (let y = image.height - 1; y >= 0; y -= 1) {
+        if (solid(x, y)) return { x: x + 0.5, y: y + 1 };
+      }
+    }
+    return { x: image.width / 2, y: image.height };
+  };
+  const left = end(0, 1);
+  const right = end(image.width - 1, -1);
+  return { x: (left.x + right.x) / 2 / image.width, y: (left.y + right.y) / 2 / image.height };
 }
 
 /** A whole image blurred, along its rows and then down its columns, twice over each. */

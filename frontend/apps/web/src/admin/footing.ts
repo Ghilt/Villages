@@ -58,3 +58,52 @@ export function footingOf(height: number, aspect: number, foot: number, side: nu
     box: { x: left, y: top, width: Math.max(...xs) - left, height: Math.max(...ys) - top },
   };
 }
+
+/** The four ways a bridge lies on the lattice, as steps along its two axes: either axis, or either diagonal. */
+const AXES: Readonly<Record<'u' | 'v' | 'uv' | 'vu', readonly [number, number]>> = {
+  u: [1, 0],
+  v: [0, 1],
+  uv: [Math.SQRT1_2, Math.SQRT1_2],
+  vu: [Math.SQRT1_2, -Math.SQRT1_2],
+};
+
+/**
+ * A bridge [height] world units tall, [aspect] times as wide, standing at [footX] across its picture and [footY] down
+ * it, over the diamonds a deck [span] units long lies on along [axis], its middle at the origin: so it can be seen to
+ * lie along its diamonds or not.
+ */
+export function bridgeFootingOf(
+  axis: keyof typeof AXES,
+  span: number,
+  height: number,
+  aspect: number,
+  footX: number,
+  footY: number,
+): Footing {
+  const [du, dv] = AXES[axis];
+  const diamonds: Point[][] = [];
+  const reach = Math.ceil(span);
+  for (let u = -reach; u < reach; u += 1) {
+    for (let v = -reach; v < reach; v += 1) {
+      const along = (u + 0.5) * du + (v + 0.5) * dv;
+      const across = (u + 0.5) * dv - (v + 0.5) * du;
+      if (Math.abs(along) <= span / 2 + 0.25 && Math.abs(across) <= 0.75) {
+        diamonds.push([onScreen(u + 1, v + 1), onScreen(u, v + 1), onScreen(u, v), onScreen(u + 1, v)]);
+      }
+    }
+  }
+  const half = span / 2;
+  const outline = [onScreen(-half * du, -half * dv), onScreen(half * du, half * dv)];
+  const width = height * aspect;
+  const picture = { x: -footX * width, y: -footY * height, width, height };
+  const xs = [...diamonds.flat().map((p) => p.x), picture.x, picture.x + width];
+  const ys = [...diamonds.flat().map((p) => p.y), picture.y, picture.y + height];
+  const left = Math.min(...xs);
+  const top = Math.min(...ys);
+  return {
+    diamonds,
+    outline,
+    picture,
+    box: { x: left, y: top, width: Math.max(...xs) - left, height: Math.max(...ys) - top },
+  };
+}

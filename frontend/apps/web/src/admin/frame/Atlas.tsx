@@ -10,6 +10,10 @@ export interface Frame {
   readonly source: string;
   /** Where a building stands across its picture, as a fraction of its width: the structures' atlas alone says. */
   readonly footX?: number;
+  /** Where a bridge stands down its picture, as a fraction of its height: the settlements' atlas says. */
+  readonly footY?: number;
+  /** How many world units it stands, for a picture cut at a scale: the settlements' atlas says. */
+  readonly tall?: number;
 }
 
 /** An atlas the tools cut, `public/art/<name>.json` beside its `.webp`, as much of it as the pages read. */
@@ -28,12 +32,13 @@ export interface Atlas {
 const CUT: Readonly<Record<string, string>> = {
   scenery: 'villages:art-cut',
   structures: 'villages:structures-cut',
+  settlements: 'villages:structures-cut',
   critters: 'villages:critters-cut',
 };
 
 /** The atlas `public/art/<name>.json` names, read again whenever the dev server cuts it again. */
 export function useAtlas<A extends Atlas = Atlas>(
-  name: 'scenery' | 'structures' | 'critters',
+  name: 'scenery' | 'structures' | 'settlements' | 'critters',
 ): A | null | 'missing' {
   return useJson<A>(`/art/${name}.json`, CUT[name]);
 }

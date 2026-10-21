@@ -102,6 +102,14 @@ export const ARTIFACTS: readonly Artifact[] = [
     what: 'A picture of every type of structure in every culture, and its ruin: placeholders until painted over.',
   },
   {
+    id: 'settlement-pictures',
+    form: 'folder',
+    name: 'settlement and bridge pictures',
+    path: 'world/sprites/settlements/, world/sprites/bridges/',
+    origin: 'authored',
+    what: 'Every settlement piece in every culture, the jetties and the bridges: placeholders until painted over.',
+  },
+  {
     id: 'critter-pictures',
     form: 'folder',
     name: 'critter pictures',
@@ -344,6 +352,15 @@ export const ARTIFACTS: readonly Artifact[] = [
     path: 'public/art/structures.webp, structures.json',
     origin: 'baked',
     what: 'Every structure picture, cut and packed into one sheet, which the map draws from.',
+  },
+  {
+    id: 'settlement-atlas',
+    form: 'files',
+    name: 'settlement atlas',
+    path: 'public/art/settlements.webp, settlements.json',
+    origin: 'baked',
+    what: "Every settlement piece and bridge, cut at its own size into one sheet, for the map's villages and roads.",
+    development: 'Looked at on the structures and pictures pages until the map draws the villages from it.',
   },
   {
     id: 'critter-atlas',

@@ -60,3 +60,17 @@
   stroke-dasharray: 0.4 0.25;
   opacity: 0.85;
 }
+
+/* The settlements' pieces and the bridges: a row of them, a placeholder ringed in dashes as a cut one is. */
+.structures-lying {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: flex-end;
+  margin-top: 0.6rem;
+}
+
+.structures-placeholder {
+  outline: 1px dashed var(--ink);
+  outline-offset: -2px;
+}

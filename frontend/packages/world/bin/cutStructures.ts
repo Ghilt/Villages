@@ -1,20 +1,21 @@
-import { createHash } from 'node:crypto';
-import { existsSync } from 'node:fs';
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
-
-import sharp from 'sharp';
-
-import { crop, opaqueBox, packShelves } from '../src/art.ts';
-import type { Rgba } from '../src/art.ts';
+import { facesSvg } from '../src/blockOut.ts';
 import {
-  flagOf,
-  footOfBuilding,
-  keyOfStructureFile,
-  shadowOfBuilding,
-  structurePictureFile,
-} from '../src/structureArt.ts';
-import type { StructureAtlasFile, StructureFrame, StructureShadow } from '../src/structureArt.ts';
+  BRIDGE_AXES,
+  BRIDGE_KINDS,
+  CUT_PER_UNIT,
+  DRAWN_PER_UNIT,
+  JETTY_AXES,
+  SETTLEMENT_PIECES,
+  bridgeFaces,
+  bridgeFile,
+  jettyFaces,
+  jettyFile,
+  keyOfBridgeFile,
+  keyOfSettlementFile,
+  settlementPieceFaces,
+  settlementPieceFile,
+} from '../src/settlementLooks.ts';
+import { keyOfStructureFile, structurePictureFile } from '../src/structureArt.ts';
 import {
   DRAWN_CULTURES,
   DRAWN_TYPES,
@@ -24,11 +25,14 @@ import {
   styled,
 } from '../src/structureLooks.ts';
 import { keyOfStructureMarkFile, structureMarkFile, structureMarkSvg } from '../src/structureMarks.ts';
+import { CULTURES } from '../src/structures.ts';
 
-import { ART_DIR, STRUCTURE_MARKS_DIR, STRUCTURES_DIR } from './lib/paths.ts';
+import { cutAtlas, drawMissing, folderOf, picturesIn, savePlaceholders } from './lib/cutBuildings.ts';
+import { ART_DIR, BRIDGES_DIR, SETTLEMENTS_DIR, STRUCTURE_MARKS_DIR, STRUCTURES_DIR } from './lib/paths.ts';
 
 /**
- * The pictures of structures, one a type and a culture and a ruin a culture, cut into one atlas.
+ * The pictures of structures, one a type and a culture and a ruin a culture, cut into one atlas; and the pictures of
+ * the settlements' pieces and the bridges, cut into another.
  *
  *   node bin/cutStructures.ts
  *
@@ -36,195 +40,99 @@ import { ART_DIR, STRUCTURE_MARKS_DIR, STRUCTURES_DIR } from './lib/paths.ts';
  * map draws in code, and remembers what it drew in `placeholders.json` there, so a picture saved over one is known to
  * be Adam's and is never drawn over. Then it crops every picture to what is drawn in it, scales it to one height,
  * finds where a pennant stands on it and where it stands on the ground, casts its shadow, and packs them all into
- * `public/art/structures.webp` with `structures.json` beside it, which the map draws from where it has a picture and draws in code where it has none. The marks of
- * `world/sprites/marks/structures/`, a pin a type and the ruin's, are drawn and cut the same way into the same atlas,
- * with a record of their own. Nothing is written
- * when nothing is new. Seconds. See docs/plans/structures.md.
+ * `public/art/structures.webp` with `structures.json` beside it, which the map draws from where it has a picture and
+ * draws in code where it has none. The marks of `world/sprites/marks/structures/`, a pin a type and the ruin's, are drawn
+ * and cut the same way into the same atlas, with a record of their own.
+ *
+ * Then the same for `world/sprites/settlements/` - a cottage, a house, a barn, a chapel, a fishing hut, a net rack and a
+ * boat in every culture, and a jetty along each axis - and `world/sprites/bridges/`, timber and stone on each of the
+ * lattice's four axes: placeholders drawn in the map's own camera at `DRAWN_PER_UNIT` pixels to the world unit, the
+ * scale a picture painted over one keeps, cut at `CUT_PER_UNIT` into `public/art/settlements.webp`, each frame saying how
+ * many world units it stands. Nothing is written when nothing is new. Seconds. See docs/plans/structures.md and
+ * docs/plans/settlements-and-roads.md.
  */
 
-/** How tall every picture is cut, in pixels: the map lays a structure out 160 tall, as its castle is. */
+/** How tall every structure's picture is cut, in pixels: the map lays a structure out 160 tall, as its castle is. */
 const HEIGHT = 160;
-/** How big a placeholder is drawn, before it is cropped and scaled. */
+/** How big a structure's placeholder is drawn, before it is cropped and scaled. */
 const DRAWN = 384;
-const PAD = 2;
-/** Twice the scenery's, because the buildings' shadows are packed in too: kept nearer square than tall. */
-const WIDEST = 2048;
 
-const sha = (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex');
-/** A folder of pictures, what a file in it is keyed by, and its record of which are still placeholders. */
-interface Folder {
-  dir: string;
-  keyOf: (file: string) => string | null;
-  record: string;
-  placeholders: Record<string, string>;
-}
-
-async function folder(dir: string, keyOf: (file: string) => string | null): Promise<Folder> {
-  await mkdir(dir, { recursive: true });
-  const record = resolve(dir, 'placeholders.json');
-  const placeholders = existsSync(record)
-    ? (JSON.parse(await readFile(record, 'utf8')) as Record<string, string>)
-    : {};
-  return { dir, keyOf, record, placeholders };
-}
-
-const pictures = await folder(STRUCTURES_DIR, keyOfStructureFile);
-const marks = await folder(STRUCTURE_MARKS_DIR, keyOfStructureMarkFile);
+const pictures = await folderOf(STRUCTURES_DIR, keyOfStructureFile);
+const marks = await folderOf(STRUCTURE_MARKS_DIR, keyOfStructureMarkFile);
+const pieces = await folderOf(SETTLEMENTS_DIR, keyOfSettlementFile);
+const bridges = await folderOf(BRIDGES_DIR, keyOfBridgeFile);
 
 // Draw what is missing, never over a file that is there.
 let drawn = 0;
-async function drawMissing(into: Folder, file: string, svg: () => string): Promise<void> {
-  const path = resolve(into.dir, file);
-  if (existsSync(path)) return;
-  const png = await sharp(Buffer.from(svg())).png({ compressionLevel: 9 }).toBuffer();
-  await writeFile(path, png);
-  into.placeholders[file] = sha(png);
-  drawn += 1;
-}
+const draw = async (...args: Parameters<typeof drawMissing>) => {
+  if (await drawMissing(...args)) drawn += 1;
+};
 for (const picture of [...DRAWN_TYPES, RUIN_PICTURE]) {
   for (const culture of DRAWN_CULTURES) {
-    await drawMissing(pictures, structurePictureFile(picture, culture), () =>
+    await draw(pictures, structurePictureFile(picture, culture), () =>
       pictureSvg(styled(pictureFor(picture, picture === RUIN_PICTURE), culture), DRAWN),
     );
   }
-  await drawMissing(marks, structureMarkFile(picture), () => structureMarkSvg(picture, DRAWN));
+  await draw(marks, structureMarkFile(picture), () => structureMarkSvg(picture, DRAWN));
 }
-
-// Cut every picture there is.
-const pieces: {
-  key: string;
-  file: string;
-  image: Rgba;
-  footX: number;
-  placeholder: boolean;
-  pin: boolean;
-}[] = [];
-const files = async (from: Folder) =>
-  (await readdir(from.dir))
-    .filter((file) => from.keyOf(file) !== null)
-    .sort()
-    .map((file) => ({ from, file }));
-for (const { from, file } of [...(await files(pictures)), ...(await files(marks))]) {
-  const bytes = await readFile(resolve(from.dir, file));
-  const placeholder = from.placeholders[file] === sha(bytes);
-  if (!placeholder) delete from.placeholders[file];
-  const { data, info } = await sharp(bytes).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-  const whole: Rgba = { width: info.width, height: info.height, data: new Uint8Array(data) };
-  const box = opaqueBox(whole);
-  if (box === null) {
-    console.log(`structures: ${file} has nothing drawn in it, so it is left out`);
-    continue;
+for (const piece of SETTLEMENT_PIECES) {
+  for (const culture of CULTURES) {
+    await draw(pieces, settlementPieceFile(piece, culture), () =>
+      facesSvg(settlementPieceFaces(piece, culture), DRAWN_PER_UNIT),
+    );
   }
-  const cropped = crop(whole, box);
-  const width = Math.max(1, Math.round((cropped.width * HEIGHT) / cropped.height));
-  const scaled = await sharp(Buffer.from(cropped.data), {
-    raw: { width: cropped.width, height: cropped.height, channels: 4 },
-  })
-    .resize(width, HEIGHT, { kernel: 'lanczos3' })
-    .raw()
-    .toBuffer();
-  pieces.push({
-    key: from.keyOf(file)!,
-    file: from === marks ? `../marks/structures/${file}` : file,
-    image: { width, height: HEIGHT, data: new Uint8Array(scaled) },
-    // Read before the picture is scaled down, where the corner is still sharp.
-    footX: footOfBuilding(cropped),
-    placeholder,
-    pin: from === marks,
-  });
+}
+for (const axis of JETTY_AXES) {
+  await draw(pieces, jettyFile(axis), () => facesSvg(jettyFaces(axis), DRAWN_PER_UNIT));
+}
+for (const kind of BRIDGE_KINDS) {
+  for (const axis of BRIDGE_AXES) {
+    await draw(bridges, bridgeFile(kind, axis), () => facesSvg(bridgeFaces(kind, axis), DRAWN_PER_UNIT));
+  }
 }
 
-// Every building's shadow, from the cut picture itself, into the same atlas; a pin is a sign and casts none.
-const shadows = pieces.map((piece) =>
-  piece.pin ? null : shadowOfBuilding(piece.image, piece.footX * piece.image.width),
-);
-// The pictures first and the shadows after them, so a picture's place in the atlas is its place in `pieces`.
-const images = [
-  ...pieces.map((piece) => piece.image),
-  ...shadows.flatMap((shadow) => (shadow === null ? [] : [shadow.image])),
-];
-const packed = packShelves(
-  images.map((image) => ({ width: image.width, height: image.height })),
-  PAD,
-  WIDEST,
-);
-const atlas = await sharp({
-  create: {
-    width: packed.width,
-    height: packed.height,
-    channels: 4,
-    background: { r: 0, g: 0, b: 0, alpha: 0 },
-  },
-})
-  .composite(
-    images.map((image, at) => ({
-      input: Buffer.from(image.data),
-      raw: { width: image.width, height: image.height, channels: 4 as const },
-      left: packed.placed[at]!.x,
-      top: packed.placed[at]!.y,
+const structures = await cutAtlas(
+  [
+    ...(await picturesIn(pictures)).map(({ from, file }) => ({
+      from,
+      file,
+      source: file,
+      pin: false,
+      stands: 'corner' as const,
     })),
-  )
-  .webp({ lossless: true, effort: 6 })
-  .toBuffer();
-
-const frames: Record<string, StructureFrame> = {};
-pieces.forEach((piece, at) => {
-  const flag = flagOf(piece.image);
-  frames[piece.key] = {
-    ...packed.placed[at]!,
-    width: piece.image.width,
-    height: piece.image.height,
-    flagX: flag.x,
-    flagY: flag.y,
-    footX: piece.footX,
-    placeholder: piece.placeholder,
-    source: piece.file,
-  };
-});
-const shadowFrames: Record<string, StructureShadow> = {};
-let castAt = pieces.length;
-pieces.forEach((piece, at) => {
-  const shadow = shadows[at];
-  if (shadow === null || shadow === undefined) return;
-  shadowFrames[piece.key] = {
-    ...packed.placed[castAt]!,
-    width: shadow.image.width,
-    height: shadow.image.height,
-    footX: Math.round(shadow.footX * 100) / 100,
-    footY: shadow.footY,
-  };
-  castAt += 1;
-});
-// Of the frames too, so a change in what is measured on a picture is written when the pictures are not.
-const version = sha(
-  Buffer.concat([atlas, Buffer.from(JSON.stringify({ frames, shadows: shadowFrames }))]),
-).slice(0, 16);
-const atlasJson = resolve(ART_DIR, 'structures.json');
-const before = existsSync(atlasJson)
-  ? (JSON.parse(await readFile(atlasJson, 'utf8')) as StructureAtlasFile)
-  : null;
-
-for (const { record, placeholders } of [pictures, marks]) {
-  await writeFile(record, `${JSON.stringify(placeholders, null, 2)}\n`);
-}
-const painted = pieces.filter((piece) => !piece.placeholder).length;
-const said = `${pieces.length} pictures, ${painted} painted and ${pieces.length - painted} placeholders`;
-if (before?.version === version) {
-  console.log(`structures: nothing new - ${said}`);
-} else {
-  await mkdir(ART_DIR, { recursive: true });
-  await writeFile(resolve(ART_DIR, 'structures.webp'), atlas);
-  const file: StructureAtlasFile = {
-    version,
-    cutAt: new Date().toISOString(),
-    width: packed.width,
-    height: packed.height,
-    frames,
-    shadows: shadowFrames,
-  };
-  // Last, so that a page that finds the file finds the atlas it names.
-  await writeFile(atlasJson, `${JSON.stringify(file, null, 2)}\n`);
-  console.log(
-    `structures: cut - ${said}, ${drawn} drawn just now, atlas ${packed.width} by ${packed.height}`,
-  );
-}
+    ...(await picturesIn(marks)).map(({ from, file }) => ({
+      from,
+      file,
+      source: `../marks/structures/${file}`,
+      pin: true,
+      stands: 'corner' as const,
+    })),
+  ],
+  { tall: HEIGHT },
+  ART_DIR,
+  'structures',
+);
+const settlements = await cutAtlas(
+  [
+    ...(await picturesIn(pieces)).map(({ from, file }) => ({
+      from,
+      file,
+      source: file,
+      pin: false,
+      stands: file.startsWith('jetty-') ? ('middle' as const) : ('corner' as const),
+    })),
+    ...(await picturesIn(bridges)).map(({ from, file }) => ({
+      from,
+      file,
+      source: `../bridges/${file}`,
+      pin: false,
+      stands: 'middle' as const,
+    })),
+  ],
+  { drawnPerUnit: DRAWN_PER_UNIT, cutPerUnit: CUT_PER_UNIT },
+  ART_DIR,
+  'settlements',
+);
+await savePlaceholders([pictures, marks, pieces, bridges]);
+console.log(`${structures}${drawn > 0 ? `, ${drawn} drawn just now` : ''}`);
+console.log(settlements);

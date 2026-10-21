@@ -75,6 +75,26 @@ pale face. Upright, on a transparent background, its point on the bottom edge: t
 stands. It is cropped and scaled to 160 tall and drawn about 44 pixels tall for a castle, so paint it 320 tall or
 more and keep the shape bold. A pennant flies from the middle of its top.
 
+**A settlement is laid out in pieces, and a road crosses a river by a bridge**, both cut by the same tool into an
+atlas of their own, `public/art/settlements.webp`. `world/sprites/settlements/` holds `<piece>-<culture>.png` for
+a cottage, a house, a barn, a chapel - each culture's own place of worship: a chapel, a small mosque, a
+shrine-temple, a thatched shrine - a fishing hut, a net rack and a boat - a smack, a felucca, a sampan, a dugout -
+in each of the four cultures, and `jetty-u.png` and `jetty-v.png`, a jetty along each of the ground's two axes;
+`world/sprites/bridges/` holds `timber-<axis>.png` and `stone-<axis>.png` for each of its four axes, `u`, `v`,
+`uv` and `vu`, the two axes and the two diagonals, which with a bridge reading the same from either end are its
+eight directions. Thirty-eight placeholders, each with its own `placeholders.json`, drawn as block-outs in the
+map's own camera - the ground turned 26 degrees, seen from the south and 45 degrees above, the light from the right
+- at 200 pixels to the world unit. **Paint over a placeholder at its own size**, as asseterizer does, because the
+size is the scale: the tool reads how many world units a picture stands from its pixels at that scale, and cuts it
+at 24 to the unit. A piece stands on the front corner of its base, its lowest point, on a square of the ground's
+diamonds two or three a side, as the structures' pictures do, and casts its shadow as they do; paint no shadow. A
+bridge and a jetty stand on the middle of their deck, which the tool finds halfway between where their two ends
+are lowest, so paint each end meeting the bank at the edge of the picture, and nothing hanging below. Never mirror
+one direction to make another: the light would come from the left. Each is shown on `/admin/inspect-structures`,
+standing on its footprint or lying over its axis's diamonds, and on `/admin/inspect-pictures`. The block-outs are
+`packages/world/src/settlementLooks.ts`; the brief for painting them is `world/guides/settlements/`. See
+`docs/plans/settlements-and-roads.md`.
+
 **A critter is a strip of frames**, cut by a tool of its own from `world/sprites/critters/`, with its own
 `placeholders.json`: `<kind>.png` for every kind in `world/critters.json`, its frames side by side from left to
 right, each as wide as the picture over how many frames that file gives the kind, so a bird of three frames is a

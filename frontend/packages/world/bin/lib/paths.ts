@@ -43,6 +43,10 @@ export const SPRITES_DIR = resolve(REPO, 'world', 'sprites');
  * their own, with their own record of placeholders, apart from the scenery's that `world:art` keeps.
  */
 export const STRUCTURES_DIR = resolve(SPRITES_DIR, 'structures');
+/** The pieces a settlement is laid out in, each in every culture, and the jetties: `world:structures` cuts them. */
+export const SETTLEMENTS_DIR = resolve(SPRITES_DIR, 'settlements');
+/** The bridges, two kinds on four axes, cut into the settlements' atlas. */
+export const BRIDGES_DIR = resolve(SPRITES_DIR, 'bridges');
 /**
  * The marks of structures, one a type and the ruin's, which `world:structures` cuts into the same atlas, with a
  * record of placeholders of their own. A folder inside `marks/`, which `world:art` passes over.
