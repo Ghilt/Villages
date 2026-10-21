@@ -70,12 +70,12 @@ interface Scene {
      */
     val matches: Boolean
 
-    /** Whether the happening has its aspect, which alone gives the boost. */
+    /** Whether its bearer - the effect's slice, the summon - is empowered: the aspect boost, or a buff of an effect's. */
     val boosted: Boolean
 
     fun number(name: String): Double
 
-    /** [amount] grown by the aspect boost when it holds, and cut to the share of itself its bearer still is. */
+    /** [amount] grown by what empowers its bearer, the aspect boost among it, and cut to the share of itself its bearer still is. */
     fun boost(amount: Double): Double
 
     fun chance(percent: Double): Boolean
@@ -92,6 +92,9 @@ interface Scene {
     fun favours(side: Side): Boolean
 
     fun summons(side: Side): List<Summon>
+
+    /** [side]'s slices, as a moment names them. */
+    fun slices(side: Side): List<Actor>
 
     /** The first time this is asked for this effect on this side in the challenge: true; after, false. */
     fun once(): Boolean
@@ -174,8 +177,8 @@ sealed interface Change {
 
     data class Pour(val target: Int) : Change
 
-    /** A building or a person comes on the line for [side], bringing [arrives] before any boost, and [boosted] or not. */
-    data class OnTheLine(val side: Side, val owner: Int, val effect: String, val standIn: StandIn, val arrives: Double, val boosted: Boolean) : Change
+    /** A building or a person comes on the line for [side], bringing [arrives] before any boost and paying [paid], [boosted] or not. */
+    data class OnTheLine(val side: Side, val owner: Int, val effect: String, val standIn: StandIn, val arrives: Double, val paid: Double, val boosted: Boolean) : Change
 
     /** A moment that changes nothing but is worth saying. */
     data class Say(
@@ -186,6 +189,7 @@ sealed interface Change {
         val target: Actor? = null,
         val amount: Double? = null,
         val targetEffect: String? = null,
+        val status: String? = null,
     ) : Change
 }
 
@@ -205,6 +209,7 @@ object ChallengeBehaviours {
 
     /** What [catalogue] asks of the code that the code lacks, a line a lack; none when the code has all of it. */
     fun unmatched(catalogue: ChallengeCatalogue): List<String> = buildList {
+        if (catalogue.buffs[EMPOWERED] == null) add("there is no buff '$EMPOWERED', which the aspect boost is")
         (catalogue.buffs + catalogue.debuffs).forEach { (id, spec) ->
             val behaviour = lasting[id]
             if (behaviour == null) add("$id has no behaviour in the code") else (behaviour.reads - spec.numbers.keys).forEach { add("$id gives no number '$it', which its behaviour reads") }

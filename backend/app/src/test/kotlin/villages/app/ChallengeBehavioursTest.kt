@@ -38,7 +38,7 @@ class ChallengeBehavioursTest {
             "character-names" to File("../../world/catalogues/character-names.json").readText(),
         )
         val unknown = real.replace("\"noQuarter\": {", "\"noMercy\": {")
-        val numberless = real.replace("\"numbers\": { \"chance\": 25 }", "\"numbers\": { \"odds\": 25 }")
+        val numberless = real.replace("can beat.\",\n        \"numbers\": { \"chance\": 25 }", "can beat.\",\n        \"numbers\": { \"odds\": 25 }")
 
         assertEquals(
             "world/catalogues/challenges.json: violence.noMercy has no behaviour in the code",

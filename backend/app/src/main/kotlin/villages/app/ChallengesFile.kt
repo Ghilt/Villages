@@ -89,7 +89,9 @@ object ChallengesFile {
         if (!node.isObject) refuse(at)
         word(node, "name", at)
         word(node, "words", at)
-        val on = node["on"]?.takeIf { it.isString }?.asString()?.let(BEARERS::get) ?: refuse("$at.on")
+        val on = node["on"]?.takeIf { it.isArray && !it.isEmpty }?.values()?.map { bearer ->
+            bearer.takeIf { it.isString }?.asString()?.let(BEARERS::get) ?: refuse("$at.on")
+        }?.toSet() ?: refuse("$at.on")
         return checked(at) { Lasting(on, numbers(node["numbers"], "$at.numbers")) }
     }
 

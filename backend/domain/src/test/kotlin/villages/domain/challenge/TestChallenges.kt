@@ -37,7 +37,12 @@ val TEST_CATALOGUE = ChallengeCatalogue(
         ChallengeEffect("nature.wildRemembers", Aspect.NATURE, Fires.PASSIVE, mapOf("seconds" to 10.0), puts = "eroding"),
         ChallengeEffect("industry.engines", Aspect.INDUSTRY, Fires.TRIGGER, summons = "machine", matching = true),
         ChallengeEffect("industry.works", Aspect.INDUSTRY, Fires.TRIGGER, slot = ChallengeSlot(Fits.STRUCTURE, onTheLine = true), matching = true),
-        ChallengeEffect("industry.wellOiled", Aspect.INDUSTRY, Fires.PASSIVE, mapOf("chance" to 20.0, "amount" to 5.0)),
+        ChallengeEffect("industry.wellOiled", Aspect.INDUSTRY, Fires.PASSIVE, mapOf("chance" to 20.0, "seconds" to 10.0), puts = "hastened"),
+        ChallengeEffect("violence.warDrums", Aspect.VIOLENCE, Fires.TRIGGER, mapOf("seconds" to 10.0), matching = true, puts = "hastened"),
+        ChallengeEffect("holy.blessing", Aspect.HOLY, Fires.TRIGGER, mapOf("seconds" to 8.0), puts = "empowered"),
+        ChallengeEffect("reason.foresight", Aspect.REASON, Fires.TRIGGER, mapOf("seconds" to 8.0), matching = true, puts = "warded"),
+        ChallengeEffect("authority.fealty", Aspect.AUTHORITY, Fires.TRIGGER, mapOf("seconds" to 15.0), matching = true, puts = "steadfast"),
+        ChallengeEffect("freedom.wordSpreads", Aspect.FREEDOM, Fires.TRIGGER, mapOf("seconds" to 15.0), puts = "echoing"),
     ),
     summons = mapOf(
         "mercenary" to SummonSpec(Aspect.VIOLENCE, mapOf("pulls" to 10.0)),
@@ -51,15 +56,22 @@ val TEST_CATALOGUE = ChallengeCatalogue(
         "creature" to SummonSpec(Aspect.NATURE, mapOf("pulls" to 3.0), matching = true),
     ),
     kinds = emptyMap(),
+    buffs = mapOf(
+        EMPOWERED to Lasting(setOf(Bearer.SLICE, Bearer.SUMMON), mapOf("percent" to 50.0)),
+        "hastened" to Lasting(setOf(Bearer.SUMMON), mapOf("rate" to 50.0)),
+        "echoing" to Lasting(setOf(Bearer.SLICE), mapOf("chance" to 25.0)),
+        "warded" to Lasting(setOf(Bearer.SLICE, Bearer.SUMMON)),
+        "steadfast" to Lasting(setOf(Bearer.SUMMON)),
+    ),
     debuffs = mapOf(
-        "stunned" to Lasting(Bearer.SUMMON),
-        "aspectBound" to Lasting(Bearer.SUMMON),
-        "weakened" to Lasting(Bearer.SUMMON, mapOf("percent" to 30.0)),
-        "eroding" to Lasting(Bearer.SUMMON, mapOf("integrity" to 4.0)),
+        "stunned" to Lasting(setOf(Bearer.SUMMON)),
+        "aspectBound" to Lasting(setOf(Bearer.SUMMON)),
+        "weakened" to Lasting(setOf(Bearer.SUMMON), mapOf("percent" to 30.0)),
+        "eroding" to Lasting(setOf(Bearer.SUMMON), mapOf("integrity" to 4.0)),
     ),
 )
 
-val TEST_RULES = ChallengeRules(1.5, 100.0, 10.0, 0.2, 0.5, 10.0, SliceStart(50.0, 50.0, 3))
+val TEST_RULES = ChallengeRules(100.0, 10.0, 0.2, 0.5, 10.0, SliceStart(50.0, 50.0, 3))
 
 /** The test catalogue with one of a summon's numbers changed. */
 fun ChallengeCatalogue.withSummon(summon: String, number: String, value: Double): ChallengeCatalogue = copy(
@@ -75,6 +87,11 @@ val ANYWHERE = TEST_CATALOGUE.copy(
 /** The test catalogue with one effect's mark set: whether it needs a matching aspect. */
 fun ChallengeCatalogue.marked(effect: String, matching: Boolean): ChallengeCatalogue = copy(
     effects = effects.map { if (it.id == effect) it.copy(matching = matching) else it },
+)
+
+/** The test catalogue with one of a buff's numbers changed. */
+fun ChallengeCatalogue.withBuff(buff: String, number: String, value: Double): ChallengeCatalogue = copy(
+    buffs = buffs.mapValues { (id, entry) -> if (id == buff) entry.copy(numbers = entry.numbers + (number to value)) else entry },
 )
 
 /** The test catalogue with one of a debuff's numbers changed. */

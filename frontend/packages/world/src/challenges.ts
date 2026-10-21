@@ -71,7 +71,8 @@ export interface ChallengeSummon {
 export interface ChallengeLasting {
   readonly id: string;
   readonly name: string;
-  readonly on: 'slice' | 'summon';
+  /** What it goes on: slices, summons, or both. */
+  readonly on: readonly ('slice' | 'summon')[];
   readonly words: string;
   readonly numbers: Readonly<Record<string, number>>;
 }
@@ -183,11 +184,17 @@ function lastingOf(section: string, id: string, node: unknown): ChallengeLasting
   const at = `${section}.${id}`;
   if (!isObject(node)) refuse(at);
   const { on } = node;
-  if (on !== 'slice' && on !== 'summon') refuse(`${at}.on`);
+  if (
+    !Array.isArray(on) ||
+    on.length === 0 ||
+    !on.every((bearer) => bearer === 'slice' || bearer === 'summon')
+  ) {
+    refuse(`${at}.on`);
+  }
   return {
     id,
     name: word(node, 'name', at),
-    on,
+    on: on as ('slice' | 'summon')[],
     words: word(node, 'words', at),
     numbers: numbersOf(node.numbers, `${at}.numbers`),
   };

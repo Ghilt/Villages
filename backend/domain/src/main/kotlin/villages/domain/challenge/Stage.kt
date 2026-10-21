@@ -69,5 +69,5 @@ internal fun Contest.slotOf(side: Side, slice: Int, effect: ChallengeEffect): Li
         is StandIn.Building -> rules.buildingArrives * standIn.level
         is StandIn.KeyFigure -> lent
     }
-    return listOf(Change.OnTheLine(side, slice, effect.id, standIn, arrives, scene.boosted))
+    return listOf(Change.OnTheLine(side, slice, effect.id, standIn, arrives, scene.boost(arrives), scene.boosted))
 }

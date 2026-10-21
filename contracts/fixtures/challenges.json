@@ -51,14 +51,14 @@
     "$comment": "One buff.",
     "hastened": {
       "name": "Hastened",
-      "on": "summon",
+      "on": ["summon", "slice"],
       "words": "Acts again, {rate}% of seconds.",
       "numbers": { "rate": 50 }
     }
   },
   "debuffs": {
     "$comment": "One debuff.",
-    "weakened": { "name": "Weakened", "on": "slice", "words": "Works {percent}% less.", "numbers": { "percent": 25 } }
+    "weakened": { "name": "Weakened", "on": ["slice"], "words": "Works {percent}% less.", "numbers": { "percent": 25 } }
   },
   "kinds": {
     "$comment": "One kind, weighing two aspects.",

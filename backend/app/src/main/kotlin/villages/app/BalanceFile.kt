@@ -49,7 +49,6 @@ object BalanceFile {
             ),
             challenge = ruled("challenge") {
                 ChallengeRules(
-                    boost = number(challenge, "challenge.boost"),
                     tugEnds = number(challenge, "challenge.tugEnds"),
                     buildingArrives = number(challenge, "challenge.buildingArrives"),
                     pullShare = number(challenge, "challenge.pullShare"),

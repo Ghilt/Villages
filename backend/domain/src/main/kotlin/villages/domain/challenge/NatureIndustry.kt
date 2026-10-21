@@ -9,13 +9,13 @@ private object Teeming : EffectBehaviour {
     override fun enemyActed(scene: Scene, summon: Summon): List<Change> = if (scene.chance(scene.number("chance"))) scene.hire() else emptyList()
 }
 
-/** Well-Oiled: each time a summon of its side acts, a `chance` that it pulls `amount` more. */
+/** Well-Oiled: each time a summon of its side acts, a `chance` it is hastened, the buff its entry names, for `seconds`. */
 private object WellOiled : EffectBehaviour {
-    override val reads = setOf("chance", "amount")
+    override val reads = setOf("chance", "seconds")
 
     override fun friendActed(scene: Scene, summon: Summon): List<Change> {
         if (!scene.chance(scene.number("chance"))) return emptyList()
-        return listOf(Change.Pull(scene.side, scene.boost(scene.number("amount")), summon.actor, scene.effect, scene.boosted))
+        return listOf(scene.putOn(summon.actor, scene.number("seconds")))
     }
 }
 

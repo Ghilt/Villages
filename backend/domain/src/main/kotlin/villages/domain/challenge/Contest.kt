@@ -71,6 +71,12 @@ internal class Contest(
 
     val happening: Happening get() = setup.progression.happenings[at]
 
+    /** The last second of the happening going on: the one before the next begins, or the challenge's last. */
+    fun happeningEnds(): Int {
+        val progression = setup.progression
+        return if (at + 1 < progression.happenings.size) progression.startOf(at + 1) - 1 else progression.seconds - 1
+    }
+
     fun fight(): ChallengeResult {
         val progression = setup.progression
         for (now in 0 until progression.seconds) {
@@ -105,6 +111,7 @@ internal class Contest(
             changes += field.filter { it.coffer > 0.0 }.map { Change.Pour(it.serial) }
         }
         Side.entries.forEach { match(it) }
+        empowerMatches()
         Side.entries.forEach { changes += meet(it) }
         land(changes)
     }
@@ -120,7 +127,9 @@ internal class Contest(
                     return@flatMap listOf(Change.Say(What.CANCELLED, side.other, Actor.OfSlice(side.other, by), their.id, Actor.OfSlice(side, slice), targetEffect = effect.id))
                 }
             }
-            behaviour.activated(scene(side, slice, effect))
+            val fired = behaviour.activated(scene(side, slice, effect))
+            if (effect.fires != Fires.TRIGGER || !rng.chance(echoChance(side, slice))) return@flatMap fired
+            fired + Change.Say(What.ECHOED, side, Actor.OfSlice(side, slice), effect.id) + behaviour.activated(scene(side, slice, effect))
         }
     }
 
@@ -136,6 +145,11 @@ internal class Contest(
             val enemy = summon.side.other
             changes += actOf(summon)
             changes += wearOf(summon)
+            if (rng.chance(againChance(summon))) {
+                changes += Change.Say(What.ACTED_AGAIN, summon.side, summon.actor, null)
+                changes += actOf(summon)
+                changes += wearOf(summon)
+            }
             changes += working(enemy).flatMap { (slice, effect, behaviour) -> behaviour.enemyActed(scene(enemy, slice, effect), summon) }
             changes += working(summon.side).flatMap { (slice, effect, behaviour) -> behaviour.friendActed(scene(summon.side, slice, effect), summon) }
         }
@@ -208,10 +222,10 @@ internal class Contest(
     }
 
     fun scene(side: Side, slice: Int, effect: ChallengeEffect): Scene =
-        SceneOf(side, slice, effect.aspect, effect::number, Actor.OfSlice(side, slice), effect, effect.puts)
+        SceneOf(side, slice, effect.aspect, effect::number, Actor.OfSlice(side, slice), effect, effect.puts, null)
 
     fun summonScene(summon: Summon): Scene =
-        SceneOf(summon.side, summon.owner, summon.aspect, { catalogue.summons.getValue(summon.kind).number(it) }, summon.actor, null, catalogue.summons[summon.kind]?.puts)
+        SceneOf(summon.side, summon.owner, summon.aspect, { catalogue.summons.getValue(summon.kind).number(it) }, summon.actor, null, catalogue.summons[summon.kind]?.puts, summon)
 
     private inner class SceneOf(
         override val side: Side,
@@ -221,21 +235,22 @@ internal class Contest(
         override val actor: Actor,
         private val entry: ChallengeEffect?,
         private val puts: String?,
+        private val summon: Summon?,
     ) : Scene {
         override val second: Int get() = this@Contest.second
         override val happening: Happening get() = this@Contest.happening
         override val previous: Happening? get() = this@Contest.previous
         override val matches: Boolean get() = if (entry != null) matching.getValue(side)[slice] else happening.matches(aspect)
-        override val boosted: Boolean get() = happening.matches(aspect)
+        override val boosted: Boolean get() = empowerment(bearing) > 1.0
         override val effect: String? get() = entry?.id
 
         override fun number(name: String): Double = numbers(name)
 
-        override fun boost(amount: Double): Double = (if (boosted) amount * rules.boost else amount) * effectiveness(bearing)
+        override fun boost(amount: Double): Double = amount * empowerment(bearing) * effectiveness(bearing)
 
         /** What this scene's own bearer bears: the summon's, or its slice's. */
         private val bearing: Map<String, Int>
-            get() = if (entry == null) this@Contest.field.firstOrNull { it.actor == actor }?.bearing.orEmpty() else bearings.getValue(side)[slice]
+            get() = summon?.bearing ?: bearings.getValue(side)[slice]
 
         override fun chance(percent: Double): Boolean = rng.chance(percent)
 
@@ -248,6 +263,8 @@ internal class Contest(
         override fun favours(side: Side): Boolean = if (side == Side.A) tug > 0.0 else tug < 0.0
 
         override fun summons(side: Side): List<Summon> = field.filter { it.side == side }
+
+        override fun slices(side: Side): List<Actor> = setup.side(side).indices.map { Actor.OfSlice(side, it) }
 
         override fun once(): Boolean = asked.add(Triple(side, slice, entry?.id ?: ""))
 

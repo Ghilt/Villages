@@ -2,9 +2,13 @@
   0  0      -            happening began                                                             0
   0  0 A    a1           matches                                                                     0
   0  0 B    b2           matches                                                                     0
+  0  0 A    -            buffed          empowered              a1                   5               0
+  0  0 B    -            buffed          empowered              b2                   5               0
   0  0 B    b1           lent            diplomacy.envoy                            12     -12     -12
   0  0 A    a1           summoned        violence.sellswords    #1 mercenary                       -12
+  0  0 A    -            buffed          empowered              #1 mercenary         5             -12
   0  0 B    b2           summoned        violence.sellswords    #2 mercenary                       -12
+  0  0 B    -            buffed          empowered              #2 mercenary         5             -12
   1  0 A    #1 mercenary pulled           ×                                         15      15       3
   1  0 B    #2 mercenary pulled           ×                                         15     -15     -12
   2  0 A    #1 mercenary pulled           ×                                         15      15       3
@@ -13,8 +17,12 @@
   3  0 A    #1 mercenary pulled           ×                                         15      15       3
   4  0 A    #1 mercenary pulled           ×                                         15      15      18
   5  0 A    #1 mercenary pulled           ×                                         15      15      33
+  6  0 A    #1 mercenary lifted          empowered                                                  33
+  6  0 A    a1           lifted          empowered                                                  33
+  6  0 B    b2           lifted          empowered                                                  33
   6  1      -            happening began                                                            33
   6  1 B    b1           matches                                                                    33
+  6  1 B    -            buffed          empowered              b1                   5              33
   6  1 B    b2           pulled          violence.spoils                            30     -30       3
   6  1 B    b1           lent            diplomacy.envoy ×                          18     -18     -15
   6  1 A    #1 mercenary pulled                                                     10      10      -5
@@ -23,6 +31,7 @@
   9  1 A    #1 mercenary pulled                                                     10      10      25
  10  1 A    #1 mercenary pulled                                                     10      10      35
  11  1 A    #1 mercenary pulled                                                     10      10      45
+ 12  1 B    b1           lifted          empowered                                                  45
  12  2      -            happening began                                                            45
  12  2 B    b1           lent            diplomacy.envoy                            12     -12      33
  12  2 A    #1 mercenary pulled                                                     10      10      43
@@ -35,12 +44,26 @@
  18  3 A    a1           matches                                                                    93
  18  3 B    b1           matches                                                                    93
  18  3 B    b2           matches                                                                    93
+ 18  3 A    -            buffed          empowered              a1                   5              93
+ 18  3 B    -            buffed          empowered              b1                   5              93
+ 18  3 B    -            buffed          empowered              b2                   5              93
+ 18  3 A    -            buffed          empowered              #1 mercenary         5              93
  18  3 B    b1           lent            diplomacy.envoy ×                          18     -18      75
  18  3 A    a1           summoned        violence.sellswords    #3 mercenary                        75
+ 18  3 A    -            buffed          empowered              #3 mercenary         5              75
+ 18  3 B    b1           turned          diplomacy.sweeterTerms #1 mercenary                        75
  18  3 B    b2           summoned        violence.sellswords    #4 mercenary                        75
- 18  3 A    #1 mercenary pulled           ×                                         15      15      90
- 19  3 A    #1 mercenary pulled           ×                                         15      15     105
- 19  3 A    #3 mercenary pulled           ×                                         15      15     120
- 19  3 B    #4 mercenary pulled           ×                                         15     -15     105
- 19  3 A    -            ended                                                              -5     100
-ended pulled in second 19, the tug 100, won by A
+ 18  3 B    -            buffed          empowered              #4 mercenary         5              75
+ 18  3 B    #1 mercenary pulled           ×                                         15     -15      60
+ 19  3 B    #1 mercenary pulled           ×                                         15     -15      45
+ 19  3 A    #3 mercenary pulled           ×                                         15      15      60
+ 19  3 B    #4 mercenary pulled           ×                                         15     -15      45
+ 19  3 A    #3 mercenary killed          violence.noQuarter     #4 mercenary                        45
+ 20  3 B    #1 mercenary pulled           ×                                         15     -15      30
+ 20  3 A    #3 mercenary pulled           ×                                         15      15      45
+ 20  3 A    #3 mercenary killed          violence.noQuarter     #1 mercenary                        45
+ 21  3 A    #3 mercenary pulled           ×                                         15      15      60
+ 22  3 A    #3 mercenary pulled           ×                                         15      15      75
+ 23  3 A    #3 mercenary pulled           ×                                         15      15      90
+ 23  3      -            ended                                                                      90
+ended time_ran_out in second 23, the tug 90, won by A

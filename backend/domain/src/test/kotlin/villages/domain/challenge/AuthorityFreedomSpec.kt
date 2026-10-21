@@ -39,7 +39,7 @@ class AuthorityFreedomSpec : StringSpec({
 
         result.saying(What.DEBUFFED).map { Triple(it.second, it.status, it.amount) } shouldBe listOf(Triple(5, "aspectBound", 6.0))
         result.saying(What.IDLE).map { it.second } shouldBe listOf(5, 10)
-        result.saying(What.LIFTED).map { it.second to it.status } shouldBe listOf(12 to "aspectBound")
+        result.saying(What.LIFTED).filter { it.status == "aspectBound" }.map { it.second to it.status } shouldBe listOf(12 to "aspectBound")
         result.saying(What.PULLED).filter { it.side == Side.B }.map { it.second } shouldBe (1..4).toList() + (12..14).toList()
     }
 

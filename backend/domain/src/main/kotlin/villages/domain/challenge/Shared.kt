@@ -46,3 +46,17 @@ internal object PullsHarderBehind : SummonBehaviour {
 
 /** The enemy summons [scene]'s side can kill with a power of [power]: those whose integrity it beats. */
 internal fun Scene.beatable(power: Double): List<Summon> = summons(side.other).filter { power > it.integrity }
+
+/** What of its own side an effect puts its buff on: its slices, its summons, or both. */
+internal enum class Own { SLICES, SUMMONS, BOTH }
+
+/** Puts the buff its entry names on every one of [own] of its side for `seconds`, as it fires. */
+internal class Rallies(private val own: Own) : EffectBehaviour {
+    override val reads = setOf("seconds")
+
+    override fun activated(scene: Scene): List<Change> {
+        val slices = if (own == Own.SUMMONS) emptyList() else scene.slices(scene.side)
+        val summons = if (own == Own.SLICES) emptyList() else scene.summons(scene.side).map { it.actor }
+        return (slices + summons).map { scene.putOn(it, scene.number("seconds")) }
+    }
+}

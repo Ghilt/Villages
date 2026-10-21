@@ -124,11 +124,13 @@ data class ChallengeKind(
 enum class Bearer { SLICE, SUMMON }
 
 /**
- * A buff, which helps, or a debuff, which hinders: what it goes [on] and its own [numbers]. An effect or a summon puts it
- * on for the seconds they say; what it does while it is on is its behaviour's, in code, by its id.
+ * A buff, which helps, or a debuff, which hinders: what it goes [on] - slices, summons or both, as its words say - and
+ * its own [numbers]. An effect or a summon puts it on for the seconds they say; what it does while it is on is its
+ * behaviour's, in code, by its id. Named for what it does, so that effects of many flavours can put on the same one.
  */
-data class Lasting(val on: Bearer, val numbers: Map<String, Double> = emptyMap()) {
+data class Lasting(val on: Set<Bearer>, val numbers: Map<String, Double> = emptyMap()) {
     init {
+        require(on.isNotEmpty()) { "a buff or a debuff goes on something" }
         require(numbers.values.all { it >= 0.0 && it.isFinite() }) { "a buff's or a debuff's numbers are nothing or more, not $numbers" }
     }
 

@@ -920,7 +920,7 @@ and `-- --drop` takes them off; by hand only.
   game server reads the same file and refuses one it cannot read, or one that breaks a rule of the content - a summon
   that is not there, a slot that neither lends nor puts on the line - naming where, as it does every catalogue, said
   once in the debug panel's faults and the server's log. The numbers of a challenge's rules that belong to no one
-  effect are the balance's `challenge` group, at `/admin/inspect-balance`: the aspect boost, how far the tug runs,
+  effect are the balance's `challenge` group, at `/admin/inspect-balance`: how far the tug runs,
   what a building on the line brings, what it loses killed, and the slice every house starts with. Below the content
   is the simulator, which needs the game server to fight. Each side is one to three slices - an aspect, power,
   integrity and summon count, two at most of its aspect's effects, and a stand-in in the slot of each that has one, a

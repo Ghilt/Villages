@@ -122,6 +122,9 @@ export function towardSaid(tug: number): string {
 /** A number as the page says it: whole, or to one decimal. */
 export const numberSaid = (value: number) => (Number.isInteger(value) ? String(value) : value.toFixed(1));
 
+/** The buff the aspect boost is, which the server's engine puts on whatever matches each happening. */
+export const EMPOWERED = 'empowered';
+
 /** What each kind of moment says, in words. */
 export const WHAT_SAID: Readonly<Record<string, string>> = {
   happeningBegan: 'happening began',
@@ -142,6 +145,10 @@ export const WHAT_SAID: Readonly<Record<string, string>> = {
   lifted: 'lifted',
   cleansed: 'cleansed',
   worn: 'worn',
+  warded: 'warded off',
+  held: 'stood fast',
+  actedAgain: 'acted again',
+  echoed: 'echoed',
   cancelled: 'cancelled',
   integrityLost: 'wore integrity',
   auraOn: 'aura on',

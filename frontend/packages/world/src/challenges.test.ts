@@ -43,12 +43,12 @@ describe("the challenge's content", () => {
       {
         id: 'hastened',
         name: 'Hastened',
-        on: 'summon',
+        on: ['summon', 'slice'],
         words: 'Acts again, {rate}% of seconds.',
         numbers: { rate: 50 },
       },
     ]);
-    expect(challenges.debuffs[0]).toMatchObject({ id: 'weakened', on: 'slice', numbers: { percent: 25 } });
+    expect(challenges.debuffs[0]).toMatchObject({ id: 'weakened', on: ['slice'], numbers: { percent: 25 } });
     expect(challenges.said.debuffs).toBe('One debuff.');
     expect(challenges.kinds[0]).toMatchObject({ seconds: [30, 90], happenings: [3, 6], twoAspects: 20 });
     expect(challenges.kinds[0]!.weights).toMatchObject({ violence: 8, holy: 1, reason: 0 });
@@ -59,7 +59,9 @@ describe("the challenge's content", () => {
     const challenges = parseChallenges(world);
     expect(
       ASPECTS.map((aspect) => challenges.effects.filter((effect) => effect.aspect === aspect).length),
-    ).toEqual(ASPECTS.map((aspect) => (aspect === 'generosity' ? 4 : 3)));
+    ).toEqual(
+      ASPECTS.map((aspect) => (['diplomacy', 'greed', 'nature', 'industry'].includes(aspect) ? 3 : 4)),
+    );
   });
 
   it('refuses a field it cannot read, naming where', () => {

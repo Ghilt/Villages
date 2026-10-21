@@ -3,18 +3,21 @@ package villages.domain.challenge
 import kotlin.math.max
 
 /**
- * How what a moment asked for lands, in three passes: first the tug and the coffers move, as everything acted on the
+ * How what a moment asked for lands, in passes: first the tug and the coffers move, as everything acted on the
  * state the moment began with; then the dead fall, so a summon both killed and turned is killed, and the room a death
- * leaves is there for what comes next; then summons turn and come, things come on the line, slices are worn, and buffs
- * and debuffs go on; and last the cleansings, so that one lifts a debuff put on in its own second too, whichever side
- * put it on. Each change is said as it lands, a moment each. The rules that must hold are held here: no side
+ * leaves is there for what comes next; then buffs go on, so that a ward or a stand put on in a second holds against a
+ * debuff or a turn of the same second; then summons turn and come, things come on the line, slices are worn, and
+ * debuffs go on; and last the cleansings, so that one lifts a debuff of its own second too. Whichever side asked comes
+ * to the same. Each change is said as it lands, a moment each. The rules that must hold are held here: no side
  * ever has more summons than its slices let it have, and a thing on the line comes on it once. See decision record 0107.
  */
 internal fun Contest.land(changes: List<Change>) {
     val (moving, rest) = changes.partition { it is Change.Pull || it is Change.Say || it is Change.Deposit || it is Change.Pour }
     moving.forEach { landOne(it) }
     rest.filterIsInstance<Change.Kill>().forEach { landOne(it) }
-    rest.filterNot { it is Change.Kill || it is Change.Cleanse }.forEach { landOne(it) }
+    val buffs = rest.filter { it is Change.PutOn && it.lasting in catalogue.buffs }
+    buffs.forEach { landOne(it) }
+    rest.filterNot { it is Change.Kill || it is Change.Cleanse || it in buffs }.forEach { landOne(it) }
     rest.filterIsInstance<Change.Cleanse>().forEach { landOne(it) }
 }
 
@@ -47,7 +50,7 @@ private fun Contest.landOne(change: Change) {
             it.coffer = 0.0
             pull(Change.Pull(it.side, poured, it.actor, null, false, What.POURED))
         }
-        is Change.Say -> say(change.what, change.side, change.actor, change.effect, change.target, change.amount, targetEffect = change.targetEffect)
+        is Change.Say -> say(change.what, change.side, change.actor, change.effect, change.target, change.amount, targetEffect = change.targetEffect, status = change.status)
     }
 }
 
@@ -73,6 +76,7 @@ private fun Contest.hire(change: Change.Hire) {
     field += summon
     check(counted(change.side) <= cap(change.side)) { "side ${change.side} has more summons than its slices let it have" }
     say(What.SUMMONED, change.side, actor, change.effect, summon.actor)
+    empowerArrival(summon)
 }
 
 private fun Contest.kill(change: Change.Kill) {
@@ -98,6 +102,10 @@ private fun Contest.fall(target: Summon, actor: Actor, effect: String?, status: 
 private fun Contest.turn(change: Change.Turn) {
     val target = alive(change.target) ?: return
     if (target.onTheLine || target.side == change.toward) return
+    if (steadfast(target)) {
+        say(What.HELD, target.side, target.actor, change.effect, change.actor)
+        return
+    }
     if (counted(change.toward) >= cap(change.toward)) {
         field.remove(target)
         say(What.DESERTED, change.toward, change.actor, change.effect, target.actor)
@@ -125,6 +133,6 @@ private fun Contest.comeOnTheLine(change: Change.OnTheLine) {
         arrivedWith = change.arrives,
     )
     field += summon
-    val paid = if (change.boosted) change.arrives * rules.boost else change.arrives
-    pull(Change.Pull(change.side, paid, summon.actor, change.effect, change.boosted, What.ARRIVED))
+    pull(Change.Pull(change.side, change.paid, summon.actor, change.effect, change.boosted, What.ARRIVED))
+    empowerArrival(summon)
 }

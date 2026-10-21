@@ -54,10 +54,12 @@ private object Enforcer : SummonBehaviour {
 internal val authorityAndFreedom: Map<String, EffectBehaviour> = mapOf(
     "authority.watch" to Hires,
     "authority.curfew" to Curfew,
+    "authority.fealty" to Rallies(Own.SUMMONS),
     "authority.firmHand" to FirmHand,
     "freedom.commons" to Hires,
     "freedom.againstTheGrain" to AgainstTheGrain,
     "freedom.ownWill" to OwnWill,
+    "freedom.wordSpreads" to Rallies(Own.SLICES),
 )
 
 internal val authorityAndFreedomSummons: Map<String, SummonBehaviour> = mapOf("enforcer" to Enforcer, "rebel" to PullsHarderBehind)

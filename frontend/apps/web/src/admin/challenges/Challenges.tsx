@@ -14,7 +14,7 @@ import { InspectPage } from '../frame/InspectPage';
 import { SaveBar, WholeFile } from '../frame/SaveBar';
 import { useCatalogueEditor } from '../frame/useCatalogueEditor';
 import type { CatalogueEditor, Path } from '../frame/useCatalogueEditor';
-import { said } from './setup';
+import { EMPOWERED, said } from './setup';
 import { Matchups } from './Matchups';
 import { Simulator } from './Simulator';
 
@@ -140,6 +140,7 @@ function Lastings({ editor, content }: { editor: Editor; content: Content }) {
   ];
   const putters = (id: string) =>
     [
+      ...(id === EMPOWERED ? ['each happening, on whatever matches it'] : []),
       ...content.effects.filter((effect) => effect.puts === id).map((effect) => effect.name),
       ...content.summons.filter((summon) => summon.puts === id).map((summon) => `the ${summon.name}`),
     ].join(', ');
@@ -169,7 +170,7 @@ function Lastings({ editor, content }: { editor: Editor; content: Content }) {
                 />
               </th>
               <td>{kind}</td>
-              <td>{lasting.on}</td>
+              <td>{lasting.on.join(', ')}</td>
               <td>
                 <WordsField
                   editor={editor}

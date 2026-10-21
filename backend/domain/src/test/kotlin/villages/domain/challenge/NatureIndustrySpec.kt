@@ -52,11 +52,14 @@ class NatureIndustrySpec : StringSpec({
         result.saying(What.PULLED).filter { it.effect == "greed.pickBones" }.map { it.second } shouldBe listOf(5)
     }
 
-    "a Machine pulls ten a second, and Well-Oiled now and then makes a friend's act pull five more" {
-        val oiled = ANYWHERE.with("industry.wellOiled", "chance", 100.0)
-        val result = fight(listOf(slice(INDUSTRY, "industry.engines", "industry.wellOiled")), IDLE, 3, Happening(REASON), catalogue = oiled)
+    "a Machine pulls ten a second, and Well-Oiled now and then hastens a friend as it acts, so that it acts again" {
+        val oiled = ANYWHERE.with("industry.wellOiled", "chance", 100.0).withBuff("hastened", "rate", 100.0)
+        val result = fight(listOf(slice(INDUSTRY, "industry.engines", "industry.wellOiled")), IDLE, 4, Happening(INDUSTRY), catalogue = oiled)
 
-        result.saying(What.PULLED).map { it.effect to it.amount } shouldBe listOf(null to 10.0, "industry.wellOiled" to 5.0, null to 10.0, "industry.wellOiled" to 5.0)
+        result.saying(What.BUFFED).first { it.status == "hastened" }.let { it.second to it.target.toString() } shouldBe (1 to "#1")
+        result.saying(What.ACTED_AGAIN).map { it.second } shouldBe listOf(2, 3)
+        result.saying(What.PULLED).filter { it.actor.toString() == "#1" }.map { it.second to it.amount } shouldBe
+            listOf(1 to 15.0, 2 to 15.0, 2 to 15.0, 3 to 15.0, 3 to 15.0)
     }
 
     "Works and Forges puts its building on the line as it fires" {

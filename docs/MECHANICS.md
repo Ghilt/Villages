@@ -1189,7 +1189,8 @@ sermon - each draw progressions of their own flavour.
 **integrity**, a **summon count**, two **effects** of its own aspect, and the slots its effects bring, which take
 a key figure or a structure. Every slice meets every happening. A slice's **aspect matches** while the latest
 happening has its aspect - several of a side's slices may match, or none - and a matching slice gets the **aspect
-boost**, half as much again on whatever it does. A Diplomacy slice in a battle gets no boost, and still does what its
+boost**, half as much again on whatever it does: a buff, *empowered*, which the happening puts on whatever matches
+it until it ends, and which an effect can put on out of its aspect too. A Diplomacy slice in a battle gets no boost, and still does what its
 effects let it do there.
 
 **Effects** are **triggers**, which fire as their slice meets a happening, and **passives**, which work from second to
@@ -1207,7 +1208,10 @@ and the effects that put them on carry the flavour: Authority's Curfew leaves ev
 only in happenings of its own aspect, and the Enforcer stuns the enemy's hardest puller; Reason sees through an enemy
 summon's tricks and weakens it; as a happening leaves Nature the briars close, and the enemy's summons are eroding,
 losing integrity at each act until they are gone. Generosity's Tend the Wounded **cleanses** its side of every debuff.
-The same one put on again lasts from then and never stacks; different ones add up. The page charts them all.
+Buffs help the same way: *empowered*, which is the aspect boost; *hastened*, acting again in some seconds, which
+Violence's War Drums beat and Industry's Well-Oiled gives; *echoing*, a trigger firing twice, as the word spreads for
+Freedom; *warded*, which no debuff takes, Reason's Foresight; and *steadfast*, never turned, sworn by Authority's Oaths
+of Fealty. The same one put on again lasts from then and never stacks; different ones add up. The page charts them all.
 
 **Things on the line.** A slot may put what is in it on the line: a building or a person then stands in the
 challenge as a summon, stronger than most and paying its side as it arrives, and if it is killed the building

@@ -113,7 +113,8 @@ export function MomentsTable({
         </table>
       </div>
       <p className="inspect-quiet">
-        × boosted: the happening has the doer's aspect or its anti-aspect. The tug is side A's way up.
+        × empowered: the aspect boost, which a happening gives whatever matches it, or a buff an effect put
+        on. The tug is side A's way up.
       </p>
     </div>
   );

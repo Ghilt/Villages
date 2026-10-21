@@ -24,7 +24,25 @@ interface LastingBehaviour {
 
     /** On a summon: the integrity it loses each time it acts, by its [entry]'s numbers. */
     fun wears(entry: Lasting): Double = 0.0
+
+    /** How much it grows what its bearer does, one or more, by its [entry]'s numbers: the aspect boost is one. */
+    fun empowers(entry: Lasting): Double = 1.0
+
+    /** On a summon: the chance out of a hundred that it acts a second time in a second, by its [entry]'s numbers. */
+    fun actsAgain(entry: Lasting): Double = 0.0
+
+    /** On a slice: the chance out of a hundred that each of its triggers fires twice, by its [entry]'s numbers. */
+    fun echoes(entry: Lasting): Double = 0.0
+
+    /** No debuff can be put on its bearer while it is on. */
+    val wards: Boolean get() = false
+
+    /** On a summon: it cannot be turned while it is on. */
+    val steadies: Boolean get() = false
 }
+
+/** The buff a happening puts on whatever matches it, which is the aspect boost; the catalogue must have it. */
+const val EMPOWERED = "empowered"
 
 /** Stunned: the summon does not act. The Enforcer's. */
 private object Stunned : LastingBehaviour {
@@ -50,8 +68,88 @@ private object Eroding : LastingBehaviour {
     override fun wears(entry: Lasting): Double = entry.number("integrity")
 }
 
-internal val lastingBehaviours: Map<String, LastingBehaviour> =
-    mapOf("stunned" to Stunned, "aspectBound" to AspectBound, "weakened" to Weakened, "eroding" to Eroding)
+/** Empowered: its bearer does `percent` more, half as much again to begin with. What a happening gives whatever matches it. */
+private object Empowered : LastingBehaviour {
+    override val reads = setOf("percent")
+
+    override fun empowers(entry: Lasting): Double = 1.0 + entry.number("percent") / 100.0
+}
+
+/** Hastened: the summon acts again, in `rate` of its seconds out of a hundred. */
+private object Hastened : LastingBehaviour {
+    override val reads = setOf("rate")
+
+    override fun actsAgain(entry: Lasting): Double = entry.number("rate")
+}
+
+/** Echoing: each trigger of the slice fires twice, at a `chance` out of a hundred. */
+private object Echoing : LastingBehaviour {
+    override val reads = setOf("chance")
+
+    override fun echoes(entry: Lasting): Double = entry.number("chance")
+}
+
+/** Warded: no debuff can be put on its bearer. */
+private object Warded : LastingBehaviour {
+    override val wards = true
+}
+
+/** Steadfast: the summon cannot be turned. */
+private object Steadfast : LastingBehaviour {
+    override val steadies = true
+}
+
+internal val lastingBehaviours: Map<String, LastingBehaviour> = mapOf(
+    "stunned" to Stunned,
+    "aspectBound" to AspectBound,
+    "weakened" to Weakened,
+    "eroding" to Eroding,
+    EMPOWERED to Empowered,
+    "hastened" to Hastened,
+    "echoing" to Echoing,
+    "warded" to Warded,
+    "steadfast" to Steadfast,
+)
+
+/** How much what bears [bearing] has what it does grown: each buff's growth, all of them together. */
+internal fun Contest.empowerment(bearing: Map<String, Int>): Double =
+    bearing.keys.fold(1.0) { grown, id -> grown * (lastingBehaviours[id]?.empowers(catalogue.lasting(id)!!) ?: 1.0) }
+
+/** The chance out of a hundred of what [bearing] says, one of its hooks over all it bears, no more than a hundred. */
+private fun Contest.chanceOf(bearing: Map<String, Int>, hook: (LastingBehaviour, Lasting) -> Double): Double =
+    bearing.keys.sumOf { id -> lastingBehaviours[id]?.let { hook(it, catalogue.lasting(id)!!) } ?: 0.0 }.coerceAtMost(100.0)
+
+/** The chance out of a hundred that [summon] acts a second time this second. */
+internal fun Contest.againChance(summon: Summon): Double = chanceOf(summon.bearing) { behaviour, entry -> behaviour.actsAgain(entry) }
+
+/** The chance out of a hundred that a trigger of [side]'s slice [slice] fires twice. */
+internal fun Contest.echoChance(side: Side, slice: Int): Double = chanceOf(bearings.getValue(side)[slice]) { behaviour, entry -> behaviour.echoes(entry) }
+
+/** Whether [summon] bears something that keeps it from being turned. */
+internal fun steadfast(summon: Summon): Boolean = summon.bearing.keys.any { lastingBehaviours[it]?.steadies == true }
+
+/**
+ * The aspect boost, as a buff: as a happening begins, everything whose aspect it has - a slice's, a summon's own - is
+ * empowered until it ends, and a summon that comes during it is empowered as it comes, by [empowerArrival].
+ */
+internal fun Contest.empowerMatches() {
+    Side.entries.forEach { side ->
+        setup.side(side).forEachIndexed { slice, spec ->
+            if (happening.matches(spec.aspect)) empower(side, Actor.OfSlice(side, slice))
+        }
+    }
+    field.filter { happening.matches(it.aspect) }.forEach { empower(it.side, it.actor) }
+}
+
+/** Empowers [summon] as it comes, when the happening it comes in has its aspect. */
+internal fun Contest.empowerArrival(summon: Summon) {
+    if (happening.matches(summon.aspect)) empower(summon.side, summon.actor)
+}
+
+/** A catalogue without the buff has no boost, as in a spec of something else; the shelf refuses the real one without it. */
+private fun Contest.empower(side: Side, bearer: Actor) {
+    if (EMPOWERED in catalogue.buffs) putOn(Change.PutOn(side, bearer, EMPOWERED, happeningEnds(), Actor.TheChallenge, null))
+}
 
 /** How much of itself what bears [bearing] still is: each buff's and debuff's share of itself, all of them together. */
 internal fun Contest.effectiveness(bearing: Map<String, Int>): Double =
@@ -85,6 +183,13 @@ internal fun Contest.needsMatch(summon: Summon): Boolean =
 /** Puts [change]'s buff or debuff on its bearer until its second, the later of two ends when it is on already, and says so. */
 internal fun Contest.putOn(change: Change.PutOn) {
     val bearing = bearingOf(change.target) ?: return
+    if (change.lasting in catalogue.debuffs) {
+        val ward = bearing.keys.firstOrNull { lastingBehaviours[it]?.wards == true }
+        if (ward != null) {
+            say(What.WARDED, change.side, change.actor, change.effect, change.target, status = change.lasting)
+            return
+        }
+    }
     bearing[change.lasting] = max(bearing[change.lasting] ?: -1, change.until)
     val what = if (change.lasting in catalogue.debuffs) What.DEBUFFED else What.BUFFED
     say(what, change.side, change.actor, change.effect, change.target, (change.until - second).toDouble(), status = change.lasting)

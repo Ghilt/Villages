@@ -60,6 +60,8 @@ internal val holyAndReason: Map<String, EffectBehaviour> = mapOf(
     "reason.counsel" to Slotted,
     "reason.refutation" to Refutation,
     "reason.seenThrough" to SeenThrough,
+    "reason.foresight" to Rallies(Own.BOTH),
+    "holy.blessing" to Rallies(Own.SLICES),
 )
 
 internal val holyAndReasonSummons: Map<String, SummonBehaviour> = mapOf("priest" to Priest)

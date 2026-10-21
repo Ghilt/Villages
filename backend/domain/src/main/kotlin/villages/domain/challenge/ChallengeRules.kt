@@ -1,14 +1,14 @@
 package villages.domain.challenge
 
 /**
- * The numbers of a challenge's rules that belong to no one effect, the balance's `challenge` group: the aspect
- * [boost]; how far the tug runs either way, [tugEnds]; what a building put on the line pays as it arrives for each of
+ * The numbers of a challenge's rules that belong to no one effect, the balance's `challenge` group: how far the tug
+ * runs either way, [tugEnds]; what a building put on the line pays as it arrives for each of
  * its levels, [buildingArrives], and the shares of what a thing on the line arrives with that it pulls a second,
  * [pullShare], and adds to its slice's integrity, [integrityShare]; the effectiveness out of a hundred a building or a
- * person loses when killed on the line; and the [slice] every house starts with. See decision record 0107.
+ * person loses when killed on the line; and the [slice] every house starts with. The aspect boost is not here: it is the
+ * buff Empowered, whose share is its own entry's in the catalogue. See decision record 0107.
  */
 data class ChallengeRules(
-    val boost: Double,
     val tugEnds: Double,
     val buildingArrives: Double,
     val pullShare: Double,
@@ -17,7 +17,6 @@ data class ChallengeRules(
     val slice: SliceStart,
 ) {
     init {
-        require(boost >= 1.0 && boost.isFinite()) { "the boost grows what it boosts, so it is one or more, not $boost" }
         require(tugEnds > 0.0 && tugEnds.isFinite()) { "the tug runs some way either side of the middle, not $tugEnds" }
         require(listOf(buildingArrives, pullShare, integrityShare).all { it >= 0.0 && it.isFinite() }) {
             "what a thing on the line brings is nothing or more"

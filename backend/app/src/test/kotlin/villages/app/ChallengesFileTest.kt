@@ -35,8 +35,8 @@ class ChallengesFileTest {
         assertEquals(false, challenges.summons.getValue("collector").matching)
         assertEquals("weakened", challenges.effect("violence.noQuarter")?.puts)
         assertEquals("hastened", challenges.summons.getValue("collector").puts)
-        assertEquals(Lasting(Bearer.SUMMON, mapOf("rate" to 50.0)), challenges.buffs.getValue("hastened"))
-        assertEquals(Lasting(Bearer.SLICE, mapOf("percent" to 25.0)), challenges.debuffs.getValue("weakened"))
+        assertEquals(Lasting(setOf(Bearer.SUMMON, Bearer.SLICE), mapOf("rate" to 50.0)), challenges.buffs.getValue("hastened"))
+        assertEquals(Lasting(setOf(Bearer.SLICE), mapOf("percent" to 25.0)), challenges.debuffs.getValue("weakened"))
         val battle = challenges.kinds.getValue("battle")
         assertEquals(30..90, battle.seconds)
         assertEquals(3..6, battle.happenings)
@@ -48,7 +48,7 @@ class ChallengesFileTest {
     fun `the real one reads, three or four effects to every aspect, and is in the one form`() {
         val challenges = ChallengesFile.parse(real)
 
-        assertEquals(Aspect.entries.associateWith { if (it == Aspect.GENEROSITY) 4 else 3 }, Aspect.entries.associateWith { challenges.effectsOf(it).size })
+        assertEquals(Aspect.entries.associateWith { if (it in setOf(Aspect.DIPLOMACY, Aspect.GREED, Aspect.NATURE, Aspect.INDUSTRY)) 3 else 4 }, Aspect.entries.associateWith { challenges.effectsOf(it).size })
         assertEquals(setOf("battle", "debate", "tradeWar", "sermon", "even"), challenges.kinds.keys)
         assertEquals(real, CatalogueText.format(real))
     }

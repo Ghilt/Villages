@@ -93,6 +93,18 @@ enum class What {
     /** A summon lost integrity to a debuff it bears, [ChallengeMoment.status] naming it. */
     WORN,
 
+    /** A debuff did not take, its bearer warded, [ChallengeMoment.status] naming the debuff. */
+    WARDED,
+
+    /** A summon stood fast against being turned, steadfast. */
+    HELD,
+
+    /** A summon acted a second time in its second, hastened. */
+    ACTED_AGAIN,
+
+    /** A slice's trigger fired a second time, echoing. */
+    ECHOED,
+
     /** A trigger was cancelled before it fired. */
     CANCELLED,
     INTEGRITY_LOST,

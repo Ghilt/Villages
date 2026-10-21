@@ -101,7 +101,7 @@ class BalanceFileTest {
         assertEquals(3_500_000.0, balance.islands.smallerThanKm2)
         assertEquals(16..60, balance.newcomers.ages)
         assertEquals(
-            villages.domain.challenge.ChallengeRules(2.0, 80.0, 12.0, 0.25, 0.4, 15.0, villages.domain.challenge.SliceStart(40.0, 60.0, 2)),
+            villages.domain.challenge.ChallengeRules(80.0, 12.0, 0.25, 0.4, 15.0, villages.domain.challenge.SliceStart(40.0, 60.0, 2)),
             balance.challenge,
         )
         assertEquals(villages.application.Balance.HouseBots(250, 50.0, 5.0), balance.houseBots)
@@ -125,10 +125,10 @@ class BalanceFileTest {
 
     @Test
     fun `a challenge's number that breaks its rule refuses the file, naming the group and the rule`() {
-        val text = java.io.File("../../contracts/fixtures/balance.json").readText().replace("\"boost\": 2", "\"boost\": 0.5")
+        val text = java.io.File("../../contracts/fixtures/balance.json").readText().replace("\"tugEnds\": 80", "\"tugEnds\": 0")
 
         val refused = org.junit.jupiter.api.assertThrows<IllegalArgumentException> { BalanceFile.parse(text) }
-        assertEquals("world/catalogues/balance.json: challenge: the boost grows what it boosts, so it is one or more, not 0.5", refused.message)
+        assertEquals("world/catalogues/balance.json: challenge: the tug runs some way either side of the middle, not 0.0", refused.message)
     }
 
     @Test

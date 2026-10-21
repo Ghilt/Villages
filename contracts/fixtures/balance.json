@@ -12,7 +12,6 @@
   "newcomers": { "youngest": 16, "oldest": 60 },
   "challenge": {
     "$comment": "A challenge.",
-    "boost": 2,
     "tugEnds": 80,
     "buildingArrives": 12,
     "pullShare": 0.25,

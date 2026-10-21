@@ -34,7 +34,7 @@ val TEST_BALANCE = Balance(
     ),
     islands = Balance.Islands(smallerThanKm2 = 4_000_000.0),
     newcomers = Balance.Newcomers(youngest = 18, oldest = 50),
-    challenge = ChallengeRules(1.5, 100.0, 10.0, 0.2, 0.5, 10.0, SliceStart(50.0, 50.0, 3)),
+    challenge = ChallengeRules(100.0, 10.0, 0.2, 0.5, 10.0, SliceStart(50.0, 50.0, 3)),
     houseBots = Balance.HouseBots(count = 300, apartKm = 60.0, beyondRuinKm = 6.0),
 )
 

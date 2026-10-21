@@ -30,7 +30,6 @@ export interface Balance {
   readonly islands: { readonly smallerThanKm2: number };
   readonly newcomers: { readonly youngest: number; readonly oldest: number };
   readonly challenge: {
-    readonly boost: number;
     readonly tugEnds: number;
     readonly buildingArrives: number;
     readonly pullShare: number;
@@ -108,7 +107,6 @@ export function parseBalance(text: string): Balance {
       oldest: number(newcomers, 'newcomers.oldest', true),
     },
     challenge: {
-      boost: number(challenge, 'challenge.boost'),
       tugEnds: number(challenge, 'challenge.tugEnds'),
       buildingArrives: number(challenge, 'challenge.buildingArrives'),
       pullShare: number(challenge, 'challenge.pullShare'),
