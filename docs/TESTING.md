@@ -56,6 +56,9 @@ Every increment lands with the test that proves it. The tests are the reason we 
   machine's twenty threads kept busy, the slowest test took six seconds. A test that loads a great deal fresh for
   every case loads it once first in a `beforeAll`, on a hook's time, as `stage/phone.test.ts` does, and a lookup a
   test asks of many times is made once, not once a case.
+- An end-to-end test closes every window it opens, which the test's own context does by itself: one left open goes
+  on drawing the game in software and starves whatever test runs after it. A second window is a context of the
+  test's making, closed in an `afterEach` however the test ended, as `smoke.e2e.ts` does.
 - MapLibre and Pixi are never instantiated in unit tests. Their maths is pure and tested directly; their pixels get
   one end-to-end smoke test.
 - A test that needs Docker says so in its name, and is skipped with a clear message when Docker is absent.

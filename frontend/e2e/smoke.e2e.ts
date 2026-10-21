@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import type { Page } from '@playwright/test';
+import type { BrowserContext, Page } from '@playwright/test';
 
 import { startGame, stopGame, testPorts } from './servers.ts';
 
@@ -9,11 +9,24 @@ import { startGame, stopGame, testPorts } from './servers.ts';
  * played - and the house still the player's after the game server is stopped and started again. What it reads is
  * what Adam reads, the debug panel's log and the events log; what it presses is what a player presses.
  */
+/**
+ * The watcher's window, in a context of the test's making, closed when the test ends however it ends, as the player's,
+ * the test's own, is by Playwright: a window of the game left open draws on in software and starves whatever runs
+ * after it. See accounts.e2e.ts.
+ */
+let watching: BrowserContext | undefined;
+test.afterEach(async () => {
+  await watching?.close();
+  watching = undefined;
+});
+
 test('the map, a house founded, another window seeing it, an action taken, and a restart that forgets nothing', async ({
   browser,
+  context,
 }) => {
-  const player = await (await browser.newContext()).newPage();
-  const watcher = await (await browser.newContext()).newPage();
+  const player = await context.newPage();
+  watching = await browser.newContext();
+  const watcher = await watching.newPage();
   let name = '';
 
   await test.step('the map is drawn, from the world this tree has cut', async () => {
