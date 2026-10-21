@@ -1,4 +1,4 @@
-import { ASPECTS } from '@villages/world';
+import { ASPECTS, filledIn } from '@villages/world';
 import type { Aspect, ChallengeEffect, Challenges } from '@villages/world';
 import type { SliceView } from '@villages/protocol';
 
@@ -129,8 +129,9 @@ function SliceBuilder({
       {own.map((effect) => {
         const carried = slice.effects.includes(effect.id);
         const standIn = slice.slotted[effect.id];
+        const summon = content.summons.find((one) => one.id === effect.summons);
         return (
-          <div key={effect.id}>
+          <div key={effect.id} className="challenges-choice">
             <label className="inspect-pick">
               <input
                 type="checkbox"
@@ -140,6 +141,14 @@ function SliceBuilder({
               />{' '}
               {effect.name} <span className="challenges-fires">{effect.fires}</span>
             </label>
+            <div
+              className="challenges-choice__words"
+              title={
+                summon === undefined ? undefined : `${summon.name}: ${filledIn(summon.words, summon.numbers)}`
+              }
+            >
+              {filledIn(effect.words, effect.numbers)}
+            </div>
             {carried && standIn !== undefined && (
               <StandInBuilder
                 label={`${label} ${effect.name}`}

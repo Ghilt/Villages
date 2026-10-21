@@ -64,6 +64,19 @@
   margin: 0.1rem 0 0.4rem 1.4rem;
 }
 
+/* An effect a slice can carry: its box and name, and under them what it does, in a line or two. */
+
+.challenges-choice {
+  margin: 0.25rem 0 0.35rem;
+}
+
+.challenges-choice__words {
+  margin-left: 1.4rem;
+  font-size: 0.82rem;
+  line-height: 1.3;
+  color: var(--ink-soft);
+}
+
 .challenges-happenings {
   margin: 0.3rem 0 0.5rem;
   padding-left: 1.4rem;

@@ -7,13 +7,13 @@
       "noQuarter": {
         "name": "No Quarter",
         "fires": "passive",
-        "words": "Each Mercenary act has a {chance}% chance to kill an enemy summon it can beat as well.",
+        "words": "Each Mercenary act: {chance}% chance to also kill an enemy summon it can beat.",
         "numbers": { "chance": 25 }
       },
       "spoils": {
         "name": "Spoils of the Field",
         "fires": "passive",
-        "words": "+{amount} to the tug when the happening changes away from Violence.",
+        "words": "+{amount} when the happening changes away from Violence.",
         "numbers": { "amount": 30 }
       }
     },
@@ -27,13 +27,13 @@
       "sweeterTerms": {
         "name": "Sweeter Terms",
         "fires": "trigger",
-        "words": "Each enemy summon turns to this side: {strong}% when this slice's power beats its integrity, {weak}% when it does not. One that finds no room deserts.",
+        "words": "Turns each enemy summon: {strong}% if power beats its integrity, else {weak}%. No room: it deserts.",
         "numbers": { "strong": 50, "weak": 20 }
       },
       "parley": {
         "name": "Endless Parley",
         "fires": "passive",
-        "words": "+{perSecond} to the tug every second; while the tug favours the opponent, their power is {power} lower.",
+        "words": "+{perSecond} a second; while the opponent leads, their power is {power} lower.",
         "numbers": { "perSecond": 2, "power": 5 }
       }
     },
@@ -41,14 +41,14 @@
       "rebuke": {
         "name": "Divine Rebuke",
         "fires": "passive",
-        "words": "Each time an enemy summon acts, a {chance}% chance that every enemy slice loses {integrity} integrity.",
+        "words": "An enemy summon acts: {chance}% chance every enemy slice loses {integrity} integrity.",
         "numbers": { "chance": 20, "integrity": 10 }
       },
-      "ordination": { "name": "Ordination", "fires": "trigger", "words": "Ordains a Priest, who pulls by how far this side's integrity stands above the enemy's.", "summons": "priest" },
+      "ordination": { "name": "Ordination", "fires": "trigger", "words": "Ordains a Priest, who pulls by how far this side's integrity beats the enemy's.", "summons": "priest" },
       "sanctuary": {
         "name": "Sanctuary",
         "fires": "passive",
-        "words": "Puts the building on the line the first time the slice comes on stage; +{piety} piety if the challenge is won.",
+        "words": "Puts the building on the line the first time on stage; +{piety} piety if won.",
         "slot": { "fits": "structure", "onTheLine": true },
         "numbers": { "piety": 5 }
       }
@@ -63,28 +63,28 @@
       "refutation": {
         "name": "Refutation",
         "fires": "passive",
-        "words": "A {chance}% chance to cancel each enemy trigger.",
+        "words": "{chance}% chance to cancel each enemy trigger.",
         "numbers": { "chance": 20 }
       },
       "seenThrough": {
         "name": "Seen Through",
         "fires": "passive",
-        "words": "Each time an enemy summon acts, a {chance}% chance of +{amount} to the tug.",
+        "words": "An enemy summon acts: {chance}% chance of +{amount}.",
         "numbers": { "chance": 20, "amount": 5 }
       }
     },
     "authority": {
-      "watch": { "name": "Raise the Watch", "fires": "trigger", "words": "Raises an Enforcer, who costs this side every second and silences the enemy summon pulling hardest.", "summons": "enforcer" },
+      "watch": { "name": "Raise the Watch", "fires": "trigger", "words": "Raises an Enforcer: costs this side, silences the enemy's hardest-pulling summon.", "summons": "enforcer" },
       "decree": {
         "name": "By Decree",
         "fires": "passive",
-        "words": "A {chance}% chance to stop each act of an enemy summon whose integrity this slice's power beats.",
+        "words": "{chance}% chance to stop each act of an enemy summon this slice's power beats.",
         "numbers": { "chance": 25 }
       },
       "firmHand": {
         "name": "The Firm Hand",
         "fires": "passive",
-        "words": "While the tug favours this side, the opponent's power is {power} lower.",
+        "words": "While this side leads, the opponent's power is {power} lower.",
         "numbers": { "power": 5 }
       }
     },
@@ -93,24 +93,24 @@
       "againstTheGrain": {
         "name": "Against the Grain",
         "fires": "passive",
-        "words": "+{amount} to the tug when this slice comes on stage by the draw, matching neither the happening's aspects nor their anti-aspects.",
+        "words": "+{amount} when on stage by the draw, matching no aspect of the happening.",
         "numbers": { "amount": 20 }
       },
-      "ownWill": { "name": "Will of One's Own", "fires": "passive", "words": "Once in a challenge, at a change of happening, this slice stays on stage whatever the new aspects." }
+      "ownWill": { "name": "Will of One's Own", "fires": "passive", "words": "Once a challenge, at a change of happening, this slice stays on stage regardless." }
     },
     "greed": {
       "countingHouse": {
         "name": "Counting House",
         "fires": "trigger",
-        "words": "Puts the building on the line when the slice comes on stage; +{wealth} wealth if the challenge is won.",
+        "words": "Puts the building on the line when on stage; +{wealth} wealth if won.",
         "slot": { "fits": "structure", "onTheLine": true },
         "numbers": { "wealth": 5 }
       },
-      "farmTaxes": { "name": "Farm the Taxes", "fires": "trigger", "words": "Hires a Collector, who costs this side every second and fills a coffer that pours into the tug at the next change of happening, or at the end.", "summons": "collector" },
+      "farmTaxes": { "name": "Farm the Taxes", "fires": "trigger", "words": "Hires a Collector: costs this side, fills a coffer that pours at the next happening or the end.", "summons": "collector" },
       "pickBones": {
         "name": "Pick the Bones",
         "fires": "passive",
-        "words": "+{amount} to the tug whenever an enemy summon is killed.",
+        "words": "+{amount} whenever an enemy summon is killed.",
         "numbers": { "amount": 10 }
       }
     },
@@ -125,23 +125,23 @@
       "remembered": {
         "name": "Remembered Kindness",
         "fires": "passive",
-        "words": "+{amount} to the tug whenever a summon of this side is killed.",
+        "words": "+{amount} whenever a summon of this side is killed.",
         "numbers": { "amount": 15 }
       }
     },
     "nature": {
-      "wildHunt": { "name": "The Wild Hunt", "fires": "trigger", "words": "Looses a Predator, who pulls, or now and then kills an enemy summon it can beat instead.", "summons": "predator" },
+      "wildHunt": { "name": "The Wild Hunt", "fires": "trigger", "words": "Looses a Predator, who pulls, or now and then kills an enemy summon it can beat.", "summons": "predator" },
       "teeming": {
         "name": "Teeming Wilds",
         "fires": "passive",
-        "words": "Each time an enemy summon acts, a {chance}% chance a Creature comes to this side.",
+        "words": "An enemy summon acts: {chance}% chance a Creature comes to this side.",
         "summons": "creature",
         "numbers": { "chance": 20 }
       },
       "wildRemembers": {
         "name": "The Wild Remembers",
         "fires": "passive",
-        "words": "+{amount} to the tug when the happening changes away from Nature.",
+        "words": "+{amount} when the happening changes away from Nature.",
         "numbers": { "amount": 30 }
       }
     },
@@ -150,13 +150,13 @@
       "works": {
         "name": "Works and Forges",
         "fires": "trigger",
-        "words": "Puts the building on the line when the slice comes on stage.",
+        "words": "Puts the building on the line when on stage.",
         "slot": { "fits": "structure", "onTheLine": true }
       },
       "wellOiled": {
         "name": "Well-Oiled",
         "fires": "passive",
-        "words": "Each time a summon of this side acts, a {chance}% chance it pulls {amount} more.",
+        "words": "A summon of this side acts: {chance}% chance it pulls {amount} more.",
         "numbers": { "chance": 20, "amount": 5 }
       }
     }
@@ -172,13 +172,13 @@
     "priest": {
       "name": "Priest",
       "aspect": "holy",
-      "words": "Pulls as much as its side's slice on stage has integrity above the enemy's, times {share}, and never less than nothing.",
+      "words": "Pulls its side's integrity lead over the enemy's, times {share}.",
       "numbers": { "share": 1 }
     },
     "enforcer": {
       "name": "Enforcer",
       "aspect": "authority",
-      "words": "Costs its side {costs} a second; each act silences the enemy summon pulling hardest for {silences} seconds.",
+      "words": "Costs its side {costs} a second; silences the hardest-pulling enemy summon {silences} seconds.",
       "numbers": { "costs": 5, "silences": 3 }
     },
     "rebel": {
@@ -190,7 +190,7 @@
     "collector": {
       "name": "Collector",
       "aspect": "greed",
-      "words": "Costs its side {costs} a second and puts {deposits} in its coffer each act; the coffer pours into the tug at the next change of happening or at the end, and is lost with the Collector.",
+      "words": "Costs its side {costs} a second, puts {deposits} in its coffer; the coffer is lost if it dies.",
       "numbers": { "costs": 3, "deposits": 6 }
     },
     "benefactor": {
@@ -202,7 +202,7 @@
     "predator": {
       "name": "Predator",
       "aspect": "nature",
-      "words": "Pulls {pulls} a second, or with a {kills}% chance kills an enemy summon it can beat instead.",
+      "words": "Pulls {pulls} a second, or {kills}% chance to kill an enemy summon it can beat instead.",
       "numbers": { "pulls": 5, "kills": 20 }
     },
     "creature": {
