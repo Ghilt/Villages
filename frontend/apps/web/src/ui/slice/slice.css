@@ -220,6 +220,10 @@
     flex-direction: column;
   }
 
+  .ui-slice-tray__chips--column .ui-slice-chip {
+    min-width: 9.5rem;
+  }
+
   .ui-slice-tray--end .ui-slice-tray__chips--row {
     justify-content: flex-end;
   }

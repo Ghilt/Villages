@@ -302,6 +302,17 @@ in a module of its own, the way `stageBox.ts` already is.
 This is a real constraint and it is the right one: a component that only reads correctly when it happens to
 be the whole window is exactly what the rule at the top exists to prevent.
 
+## A challenge's spectacle
+
+The spectacle is held by the shape of its box, never by a breakpoint: **wide**, its two banks side by side across a
+landscape stage, each house's tray of slices a row along the bottom; **deep**, the same banks made deep on a portrait
+stage or a phone, the ranks one behind another up the screen and each tray a column at its own side. Either way the
+houses stand left and right, so a phone shows no figure from behind (decision record 0116). The venue's scene covers
+its box, so a phone, narrower than the deep scene, crops its edges; a venue keeps what matters inside the middle that
+every box shows. The tug and the happening stay at the top and the replay along the bottom, their size the
+interface's own and not the scene's, and the history slides in from the right of a wide stage and the bottom of a
+deep one. The challenges page holds it wide, deep, or as a phone of 390 by 844.
+
 ## The instrument
 
 **Two toggles in the very top right of the debug panel confine the stage to a phone**, upright and in

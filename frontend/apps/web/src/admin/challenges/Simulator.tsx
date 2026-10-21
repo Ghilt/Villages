@@ -129,6 +129,14 @@ const SIDES_SHOWN: Readonly<Record<'a' | 'b', HouseShown>> = {
   b: { name: 'B', colour: '#a8452a' },
 };
 
+/** How the spectacle is held on the page: wide, deep as a screen turned on its end, or as a phone in the hand. */
+type Holding = 'wide' | 'deep' | 'phone';
+const HOLDS: readonly { readonly held: Holding; readonly said: string }[] = [
+  { held: 'wide', said: 'held wide' },
+  { held: 'deep', said: 'held deep' },
+  { held: 'phone', said: 'as a phone' },
+];
+
 function Fought({
   answer,
   draft,
@@ -144,6 +152,7 @@ function Fought({
   ends: number;
   onAgain: (seed: number) => void;
 }) {
+  const [held, setHeld] = useState<Holding>('wide');
   if (!answer.fought) {
     return (
       <p className="inspect-problem">
@@ -181,9 +190,30 @@ function Fought({
         </p>
       ))}
       {batch === undefined && content !== null && (
-        <div className="challenges-spectacle">
-          <Spectacle run={answer.challenge} sides={draft} content={content} houses={SIDES_SHOWN} />
-        </div>
+        <>
+          <p className="challenges-held">
+            {HOLDS.map((one) => (
+              <button
+                key={one.held}
+                type="button"
+                className="inspect-button"
+                aria-pressed={held === one.held}
+                onClick={() => setHeld(one.held)}
+              >
+                {one.said}
+              </button>
+            ))}
+          </p>
+          <div className={`challenges-spectacle challenges-spectacle--${held}`}>
+            <Spectacle
+              run={answer.challenge}
+              sides={draft}
+              content={content}
+              houses={SIDES_SHOWN}
+              held={held === 'wide' ? 'wide' : 'deep'}
+            />
+          </div>
+        </>
       )}
       {batch === undefined ? (
         <TugChart tugs={tugBySecond(moments, progression.seconds)} progression={progression} ends={ends} />

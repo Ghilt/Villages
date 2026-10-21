@@ -278,13 +278,37 @@
   color: #b52f2e;
 }
 
-/* The spectacle of a single run, held wide: the square, sixteen by ten, as wide as the page lets it be. */
+/*
+ * The spectacle of a single run: held wide, the square sixteen by ten, as wide as the page lets it be; held deep, ten
+ * by sixteen and no taller than the window; as a phone, the 390 by 844 every phone state is drawn at.
+ */
 .challenges-spectacle {
-  width: 100%;
-  max-width: 1280px;
-  aspect-ratio: 16 / 10;
-  margin: 0.75rem 0;
+  margin: 0.25rem 0 0.75rem;
   border: 1px solid #3d3427;
   border-radius: 4px;
   overflow: hidden;
+}
+
+.challenges-spectacle--wide {
+  width: 100%;
+  max-width: 1280px;
+  aspect-ratio: 16 / 10;
+}
+
+.challenges-spectacle--deep {
+  height: min(1440px, 85vh);
+  max-width: 100%;
+  aspect-ratio: 10 / 16;
+}
+
+.challenges-spectacle--phone {
+  width: 390px;
+  height: 844px;
+  max-width: 100%;
+}
+
+.challenges-held {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
 }
