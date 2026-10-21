@@ -1009,7 +1009,9 @@ and `-- --drop` takes them off; by hand only.
   relief shaders and the critters, beside the sprites that tell them where the trees stand, and under them the
   trees' wind, the cloud shader and the fog shader, which read nothing baked, the fog telling the critters where
   the house sees now. Beside that box is the connection, which talks to the gateway and tells the sprites, the
-  panes and the fog what the house has and sees; choosing the shaders' box lights every shader in it. **The game server** box holds the gateway, the rules, the reactions and the projections, and
+  panes and the fog what the house has and sees, and beside it **the sign-in**, who this browser plays as, which opens
+  it; choosing the shaders' box lights every shader in it. **The game server** box holds the gateway, the rules, the
+  reactions, the projections and **the accounts**, who a browser is signed in as, kept in MongoDB beside the events, and
   the baked files it reads arrive at the box; **the event store** box holds Occurrent, MongoDB, the bridge,
   RabbitMQ and the in-memory store used without Docker, the last dashed because it is used only instead of
   MongoDB. Every arrow between running pieces says what passes along it - commands, the history, every event a

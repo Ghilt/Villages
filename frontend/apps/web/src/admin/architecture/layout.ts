@@ -61,9 +61,11 @@ const CLUSTER = { pad: 24, head: 64 };
  * middle of it and the critters beside the sprites whose trees they fly out of, room between them for what passes
  * from one to the other. Under them, in the shaders' box, the trees' wind under the land whose gusts it shares, the
  * clouds, and the fog under the critters it tells where the house sees; and beside the box the connection, which
- * talks down to the gateway and up to the parts drawing what it is told. In the game server and the event store, a column of three and a row of two: the gateway is
- * above what feeds it, Occurrent above what keeps its events, the bridge beside it and above the broker it
- * publishes to, and the feed runs up.
+ * talks down to the gateway and up to the parts drawing what it is told, and beside it the sign-in, which opens it. In
+ * the game server and the event store, a column of three and a row of two: the gateway is above what feeds it, and
+ * the accounts out to its right, clear of the projections, so what they keep runs down past the event store to
+ * MongoDB; Occurrent above what keeps its events, the bridge beside it and above the broker it publishes to, and the
+ * feed runs up.
  */
 const SPOTS: Record<string, { readonly col: number; readonly row: number }> = {
   painter: { col: 0, row: 0 },
@@ -79,10 +81,12 @@ const SPOTS: Record<string, { readonly col: number; readonly row: number }> = {
   clouds: { col: 3.5, row: 1 },
   fog: { col: 5, row: 1 },
   connection: { col: 6.75, row: 1 },
+  signin: { col: 8.25, row: 1 },
   gateway: { col: 1, row: 0 },
   rules: { col: 0, row: 1 },
   reactions: { col: 1, row: 1 },
   projections: { col: 2, row: 1 },
+  accounts: { col: 3, row: 0 },
   occurrent: { col: 1, row: 0 },
   bridge: { col: 2, row: 0 },
   memory: { col: 0, row: 1 },
@@ -135,6 +139,8 @@ const ROUND: Record<string, readonly [Side, Side]> = {
   'run:connection>run:gateway': ['bottom', 'top'],
   'run:rabbitmq>run:projections': ['right', 'right'],
   'run:occurrent>run:memory': ['left', 'top'],
+  'run:signin>run:accounts': ['bottom', 'top'],
+  'run:accounts>run:mongodb': ['bottom', 'bottom'],
 };
 
 /**
