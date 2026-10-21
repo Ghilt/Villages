@@ -13,6 +13,9 @@ dependencies {
     // The web server's half of the accounts: the sign-in's endpoints under /auth, behind Spring Security. See
     // docs/plans/accounts.md.
     implementation(libs.spring.boot.starter.security)
+    // Signing in through Google and Discord, as a client of theirs.
+    implementation(libs.spring.security.oauth2.client)
+    implementation(libs.spring.security.oauth2.jose)
     implementation(libs.jackson.module.kotlin)
     implementation(project(":domain"))
     implementation(project(":application"))

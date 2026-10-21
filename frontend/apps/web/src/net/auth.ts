@@ -16,6 +16,8 @@ export interface Me {
   /** The account's email, or null for a guest. */
   email: string | null;
   verified: boolean;
+  /** The places this account signs in through besides its email. */
+  through: ('google' | 'discord')[];
   signIn: SignInView | null;
   settings: Settings;
 }
@@ -40,6 +42,7 @@ const NOBODY: Me = {
   guest: false,
   email: null,
   verified: false,
+  through: [],
   signIn: null,
   settings: { motion: 'device', language: 'en' },
 };
@@ -211,6 +214,16 @@ export async function signOutThere(id: string): Promise<void> {
 /** Every sign-in of this player's ended but this browser's. */
 export async function signOutEverywhereElse(): Promise<void> {
   await ask('POST', 'signins/others-out');
+}
+
+/** Which of Google and Discord this game server signs in through, and whether they are the pretend ones. */
+export function providers(): Promise<{ providers: ('google' | 'discord')[]; pretend: boolean }> {
+  return ask('GET', 'providers');
+}
+
+/** Sends this browser to sign in through [provider], which sends it back to the game signed in. */
+export function signInThrough(provider: 'google' | 'discord'): void {
+  window.location.assign(`/oauth2/authorization/${provider}`);
 }
 
 /** This browser signed out: its sign-in ended on the server, and its windows stood down. */

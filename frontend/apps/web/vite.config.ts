@@ -36,7 +36,14 @@ const GAME =
   named === undefined
     ? `http://localhost:${tree.gamePort}`
     : named.replace(/^ws/, 'http').replace(/\/ws$/, '');
-const SIGN_IN = { '/auth': { target: GAME } };
+const SIGN_IN = {
+  '/auth': { target: GAME },
+  // Signing in through Google and Discord: sent there from /oauth2, back to /login/oauth2, and on a tree through the
+  // pretend ones, /pretend, all the game server's.
+  '/oauth2': { target: GAME },
+  '/login/oauth2': { target: GAME },
+  '/pretend': { target: GAME },
+};
 
 export default defineConfig({
   // worldApi is the dev server's own answer to "what masters are there, and cut me that one", and worldFiles

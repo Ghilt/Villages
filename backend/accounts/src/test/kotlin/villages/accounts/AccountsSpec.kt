@@ -185,3 +185,56 @@ class AccountsWithPasswordsSpec : StringSpec({
         accounts.who(made.begun.secret).shouldBeNull()
     }
 })
+
+/** Signing in through Google or Discord, and how an identity there joins an account here. */
+class AccountsThroughProvidersSpec : StringSpec({
+    val here = Asking("Chrome", "here", "http://localhost:5548")
+    val google = Login("google", "1029384756")
+
+    "an identity signs in to the account it signed in to before" {
+        val accounts = Accounts(InMemoryAccounts(), HandClock())
+        val first = accounts.signInThrough(google, "ada@example.com", verified = true, current = null, asking = here)
+
+        val again = accounts.signInThrough(google, "ada@example.com", verified = true, current = null, asking = here)
+
+        again.signIn.player shouldBe first.signIn.player
+        accounts.recordOf(first.signIn.player)?.email shouldBe "ada@example.com"
+        accounts.recordOf(first.signIn.player)?.verified shouldBe true
+        accounts.who(again.secret)?.guest shouldBe false
+    }
+
+    "a guest who signs in through Google for the first time is that account, house and all" {
+        val accounts = Accounts(InMemoryAccounts(), HandClock())
+        val guest = accounts.newcomer("Chrome")
+
+        accounts.signInThrough(google, "ada@example.com", verified = true, current = guest.signIn, asking = here)
+            .signIn.player shouldBe guest.signIn.player
+    }
+
+    "an identity whose verified email is a verified account's joins that account" {
+        val outbox = Outbox()
+        val accounts = Accounts(InMemoryAccounts(), HandClock(), mailer = outbox)
+        val made = accounts.makeAccount("ada@example.com", "a long and quiet river", Keeping.REMEMBERED, null, here)
+            .shouldBeInstanceOf<Making.Made>()
+        accounts.verify(outbox.mail().single().link!!.substringAfter('#'))
+
+        val joined = accounts.signInThrough(google, "Ada@Example.com", verified = true, current = null, asking = here)
+
+        joined.signIn.player shouldBe made.begun.signIn.player
+        accounts.recordOf(made.begun.signIn.player)?.logins shouldBe listOf(google)
+    }
+
+    "an email not verified on either side joins nothing: the identity is an account of its own, and the email is left" {
+        val accounts = Accounts(InMemoryAccounts(), HandClock())
+        val made = accounts.makeAccount("ada@example.com", "a long and quiet river", Keeping.REMEMBERED, null, here)
+            .shouldBeInstanceOf<Making.Made>()
+
+        val apart = accounts.signInThrough(google, "ada@example.com", verified = true, current = null, asking = here)
+        val unverified = accounts.signInThrough(Login("discord", "42"), "babbage@example.com", verified = false, current = null, asking = here)
+
+        apart.signIn.player shouldNotBe made.begun.signIn.player
+        accounts.recordOf(apart.signIn.player)?.email.shouldBeNull()
+        accounts.recordOf(unverified.signIn.player)?.email.shouldBeNull()
+        accounts.who(unverified.secret)?.guest shouldBe false
+    }
+})

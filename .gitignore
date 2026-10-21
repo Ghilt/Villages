@@ -93,3 +93,7 @@ frontend/apps/web/public/art/
 
 # The cut interface pictures, each at 1x, 2x and 3x, rebuilt from world/ui/ by npm run world:ui. Output.
 frontend/apps/web/public/ui/
+
+# The ids and secrets of the applications registered with Google and Discord, beside the shared .git and the main
+# checkout's alone: a secret is never committed. See docs/adr/0111.
+.secrets/

@@ -121,7 +121,7 @@ violation when the rule was introduced.
 | `projections` | Read models: the structures and people by cell, which the map is drawn from, the houses, the choices, the dialogues; the sight is what every house can see, which the fog of war is drawn from |
 | `gateway` | Player connections, cell subscriptions, snapshots, coalesced deltas, command intake through one registry, `Commands`, each mechanic a part of its own made from the `GatewayMechanic` its configuration hands over (0075), and Adam's instruments, whose levers are each mechanic's and whose looks are a part of their own, `Instruments`, all closed by `villages.instruments` (0076) |
 | `accounts` | Who a browser is signed in as: the sign-ins, kept by the hash of their secret and how long each is kept, and every player's record, in memory or beside the events in the tree's own database, never among them. Nothing of the game reaches it (0109) |
-| `app` | The Spring Boot bootstrap and the wiring, and the web server's side of the accounts: the sign-in's cookie and the endpoints under `/auth`, behind Spring Security. The only module that knows every other one |
+| `app` | The Spring Boot bootstrap and the wiring, and the web server's side of the accounts: the sign-in's cookie, the endpoints under `/auth`, and signing in through Google and Discord as Spring Security's OAuth2 client, or a pretend Google and Discord on a tree (0111). The only module that knows every other one |
 | `arch-tests` | The layer rules, as tests |
 | `load-bots` | The swarm that proves the scale numbers |
 

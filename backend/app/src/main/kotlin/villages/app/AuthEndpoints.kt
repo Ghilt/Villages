@@ -29,6 +29,7 @@ class AuthEndpoints(
     private val accounts: Accounts,
     private val cookie: SignInCookie,
     private val outbox: Outbox,
+    private val elsewhere: SigningInElsewhere,
     @Value("\${villages.instruments:true}") private val instrumentsOpen: Boolean,
 ) {
     /**
@@ -62,6 +63,10 @@ class AuthEndpoints(
         accounts.settle(who.signIn.player, settings)
         return ResponseEntity.ok(Me.of(who.signIn, who.record?.copy(settings = settings)))
     }
+
+    /** Which of Google and Discord a browser can sign in through here, and whether they are the pretend ones. */
+    @GetMapping("/providers")
+    fun providers(): Map<String, Any> = mapOf("providers" to elsewhere.providers, "pretend" to elsewhere.pretend)
 
     /**
      * A newcomer: a player of their own and a guest's sign-in for this browser. A page that kept a player's id in local

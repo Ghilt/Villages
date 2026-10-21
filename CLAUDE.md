@@ -376,6 +376,9 @@ Commands are added here as the increments land:
   it is given `--villages.store=mongo`, as the quick start gives it whenever Docker is running: then it is in
   this tree's own database and outlives the server (0092); with `--villages.broker=rabbit` too, which the quick
   start also gives it, RabbitMQ carries every event stored, in this tree's own virtual host (0094).
+  Signing in through Google and Discord is the real ones in the main checkout once `.secrets/oauth.properties`
+  beside the shared `.git` holds their applications' ids and secrets, and a pretend Google and Discord of the game
+  server's own on every worktree; `--villages.oauth=real|pretend|off` says otherwise (decision record 0111).
   `--villages.instruments=false` closes Adam's instruments: every lever
   of the debug panel and the events log, seeing everything, the fog's switch and the wipe are refused
   `instrumentsClosed`, and the player's own commands go on. See decision record 0076.

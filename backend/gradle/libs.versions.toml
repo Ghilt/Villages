@@ -52,6 +52,10 @@ bouncycastle-provider = { module = "org.bouncycastle:bcprov-jdk18on", version.re
 # What Spring Security's hashing logs through; Spring Boot manages its version.
 commons-logging = { module = "commons-logging:commons-logging" }
 spring-core = { module = "org.springframework:spring-core" }
+# Spring Security's OAuth2 client, for signing in through Google and Discord; and its JOSE, which checks the token
+# Google signs. Spring Boot manages their versions.
+spring-security-oauth2-client = { module = "org.springframework.security:spring-security-oauth2-client" }
+spring-security-oauth2-jose = { module = "org.springframework.security:spring-security-oauth2-jose" }
 # CloudEvents is what an event is stored as. Occurrent brings it, and we name it because we build
 # envelopes ourselves: the provenance extensions of decision record 0035.
 cloudevents-core = { module = "io.cloudevents:cloudevents-core", version.ref = "cloudevents" }

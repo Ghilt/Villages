@@ -16,6 +16,8 @@ data class Me(
     val guest: Boolean,
     val email: String?,
     val verified: Boolean,
+    /** The places this account signs in through besides its email: google, discord. */
+    val through: List<String>,
     val signIn: SignInView?,
     val settings: SettingsView,
 ) {
@@ -26,6 +28,7 @@ data class Me(
             guest = false,
             email = null,
             verified = false,
+            through = emptyList(),
             signIn = null,
             settings = SettingsView.of(Settings()),
         )
@@ -36,6 +39,7 @@ data class Me(
             guest = record?.guest ?: true,
             email = record?.email,
             verified = record?.verified ?: false,
+            through = record?.logins.orEmpty().map { it.provider },
             signIn = SignInView(
                 id = signIn.id.value.toString(),
                 keeping = signIn.keeping.said,

@@ -12,7 +12,9 @@ function whoSaid(me: Me | null): string {
   if (me.guest) {
     return 'You are playing as a guest, remembered by this browser alone: clearing its cookies would lose your house. An account keeps it wherever you sign in.';
   }
-  return `You are signed in as ${me.email ?? 'an account'}.`;
+  const through = me.through.map((one) => (one === 'google' ? 'Google' : 'Discord')).join(' and ');
+  if (me.email === null) return `You are signed in through ${through}.`;
+  return `You are signed in as ${me.email}${through === '' ? '' : `, and through ${through}`}.`;
 }
 
 /**

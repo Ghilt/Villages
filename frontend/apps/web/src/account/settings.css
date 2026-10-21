@@ -33,3 +33,11 @@
   align-items: center;
   gap: var(--ui-space-1) var(--ui-space-2);
 }
+
+/* Google's and Discord's buttons under a form, one under another at its width. */
+.settings__elsewhere {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+  margin-top: var(--ui-space-3);
+}

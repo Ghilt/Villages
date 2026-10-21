@@ -179,6 +179,32 @@ class Accounts(
         return Making.Made(signIns.swap(current.id, record.player, current.keeping, asking.browser))
     }
 
+    /**
+     * This browser, whose sign-in is [current], signed in through Google or Discord as [login], which said its email
+     * and whether it had verified it. The account [login] already signs in to, if any; else the account whose email it
+     * is, when both have verified it, which [login] then joins; else this guest's own player, house and all; else a
+     * player of their own. A verified email nobody holds is kept as the account's, verified.
+     */
+    fun signInThrough(login: Login, email: String?, verified: Boolean, current: SignIn?, asking: Asking): Begun {
+        stores.players.byLogin(login)?.let { return signIns.swap(current?.id, it.player, Keeping.REMEMBERED, asking.browser) }
+        val trusted = email?.let(::emailOf)?.takeIf { verified }
+        val holder = trusted?.let(stores.players::byEmail)?.takeIf { it.verified }
+        val record = if (holder != null) {
+            holder.copy(logins = holder.logins + login)
+        } else {
+            val base = current?.let { stores.players.of(it.player) }?.takeIf { it.guest } ?: PlayerRecord(newPlayer(), clock.instant())
+            val free = trusted?.takeIf { stores.players.byEmail(it) == null }
+            base.copy(logins = base.logins + login, email = base.email ?: free, verified = base.verified || free != null)
+        }
+        if (!stores.players.claim(record)) {
+            // Taken in the moment since it was looked for: by the identity itself, which is then signed in to; or by the
+            // email, which is left to its holder, and the identity kept alone.
+            stores.players.byLogin(login)?.let { return signIns.swap(current?.id, it.player, Keeping.REMEMBERED, asking.browser) }
+            stores.players.put(record.copy(email = holder?.email, verified = holder?.verified ?: false))
+        }
+        return signIns.swap(current?.id, record.player, Keeping.REMEMBERED, asking.browser)
+    }
+
     /** Who [secret] is signed in as, used now, or null when it is no sign-in or one that has ended. */
     fun who(secret: String, cookie: Boolean = false): Who? {
         val signIn = signIns.find(secret) ?: return null

@@ -8,6 +8,7 @@ import { TextButton } from '../ui/button/Button';
 import { TextField } from '../ui/field/TextField';
 import { Form } from '../ui/form/Form';
 import { Switch } from '../ui/switch/Switch';
+import { Elsewhere } from './Elsewhere';
 import { ForgotForm } from './PasswordForms';
 import { aboutThePassword, said } from './words';
 
@@ -109,25 +110,28 @@ export function CreateAccountForm({ onElsewhere }: { onElsewhere: () => void }) 
     );
   }
   return (
-    <Form
-      label="Create an account"
-      onSend={create}
-      actions={
-        <>
-          <TextButton face="secondary" onClick={onElsewhere}>
-            Sign in instead
-          </TextButton>
-          <TextButton sends disabled={sending.at === 'sending'}>
-            Create the account
-          </TextButton>
-        </>
-      }
-    >
-      <p className="ui-label">
-        An account keeps your house wherever you sign in. Its email will be asked to be verified.
-      </p>
-      <Fields {...{ email, setEmail, password, setPassword, remembered, remember, sending }} choosing />
-    </Form>
+    <>
+      <Form
+        label="Create an account"
+        onSend={create}
+        actions={
+          <>
+            <TextButton face="secondary" onClick={onElsewhere}>
+              Sign in instead
+            </TextButton>
+            <TextButton sends disabled={sending.at === 'sending'}>
+              Create the account
+            </TextButton>
+          </>
+        }
+      >
+        <p className="ui-label">
+          An account keeps your house wherever you sign in. Its email will be asked to be verified.
+        </p>
+        <Fields {...{ email, setEmail, password, setPassword, remembered, remember, sending }} choosing />
+      </Form>
+      <Elsewhere />
+    </>
   );
 }
 
@@ -158,36 +162,39 @@ export function SignInForm({ onElsewhere }: { onElsewhere?: () => void }) {
     return <ForgotForm onBack={() => forget(false)} />;
   }
   return (
-    <Form
-      label="Sign in"
-      onSend={enter}
-      actions={
-        <>
-          {onElsewhere !== undefined && (
-            <TextButton face="secondary" onClick={onElsewhere}>
-              Create an account
+    <>
+      <Form
+        label="Sign in"
+        onSend={enter}
+        actions={
+          <>
+            {onElsewhere !== undefined && (
+              <TextButton face="secondary" onClick={onElsewhere}>
+                Create an account
+              </TextButton>
+            )}
+            <TextButton sends disabled={sending.at === 'sending'}>
+              Sign in
             </TextButton>
-          )}
-          <TextButton sends disabled={sending.at === 'sending'}>
-            Sign in
+          </>
+        }
+      >
+        {house !== null && (
+          <p className="ui-label">
+            Signing in to an account leaves this guest’s house, {house}, behind: an account plays its own.
+          </p>
+        )}
+        <Fields
+          {...{ email, setEmail, password, setPassword, remembered, remember, sending }}
+          choosing={false}
+        />
+        <div className="settings__row">
+          <TextButton face="secondary" size="small" onClick={() => forget(true)}>
+            Forgot your password?
           </TextButton>
-        </>
-      }
-    >
-      {house !== null && (
-        <p className="ui-label">
-          Signing in to an account leaves this guest’s house, {house}, behind: an account plays its own.
-        </p>
-      )}
-      <Fields
-        {...{ email, setEmail, password, setPassword, remembered, remember, sending }}
-        choosing={false}
-      />
-      <div className="settings__row">
-        <TextButton face="secondary" size="small" onClick={() => forget(true)}>
-          Forgot your password?
-        </TextButton>
-      </div>
-    </Form>
+        </div>
+      </Form>
+      <Elsewhere />
+    </>
   );
 }

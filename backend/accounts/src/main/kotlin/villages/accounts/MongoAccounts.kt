@@ -39,6 +39,8 @@ class MongoAccounts(connection: String, val database: String) : AccountStores {
             Indexes.ascending("email"),
             IndexOptions().unique(true).partialFilterExpression(Filters.exists("email")),
         )
+        // One account to a Google or a Discord identity: a unique index over every record's list of them.
+        it.createIndex(Indexes.ascending("logins"), IndexOptions().unique(true).partialFilterExpression(Filters.exists("logins")))
     }
 
     private val linkRows: MongoCollection<Document> = client.getDatabase(database).getCollection(MAIL_LINKS).also {
@@ -81,6 +83,8 @@ class MongoAccounts(connection: String, val database: String) : AccountStores {
         }
 
         override fun byEmail(email: String): PlayerRecord? = playerRows.find(eq("email", email)).first()?.player()
+
+        override fun byLogin(login: Login): PlayerRecord? = playerRows.find(eq("logins", login.key)).first()?.player()
 
         override fun claim(record: PlayerRecord): Boolean =
             try {
@@ -145,6 +149,7 @@ private fun PlayerRecord.row() = Document()
     .apply { email?.let { append("email", it) } }
     .append("verified", verified)
     .apply { password?.let { append("password", it) } }
+    .apply { if (logins.isNotEmpty()) append("logins", logins.map { it.key }) }
 
 private fun Document.player() = PlayerRecord(
     player = PlayerId(UUID.fromString(getString("_id"))),
@@ -155,6 +160,7 @@ private fun Document.player() = PlayerRecord(
     email = getString("email"),
     verified = getBoolean("verified", false),
     password = getString("password"),
+    logins = getList("logins", String::class.java).orEmpty().map { Login(it.substringBefore(':'), it.substringAfter(':')) },
 )
 
 private fun MailLink.row() = Document()

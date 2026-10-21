@@ -1117,7 +1117,16 @@ and `-- --drop` takes them off; by hand only.
   again with a new secret. **Where you are signed in** lists every browser signed in to the account, the newest used
   first, this one marked, each remembered or until the browser closes and when it was last used: *Sign out there* ends
   that sign-in on the server and dims its windows under **Signed out** within a second, and *Sign out everywhere
-  else* does it to all of them. A sign-in with a window open counts as used however long ago it opened: every five
+  else* does it to all of them. **Continue with Google** and **Continue with Discord**, under the forms, sign in
+  through either: away and back, signed in and remembered, a guest's house kept by an identity that has no account
+  here yet, and an identity whose verified email is a verified account's joining it. On a worktree they are a
+  **pretend Google and Discord** of the game server's own, a page at `/pretend/<provider>/authorize` that asks which
+  made-up email to be and whether it is verified, and the game server's log says *signing in through google and
+  discord, pretend* as it starts; in the main checkout they are the real ones once `.secrets/oauth.properties`
+  beside the shared `.git` holds `google.client-id`, `google.client-secret`, `discord.client-id` and
+  `discord.client-secret`, for applications registered with each for
+  `http://localhost:5173/login/oauth2/code/google` and `.../discord`. Account then says what the account signs in
+  through. A sign-in with a window open counts as used however long ago it opened: every five
   minutes the game server uses those, and ends any other past its end. Signed in, Account says the email, and **Log out** at the
   foot ends the sign-in on the server and dims the window under **Signed out**, whose *Sign in* signs in again there.
   **The world moving** is

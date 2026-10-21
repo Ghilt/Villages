@@ -35,9 +35,17 @@ data class PlayerRecord(
     val verified: Boolean = false,
     /** [Passwords.hash] of the account's password, never the password. */
     val password: String? = null,
+    /** The Google and Discord identities that sign in to it. */
+    val logins: List<Login> = emptyList(),
 ) {
-    /** A player without an account: no email to sign in with. */
-    val guest: Boolean get() = email == null
+    /** A player without an account: no email and no identity elsewhere to sign in with. */
+    val guest: Boolean get() = email == null && logins.isEmpty()
+}
+
+/** An identity a player signs in through elsewhere: Google's or Discord's, by the id that provider gives it. */
+data class Login(val provider: String, val subject: String) {
+    /** The one text it is kept and looked up by. */
+    val key: String get() = "$provider:$subject"
 }
 
 /**
@@ -70,10 +78,13 @@ interface PlayerStore {
     /** The account kept under [email], as [emailOf] has it. */
     fun byEmail(email: String): PlayerRecord?
 
+    /** The account [login] signs in to. */
+    fun byLogin(login: Login): PlayerRecord?
+
     /**
-     * Writes [record] over the one its player has, unless another player's account is kept under its email, and says
-     * which: one account to an email, held by the store at the instant of writing, so two who ask at once cannot both
-     * have it.
+     * Writes [record] over the one its player has, unless another player's account is kept under its email, or signed
+     * in to by one of its logins, and says which: one account to an email and to an identity, held by the store at the
+     * instant of writing, so two who ask at once cannot both have it.
      */
     fun claim(record: PlayerRecord): Boolean
 }
@@ -144,9 +155,13 @@ class InMemoryAccounts : AccountStores {
 
         override fun byEmail(email: String): PlayerRecord? = records.values.firstOrNull { it.email == email }
 
+        override fun byLogin(login: Login): PlayerRecord? = records.values.firstOrNull { login in it.logins }
+
         @Synchronized
         override fun claim(record: PlayerRecord): Boolean {
-            if (records.values.any { it.email == record.email && it.player != record.player }) return false
+            val others = records.values.filter { it.player != record.player }
+            if (record.email != null && others.any { it.email == record.email }) return false
+            if (others.any { other -> other.logins.any { it in record.logins } }) return false
             records[record.player] = record
             return true
         }

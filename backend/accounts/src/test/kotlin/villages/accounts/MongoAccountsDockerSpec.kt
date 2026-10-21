@@ -71,6 +71,18 @@ class MongoAccountsDockerSpec : StringSpec({
         }
     }
 
+    "one account to a Google or a Discord identity, found by it".config(enabledOrReasonIf = needsDocker) {
+        stores("logins").use { kept ->
+            val google = Login("google", "1029384756")
+            val ada = PlayerRecord(PlayerId(UUID.randomUUID()), HandClock().now, logins = listOf(google))
+            val other = PlayerRecord(PlayerId(UUID.randomUUID()), HandClock().now, logins = listOf(google))
+
+            kept.players.claim(ada) shouldBe true
+            kept.players.claim(other) shouldBe false
+            kept.players.byLogin(google) shouldBe ada
+        }
+    }
+
     "a player has one record".config(enabledOrReasonIf = needsDocker) {
         stores("players").use { kept ->
             val record = PlayerRecord(PlayerId(UUID.randomUUID()), HandClock().now)
