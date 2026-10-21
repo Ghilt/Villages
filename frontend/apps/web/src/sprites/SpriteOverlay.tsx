@@ -20,18 +20,26 @@ import { useStore } from '../store/useStore';
 const CHARACTER = 'character:';
 /** The id space structures are drawn under, apart from people. See `mapSprites.ts`. */
 const STRUCTURE = 'structure:';
+/** A settlement's, by its number. See `useSettlements.ts`. */
+const SETTLEMENT = 'settlement:';
 /** What a crowd's "+N" answers a click with: its leader's id with this in front. See `MarksLayer.ts`. */
 const GROUP = 'group:';
 /** How close a Ctrl-click takes the camera: well in from where everything becomes its mark. */
 const CLOSER_ZOOM = 9;
 
-/** A person or a structure, by the id it is drawn under, or null for anything else. */
-function thingOf(id: string): { kind: 'character' | 'structure'; id: string } | null {
-  return id.startsWith(CHARACTER)
-    ? { kind: 'character', id: id.slice(CHARACTER.length) }
-    : id.startsWith(STRUCTURE)
-      ? { kind: 'structure', id: id.slice(STRUCTURE.length) }
-      : null;
+/** What can be picked on the map: a person, a structure, or a settlement by its jetties, net racks and boats. */
+type Picked = { kind: 'character' | 'structure' | 'settlement'; id: string };
+
+/** A person, a structure or a settlement, by the id it is drawn under, or null for anything else. */
+function thingOf(id: string): Picked | null {
+  for (const [prefix, kind] of [
+    [CHARACTER, 'character'],
+    [STRUCTURE, 'structure'],
+    [SETTLEMENT, 'settlement'],
+  ] as const) {
+    if (id.startsWith(prefix)) return { kind, id: id.slice(prefix.length) };
+  }
+  return null;
 }
 
 interface SpriteOverlayProps {
@@ -44,9 +52,13 @@ interface SpriteOverlayProps {
    * overlay knows nothing of windows. See `App.tsx`.
    */
   picked:
-    { kind: 'house' | 'area' | 'character' | 'structure' | 'river' | 'lake' | 'sea'; id: string } | undefined;
-  /** A person or a structure clicked on the map, which opens a window on it. */
-  onPick: (thing: { kind: 'character' | 'structure'; id: string }) => void;
+    | {
+        kind: 'house' | 'area' | 'character' | 'structure' | 'settlement' | 'river' | 'lake' | 'sea';
+        id: string;
+      }
+    | undefined;
+  /** A person, a structure or a settlement clicked on the map, which opens a window on it. */
+  onPick: (thing: Picked) => void;
   /** Whether the game has started, its loading screen lifted: handed in, as the startup is the app's. */
   started: boolean;
 }

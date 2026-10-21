@@ -483,7 +483,7 @@ points at something.
 ### What it is
 
 A window that says what one thing in the world is. That thing is its **subject** — today a house, an
-area, a character or water - a river, a lake, the sea - later a holding, a work, a place named in a
+area, a character, a structure, a settlement or water - a river, a lake, the sea - later a holding, a work, a place named in a
 conversation. The window says what the
 world knows about that subject, and then it offers **links**: the things worth looking at from here, each
 of which opens on its own.

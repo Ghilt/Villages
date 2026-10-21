@@ -13,7 +13,7 @@ import { Desk } from './desk/Desk';
 import { panelWants, stageBox } from './stage/stageBox';
 import { note } from './log/log';
 import { inspect } from './inspect/opening';
-import { WaterClicks } from './inspect/WaterClicks';
+import { GroundClicks } from './inspect/GroundClicks';
 import { RippleAlongWater } from './inspect/RippleAlongWater';
 import { Settings } from './account/Settings';
 import { SignedOut } from './account/SignedOut';
@@ -318,8 +318,8 @@ export function App({ master, devTools }: AppProps) {
           picked={open[0]}
           onPick={inspect}
         />
-        {/* After the marks' and the areas', so that a click neither took asks what water is there. */}
-        <WaterClicks map={map} onPick={inspect} />
+        {/* After the marks' and the areas', so that a click neither took opens a settlement or asks what water is there. */}
+        <GroundClicks map={map} worldRoot={worldRoot} onPick={inspect} />
         <RippleAlongWater map={map} worldRoot={worldRoot} />
         <InfluenceZone map={map} zone={zone} turn={camera.latticeTurn} />
         {/* On a phone, the size control in the map's corner over a little fade, and nothing else. Never in

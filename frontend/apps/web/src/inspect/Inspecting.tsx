@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { charactersInView, structuresInView } from '@villages/client-core';
 import { describeDay, shortDay } from '@villages/protocol';
@@ -6,10 +6,16 @@ import type { StructureView } from '@villages/protocol';
 import type { TerrainClass } from '@villages/world';
 
 import { areasStore } from '../areas/areas';
+import { fromMercator, toMercatorExact } from '../geometry/cameraMath';
+import { onACorner } from '../geometry/footing';
 import { terrainPalette } from '../geometry/terrainClasses';
+import { WORLD_MASTER_WIDTH } from '../geometry/world';
 import { inspectSubject, sessionStore } from '../net/gateway';
 import { cultureOfPlace, useCultureMap } from '../map/culture';
+import { chosenMaster, worldRootOf } from '../map/masters';
 import { useStructureCatalogue } from '../net/structureCatalogue';
+import { settlementAt } from '../sprites/settlements/settlementsHeld';
+import { useSettlementsHeld } from '../sprites/settlements/useSettlementsHeld';
 import type { Room } from '../stage/panes';
 import {
   type Description,
@@ -20,6 +26,7 @@ import {
   describeWater,
   type Legend,
 } from './describe';
+import { describeSettlement } from './describeSettlement';
 import { InspectWindow, WindowBar } from './InspectWindow';
 import { sayingOrLastSaid } from './remembered';
 import { forgetSubject, isWaterKind, type Subject } from './subjects';
@@ -57,6 +64,13 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
   const connection = useStore(sessionStore, (state) => state.connection);
   const catalogue = useStructureCatalogue();
   const cultures = useCultureMap();
+  const worldRoot = useMemo(() => worldRootOf(chosenMaster()), []);
+  const settlements = useSettlementsHeld(worldRoot);
+  /** The settlement a structure is part of, by where the map stands it, as the map tells it (0117); or null. */
+  const partOf = (structure: StructureView) => {
+    const at = toMercatorExact(onACorner({ lng: structure.place.lon, lat: structure.place.lat }));
+    return settlementAt(settlements, at.x * WORLD_MASTER_WIDTH, at.y * WORLD_MASTER_WIDTH);
+  };
   /** A structure as its window says it, by the catalogue's entry for its type and whether it is the player's. */
   const sayStructure = (structure: StructureView): Description =>
     describeStructure(
@@ -64,6 +78,7 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
       catalogue?.types.find((one) => one.type === structure.structureType),
       structure.holder !== undefined && structure.holder.id === yourHouse?.house.id,
       cultureOfPlace(cultures, structure.place),
+      partOf(structure),
     );
 
   // An area the player deleted is not a window they shut, so the window goes rather than saying nothing -
@@ -107,6 +122,21 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
       return area === null
         ? null
         : { said: describeArea(area, structuresInView(onTheMap), legend), hidden: undefined };
+    }
+
+    // A settlement is what the page holds of it, and the structures in view standing inside it.
+    if (subject.kind === 'settlement') {
+      const settlement = settlements.find((one) => String(one.index) === subject.id);
+      if (settlement === undefined) return null;
+      const middle = fromMercator({
+        x: settlement.x / WORLD_MASTER_WIDTH,
+        y: settlement.y / WORLD_MASTER_WIDTH,
+      });
+      const inside = structuresInView(onTheMap).filter((one) => partOf(one)?.index === settlement.index);
+      return {
+        said: describeSettlement({ ...settlement, at: { lat: middle.lat, lon: middle.lng } }, inside),
+        hidden: undefined,
+      };
     }
 
     // Water is what the server said of it when it was clicked, kept for this page's life.
@@ -166,7 +196,13 @@ export function Inspecting({ subject, room, along }: InspectingProps) {
   const freshness = (): { said: string; meant: string } | null => {
     const answered = answer?.house ?? answer?.character ?? answer?.structure;
     const hidden = live !== null ? live.hidden : answered === undefined ? null : answered.seenUntil;
-    if (subject.kind === 'area' || isWaterKind(subject.kind) || said === null || hidden === null) {
+    if (
+      subject.kind === 'area' ||
+      subject.kind === 'settlement' ||
+      isWaterKind(subject.kind) ||
+      said === null ||
+      hidden === null
+    ) {
       return null;
     }
     return hidden === undefined
@@ -203,6 +239,7 @@ const KIND_WORDS: Record<Subject['kind'], string> = {
   area: 'Area',
   character: 'Key figure',
   structure: 'Structure',
+  settlement: 'Settlement',
   river: 'River',
   lake: 'Lake',
   sea: 'Sea',

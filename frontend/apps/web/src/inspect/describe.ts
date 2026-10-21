@@ -196,11 +196,20 @@ export function describeStructure(
   spec: StructureTypeSpec | undefined,
   yours: boolean,
   culture: Culture | null = null,
+  partOf: { readonly index: number; readonly name: string } | null = null,
 ): Description {
   // The catalogue's word for it in the culture it is built in: a great mosque, a stockade.
   const word = spec?.words[culture ?? 'european'] ?? spec?.words.european ?? spoken(structure.structureType);
   const { holder, level, place } = structure;
   const links: Link[] = [{ what: 'show it on the map', to: 'map', at: place }];
+  // The settlement it stands in, as a whole: a structure is part of the one whose radius holds it (0117).
+  if (partOf !== null) {
+    links.push({
+      what: `part of the ${partOf.name}`,
+      to: 'subject',
+      subject: { kind: 'settlement', id: String(partOf.index) },
+    });
+  }
   if (holder !== undefined) {
     links.push({ what: holder.name, to: 'subject', subject: { kind: 'house', id: holder.id } });
   }
@@ -214,6 +223,7 @@ export function describeStructure(
         : `${article} ${word}${structure.seatOf === undefined ? '' : `, the seat of ${structure.seatOf.name}`}`,
     facts: [
       { what: 'Held by', said: holder?.name ?? 'nobody' },
+      ...(partOf === null ? [] : [{ what: 'Part of', said: `the ${partOf.name}` }]),
       { what: 'Level', said: spec === undefined ? String(level) : `${level} of ${spec.levels}` },
       // What it gives whoever holds it, the catalogue's for its type at its level; a ruin gives nothing.
       ...(spec === undefined
@@ -260,7 +270,7 @@ export function yieldsOf(
 }
 
 /** A name in the catalogue, said: `printingHouse` is a printing house. */
-function spoken(type: string): string {
+export function spoken(type: string): string {
   return type.replace(/[A-Z]/g, (letter) => ` ${letter.toLowerCase()}`);
 }
 

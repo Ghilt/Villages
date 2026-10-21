@@ -457,7 +457,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   **inspect window** on it, marked with two waves for a river, a shore for a lake and an anchor for the sea: its
   name in English - the one of 1790 where the review chose it, with today's under it - or *A river*, *A lake* or
   *A sea* where nothing named is close enough to be the water painted there, and *show it on the map*, back to
-  where it was clicked. A click a house, a person or an area took is theirs. The page asks the game server, which
+  where it was clicked. A click a house, a person or an area took is theirs, and from 7.5 in so is one on a
+  settlement's ground. The page asks the game server, which
   answers from the ground map and the names of the master the page draws, and only on ground the house has
   revealed: under the fog nothing opens. The ground is read in cells some eighteen kilometres across, so a click
   on a shore can name the water beside it: a lake is the one whose shores enclose the click, a cell mostly sea is
@@ -521,7 +522,10 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `public/art/settlements.webp` - and every structure whose place its radius holds, the nearest middle's where two
   do, stands among the trees together with it as one thing on its square: its houses, its mill and its market, drawn
   as structures are, and a castle founded inside it too. A structure inside one is worn into the settlement's own
-  ground rather than given a yard and paths of its own. A click on any building opens that structure's window. The
+  ground rather than given a yard and paths of its own. A click on any building opens that structure's window, which
+  says the settlement it is *part of* and links to it; a click on a settlement's own ground, its jetties, net racks or
+  boats opens the settlement's **inspect window**, marked as an area is: its name, a hamlet, a village or a large
+  village held by nobody, its buildings in view counted by their type, and a link to each of them. The
   log's `settlements` line says how many are held, how many laid out and how many structures stand in them, and the
   probe's `villagesSprites()` names each settlement `settlement:<number>`. Each is seen only through the fog, so *see
   everything* shows them all; further out than 7.5 a settlement, like its houses, has no mark.

@@ -1,3 +1,12 @@
+import {
+  GROUND_LATTICE,
+  SETTLEMENT_SIDES,
+  alongU,
+  alongV,
+  frameOf,
+  inSquare,
+  settlementSquare,
+} from '@villages/world';
 import type { SettlementRecord, SettlementType, SettlementsMapFile } from '@villages/world';
 
 /*
@@ -58,6 +67,38 @@ export function settlementAt(
     }
   }
   return best;
+}
+
+const FRAME = frameOf(GROUND_LATTICE);
+
+/**
+ * The settlement whose square of ground a point stands on, in world units: what a click on its ground opens. Its square
+ * is laid round the corner nearest its middle, as `settlementIn` lays it; where two squares hold the point, the nearer
+ * middle's. Null for a point on none.
+ */
+export function settlementOnItsSquare(
+  settlements: readonly HeldSettlement[],
+  x: number,
+  y: number,
+): HeldSettlement | null {
+  const u = Math.floor(alongU(FRAME, x, y));
+  const v = Math.floor(alongV(FRAME, x, y));
+  const on = settlements.filter((one) =>
+    inSquare(
+      settlementSquare(
+        Math.round(alongU(FRAME, one.x, one.y)),
+        Math.round(alongV(FRAME, one.x, one.y)),
+        SETTLEMENT_SIDES[Math.max(0, Math.min(2, one.level - 1))]!,
+      ),
+      u,
+      v,
+    ),
+  );
+  return on.length === 0
+    ? null
+    : on.reduce((best, one) =>
+        Math.hypot(one.x - x, one.y - y) < Math.hypot(best.x - x, best.y - y) ? one : best,
+      );
 }
 
 const maps = new Map<string, Promise<SettlementsMapFile | null>>();

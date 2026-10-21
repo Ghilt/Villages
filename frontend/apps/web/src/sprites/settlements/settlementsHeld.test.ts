@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { SettlementRecord, SettlementsMapFile } from '@villages/world';
 
-import { settlementAt, settlementsHeld } from './settlementsHeld';
+import { settlementAt, settlementOnItsSquare, settlementsHeld } from './settlementsHeld';
 
 const map: SettlementsMapFile = {
   master: 'test',
@@ -38,5 +38,15 @@ describe('the settlements the page holds', () => {
     // Within both circles, nearer the fishing village's middle.
     expect(settlementAt(held, 108, 100)?.index).toBe(1);
     expect(settlementAt(held, 100, 130)).toBeNull();
+  });
+
+  it('are opened by a click on their square of ground, as wide as their level, the nearer middle where two are', () => {
+    const held = settlementsHeld(map, [[dantzic, vistula]]);
+    expect(settlementOnItsSquare(held, 100.4, 100.4)?.index).toBe(0);
+    // A large village's square is nineteen diamonds a side, a hamlet's seven, laid round the corner of its middle.
+    expect(settlementOnItsSquare(held, 92, 100)?.index).toBe(0);
+    expect(settlementOnItsSquare(held, 112.5, 100)?.index).toBe(1);
+    expect(settlementOnItsSquare(held, 120, 100)).toBeNull();
+    expect(settlementOnItsSquare(settlementsHeld(map, [[vistula]]), 104, 100)).toBeNull();
   });
 });

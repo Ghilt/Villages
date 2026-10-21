@@ -1,17 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { GROUND_LATTICE, SETTLEMENT_SIDES, alongU, alongV, frameOf, settlementIn } from '@villages/world';
-import type { LaidOut, SettlementsMapFile } from '@villages/world';
+import type { LaidOut } from '@villages/world';
 
 import { fromMercator, toMercatorExact } from '../../geometry/cameraMath';
 import { WORLD_MASTER_WIDTH } from '../../geometry/world';
 import { note } from '../../log/log';
 import { cultureOfPlace, useCultureMap } from '../../map/culture';
-import { heldStandsOf, onStandsArrived, onStandsFollowed } from '../../net/stands';
 import { createGroundTiles } from '../ground/groundTiles';
 import type { MapSprite } from '../SpriteRenderer';
-import { settlementAt, settlementsHeld, settlementsMap } from './settlementsHeld';
+import { settlementAt } from './settlementsHeld';
 import type { HeldSettlement } from './settlementsHeld';
+import { useSettlementsHeld } from './useSettlementsHeld';
 
 const FRAME = frameOf(GROUND_LATTICE);
 const UNTINTED = 0xffffff;
@@ -33,35 +33,8 @@ export function settlementSpriteId(index: number): string {
 export function useSettlements(given: readonly MapSprite[], tilesRoot: string): readonly MapSprite[] {
   const [known, setKnown] = useState(0);
   const ground = useMemo(() => createGroundTiles(tilesRoot, () => setKnown((was) => was + 1)), [tilesRoot]);
-  const [version, setVersion] = useState(0);
-  useEffect(() => {
-    const bump = () => setVersion((was) => was + 1);
-    const stopArriving = onStandsArrived((_, __, layer) => layer === 'settlements' && bump());
-    const stopFollowing = onStandsFollowed(bump);
-    return () => {
-      stopArriving();
-      stopFollowing();
-    };
-  }, []);
-  const [map, setMap] = useState<SettlementsMapFile | null>(null);
-  useEffect(() => {
-    let live = true;
-    void settlementsMap(tilesRoot).then((read) => live && setMap(read));
-    return () => {
-      live = false;
-    };
-  }, [tilesRoot]);
   const cultures = useCultureMap();
-
-  const held = useMemo(() => {
-    void version;
-    return settlementsHeld(
-      map,
-      [...heldStandsOf('settlements')].flatMap((tile) =>
-        tile.settlements === undefined ? [] : [tile.settlements],
-      ),
-    );
-  }, [map, version]);
+  const held = useSettlementsHeld(tilesRoot);
 
   const laid = useRef(new Map<string, LaidOut>());
   const made = useRef(new Map<string, MapSprite>());

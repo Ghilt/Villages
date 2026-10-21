@@ -7,6 +7,7 @@ import type { StructureTypeSpec } from '@villages/world';
 
 import { portraitUrl } from '../figures/portraits';
 import { describeCharacter, describeStructure, givesOf, socketsSaid } from './describe';
+import { describeSettlement } from './describeSettlement';
 import type { CharacterSeen } from './describe';
 
 const today = dayOf(1790, 5, 9);
@@ -144,11 +145,84 @@ describe("a structure's window", () => {
     );
   });
 
+  it('says which settlement it is part of, with a way to the settlement as a whole', () => {
+    const said = describeStructure(abbey, spec, false, null, { index: 7, name: 'village by the Vistula' });
+
+    expect(said.facts[1]).toEqual({ what: 'Part of', said: 'the village by the Vistula' });
+    expect(said.links[1]).toEqual({
+      what: 'part of the village by the Vistula',
+      to: 'subject',
+      subject: { kind: 'settlement', id: '7' },
+    });
+  });
+
   it('says a type the catalogue has not told it of in its own name, spoken', () => {
     const said = describeStructure({ ...abbey, structureType: 'printingHouse' }, undefined, false);
 
     expect(said.under).toBe('a printing house');
     expect(said.facts[1]).toEqual({ what: 'Level', said: '2' });
+  });
+});
+
+describe("a settlement's window", () => {
+  const house = (
+    id: string,
+    structureType = 'house',
+    place = { lat: 54.361, lon: 18.646 },
+  ): StructureView => ({
+    id,
+    structureType,
+    name: `${structureType} in the village by the ruins of Dantzic`,
+    place,
+    cell: '2123302003',
+    level: 1,
+    significance: 1,
+    since: 654635,
+    stamp: 1,
+  });
+  const village = {
+    name: 'village by the ruins of Dantzic',
+    type: 'village' as const,
+    level: 2,
+    at: { lat: 54.351, lon: 18.646 },
+  };
+
+  it('names it, says what it is and that nobody holds it, and counts the buildings in it by their type', () => {
+    const said = describeSettlement(village, [house('a'), house('b'), house('c', 'mill')]);
+
+    expect([said.kind, said.name, said.under]).toEqual([
+      'Settlement',
+      'Village by the ruins of Dantzic',
+      'a village, held by nobody',
+    ]);
+    expect(said.facts.map((fact) => `${fact.what}: ${fact.said}`)).toEqual([
+      'Buildings: 2 houses, a mill',
+      'Stands: 54.351, 18.646',
+    ]);
+  });
+
+  it('leads to where it stands and to every structure in it, each by which way it stands from the middle', () => {
+    const said = describeSettlement(village, [
+      house('a'),
+      house('b', 'house', { lat: 54.351, lon: 18.66 }),
+      house('c', 'mill', { lat: 54.3515, lon: 18.6465 }),
+      { ...house('d', 'castle', { lat: 54.341, lon: 18.646 }), name: 'Castle Erebus' },
+    ]);
+
+    expect(said.links).toEqual([
+      { what: 'show it on the map', to: 'map', at: village.at },
+      { what: 'a house to the north', to: 'subject', subject: { kind: 'structure', id: 'a' } },
+      { what: 'a house to the east', to: 'subject', subject: { kind: 'structure', id: 'b' } },
+      { what: 'Castle Erebus', to: 'subject', subject: { kind: 'structure', id: 'd' } },
+      { what: 'a mill by the green', to: 'subject', subject: { kind: 'structure', id: 'c' } },
+    ]);
+  });
+
+  it('says a fishing village is by the water, and when no building of it is in view', () => {
+    const said = describeSettlement({ ...village, type: 'fishingVillage', level: 1 }, []);
+
+    expect(said.under).toBe('a hamlet by the water, held by nobody');
+    expect(said.facts[0]).toEqual({ what: 'Buildings', said: 'none in view' });
   });
 });
 
