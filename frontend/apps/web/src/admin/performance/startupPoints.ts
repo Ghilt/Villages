@@ -1,7 +1,7 @@
 /**
  * The points `npm run perf:startup` keeps, one line of `docs/experiments/performance/startup.jsonl` each: how long the
  * game took to start and where that time went, for the first load after the dev server started, for a load again,
- * and for the built page. Read by the performance page; the tool writes them by these types. Kept apart from the
+ * for the built page, and for a player's first visit, the built page in a browser that has nothing compiled or cached. Read by the performance page; the tool writes them by these types. Kept apart from the
  * shaders' points because a start is not a place: what is the same - which points compare, a point's name, the line
  * one chart draws - is the shaders' reader's (`shaderPoints.ts`). See decision record 0106.
  */
@@ -69,9 +69,17 @@ export interface StartupPoint extends Measured {
     readonly chrome: string;
     readonly viewport: string;
   };
-  /** The first load after the dev server started, the middle of the loads again, and the built page's middle. */
-  readonly loads: { readonly first: Load | null; readonly again: Load | null; readonly built: Load | null };
-  /** How many loads again and of the built page the middle was taken from. */
+  /**
+   * The first load after the dev server started, the middle of the loads again, the built page's middle, and the
+   * middle of the first visits; absent from points kept before first visits were measured (2026-10-21).
+   */
+  readonly loads: {
+    readonly first: Load | null;
+    readonly again: Load | null;
+    readonly built: Load | null;
+    readonly visit?: Load | null;
+  };
+  /** How many loads again, of the built page and first visits the middle was taken from. */
   readonly of: number;
 }
 
@@ -90,5 +98,14 @@ export const LOADS = [
     what: 'the first load after the dev server started: everything worked out anew',
   },
   { key: 'again', words: 'load again', what: 'a load again on the same dev server, the middle of several' },
-  { key: 'built', words: 'built page', what: 'the page as it is built for a player, the middle of several' },
+  {
+    key: 'built',
+    words: 'built page',
+    what: 'the page as it is built for a player, in a browser that has loaded it before, the middle of several',
+  },
+  {
+    key: 'visit',
+    words: 'first visit',
+    what: "the built page in a browser of its own, nothing compiled or cached: a player's first visit, the middle of several",
+  },
 ] as const;

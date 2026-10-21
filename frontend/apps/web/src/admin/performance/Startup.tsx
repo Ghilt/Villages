@@ -6,7 +6,7 @@ import { lineOf, pointName } from './shaderPoints';
 import { LOADS, readStartupPoints } from './startupPoints';
 import type { Load, Spent, StartupPoint } from './startupPoints';
 
-const COLOURS = { first: '#eb6834', again: '#2a78d6', built: '#1baf7a' } as const;
+const COLOURS = { first: '#eb6834', again: '#2a78d6', built: '#1baf7a', visit: '#b04ac0' } as const;
 
 type Reading =
   | { state: 'reading' }
@@ -19,8 +19,8 @@ const mb = (kb: number | undefined) => (kb === undefined ? '-' : (kb / 1024).toF
 
 /**
  * How long the game takes to start, point by point: the history `npm run perf:startup` keeps, read from
- * `docs/experiments/performance/startup.jsonl`. The latest point's three loads - the first after the dev server
- * started, a load again, the built page - and when each mark of the start came, the stalls and stutters up to the
+ * `docs/experiments/performance/startup.jsonl`. The latest point's four loads - the first after the dev server
+ * started, a load again, the built page, a player's first visit - and when each mark of the start came, the stalls and stutters up to the
  * loading screen lifting and after it, what was fetched; each load's start point by point; and where the CPU's time
  * went, by module and by function. See decision record 0106.
  */
@@ -111,11 +111,12 @@ function Latest({ point }: { point: StartupPoint }) {
   return (
     <section className="inspect-group" aria-label="the latest point">
       <p className="inspect-said">
-        The latest point, {pointName(point)}, &quot;{point.code.subject}&quot;, {point.why}: each load in a
-        browser of its own with nothing cached, at {point.machine.viewport} on the {point.machine.gpu},{' '}
-        {point.machine.cpu}; the load again and the built page the middle of {point.of}. Seconds from asking
-        for the page; long tasks and stutters (gaps between frames of 50 ms or more) up to the screen lifting,
-        and in the five seconds after.
+        The latest point, {pointName(point)}, &quot;{point.code.subject}&quot;, {point.why}: each load on a
+        page of its own with nothing in its cache, the first visit in a browser of its own besides, where no
+        program is compiled either, at {point.machine.viewport} on the {point.machine.gpu},{' '}
+        {point.machine.cpu}; the load again, the built page and the first visit the middle of {point.of}.
+        Seconds from asking for the page; long tasks and stutters (gaps between frames of 50 ms or more) up to
+        the screen lifting, and in the five seconds after.
       </p>
       <table className="inspect-table perf-table">
         <thead>
@@ -138,7 +139,7 @@ function Latest({ point }: { point: StartupPoint }) {
         <tbody>
           {LOADS.map(({ key, words, what }) => {
             const load = point.loads[key];
-            if (load === null) {
+            if (load === null || load === undefined) {
               return (
                 <tr key={key}>
                   <td title={what}>{words}</td>

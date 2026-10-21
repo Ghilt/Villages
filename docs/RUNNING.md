@@ -1125,11 +1125,14 @@ and `-- --drop` takes them off; by hand only.
 ## How long the game takes to start
 
 - **The start's measure**, `npm run perf:startup --prefix frontend`: on the same Chrome and servers of its own as the
-  shaders' measure, the game opened in a browser of its own each time, nothing cached, three ways - the first load
+  shaders' measure, the game opened on a page of its own each time, nothing in its cache, four ways - the first load
   after its dev server started, when the dev server works out every file anew; the game loaded again on it, three
-  times, the middle kept; and the page as it is built for a player, built by the tree's own Vite settings into
-  `.logs/perf/built` and served by the tool beside the public folder, three times, the middle kept (`--no-built`
-  leaves it out). For each: the seconds from asking for the page to the loading screen lifting (before there was a
+  times, the middle kept; the page as it is built for a player, built by the tree's own Vite settings into
+  `.logs/perf/built` and served by the tool beside the public folder, three times, the middle kept; and a player's
+  first visit, the built page in a Chrome started for that one load, three times, the middle kept. The pages of one
+  browser share the programs it has compiled, so only the first visit waits on the graphics driver as a player's first
+  visit does, and every visit after a shader changes (`--no-built` leaves out the built page and the first visit). For
+  each: the seconds from asking for the page to the loading screen lifting (before there was a
   screen, to the map drawn); when the map's style loaded and the sprite canvas was made; the long tasks - the stretches
   the page could do nothing else - and the gaps between frames, a stutter being one of 50 ms or more, up to the screen
   lifting and in the five seconds after, when a player is already looking; what was fetched, by kind; and where the
@@ -1138,7 +1141,7 @@ and `-- --drop` takes them off; by hand only.
   it as a line of `docs/experiments/performance/startup.jsonl`, `--loads 5` takes the middle of five, and `--compare`
   puts each load's seconds to ready, its long tasks and its stutters beside the last point kept and marks what moved
   by more than a fifth. About three minutes, the build one of them.
-- **On the performance page**, the chapter "How long the game takes to start": the latest point's three loads in a
+- **On the performance page**, the chapter "How long the game takes to start": the latest point's four loads in a
   table - seconds to ready, when the style and the sprites came, the long tasks and the worst gap up to ready, the
   long tasks, stutters and worst gap after it, the code and the tiles fetched, the CPU's busy time - then each load's
   seconds to ready point by point, and its long tasks after ready; and, for the load again, where the CPU's time went

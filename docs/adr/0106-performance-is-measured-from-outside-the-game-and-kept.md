@@ -106,3 +106,13 @@ and 10-19, and with the land the first zoom's wait on the graphics driver, 0.4 s
   the canvases on the screen is not seen by a WebGL timer at all.
 - At high, at 1920 by 1080, the land is most of every frame, 2.6 to 4.1 ms; the water 0.6 ms at the coast; the clouds
   0.8 ms; the trees, thousands of them, under 0.05 ms (2026-10-20).
+
+## Amendment, 2026-10-21: a player's first visit
+
+The start's loads were each on a page of their own with nothing in its cache, but the pages of one browser share the
+programs it has compiled, so none of them waited on the graphics driver as a player's first visit does: the land's,
+the clouds' and the water's compiles, which held a first visit for seconds (experiments 0025 and 0026), were in no
+point kept. So the start has a fourth load, a **first visit**: the built page in a Chrome started for that one load,
+where nothing is compiled or cached, three times and the middle kept, as `visit` in `startup.jsonl`, compared with the
+last point and drawn on the performance page beside the other three. The graphics driver's own cache, which outlives
+a browser, is not cleared; what a first visit waits on in the browser, it does.

@@ -22,8 +22,10 @@ import type { Watched } from './startupWatch.ts';
 /**
  * How long the game takes to start, and where that time goes, measured from outside the game on this machine's Chrome
  * and graphics card, against a dev server and a game server of the tool's own: the first load after the dev server
- * started, the game loaded again on it, and the page as it is built for a player. Each load in a browser of its own,
- * nothing cached; for each, when each mark of the start came, the long tasks and the gaps between frames up to the
+ * started, the game loaded again on it, the page as it is built for a player, and a player's first visit. Each load
+ * on a page of its own with nothing in its cache; the pages of one browser share the programs it has compiled, so a
+ * first visit is the built page in a browser started for that one load, where nothing is compiled either, as on a
+ * player's first visit and on every visit after a shader changes. For each, when each mark of the start came, the long tasks and the gaps between frames up to the
  * loading screen lifting and in the five seconds after, what was fetched, and where the CPU's time went by module and
  * by function. See decision record 0106.
  *
@@ -112,11 +114,24 @@ async function loadOnce(browser: Browser, url: string): Promise<Load> {
   };
 }
 
+/**
+ * A player's first visit: the built page in a browser started for this one load, which has compiled no program and
+ * cached nothing, so the page waits on the graphics driver for every program it needs before the screen lifts.
+ */
+async function firstVisit(url: string): Promise<Load> {
+  const { browser: fresh } = await chromeOnTheCard(flag('headed'));
+  try {
+    return await loadOnce(fresh, url);
+  } finally {
+    await fresh.close();
+  }
+}
+
 /** The numbers of a start a run is put beside the last point by: each load's seconds to ready, its stalls, its stutters. */
 function startupBeside(then: StartupPoint, now: StartupPoint): Beside[] {
-  return (['first', 'again', 'built'] as const).flatMap((key) => {
-    const was = then.loads[key];
-    const is = now.loads[key];
+  return (['first', 'again', 'built', 'visit'] as const).flatMap((key) => {
+    const was = then.loads[key] ?? null;
+    const is = now.loads[key] ?? null;
     if (was === null && is === null) return [];
     return [
       { name: `${key}: ready`, then: was?.ready ?? null, now: is?.ready ?? null, least: 300, unit: 's' },
@@ -169,6 +184,7 @@ try {
     again.push(await loadOnce(browser, servers.url));
   }
   const built: Load[] = [];
+  const visit: Load[] = [];
   if (!flag('no-built')) {
     console.log('  building the page');
     const page = await builtPage(tree, join(logs, 'built'), servers.gamePort);
@@ -176,6 +192,10 @@ try {
       for (let i = 0; i < loads; i += 1) {
         console.log(`  the built page, ${i + 1} of ${loads}`);
         built.push(await loadOnce(browser, page.url));
+      }
+      for (let i = 0; i < loads; i += 1) {
+        console.log(`  a first visit, ${i + 1} of ${loads}`);
+        visit.push(await firstVisit(page.url));
       }
     } finally {
       await page.stop();
@@ -193,17 +213,18 @@ try {
       chrome: browser.version(),
       viewport: `${VIEWPORT.width}x${VIEWPORT.height}`,
     },
-    loads: { first, again: middleOf(again), built: middleOf(built) },
+    loads: { first, again: middleOf(again), built: middleOf(built), visit: middleOf(visit) },
     of: loads,
   };
   mkdirSync(logs, { recursive: true });
   const file = join(logs, `startup-${stamp}.json`);
-  writeFileSync(file, `${JSON.stringify({ ...point, all: { again, built } }, null, 2)}\n`);
+  writeFileSync(file, `${JSON.stringify({ ...point, all: { again, built, visit } }, null, 2)}\n`);
 
   console.log(`\n${renderer}, ${headless ? 'headless' : 'in a window'}, ${point.machine.cpu}`);
   console.log(said('first load', point.loads.first));
   console.log(said('load again', point.loads.again));
   console.log(said('built page', point.loads.built));
+  console.log(said('first visit', point.loads.visit ?? null));
   const middle = point.loads.again;
   if (middle !== null) {
     const list = (spent: readonly { name: string; ms: number }[], count: number) =>

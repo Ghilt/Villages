@@ -409,7 +409,8 @@ Commands are added here as the increments land:
   card busy with something else is refused, `--anyway` to measure regardless. See `docs/RUNNING.md` and decision
   record 0106.
 - How long the game takes to start: `npm run perf:startup --prefix frontend`, the first load after a dev server of its
-  own started, a load again and the built page, each to the loading screen lifting and five seconds after: long
+  own started, a load again, the built page and a player's first visit (the built page in a browser of its own, nothing
+  compiled), each to the loading screen lifting and five seconds after: long
   tasks, stutters, what was fetched and where the CPU's time went; `--record` keeps it in
   `docs/experiments/performance/startup.jsonl`.
 - How smoothly the camera comes in: `npm run perf:zoom --prefix frontend`, zoom 5 to 10 over the forest, the grassland
