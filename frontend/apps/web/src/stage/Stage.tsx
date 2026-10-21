@@ -8,7 +8,7 @@ import { Container } from '../ui/container/Container';
 import { dressOf } from './dress';
 import { Seam } from './Seam';
 import { type BayName, type Box, isTabbed, type Rect, TAB_BAR, TILES } from './bayBox';
-import { cornerRight } from './corner';
+import { Corner } from './corner';
 import { baysStore, askFor, formNow, putAwayForRoom, show, showingIn, stageIs } from './bays';
 import { openBeside, showMap } from './arrive';
 import { askedIn, askingOf, type Which } from './arrangement';
@@ -66,8 +66,8 @@ interface StageProps {
   /** Over the top of everything and in no bay: the parchment, and the notice that you were stood down. */
   overlays?: ReactNode;
   /**
-   * The one mark that stands in the stage's top right corner, in no bay: the settings'. In the spread it stands just
-   * clear of the column down the right edge when one is up. See docs/plans/accounts.md.
+   * The one mark that stands in the stage's top right corner in the spread, in no bay: the settings', just clear of
+   * the column down the right edge when one is up. On a phone the settings are a pane. See docs/plans/accounts.md.
    */
   corner?: ReactNode;
 }
@@ -302,11 +302,9 @@ export function Stage({ stage, panes, overlays, corner }: StageProps) {
           `--bay-first` is the whole of it. And the bottom bar along the phone's edge. See 0048 and 0109. */}
       {box.form === 'bays' && box.bays.second !== null && <Seam along={box.along} />}
       {box.bar !== null && <PhoneBar panes={panes} rect={box.bar} />}
-      {corner !== undefined && (
-        <div className="stage__corner" style={{ right: cornerRight(stage, box) }}>
-          {corner}
-        </div>
-      )}
+      <Corner stage={stage} box={box}>
+        {corner}
+      </Corner>
       {overlays}
     </div>
   );

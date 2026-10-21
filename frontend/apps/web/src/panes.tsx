@@ -2,6 +2,8 @@ import type { ReactNode } from 'react';
 
 import type { SessionState } from '@villages/client-core';
 
+import { SETTINGS_PANE } from './account/pane';
+import { SettingsPane } from './account/SettingsPane';
 import { CHOICE_AT_REST, CHOICE_PANE } from './choice/pane';
 import { Choosing } from './choice/Choosing';
 import { lookingNow } from './looking';
@@ -40,8 +42,8 @@ import {
  * Each pane is declared by its feature, in its own folder, and named here once: the house status, the key
  * figures and the holdings, which share the corner; the choice roll while a question does, and at rest once there
  * is a house; character dialogue from the house's first dialogue on, and the quests from the first quest on, which
- * take turns in the column down the right; and Recent, last in the corner and last of the phone's bottom bar,
- * whose marks stand in this order. The map comes first, because it
+ * take turns in the column down the right; Recent, last in the corner; and on a phone the settings, last of the
+ * bottom bar, whose marks stand in this order, and in no tile of the spread. The map comes first, because it
  * is the floor, and its contents are App's, which holds the map; a window per subject open comes last,
  * newest first. A new mechanic's pane is a declaration in its folder and a line here. The stage is handed
  * the list and reads nothing of the game. See ARCHITECTURE's "The stage is handed its panes".
@@ -92,6 +94,7 @@ const STANDING: readonly Standing[] = [
     draw: (room) => <Quests room={room} />,
   },
   { pane: NAVIGATION_PANE, draw: (room) => <Navigating room={room} /> },
+  { pane: SETTINGS_PANE, draw: (room) => <SettingsPane room={room} /> },
 ];
 
 /**

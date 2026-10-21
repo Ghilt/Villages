@@ -92,6 +92,12 @@ const RECENT = {
   hands: 'M13 7.5 V12 L16 14',
 } as const;
 
+/**
+ * The settings, which are not the game's: a wheel of eight square teeth round a hole, as a clockmaker's gear, the
+ * library's `settings` mark. A drawn placeholder, as that is.
+ */
+const GEAR = 'M10.6 5.8 V2.9 H13.4 V5.8 M10.6 18.2 V21.1 H13.4 V18.2';
+
 export type IconName =
   | 'shield'
   | 'recent'
@@ -108,7 +114,8 @@ export type IconName =
   | 'lake'
   | 'sea'
   | 'tower'
-  | 'quests';
+  | 'quests'
+  | 'settings';
 
 /** Which way a needle points. The four are one drawing turned, never four drawings. */
 export type Point = 'up' | 'down' | 'left' | 'right';
@@ -182,6 +189,15 @@ export function Icon({ name, title }: IconProps) {
         <>
           <path d={BUST.head} className="icon__line" />
           <path d={BUST.shoulders} className="icon__line" />
+        </>
+      )}
+      {name === 'settings' && (
+        <>
+          <circle cx="12" cy="12" r="6.2" className="icon__line" />
+          <circle cx="12" cy="12" r="2.4" className="icon__line" />
+          {[0, 45, 90, 135].map((turn) => (
+            <path key={turn} d={GEAR} transform={`rotate(${turn} 12 12)`} className="icon__line" />
+          ))}
         </>
       )}
       {name === 'recent' && (

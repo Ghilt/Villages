@@ -46,8 +46,11 @@ export interface Pane {
    *
    * Declared by the pane and not decided by the layout, which is what keeps the layout from knowing what a
    * map is: the bays are named for where they are, and a pane says which one it belongs in.
+   *
+   * **Null for a pane that stands only on a phone**: the settings, which the spread opens in a dialog from the
+   * mark in its corner instead, Adam's word of 2026-10-21. In the spread it is in no bay.
    */
-  spread: BayName;
+  spread: BayName | null;
   /**
    * Where it stands on a phone: **on top**, the map's and the windows' alone, or **below**, everything else's
    * and the bottom bar's to choose between. Below unless it says otherwise. Adam's word of 2026-10-08: the
@@ -157,6 +160,11 @@ export const SHARED_TILES: Readonly<Partial<Record<BayName, SharedTile>>> = {
   bottomLeft: CORNER,
   right: RIGHT_COLUMN,
 };
+
+/** The tile of the spread a pane takes turns in with others, or null for one with a tile of its own, or none. */
+export function sharedTileOf(pane: Pane): BayName | null {
+  return pane.spread !== null && SHARED_TILES[pane.spread] !== undefined ? pane.spread : null;
+}
 
 export const MAP_PANE: Pane = {
   id: 'map',
@@ -281,10 +289,10 @@ export interface Asked {
  * disagreeing is a mark on a size the tile is not.
  */
 export function sizeAsked(pane: Pane, asked: Asked): PaneSize {
-  const tile = SHARED_TILES[pane.spread];
-  return tile === undefined
+  const shared = sharedTileOf(pane);
+  return shared === null
     ? (asked.heights[pane.id] ?? pane.startsAt ?? 'full')
-    : (asked.tiles[pane.spread] ?? tile.startsAt);
+    : (asked.tiles[shared] ?? SHARED_TILES[shared]!.startsAt);
 }
 
 /**
@@ -306,15 +314,18 @@ export function askedInTheSpread(
   size: PaneSize,
 ): { asked: Asked; stepped: Pane | null } {
   // A tile its panes take turns in is asked once for all of them; any other pane is asked for itself.
-  const setting = (one: Pane, to: PaneSize, from: Asked): Asked =>
-    SHARED_TILES[one.spread] !== undefined
-      ? { heights: from.heights, tiles: { ...from.tiles, [one.spread]: to } }
+  const setting = (one: Pane, to: PaneSize, from: Asked): Asked => {
+    const shared = sharedTileOf(one);
+    return shared !== null
+      ? { heights: from.heights, tiles: { ...from.tiles, [shared]: to } }
       : { heights: { ...from.heights, [one.id]: to }, tiles: from.tiles };
+  };
 
   const next = setting(pane, size, asked);
-  const other = ONE_OPENED_OUT.includes(pane.spread)
-    ? ONE_OPENED_OUT.filter((where) => where !== pane.spread).map((where) => panesIn(panes, where)[0])[0]
-    : undefined;
+  const other =
+    pane.spread !== null && ONE_OPENED_OUT.includes(pane.spread)
+      ? ONE_OPENED_OUT.filter((where) => where !== pane.spread).map((where) => panesIn(panes, where)[0])[0]
+      : undefined;
   if (size !== 'full' || other === undefined || sizeAsked(other, next) !== 'full') {
     return { asked: next, stepped: null };
   }

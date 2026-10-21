@@ -140,10 +140,11 @@ A **Sign-in** is one browser signed in to one player.
 
 ## The settings menu
 
-- **A mark**, its picture a placeholder made from the moodboard until Adam paints one. On the desktop it stands
-  beside the *Villages* title; on a phone, at the end of the bottom bar, or in the top right corner until the bar is
-  on main. The hand-over settles both.
-- **It opens the library's `Dialog`, not a pane**: it is not part of the game.
+- **A mark**, its picture a placeholder made from the moodboard until Adam paints one. On the desktop it stands in
+  the stage's top right corner; on a phone, at the far end of the bottom bar, after Recent.
+- **On the desktop it opens the library's `Dialog`**, not a pane, because it is not part of the game. **On a phone
+  it is a pane below**, the bar's to choose like any other, because a dialog over the whole window was the desktop's
+  size there: Adam's word of 2026-10-21. The same parts in both.
 - **What is in it:**
   - **Account**: who you are - a guest, an email, Google or Discord - and whether the email is verified; *Create an
     account* or *Sign in*; *Change password*; your sign-ins, with *Sign out there* and *Sign out everywhere else*;

@@ -43,7 +43,8 @@
   .figures--strip,
   .navigate--strip,
   .choice--strip,
-  .dialogues--strip {
+  .dialogues--strip,
+  .settings-pane--strip {
     /*
      * Reversed, so the marks are at the top and the name reads down from under them - the strip is 44
      * wide and the whole height here. `flex-end` is the top in a reversed column, which is where
@@ -59,7 +60,8 @@
   .figures--strip .figures__kind,
   .navigate--strip .navigate__kind,
   .choice--strip .choice__aside,
-  .dialogues--strip .dialogues__name {
+  .dialogues--strip .dialogues__name,
+  .settings-pane--strip .settings-pane__kind {
     writing-mode: vertical-rl;
     /* The strip is the whole height of the stage, so the name has all of it to be trimmed against. */
     max-height: 100%;

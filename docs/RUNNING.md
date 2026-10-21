@@ -1101,7 +1101,9 @@ and `-- --drop` takes them off; by hand only.
   game server opens the instruments only to a browser signed in to that email's verified account: anybody else's
   levers and looks are refused `instrumentsClosed`, their panel says so line by line, the outbox, the lever and
   becoming another player are refused under `/auth`, and the pretend Google and Discord are not offered to them.
-- **The settings**, the player's own: the gear in the stage's top right corner opens a dialog of what is not the game's.
+- **The settings**, the player's own: what is not the game's, behind a gear. In the spread the gear stands in the
+  stage's top right corner and opens them in a dialog; on a phone it is the last mark of the bottom bar, after Recent,
+  and puts them below as a pane, where a way to an account opens in their place with **Back to the settings**.
   **Account** says who this browser plays as. A guest is offered **Create an account** - an email, a password of
   twelve letters or more, and *Remember me on this browser*, ticked - which makes the guest that account, house and
   all, and loads the page again as it; and **Sign in**, which says first that the guest's house stays behind, and loads

@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { SETTINGS_PANE } from '../account/pane';
 import { HOUSE_PANE } from '../house/pane';
 import { inspectPane } from '../inspect/pane';
-import { MAP_PANE, NAVIGATION_PANE } from './panes';
+import { TILES } from './bayBox';
+import { MAP_PANE, NAVIGATION_PANE, panesIn } from './panes';
 import { barButtons, bayOnAPhone } from './phone';
 
 /**
@@ -175,12 +177,27 @@ describe('the bottom bar', () => {
   it('has a mark for every pane that can stand below, in the order they are declared, and none for the top', async () => {
     const { panesOn } = await import('../panes');
     // Every pane there can be at once: the house, the key figures, the holdings, a question asked rather than Take
-    // action at rest, a dialogue offered, a quest offered and Recent, and a window open.
-    const all = panesOn('11110111', [KETTLEBY], () => null);
+    // action at rest, a dialogue offered, a quest offered, Recent and the settings, and a window open.
+    const all = panesOn('111101111', [KETTLEBY], () => null);
     const below = all.filter((pane) => bayOnAPhone(pane) === 1);
 
     expect(barButtons(all).map((button) => button.id)).toEqual(below.map((pane) => pane.id));
     expect(barButtons(all).map((button) => button.id)).not.toContain(MAP_PANE.id);
-    expect(barButtons(all).at(-1)?.id).toBe(NAVIGATION_PANE.id);
+    // Recent last of the game's, and the settings at the far end after it: Adam's word of 2026-10-21.
+    expect(
+      barButtons(all)
+        .slice(-2)
+        .map((button) => button.id),
+    ).toEqual([NAVIGATION_PANE.id, SETTINGS_PANE.id]);
+  });
+
+  it('stands the settings in no tile of the spread, where their mark in the corner opens them in a dialog', async () => {
+    const { panesOn } = await import('../panes');
+    const all = panesOn('111101111', [KETTLEBY], () => null);
+
+    expect(all.filter((pane) => pane.spread === null).map((pane) => pane.id)).toEqual([SETTINGS_PANE.id]);
+    expect(TILES.flatMap((name) => panesIn(all, name)).map((pane) => pane.id)).not.toContain(
+      SETTINGS_PANE.id,
+    );
   });
 });

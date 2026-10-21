@@ -87,6 +87,7 @@ export const BAR_MARKS: Readonly<Partial<Record<IconName, MarkName>>> = {
   speech: 'dialogues',
   quests: 'quests',
   recent: 'recent',
+  settings: 'settings',
 };
 
 /**

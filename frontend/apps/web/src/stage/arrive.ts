@@ -1,5 +1,5 @@
 import { askFor, baysStore, formNow, paneById, show } from './bays';
-import { type PaneSize, SHARED_TILES, sizeAsked } from './panes';
+import { type PaneSize, sharedTileOf, sizeAsked } from './panes';
 import { arriveOnAPhone, showTheMap } from './phone';
 
 /**
@@ -24,8 +24,9 @@ export function arrive(id: string, how: Arrival = {}): void {
       askFor(id, how.inTheSpread);
     }
     // In a tile it takes turns in, what arrives comes to the front of it: a quest offered beside a dialogue.
-    if (pane !== undefined && SHARED_TILES[pane.spread] !== undefined) {
-      show(pane.spread, id);
+    const shared = pane === undefined ? null : sharedTileOf(pane);
+    if (shared !== null) {
+      show(shared, id);
     }
     return;
   }

@@ -273,8 +273,8 @@ there.
 **The bottom bar is the way to everything below.** A band one strip thick along the bottom of the stage
 upright, and down its right edge turned, set into the edge rather than floating over anything, with a mark
 for every pane that stands below - the house, the key figures, the holdings, the letter while it stands, the
-dialogues once there are any, the quests once there are any, and **Recent** - in that order, and the one
-standing there lit. Marks and no words,
+dialogues once there are any, the quests once there are any, **Recent**, and the settings - in that order, and
+the one standing there lit. Marks and no words,
 Adam's call. **Pressing a mark puts its pane below**, opened to half if the bottom was put away; **pressing
 the lit one puts the bottom away**, or opens it again. The two bays are cut from what the bar leaves, so
 nothing in their arithmetic knows it is there. It replaced the **compass**, a disc in the corner that put a
@@ -285,11 +285,12 @@ record 0109 and `LOOK-AND-FEEL.md`.
 bar on a phone and on the screen in the spread. A place pressed in it opens its window on top, and Recent
 stays below beside it, so the player can go on down the list. In the spread it is a tab in bottom left.
 
-**The settings' mark stands in the stage's top right corner**, in no bay, in both forms: a gear, which opens what is
-not the game's - who the browser plays as, whether the world moves, the language - in a dialog over the stage. In the
-spread it stands just clear of the column down the right edge when one is up, so it never stands on the column's
-tabs; in the bays it is at the corner itself. On a phone it is to move into the bottom bar once that is on main. See
-`docs/plans/accounts.md`.
+**The settings are what is not the game's** - who the browser plays as, whether the world moves, the language - and
+their mark is a gear. **In the spread it stands in the stage's top right corner**, in no bay, just clear of the column
+down the right edge when one is up, so it never stands on the column's tabs, and opens them in a dialog over the
+stage. **On a phone they are a pane below**, chosen by the gear at the far end of the bottom bar, after Recent, lit
+while they stand there like any pane's mark: a dialog over the whole window was the desktop's size on a phone, Adam's
+word of 2026-10-21. It is the one pane with no tile in the spread. See `docs/plans/accounts.md`.
 
 ## Container queries, not breakpoints
 

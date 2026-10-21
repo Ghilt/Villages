@@ -41,3 +41,52 @@
   gap: var(--ui-space-2);
   margin-top: var(--ui-space-3);
 }
+
+/* The settings as a pane below on a phone: their name over them, and the parts scrolling in the room it was given. */
+.settings-pane {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  pointer-events: auto;
+}
+
+.settings-pane__bar {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex: none;
+  padding: 0.5rem 0.75rem 0.35rem;
+}
+
+.settings-pane__head {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: normal;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ui-text-soft);
+}
+
+/* Padding on the scroller and not a shorter body, so the last part scrolls clear of the pane's foot. */
+.settings-pane__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.25rem 0.75rem 0.75rem;
+}
+
+.settings-pane__back {
+  margin-top: var(--ui-space-3);
+}
+
+.settings-pane__kind {
+  flex: 1;
+  font-size: 0.78rem;
+  font-variant: small-caps;
+  letter-spacing: 0.06em;
+  color: var(--ui-text-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

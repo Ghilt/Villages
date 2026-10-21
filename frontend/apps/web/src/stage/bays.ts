@@ -9,7 +9,7 @@ import {
   NAVIGATION_PANE,
   type Pane,
   type PaneSize,
-  SHARED_TILES,
+  sharedTileOf,
   sizeAsked,
 } from './panes';
 import { type Arrangement, arrangementFor, askedIn, type Which } from './arrangement';
@@ -178,7 +178,7 @@ function titleOf(id: string): string {
 
 /** What the log calls a pane's tile: the corner, for the panes taking turns in it, and otherwise the pane. */
 function tileOf(pane: Pane): string {
-  return SHARED_TILES[pane.spread] === undefined ? titleOf(pane.id) : 'the corner';
+  return sharedTileOf(pane) === null ? titleOf(pane.id) : 'the corner';
 }
 
 /**
