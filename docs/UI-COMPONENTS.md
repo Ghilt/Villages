@@ -448,7 +448,9 @@ A line each: what it is for, its variants, and where on the page it is.
   side's end at the top, a gilt tick where something arrived and a velvet one where it fell; and the scrub, a range
   the arrow keys step a second at a time. Held by whoever shows it; `useReplayClock` is the clock, counted from when
   it began rather than ticked, stopping at the last second and starting again from the first. In the `bar.replay`
-  recipe. `ui/replay/replayClock.ts` is its arithmetic. *Challenges*.
+  recipe. **`TugChart`**, beside it, is the tug second by second larger, the first side's end at the top and the other's
+  at the bottom, each named in its colour, a hairline at the second shown: what a challenge's history opens with.
+  `ui/replay/replayClock.ts` is their arithmetic. *Challenges*.
 - **`FieldFigure`**, `ui/fieldFigure/FieldFigure.tsx`: a figure on a challenge's field, a head over a cloak that
   widens to the hem as the map draws a person, in its side's colour or, for one of the **townsfolk**, in none. It is
   turned `east` or `west` and no other way, its hair at the back of its head and its eye on its face saying which;

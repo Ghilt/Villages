@@ -162,3 +162,47 @@
     color: var(--ui-text-soft);
   }
 }
+
+@layer ui {
+  .ui-tug-chart {
+    position: relative;
+    height: 8rem;
+    margin: 0;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--ui-night) 55%, transparent);
+    box-shadow: inset 0 0 0 1px var(--ui-gilt-deep);
+  }
+
+  .ui-tug-chart > svg {
+    position: absolute;
+    inset: 0.4rem 0;
+    width: 100%;
+    height: calc(100% - 0.8rem);
+    overflow: visible;
+  }
+
+  .ui-tug-chart__at {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    margin-left: -1px;
+    background: var(--ui-gilt-light);
+  }
+
+  .ui-tug-chart__end {
+    position: absolute;
+    left: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-shadow: 0 0 2px var(--ui-night);
+  }
+
+  .ui-tug-chart__end--first {
+    top: 0.2rem;
+  }
+
+  .ui-tug-chart__end--other {
+    bottom: 0.2rem;
+  }
+}

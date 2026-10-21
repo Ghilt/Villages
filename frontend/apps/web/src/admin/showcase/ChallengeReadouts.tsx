@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { ReplayBar } from '../../ui/replay/Replay';
+import { TugChart } from '../../ui/replay/TugChart';
 import { useReplayClock } from '../../ui/replay/useReplayClock';
 import { Slider } from '../../ui/slider/Slider';
 import { HappeningPlate, TugBar } from '../../ui/tug/Tug';
@@ -141,6 +142,15 @@ export function ChallengeReadouts() {
               tug={TUG}
               ticks={TICKS}
             />
+          </Specimen>
+          <Specimen
+            name="TugChart"
+            note="the tug second by second, as the history opens with it, second 26 marked"
+            wide
+          >
+            <div style={{ width: 'min(420px, 100%)' }}>
+              <TugChart tug={TUG} second={26} first={VARGA_SIDE} other={BRANNOCK_SIDE} />
+            </div>
           </Specimen>
           <Specimen name="ReplayBar, narrow" note="the track gives way, the marks keep their size" wide>
             <div style={{ width: 380, maxWidth: '100%' }}>
