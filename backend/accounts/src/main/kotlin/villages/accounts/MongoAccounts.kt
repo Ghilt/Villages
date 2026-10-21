@@ -5,6 +5,7 @@ import com.mongodb.MongoWriteException
 import com.mongodb.client.MongoClient
 import com.mongodb.client.MongoClients
 import com.mongodb.client.MongoCollection
+import com.mongodb.client.model.Filters
 import com.mongodb.client.model.Filters.eq
 import com.mongodb.client.model.IndexOptions
 import com.mongodb.client.model.Indexes
@@ -29,7 +30,13 @@ class MongoAccounts(connection: String, val database: String) : AccountStores {
         it.createIndex(Indexes.ascending("player"))
     }
 
-    private val playerRows: MongoCollection<Document> = client.getDatabase(database).getCollection(PLAYERS)
+    private val playerRows: MongoCollection<Document> = client.getDatabase(database).getCollection(PLAYERS).also {
+        // One account to an email, held by the index at the instant of writing; a guest's record has none.
+        it.createIndex(
+            Indexes.ascending("email"),
+            IndexOptions().unique(true).partialFilterExpression(Filters.exists("email")),
+        )
+    }
 
     override val signIns: SignInStore = object : SignInStore {
         override fun put(signIn: SignIn) {
@@ -61,6 +68,17 @@ class MongoAccounts(connection: String, val database: String) : AccountStores {
         override fun put(record: PlayerRecord) {
             playerRows.replaceOne(eq("_id", record.player.value.toString()), record.row(), ReplaceOptions().upsert(true))
         }
+
+        override fun byEmail(email: String): PlayerRecord? = playerRows.find(eq("email", email)).first()?.player()
+
+        override fun claim(record: PlayerRecord): Boolean =
+            try {
+                put(record)
+                true
+            } catch (taken: MongoWriteException) {
+                if (taken.error.category != ErrorCategory.DUPLICATE_KEY) throw taken
+                false
+            }
     }
 
     override val keptIn: String = "in MongoDB, database $database"
@@ -98,6 +116,9 @@ private fun PlayerRecord.row() = Document()
     .append("_id", player.value.toString())
     .append("since", Date.from(since))
     .append("settings", Document("motion", settings.motion).append("language", settings.language))
+    .apply { email?.let { append("email", it) } }
+    .append("verified", verified)
+    .apply { password?.let { append("password", it) } }
 
 private fun Document.player() = PlayerRecord(
     player = PlayerId(UUID.fromString(getString("_id"))),
@@ -105,4 +126,7 @@ private fun Document.player() = PlayerRecord(
     settings = get("settings", Document::class.java)
         ?.let { Settings(motion = it.getString("motion"), language = it.getString("language")) }
         ?: Settings(),
+    email = getString("email"),
+    verified = getBoolean("verified", false),
+    password = getString("password"),
 )

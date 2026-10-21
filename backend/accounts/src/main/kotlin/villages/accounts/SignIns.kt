@@ -90,6 +90,16 @@ class SignIns(private val store: SignInStore, private val clock: Clock, private 
         return Used(used, cookieAgain = due)
     }
 
+    /**
+     * A browser's sign-in swapped for a new one of [player]'s, because it signed in or made an account: the one it had,
+     * [was], is ended without telling anybody, since the browser itself asked and is about to load again as the new
+     * one. A new secret, so whoever knew the old one knows nothing now.
+     */
+    fun swap(was: SignInId?, player: PlayerId, keeping: Keeping, browser: String): Begun {
+        was?.let(store::remove)
+        return begin(player, keeping, browser)
+    }
+
     fun byId(id: SignInId): SignIn? = store.byId(id)
 
     /** Every sign-in of [player], the newest first. */

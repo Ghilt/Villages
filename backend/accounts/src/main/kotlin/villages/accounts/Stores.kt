@@ -20,10 +20,22 @@ interface SignInStore {
 }
 
 /**
- * Who a player is beyond the world's id for them: when they came, their own settings, and in time an account's way
- * in. Every player signed in has one, a guest included, so there is one place their settings are kept.
+ * Who a player is beyond the world's id for them: when they came, their own settings, and an account's way in - its
+ * email, kept as [emailOf] has it, whether that has been verified, and the password's hash. Every player signed in
+ * has one, a guest included, so there is one place their settings are kept; a guest's has no email.
  */
-data class PlayerRecord(val player: PlayerId, val since: Instant, val settings: Settings = Settings())
+data class PlayerRecord(
+    val player: PlayerId,
+    val since: Instant,
+    val settings: Settings = Settings(),
+    val email: String? = null,
+    val verified: Boolean = false,
+    /** [Passwords.hash] of the account's password, never the password. */
+    val password: String? = null,
+) {
+    /** A player without an account: no email to sign in with. */
+    val guest: Boolean get() = email == null
+}
 
 /**
  * A player's settings that are not the game's, kept for the player so they follow an account to another browser:
@@ -51,6 +63,16 @@ interface PlayerStore {
 
     /** Writes [record] over the one its player has. */
     fun put(record: PlayerRecord)
+
+    /** The account kept under [email], as [emailOf] has it. */
+    fun byEmail(email: String): PlayerRecord?
+
+    /**
+     * Writes [record] over the one its player has, unless another player's account is kept under its email, and says
+     * which: one account to an email, held by the store at the instant of writing, so two who ask at once cannot both
+     * have it.
+     */
+    fun claim(record: PlayerRecord): Boolean
 }
 
 /** The accounts' stores, together, as one thing that is opened and closed. */
@@ -89,6 +111,15 @@ class InMemoryAccounts : AccountStores {
 
         override fun put(record: PlayerRecord) {
             records[record.player] = record
+        }
+
+        override fun byEmail(email: String): PlayerRecord? = records.values.firstOrNull { it.email == email }
+
+        @Synchronized
+        override fun claim(record: PlayerRecord): Boolean {
+            if (records.values.any { it.email == record.email && it.player != record.player }) return false
+            records[record.player] = record
+            return true
         }
     }
 

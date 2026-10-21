@@ -11,12 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import villages.accounts.Accounts
-import villages.accounts.Keeping
 import villages.accounts.Outbox
 import villages.accounts.Settings
-import villages.accounts.SignIn
 import villages.accounts.browserOf
-import villages.domain.HouseId
 import villages.domain.PlayerId
 import java.util.UUID
 
@@ -49,7 +46,7 @@ class AuthEndpoints(
         if (who.cookieAgain) {
             cookie.write(response, request, secret, who.signIn.keeping)
         }
-        return Me.of(who.signIn, guest = who.guest, settings = who.record?.settings ?: Settings())
+        return Me.of(who.signIn, who.record)
     }
 
     /**
@@ -63,7 +60,7 @@ class AuthEndpoints(
         val settings = runCatching { Settings(motion = asked.motion, language = asked.language) }.getOrNull()
             ?: return ResponseEntity.badRequest().body(mapOf("refused" to "notASetting"))
         accounts.settle(who.signIn.player, settings)
-        return ResponseEntity.ok(Me.of(who.signIn, guest = who.guest, settings = settings))
+        return ResponseEntity.ok(Me.of(who.signIn, who.record?.copy(settings = settings)))
     }
 
     /**
@@ -82,7 +79,7 @@ class AuthEndpoints(
         val old = asked?.adopt?.let { runCatching { PlayerId(UUID.fromString(it)) }.getOrNull() }
         val begun = old?.let { accounts.adopt(it, browser) } ?: accounts.newcomer(browser)
         cookie.write(response, request, begun.secret, begun.signIn.keeping)
-        return Me.of(begun.signIn, guest = true, settings = Settings())
+        return Me.of(begun.signIn, accounts.recordOf(begun.signIn.player))
     }
 
     /**
@@ -99,7 +96,7 @@ class AuthEndpoints(
         endThisBrowsers(request)
         val begun = accounts.become(player, browserOf(request.getHeader("User-Agent")))
         cookie.write(response, request, begun.secret, begun.signIn.keeping)
-        return ResponseEntity.ok(Me.of(begun.signIn, guest = true, settings = Settings()))
+        return ResponseEntity.ok(Me.of(begun.signIn, accounts.recordOf(begun.signIn.player)))
     }
 
     /**
@@ -138,47 +135,3 @@ data class BecomeAsked(val player: String)
 
 /** A mail sent, as the debug panel lists it. */
 data class MailView(val to: String, val subject: String, val text: String, val link: String?, val sent: Long)
-
-/** Who a browser is, as `/auth/me` answers it: a player and their house, or nobody at all. Times are milliseconds. */
-data class Me(
-    val player: String?,
-    val house: String?,
-    val guest: Boolean,
-    val signIn: SignInView?,
-    val settings: SettingsView,
-) {
-    companion object {
-        val NOBODY = Me(player = null, house = null, guest = false, signIn = null, settings = SettingsView.of(Settings()))
-
-        fun of(signIn: SignIn, guest: Boolean, settings: Settings) = Me(
-            player = signIn.player.value.toString(),
-            house = HouseId.of(signIn.player).value.toString(),
-            guest = guest,
-            signIn = SignInView(
-                id = signIn.id.value.toString(),
-                keeping = signIn.keeping.said,
-                browser = signIn.browser,
-                ends = signIn.ends.toEpochMilli(),
-            ),
-            settings = SettingsView.of(settings),
-        )
-    }
-}
-
-/** A player's settings, as the page is told them and sends them back. */
-data class SettingsView(val motion: String, val language: String) {
-    companion object {
-        fun of(settings: Settings) = SettingsView(settings.motion, settings.language)
-    }
-}
-
-/** A sign-in, as the page is told of it: how it is kept, in the page's words, and when it ends unless used again. */
-data class SignInView(val id: String, val keeping: String, val browser: String, val ends: Long)
-
-/** How a [Keeping] is said on the page's side of `/auth`. */
-internal val Keeping.said: String
-    get() = when (this) {
-        Keeping.REMEMBERED -> "remembered"
-        Keeping.FOR_NOW -> "forNow"
-        Keeping.GUEST -> "guest"
-    }

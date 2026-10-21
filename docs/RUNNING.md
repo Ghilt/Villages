@@ -1099,7 +1099,15 @@ and `-- --drop` takes them off; by hand only.
   stood down so, and one of another sign-in plays on. The section, the outbox and the lever are Adam's instruments,
   refused while they are closed, because the mail holds live links.
 - **The settings**, the player's own: the gear in the stage's top right corner opens a dialog of what is not the game's.
-  **Account** says who this browser plays as - for now, a guest, remembered by this browser. **The world moving** is
+  **Account** says who this browser plays as. A guest is offered **Create an account** - an email, a password of
+  twelve letters or more, and *Remember me on this browser*, ticked - which makes the guest that account, house and
+  all, and loads the page again as it; and **Sign in**, which says first that the guest's house stays behind, and loads
+  the page again as the account. A password manager offers to fill both and to save what is made. What is wrong is
+  said under its field in the game's words: not an email, too short, one of the commonest, the email itself, not an
+  account's, or too many tries. An email that has an account already is mailed to say so, and the form says a mail is
+  on its way; the mail is in the Accounts section's outbox. Signed in, Account says the email, and **Log out** at the
+  foot ends the sign-in on the server and dims the window under **Signed out**, whose *Sign in* signs in again there.
+  **The world moving** is
   *As my device asks*, *Still* or *Moving*: still holds the clouds, the water, the creatures, the trees and the grass
   in the wind, the haze, an area's pulse and the light a click on water sends along it, from the next frame, whatever
   the device asks; the interface's own short movements follow the device alone. **Language** is English, the only one

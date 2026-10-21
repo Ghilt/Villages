@@ -13,6 +13,9 @@ export interface Me {
   player: string | null;
   house: string | null;
   guest: boolean;
+  /** The account's email, or null for a guest. */
+  email: string | null;
+  verified: boolean;
   signIn: SignInView | null;
   settings: Settings;
 }
@@ -35,6 +38,8 @@ const NOBODY: Me = {
   player: null,
   house: null,
   guest: false,
+  email: null,
+  verified: false,
   signIn: null,
   settings: { motion: 'device', language: 'en' },
 };
@@ -137,6 +142,26 @@ export async function settle(settings: Settings): Promise<Me> {
   const me = await ask('POST', 'settings', settings);
   knownAs(me);
   return me;
+}
+
+/**
+ * An account made with [email] and [password], and this browser signed in to it, remembered unless [remember] is
+ * false: a guest's own player becomes it, house and all. An email with an account already is mailed to say so, and
+ * the answer is who the browser was before - its `email` still not the one asked for. What the server refuses, a
+ * password that will not do among it, is thrown as its code.
+ */
+export function makeAccount(email: string, password: string, remember: boolean): Promise<Me> {
+  return ask('POST', 'signup', { email, password, remember });
+}
+
+/** This browser signed in to the account [email] is kept under, if [password] is its; refused as its code. */
+export function signInWith(email: string, password: string, remember: boolean): Promise<Me> {
+  return ask('POST', 'signin', { email, password, remember });
+}
+
+/** This browser signed out: its sign-in ended on the server, and its windows stood down. */
+export async function signOut(): Promise<void> {
+  await ask('POST', 'signout');
 }
 
 /**

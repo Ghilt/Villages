@@ -9,3 +9,10 @@
 .settings__title {
   margin: 0;
 }
+
+/* Buttons side by side in a part, with room to wrap on a phone. */
+.settings__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-2);
+}

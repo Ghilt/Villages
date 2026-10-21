@@ -5,6 +5,7 @@ import villages.application.SignedIn
 import villages.application.SignedInPlayers
 import villages.domain.PlayerId
 import java.time.Clock
+import java.time.Duration
 import java.util.UUID
 
 /**
@@ -18,8 +19,17 @@ class Accounts(
     private val newPlayer: () -> PlayerId = { PlayerId(UUID.randomUUID()) },
     /** Told of every sign-in that ends, however it ends: the gateway, which stands its windows down. */
     ended: (SignInId) -> Unit = {},
+    /** Where the mail goes: the outbox, in development. */
+    private val mailer: Mailer = Mailer {},
 ) : SignedInPlayers {
     val signIns = SignIns(stores.signIns, clock, ended)
+
+    /** A password guessed for one email, or from one address: five tries in a quarter of an hour, and twenty. */
+    private val guessed = Attempts(clock, most = 5, within = Duration.ofMinutes(15))
+    private val guessing = Attempts(clock, most = 20, within = Duration.ofMinutes(15))
+
+    /** Accounts asked for from one address: ten in an hour. */
+    private val making = Attempts(clock, most = 10, within = Duration.ofHours(1))
 
     /** Where the accounts are kept, as the debug panel says it. */
     val keptIn: String get() = stores.keptIn
@@ -55,12 +65,58 @@ class Accounts(
         return signIns.begin(player, Keeping.REMEMBERED, browser)
     }
 
+    /**
+     * An account made with [asked] and [password], and this browser, whose sign-in is [current], signed in to it,
+     * kept as [keeping] says. A guest's own player becomes the account, so its house is kept; anyone else gets a
+     * player of their own. An email with an account already is mailed to say so and nothing else changes, and the
+     * answer to the asker is the same either way. [from] is the address that asked, which may ask so many times.
+     */
+    @Suppress("LongParameterList")
+    fun makeAccount(asked: String, password: String, keeping: Keeping, browser: String, current: SignIn?, from: String): Making {
+        val email = emailOf(asked) ?: return Making.Refused("notAnEmail")
+        Passwords.problemWith(password, email)?.let { return Making.Refused(it) }
+        if (!making.allowed(from)) return Making.Refused("tooMany")
+        making.failed(from)
+        val guest = current?.let { stores.players.of(it.player) }?.takeIf { it.guest }
+        val record = (guest ?: PlayerRecord(newPlayer(), clock.instant()))
+            .copy(email = email, verified = false, password = Passwords.hash(password))
+        if (stores.players.byEmail(email) != null || !stores.players.claim(record)) {
+            mailer.send(Letters.alreadyAnAccount(email, clock.instant()))
+            return Making.Taken
+        }
+        return Making.Made(signIns.swap(current?.id, record.player, keeping, browser))
+    }
+
+    /**
+     * This browser, whose sign-in is [current], signed in to the account kept under [asked], if [password] is its,
+     * kept as [keeping] says. Whatever it was signed in as before is left: a guest's house is left behind with it,
+     * which the page says first. A wrong password and an email nobody has are answered alike and as slowly, and so
+     * many tries for one email, or from one address [from], are refused for a quarter of an hour.
+     */
+    @Suppress("LongParameterList")
+    fun signInWith(asked: String, password: String, keeping: Keeping, browser: String, current: SignIn?, from: String): Entering {
+        val email = emailOf(asked) ?: asked.trim().lowercase()
+        if (!guessed.allowed(email) || !guessing.allowed(from)) return Entering.TooMany
+        val record = stores.players.byEmail(email)
+        if (record == null || !Passwords.matches(password, record.password)) {
+            if (record == null) Passwords.matches(password, null)
+            guessed.failed(email)
+            guessing.failed(from)
+            return Entering.NotThatPassword
+        }
+        guessed.forget(email)
+        return Entering.In(signIns.swap(current?.id, record.player, keeping, browser))
+    }
+
     /** Who [secret] is signed in as, used now, or null when it is no sign-in or one that has ended. */
     fun who(secret: String, cookie: Boolean = false): Who? {
         val signIn = signIns.find(secret) ?: return null
         val used = signIns.use(signIn, cookie)
         return Who(used.signIn, stores.players.of(signIn.player), used.cookieAgain)
     }
+
+    /** [player]'s record: when they came, their settings, and their account if they have one. */
+    fun recordOf(player: PlayerId): PlayerRecord? = stores.players.of(player)
 
     /** [player]'s settings, written whole; a value no setting takes is refused before anything is written. */
     fun settle(player: PlayerId, settings: Settings) {
@@ -73,6 +129,29 @@ class Accounts(
 
 /** A browser signed in, its player's record, and whether its cookie is to be given its lifetime again. */
 data class Who(val signIn: SignIn, val record: PlayerRecord?, val cookieAgain: Boolean) {
-    /** A player without an account: every player, until accounts can be made. */
-    val guest: Boolean get() = true
+    /** A player without an account: no email to sign in with. */
+    val guest: Boolean get() = record?.guest ?: true
+}
+
+/** What asking for an account came to. */
+sealed interface Making {
+    /** Made, and the browser signed in to it with [begun]. */
+    data class Made(val begun: Begun) : Making
+
+    /** The email has an account already: it was mailed to say so, and nothing else changed. */
+    data object Taken : Making
+
+    /** Refused before anything was written, for [why]: `notAnEmail`, `tooMany`, or what is wrong with the password. */
+    data class Refused(val why: String) : Making
+}
+
+/** What signing in came to. */
+sealed interface Entering {
+    data class In(val begun: Begun) : Entering
+
+    /** The email and the password are not an account's: which of the two is wrong is not said. */
+    data object NotThatPassword : Entering
+
+    /** Too many tries for the email, or from the address, in a quarter of an hour. */
+    data object TooMany : Entering
 }

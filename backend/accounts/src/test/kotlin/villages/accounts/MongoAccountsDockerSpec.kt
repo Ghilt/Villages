@@ -58,6 +58,19 @@ class MongoAccountsDockerSpec : StringSpec({
         }
     }
 
+    "one account to an email, held by the store, and a guest's record holds none".config(enabledOrReasonIf = needsDocker) {
+        stores("emails").use { kept ->
+            val ada = PlayerRecord(PlayerId(UUID.randomUUID()), HandClock().now, email = "ada@example.com", password = "hash")
+            val other = PlayerRecord(PlayerId(UUID.randomUUID()), HandClock().now, email = "ada@example.com", password = "hash")
+
+            kept.players.claim(ada) shouldBe true
+            kept.players.claim(other) shouldBe false
+            kept.players.add(PlayerRecord(PlayerId(UUID.randomUUID()), HandClock().now)) shouldBe true
+            kept.players.add(PlayerRecord(PlayerId(UUID.randomUUID()), HandClock().now)) shouldBe true
+            kept.players.byEmail("ada@example.com") shouldBe ada
+        }
+    }
+
     "a player has one record".config(enabledOrReasonIf = needsDocker) {
         stores("players").use { kept ->
             val record = PlayerRecord(PlayerId(UUID.randomUUID()), HandClock().now)

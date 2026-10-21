@@ -11,6 +11,11 @@ dependencies {
     implementation(project(":application"))
     implementation(platform(libs.spring.boot.dependencies))
     implementation(libs.mongodb.driver.sync)
+    // Passwords are hashed with Argon2id, Spring Security's, on BouncyCastle's implementation.
+    implementation(libs.spring.security.crypto)
+    runtimeOnly(libs.bouncycastle.provider)
+    runtimeOnly(libs.commons.logging)
+    runtimeOnly(libs.spring.core)
 
     // A MongoDB of the test's own, thrown away after it, for the specs that say they need Docker.
     testImplementation(libs.testcontainers.mongodb)

@@ -31,8 +31,8 @@ class AccountsConfig {
 
     /** Told of every sign-in that ends, the gateway stands its windows down: a window belongs to a live sign-in. */
     @Bean
-    fun accounts(stores: AccountStores, clock: Clock, gateway: Gateway): Accounts =
-        Accounts(stores, clock, ended = gateway::signInEnded)
+    fun accounts(stores: AccountStores, clock: Clock, gateway: Gateway, outbox: Outbox): Accounts =
+        Accounts(stores, clock, ended = gateway::signInEnded, mailer = outbox)
 
     /** Where every mail goes in development, which the debug panel shows: nothing here could deliver one. */
     @Bean
