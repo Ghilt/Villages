@@ -53,19 +53,22 @@ because a token is a player's id until accounts.
 Worked out on the server, from what it holds already: the towns of 1790 in the names it reads beside the ground
 map (`PlaceName`, `TOWN`, `of1790`), and the ground map itself (0084).
 
-1. **The towns of 1790, most important first**, by the names file's rank, a town with none after every town
-   with one; ties by the town's id, so the order is the same on every tree.
+1. **The towns of 1790, most important first**: by their people in 1790, as `world/ruins.json` counts them for
+   the ruins, then every town it does not list by the names file's rank, which is today's, a town with none last;
+   ties by the town's id, so the order is the same on every tree.
 2. **A town too near a bot already placed is passed over**: closer than `apartKm`.
-3. **The seat stands `outKm` from the town's middle**, in a direction the bot's id picks, turned a step at a time
-   until it lands on land; a town with water all round at that reach is passed over. `outKm` is further than the
-   greatest ruin reaches, so no seat stands in a ruin.
+3. **The seat stands `beyondRuinKm` past the edge of the town's ruin**, in a direction the town's id picks, turned
+   an eighth at a time until it lands on land and not on a river; a town with water all round at that reach is passed
+   over. How far a ruin reaches is worked out as the page lays it out (0104): the server reads `world/ruins.json` for
+   it, the town's people in 1790 and the sizes, and turns world units into kilometres where the town stands.
 4. **A town whose name is not a house name** - longer than a house name may be - is passed over.
 5. **Until there are `count`.**
 
 The name is the town's name of 1790, *Nuremberg*, and its castle *Nuremberg Castle*. The banner is the server's
 own banner maker's, seeded from the bot's id, so a bot keeps its banner on every tree and every start.
 
-**The three numbers are a group of the balance**, `houseBots`: `count`, first 300; `apartKm`; `outKm`. The same
+**The three numbers are a group of the balance**, `houseBots`: `count`, first 300; `apartKm`, first 60;
+`beyondRuinKm`, first 6. The same
 master and the same balance give the same bots everywhere. Raising `count` makes more at the next opening;
 lowering it makes none and takes none away.
 

@@ -36,5 +36,11 @@
     "integrityShare": 0.5,
     "effectivenessLost": 10,
     "slice": { "power": 50, "integrity": 50, "summonCount": 3 }
+  },
+  "houseBots": {
+    "$comment": "The house bots the world opens with, each a player the world plays (decision record 0108). At most this count of them, the towns of 1790 taken most important first; each seat stands so many kilometres past the edge of its town's ruin, on land, and no nearer another bot's seat than apartKm. A town with no room for one is passed over. Raising the count makes more at the next opening; lowering it takes none away.",
+    "count": 300,
+    "apartKm": 60,
+    "beyondRuinKm": 6
   }
 }

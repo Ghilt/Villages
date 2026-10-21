@@ -1,9 +1,9 @@
 /**
  * The balance, `world/catalogues/balance.json`, as the page and its inspect page read it: the numbers that belong to
  * no one entry of a catalogue - what a roll costs and deals, when an omen is read, how small an island is, how old a
- * newcomer can be, a challenge's rules - each group with the words that say what its numbers do. Strict as the server's reader is: one it
- * cannot read refuses the file, naming where. Held to the server's reader by `contracts/fixtures/balance.json`. See
- * decision record 0097.
+ * newcomer can be, a challenge's rules, how many house bots the world opens with - each group with the words that
+ * say what its numbers do. Strict as the server's reader is: one it cannot read refuses the file, naming where. Held
+ * to the server's reader by `contracts/fixtures/balance.json`. See decision record 0097.
  */
 
 /** The four rarities, as the file names them, most common first. */
@@ -38,6 +38,8 @@ export interface Balance {
     readonly effectivenessLost: number;
     readonly slice: { readonly power: number; readonly integrity: number; readonly summonCount: number };
   };
+  /** The house bots the world opens with, and how they stand: decision record 0108. */
+  readonly houseBots: { readonly count: number; readonly apartKm: number; readonly beyondRuinKm: number };
   /** What each group's numbers do, in its own words, by the group's name; and the file's own, under `''`. */
   readonly said: Readonly<Record<string, string>>;
 }
@@ -81,6 +83,7 @@ export function parseBalance(text: string): Balance {
   const newcomers = group(file, 'newcomers');
   const challenge = group(file, 'challenge');
   const slice = group(challenge, 'slice');
+  const houseBots = group(file, 'houseBots');
   const comment = (node: Node) => (typeof node.$comment === 'string' ? node.$comment : '');
   return {
     roll: {
@@ -117,6 +120,11 @@ export function parseBalance(text: string): Balance {
         summonCount: number(slice, 'challenge.slice.summonCount', true),
       },
     },
+    houseBots: {
+      count: number(houseBots, 'houseBots.count', true),
+      apartKm: number(houseBots, 'houseBots.apartKm'),
+      beyondRuinKm: number(houseBots, 'houseBots.beyondRuinKm'),
+    },
     said: {
       '': comment(file),
       roll: comment(roll),
@@ -124,6 +132,7 @@ export function parseBalance(text: string): Balance {
       islands: comment(islands),
       newcomers: comment(newcomers),
       challenge: comment(challenge),
+      houseBots: comment(houseBots),
     },
   };
 }

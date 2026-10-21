@@ -104,6 +104,7 @@ class BalanceFileTest {
             villages.domain.challenge.ChallengeRules(2.0, 80.0, 12.0, 0.25, 0.4, 15.0, villages.domain.challenge.SliceStart(40.0, 60.0, 2)),
             balance.challenge,
         )
+        assertEquals(villages.application.Balance.HouseBots(250, 50.0, 5.0), balance.houseBots)
     }
 
     @Test

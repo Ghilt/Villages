@@ -6,9 +6,10 @@ import villages.domain.challenge.ChallengeRules
 
 /**
  * The numbers that belong to no one entry of a catalogue, `world/catalogues/balance.json`, Adam's to tune: what a roll
- * costs and deals, when an omen is read, how small an island is, how old a newcomer can be, and a challenge's rules. Each is read at the moment
- * it decides something, and what it decided is written into the event, so a retune changes what happens next and
- * never what happened. A number folded from a stored event rather than written into it - a founding's wealth - is not
+ * costs and deals, when an omen is read, how small an island is, how old a newcomer can be, a challenge's rules, and
+ * how many house bots the world opens with and where they stand. Each is read at the moment it decides something, and
+ * what it decided is written into the event, so a retune changes what happens next and never what happened. A number
+ * folded from a stored event rather than written into it - a founding's wealth - is not
  * here, because retuning it would rewrite the past. See decision record 0097.
  */
 data class Balance(
@@ -18,6 +19,7 @@ data class Balance(
     val newcomers: Newcomers,
     /** A challenge's numbers that belong to no one effect, which its own type holds to its rules. */
     val challenge: ChallengeRules,
+    val houseBots: HouseBots,
 ) {
     /**
      * A choice roll: what it costs in wealth, how many options it deals, the chance out of a hundred of each rarity,
@@ -50,6 +52,12 @@ data class Balance(
         val ages: IntRange get() = youngest..oldest
     }
 
+    /**
+     * The house bots the world opens with: at most [count], each standing [beyondRuinKm] past the edge of the ruin of
+     * the town of 1790 it is named after, and none nearer another bot's seat than [apartKm]. See decision record 0108.
+     */
+    data class HouseBots(val count: Int, val apartKm: Double, val beyondRuinKm: Double)
+
     /** What must hold of the numbers themselves; throws [CatalogueRefused] naming the place that does not. */
     fun check(): Balance {
         fun refuse(at: String, must: String): Nothing = throw CatalogueRefused(Catalogues.BALANCE, "$at $must")
@@ -68,6 +76,9 @@ data class Balance(
         if (islands.smallerThanKm2 <= 0) refuse("islands.smallerThanKm2", "is more than nothing")
         if (newcomers.youngest < 0 || newcomers.youngest > newcomers.oldest) {
             refuse("newcomers", "are no younger than nothing, and the youngest no older than the oldest")
+        }
+        if (houseBots.count < 0 || houseBots.apartKm < 0 || houseBots.beyondRuinKm < 0) {
+            refuse("houseBots", "count from nothing, and stand nothing or more apart and beyond a ruin")
         }
         return this
     }
