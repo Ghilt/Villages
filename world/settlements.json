@@ -1,0 +1,23 @@
+{
+  "$comment": "Where the villages and fishing villages of 1790 stand, nobody holding them: what `npm run world:settlements --prefix frontend` reads to choose every settlement site, Adam's to tune, every number a first draft. `ground` is how good each class of ground is to live on, nought to one; a class not listed is none, and nothing stands where its middle is none. A site's score is the mean of its ground's, the open water left out, a little more where a small river runs through it, and it stands only from `least`. `reliefMetres` is the most between the highest and the lowest of its ground. `spacingKm` is how far apart two sites in open country stand at least, and about twice that is how far apart they stand as a rule, since each is kept where nothing within it scores better; `grid` is the world units between the candidates they are chosen from, whose places are their ids. A site with open water or a large river (`fishing.river` of the flow's size, nought to one) over a share of its ground within `fishing.water` is a fishing village, and one with more is none. `levels` is the score from which a site is a village and then a large village; below it is a hamlet. `beside` stands sites beside every ruin of 1790 by its tier, `gapKm` past the edge of its overgrowth, `apartKm` from each other, at a level by its tier. A site never stands within a ruin's reach. See docs/plans/settlements-and-roads.md and decision record 0114.",
+
+  "ground": {
+    "farmland": 1, "farmland-with-woods": 0.9, "floodplain": 1, "paddy": 1, "meadow": 0.85,
+    "steppe": 0.5, "savanna": 0.5, "scrub": 0.35, "heath": 0.35, "alpine-meadow": 0.3,
+    "broadleaf-forest": 0.4, "mixed-forest": 0.4, "dry-forest": 0.35, "conifer-forest": 0.25,
+    "taiga-open": 0.2, "rainforest": 0.2, "taiga": 0.12, "tundra": 0.08
+  },
+  "least": 0.6,
+  "reliefMetres": 500,
+  "spacingKm": 35,
+  "grid": 16,
+  "riverBonus": 0.1,
+  "fishing": {"water": [0.12, 0.55], "river": 0.55},
+  "levels": [0.8, 0.92],
+  "beside": {
+    "sites": {"great": 4, "large": 3, "city": 2, "town": 1, "small": 1},
+    "gapKm": 3,
+    "apartKm": 20,
+    "level": {"great": 3, "large": 3, "city": 2, "town": 2, "small": 1}
+  }
+}
