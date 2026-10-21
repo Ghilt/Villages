@@ -22,6 +22,7 @@ import {
 } from '../src/settlementSites.ts';
 import type { Candidate, RuinPlace, Site } from '../src/settlementSites.ts';
 import { SettlementNamer } from '../src/settlementNames.ts';
+import { fileSettlements } from '../src/settlementsFile.ts';
 import type { Region } from '../src/settlementNames.ts';
 import { parseSettlements, unitsOfKm } from '../src/settlements.ts';
 import { fromWorld, toWorld } from '../src/sphere.ts';
@@ -170,20 +171,22 @@ const nameOf = (site: Site): string => {
 const nameById = new Map(sites.map((site) => [site.id, nameOf(site)]));
 
 const at = new Date().toISOString();
-const out = {
-  $comment:
-    'Written by npm run world:settlements: every settlement site, which the game server raises a settlement on at the opening (decision record 0114). Worked out again from world/settlements.json, the tiles, the names and the ruins, never edited.',
+const out = fileSettlements(
   master,
   at,
-  sites: sites.map((site) => ({
-    id: site.id,
-    type: site.type,
-    level: site.level,
-    name: nameById.get(site.id)!,
-    at: placeOf(site),
-    by: site.by,
-  })),
-};
+  sites.map((site) => {
+    const [lng, lat] = placeOf(site);
+    return {
+      id: site.id,
+      type: site.type,
+      level: site.level,
+      name: nameById.get(site.id)!,
+      lng,
+      lat,
+      by: site.by,
+    };
+  }),
+);
 const groundDir = writtenAt(resolve(GROUND_DIR, master));
 ownFile(resolve(groundDir, 'settlements.json'), 'the settlements');
 await mkdir(groundDir, { recursive: true });
