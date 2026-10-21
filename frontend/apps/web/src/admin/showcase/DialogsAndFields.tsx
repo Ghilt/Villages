@@ -9,6 +9,7 @@ import { TextField } from '../../ui/field/TextField';
 import { HoldButton } from '../../ui/hold/HoldButton';
 import { Medallion } from '../../ui/medallion/Medallion';
 import { Toasts } from '../../ui/toast/Toasts';
+import { DialogInARoom } from './DialogInARoom';
 import type { Toast } from '../../ui/toast/Toasts';
 import { FIGURES, Portrait } from './sampleFigures';
 import { Part, Specimen, Specimens } from './Specimen';
@@ -139,6 +140,20 @@ export function DialogsAndFields() {
                 </p>
               ))}
             </Dialog>
+          </Specimen>
+          <Specimen
+            name="DialogRoom"
+            note={['a dialog over a room the size of a phone', 'the page round it in reach']}
+            wide
+          >
+            <DialogInARoom dismissable />
+          </Specimen>
+          <Specimen
+            name="DialogRoom"
+            note={['one nothing puts away but an answer', 'as the signed-out screen']}
+            wide
+          >
+            <DialogInARoom dismissable={false} />
           </Specimen>
           <Specimen name="DialogBox" note="its frame alone, standing still" wide>
             <div className="showcase__dialog-width">

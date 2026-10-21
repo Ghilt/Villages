@@ -2,7 +2,8 @@
  * A dialog: the browser's modal dialog with nothing of its own drawn, so that all of it is the container
  * inside, and the page behind it dimmed with night. It rises a little way in as it opens, in a fifth of a
  * second, and only fades for whoever has asked for less movement. Its words scroll inside it when there
- * are more than the window has room for, and the page behind does not scroll while it is open.
+ * are more than the window has room for, and the page behind does not scroll while it is open. In a room, the
+ * same over the room alone.
  */
 
 @layer ui {
@@ -90,8 +91,44 @@
     overflow: hidden;
   }
 
+  /*
+   * A dialog in a room: over the room alone, which it dims, and sized to the room rather than to the window - a
+   * container query's box, so a stage confined to a phone has a dialog a phone's size. Over everything else in the
+   * room, the loading screen too, as the browser's own dialog is over everything on the page.
+   */
+  .ui-dialog-room {
+    position: absolute;
+    inset: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    container-type: size;
+  }
+
+  .ui-dialog-room__veil {
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, var(--ui-night, #1c1813) 72%, transparent);
+    backdrop-filter: blur(2px);
+    animation: ui-dialog-dim 0.18s ease-out;
+  }
+
+  .ui-dialog.ui-dialog--in-room {
+    position: relative;
+    width: min(30rem, calc(100cqw - 2rem));
+    max-height: calc(100cqh - 2rem);
+    outline: none;
+    animation: ui-dialog-in 0.18s ease-out;
+  }
+
+  .ui-dialog--in-room .ui-dialog__box > .ui-container__content {
+    max-height: calc(100cqh - 2rem);
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .ui-dialog[open] {
+    .ui-dialog[open],
+    .ui-dialog.ui-dialog--in-room {
       animation: ui-dialog-dim 0.12s ease-out;
     }
   }

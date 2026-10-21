@@ -1,0 +1,18 @@
+/* A room the size of a phone, as the stage confined to one, for a dialog to stand over alone. */
+.showcase__dialog-room {
+  position: relative;
+  width: 20rem;
+  height: 28rem;
+  max-width: 100%;
+  overflow: hidden;
+  outline: 1px dashed var(--ui-night-edge);
+  background: linear-gradient(160deg, #6d8a5e, #9bb08a 55%, #5f7f9a);
+}
+
+.showcase__dialog-room-floor {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--ui-space-2);
+  padding: var(--ui-space-3);
+}

@@ -426,7 +426,12 @@ A line each: what it is for, its variants, and where on the page it is.
   is `open`. Its `title` is the question, its children what there is to know, in a scroll area when there
   is more than the window holds, and its `actions` the answers, the one the question is about last - a
   `HoldButton`, for what cannot be undone. The page behind does not scroll while it is open. In the
-  `dialog.plain` recipe unless it says otherwise; `DialogBox` is its frame alone. *Dialogs and fields*.
+  `dialog.plain` recipe unless it says otherwise; `DialogBox` is its frame alone. **Inside a `DialogRoom` it
+  stands over the room alone**: drawn into it, dimming it and sized to it, the rest of the room inert while it
+  stands, and what is outside the room in reach. The game's stage is one, so a dialog keeps to a phone's size when the
+  stage is confined to one, and the debug panel beside it still answers: Adam's word of 2026-10-21. There it does by
+  hand what the browser's dialog does, the keyboard to its first control and Escape to put it away. *Dialogs and
+  fields*, beside a room the size of a phone.
 - **`Toasts`**, `ui/toast/Toasts.tsx`: things that happened, said in the bottom right corner of whatever
   holds them and gone once read - from five seconds to twelve, longer for more words, `stayOf` in
   `ui/toast/life.ts` - and never while the pointer or the keyboard is on one; or put away by its close
