@@ -3,6 +3,7 @@ import './mark.css';
 import type { ReactNode } from 'react';
 
 import { pictureIn, sourcesOf, usePictures } from '../art/pictures';
+import { CHALLENGE_MARKS } from './challengeMarks';
 
 /**
  * A mark: a small sign a thing is known by where there is no room for its name - a close, an eye, a step.
@@ -336,6 +337,7 @@ const DRAWN = {
       <path d="M14.4 14.4 L19 19" className="ui-mark__line" />
     </>
   ),
+  ...CHALLENGE_MARKS,
 } satisfies Record<string, ReactNode>;
 
 export type MarkName = keyof typeof DRAWN;
