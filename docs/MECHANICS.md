@@ -1362,7 +1362,8 @@ the component library first.
   it never feels bad for the player who climbed. `SETTING.md` has the reason ready.
 - **When players hold every chair of a circle**, what the next house does. It must not make a faction
   player-versus-player first.
-- **What a house bot is**, beyond holding a chair and casting a ball: a concept of its own.
+- **What a house bot does in a faction**: holding a chair, casting a ball, stepping aside. What a house bot is,
+  and that it does nothing yet, is decision record 0108.
 - **The other four factions**: their names, circles, doors and favour.
 - **How sway is counted**, what each faction's does, and where the floor and the ceiling stand.
 - **The provinces**: how many, and where their lines run - the cultures, the named regions, or lines of their own.

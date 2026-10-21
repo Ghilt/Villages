@@ -303,8 +303,11 @@ record 0055.
 NPC factions and famous characters have streams of their own: a decision AI plays them, and they work
 roughly as human players do — but as a more constant force, some of them more the shape of the landscape
 than a figure in it. An NPC house is a house; the difference is who issues its commands. Adam's word for one is
-a **house bot**: when the world opens, every place in every faction is held by one, and players rise into those
-places as they are made ready to.
+a **house bot**: a house whose player is the world itself. The world begins with a few hundred of them, each
+standing outside the ruin of a town of 1790 and named after it, as old houses took the names of their seats, and
+nobody is told which houses they are. In their first version they do nothing; a decision AI will play them once
+the resources and the rolls are balanced. When the factions come, every place in every faction is held by one at
+first, and players rise into those places.
 
 ## Not decided
 
