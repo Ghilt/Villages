@@ -55,7 +55,10 @@ map (`PlaceName`, `TOWN`, `of1790`), and the ground map itself (0084).
 
 1. **The towns of 1790, most important first**: by their people in 1790, as `world/ruins.json` counts them for
    the ruins, then every town it does not list by the names file's rank, which is today's, a town with none last;
-   ties by the town's id, so the order is the same on every tree.
+   ties by the town's id, so the order is the same on every tree. A town carried onto the master twice - Adam's
+   copied land, as Pyongyang is, about 90 kilometres apart - is taken once, at its copy furthest north and then west,
+   because a bot is its town's. Found on 2026-10-21, when 300 places made 299 bots: the world's stream held the rule
+   and made the town's bot once.
 2. **A town too near a bot already placed is passed over**: closer than `apartKm`.
 3. **The seat stands `beyondRuinKm` past the edge of the town's ruin**, in a direction the town's id picks, turned
    an eighth at a time until it lands on land and not on a river; a town with water all round at that reach is passed

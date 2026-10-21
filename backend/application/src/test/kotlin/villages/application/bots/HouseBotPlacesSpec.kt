@@ -63,6 +63,16 @@ class HouseBotPlacesSpec : StringSpec({
         HouseBotPlaces.of(towns.reversed(), ground, ruins, bots) shouldBe HouseBotPlaces.of(towns, ground, ruins, bots)
     }
 
+    "a town carried onto the master twice is taken once, at its copy furthest north, wherever the copies come in the list" {
+        val copy = town("Q3", null, Location(-20.0, 45.0), "Market")
+
+        for (listed in listOf(towns + copy, listOf(copy) + towns)) {
+            val markets = HouseBotPlaces.of(listed, ground, ruins, bots).filter { it.town == "Q3" }
+            markets.size shouldBe 1
+            kmBetween(markets.single().seat, market.at) shouldBe (ruins.kmOf("Q3", market.at) + 6.0 plusOrMinus 0.5)
+        }
+    }
+
     "nearer than apartKm is too near, so a smaller apart lets the suburb stand beside the capital" {
         HouseBotPlaces.of(towns, ground, ruins, bots.copy(apartKm = 0.0)).map { it.town } shouldBe listOf("Q1", "Q3", "Q2", "Q7")
     }

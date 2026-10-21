@@ -19,7 +19,9 @@ data class HouseBotPlace(val town: String, val name: HouseName, val seat: Locati
  * else, so that the same world gives the same bots on every tree and at every opening. See decision record 0108.
  *
  * The towns of 1790 are taken most important first: by their people in 1790 as `world/ruins.json` counts them, then
- * every town it does not list by the names' rank, a town with none last, and ties by id. Each one's seat stands
+ * every town it does not list by the names' rank, a town with none last, and ties by id. A town carried onto the
+ * master twice, where Adam copied land from one place on Earth to two, is taken once, at its copy furthest north and
+ * then west, because a bot is its town's and stands by it once. Each one's seat stands
  * [Balance.HouseBots.beyondRuinKm] past the edge of its ruin, in a direction its id picks, turned an eighth at a time
  * until it stands on land. A town is passed over when it has no land at
  * that reach, when its name is not a house name, or when its seat would stand nearer another bot's than
@@ -43,8 +45,11 @@ object HouseBotPlaces {
             .sortedWith(
                 compareBy<PlaceName, Long?>(nullsLast()) { ruins.peopleOf(it.id)?.unaryMinus() }
                     .thenBy(nullsLast()) { it.rank }
-                    .thenBy { it.id },
+                    .thenBy { it.id }
+                    .thenByDescending { it.at.lat }
+                    .thenBy { it.at.lon },
             )
+            .distinctBy { it.id }
 
     private fun nameOf(town: PlaceName): HouseName? =
         try {
