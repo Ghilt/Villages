@@ -7,11 +7,8 @@ import villages.domain.challenge.ChallengeRules
 import villages.domain.challenge.ChallengeSetup
 import villages.domain.challenge.ChallengeSlice
 import villages.domain.challenge.Progression
-import villages.domain.challenge.Ending
-import villages.domain.challenge.Outcome
 import villages.domain.challenge.Progressions
 import villages.domain.challenge.Rng
-import villages.domain.challenge.Side
 
 /**
  * The challenge fought for Adam's simulator: the engine on the catalogue and the rules in force at the moment of
@@ -54,36 +51,19 @@ class ChallengeSimulator(
         }
         val shown = fight(first)
         if (runs == 1) return shown
+        val summing = Batch.Summing(rules().tugEnds).apply { add(shown) }
         val after = Rng(first)
-        val outcomes = listOf(shown.result.outcome) + List(runs - 1) { fight(after.nextLong() and Seeds.MOST).result.outcome }
-        return shown.copy(batch = Batch.of(outcomes))
+        repeat(runs - 1) { summing.add(fight(after.nextLong() and Seeds.MOST)) }
+        return shown.copy(batch = summing.batch())
     }
 
     companion object {
-        const val MOST_RUNS = 1000
+        const val MOST_RUNS = 10_000
     }
 }
 
 /** A challenge fought: the setup it was fought on, its progression drawn when it was, what it came to, and its batch. */
 data class Fought(val setup: ChallengeSetup, val result: ChallengeResult, val batch: Batch? = null)
-
-/**
- * What a batch of challenges came to: how many were fought, how many each side won and how many ended even, how many
- * each side pulled to the end, and the mean of where the tug ended, toward side A.
- */
-data class Batch(val runs: Int, val wonByA: Int, val wonByB: Int, val even: Int, val pulledByA: Int, val pulledByB: Int, val meanTug: Double) {
-    companion object {
-        fun of(outcomes: List<Outcome>): Batch = Batch(
-            runs = outcomes.size,
-            wonByA = outcomes.count { it.wonBy == Side.A },
-            wonByB = outcomes.count { it.wonBy == Side.B },
-            even = outcomes.count { it.wonBy == null },
-            pulledByA = outcomes.count { it.ended == Ending.PULLED && it.wonBy == Side.A },
-            pulledByB = outcomes.count { it.ended == Ending.PULLED && it.wonBy == Side.B },
-            meanTug = outcomes.sumOf { it.tug } / outcomes.size,
-        )
-    }
-}
 
 /** Where a challenge's seed comes from when nobody gives one: a whole number a page can type back. */
 fun interface Seeds {

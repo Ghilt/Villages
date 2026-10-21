@@ -159,7 +159,7 @@ inspect page does (Adam: all four of the extras):
 - a seed shown with every run, which typed back gives the same run;
 - **Run** gives the run's **moments** as a table - second, happening, side, who, what, change, tug - with the
   tug drawn over time and the outcome under it;
-- **Run 100** and **Run 1000** give how often each side won, how many were pulled to 100, and the mean end tug.
+- **Run 100** and **Run 10000** give how often each side won, how many were pulled to 100, and the mean end tug.
   Run 0 is the seed given and the log shown; under a kind each run draws its own progression.
 
 What runs is the catalogue in force, not edits not yet saved, and the page says so beside Run.
@@ -242,7 +242,7 @@ progression, outcome, moments}` or `simulationRefused {id, code, reason}`, the c
 `ChallengeFrames.kt` and `challengeFrames.ts`, beside the catalogue frames, with their fixtures; `frames.ts`
 is at 396 lines, so something leaves it before these arrive. The gateway's part is `ChallengesPart.kt`, a
 mechanic that greets nobody and answers only the page that asked, and the server's wiring `ChallengesConfig.kt`.
-At most 600 seconds, three slices a side and a thousand runs.
+At most 600 seconds, three slices a side and ten thousand runs.
 
 ## The page
 
@@ -286,7 +286,12 @@ Every new check is seen to fail once.
 | 11 | **The challenge kinds drawing progressions**, protocol 59 | 👀 Battle drawn, the same progression for the same seed; 👀 a kind's weights changed, and seen |
 | 12 | **Batches**, protocol 60 | 👀 A thousand runs: who wins how often, how many pulled to 100; how long it takes |
 
-Steps 7 to 10 do not lean on each other, and 11 could come straight after 6.
+Steps 7 to 10 do not lean on each other, and 11 could come straight after 6. Step 13 was asked for by Adam on
+2026-10-21, once he had run batches:
+
+| # | Step | Verification requests |
+|---|---|---|
+| 13 | **A batch drawn whole**, protocol 61: where every run stood each second as a heatmap, the two ends rows of their own, where the runs ended beside it, the seed's run over it | 👀 run 10000, and the heatmap reads; 👀 a cell and a bar say what they hold |
 
 ## Not in this plan
 

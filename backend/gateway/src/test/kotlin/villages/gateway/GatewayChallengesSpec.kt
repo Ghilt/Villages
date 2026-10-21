@@ -79,6 +79,9 @@ class GatewayChallengesSpec : StringSpec({
         val fought = sent.single() as ChallengeSimulated
         fought.batch!!.runs shouldBe 20
         fought.batch!!.wonByA shouldBe 20
+        fought.batch!!.spread.size shouldBe 5
+        fought.batch!!.spread.all { it.sum() == 20 } shouldBe true
+        fought.batch!!.ends.sum() shouldBe 20
         fought.seed shouldBe 42L
         fought.moments.isNotEmpty() shouldBe true
     }

@@ -23,7 +23,7 @@ data class SimulateChallenge(
     val progression: ProgressionView? = null,
     val kind: String? = null,
     val seed: Long? = null,
-    /** How many times to fight it, a batch summed, from 1 to 1000; none is once. */
+    /** How many times to fight it, a batch summed, from 1 to 10000; none is once. */
     val runs: Int? = null,
 ) : ClientFrame
 
@@ -69,8 +69,23 @@ data class ChallengeSimulated(
     @get:JsonInclude(JsonInclude.Include.NON_NULL) val batch: BatchView? = null,
 ) : ServerFrame
 
-/** A batch: how many runs, each side's wins, the even ends, each side's pulls to the end, and the mean end tug toward A. */
-data class BatchView(val runs: Int, val wonByA: Int, val wonByB: Int, val even: Int, val pulledByA: Int, val pulledByB: Int, val meanTug: Double)
+/**
+ * A batch: how many runs, each side's wins, the even ends, each side's pulls to the end, the mean end tug toward A, and
+ * how the runs spread: for every second, how many stood in each of twenty-two bands of the tug - pulled to B's end,
+ * twenty of equal width between the ends, pulled to A's end - and in which band each ended.
+ */
+data class BatchView(
+    val runs: Int,
+    val wonByA: Int,
+    val wonByB: Int,
+    val even: Int,
+    val pulledByA: Int,
+    val pulledByB: Int,
+    val meanTug: Double,
+    val tugEnds: Double,
+    val spread: List<List<Int>>,
+    val ends: List<Int>,
+)
 
 /** What a challenge came to: the tug toward side A, `pulled` or `timeRanOut`, the second, `a`, `b` or none who won. */
 data class OutcomeView(

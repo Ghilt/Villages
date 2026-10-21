@@ -146,3 +146,47 @@
 .challenges-log__began td {
   border-top: 1px solid var(--ink-soft);
 }
+
+/* A batch drawn as a heatmap (SpreadChart.tsx): the seed's run in ink on a parchment halo over the cells, where the
+   runs ended in bars beside them, and the classes of the ramp named in a legend under it. */
+
+.challenges-spread {
+  max-width: 56rem;
+}
+
+.challenges-spread__halo {
+  fill: none;
+  stroke: #fbf7ec;
+  stroke-width: 5;
+  stroke-linejoin: round;
+}
+
+.challenges-spread__ended {
+  fill: #256abf;
+}
+
+.challenges-spread__legend {
+  align-items: center;
+  margin-top: 0.3rem;
+  font-size: 0.8rem;
+}
+
+.challenges-spread__class {
+  display: inline-flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.challenges-spread__swatch {
+  display: inline-block;
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 2px;
+}
+
+.challenges-spread__seed {
+  display: inline-block;
+  width: 1.2rem;
+  height: 2px;
+  background: var(--ink);
+}

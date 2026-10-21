@@ -907,10 +907,14 @@ and `-- --drop` takes them off; by hand only.
   with **keep this seed** to fight the same challenge again, how it ended and in which second, the tug toward the side
   it favours, who won, what was gained and lost; the tug drawn second by second, side A up, each happening marked; and
   every moment as a table, a side or a kind of moment kept alone, a boosted amount marked ×. **run 100** and **run
-  1000** fight the same sides that many times and say how often each side won, how many ended even, how many each
+  10000** fight the same sides that many times and say how often each side won, how many ended even, how many each
   pulled to the end, the mean end tug and how long the batch took; the first run is the seed's, and its moments are the
   ones shown, each run after it fought from a seed worked out from the one before, on a progression of its own when drawn
-  from a kind. It asks with
+  from a kind. A batch is drawn as a heatmap in place of the one run's line: a column a second, a row for each of twenty
+  bands of the tug between the ends and a row of its own for each end, set apart, every cell as dark as the share of the
+  runs standing then that stood in that band, in seven steps of one blue named under it; bars beside it say where the
+  runs ended, and the seed's run is drawn over it as a line. A run pulled to an end stays in that end's row until its
+  seconds are up. Pointing at a cell or a bar says what it holds. It asks with
   `simulateChallenge`, one of Adam's instruments, on a connection that says no hello, and a server with its instruments
   closed refuses it; nothing is stored. The plan is `docs/plans/challenges.md`.
 - **`/admin/inspect-story`** is the world's history as a timeline, `docs/STORY.md` drawn, and needs nothing else

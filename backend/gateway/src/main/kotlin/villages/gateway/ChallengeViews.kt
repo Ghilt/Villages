@@ -87,7 +87,7 @@ internal fun Fought.toFrame(id: String, catalogue: String): ChallengeSimulated {
             )
         },
         summons = summons,
-        batch = batch?.let { BatchView(it.runs, it.wonByA, it.wonByB, it.even, it.pulledByA, it.pulledByB, it.meanTug) },
+        batch = batch?.let { BatchView(it.runs, it.wonByA, it.wonByB, it.even, it.pulledByA, it.pulledByB, it.meanTug, it.tugEnds, it.spread, it.ends) },
     )
 }
 

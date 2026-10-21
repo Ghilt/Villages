@@ -48,8 +48,21 @@ class ChallengeSimulatorSpec : StringSpec({
         (batch.batch!!.wonByA + batch.batch!!.wonByB + batch.batch!!.even) shouldBe 50
         batch.batch!!.wonByA shouldBe 50
         simulator.simulate(hiring, idle, null, "skirmish", 11, runs = 50).batch shouldBe batch.batch
-        shouldThrow<SetupRefused> { simulator.simulate(hiring, idle, byHand, null, 1, runs = 1001) }.reasons shouldBe
-            listOf("a batch is 1 to 1000 runs, not 1001")
+        shouldThrow<SetupRefused> { simulator.simulate(hiring, idle, byHand, null, 1, runs = 10_001) }.reasons shouldBe
+            listOf("a batch is 1 to 10000 runs, not 10001")
+    }
+
+    "a batch says how its runs spread: for every second, how many stood in each band of the tug, and where each ended" {
+        val batch = simulator.simulate(hiring, idle, byHand, null, 3, runs = 20).batch!!
+
+        batch.spread.size shouldBe 5
+        batch.spread.all { it.size == Batch.ROWS && it.sum() == 20 } shouldBe true
+        batch.spread[0][Batch.rowOf(0.0, 100.0)] shouldBe 20
+        batch.ends[Batch.rowOf(40.0, 100.0)] shouldBe 20
+        Batch.rowOf(-100.0, 100.0) shouldBe 0
+        Batch.rowOf(100.0, 100.0) shouldBe Batch.ROWS - 1
+        Batch.rowOf(99.9, 100.0) shouldBe Batch.ROWS - 2
+        Batch.rowOf(-99.9, 100.0) shouldBe 1
     }
 
     "a setup that cannot be fought is refused with every reason it cannot be" {

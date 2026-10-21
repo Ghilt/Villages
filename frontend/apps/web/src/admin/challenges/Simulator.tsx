@@ -7,6 +7,7 @@ import { useCatalogue } from '../frame/useCatalogue';
 import { MomentsTable } from './MomentsTable';
 import { ProgressionEditor } from './ProgressionEditor';
 import { SideBuilder } from './SideBuilder';
+import { SpreadChart } from './SpreadChart';
 import { FIRST_SLICE, SAMPLE, askedOf, seedReads, towardSaid, tugBySecond } from './setup';
 import type { Draft } from './setup';
 import { TugChart } from './TugChart';
@@ -17,7 +18,7 @@ import type { Answer } from './useSimulator';
  * The simulator: a challenge built here - each side's slices with stand-ins in their slots, a progression written by
  * hand or drawn from a kind, a seed or none - fought out by the game server's engine on the catalogue in force, and
  * every moment of it shown: what it came to, the tug drawn second by second, and the moments as a table. The same seed
- * fights the same challenge, so a strange one can be fought again and read; a batch of a hundred or a thousand says how
+ * fights the same challenge, so a strange one can be fought again and read; a batch of a hundred or ten thousand says how
  * often each side wins. Words rather than marks, as every inspect page's controls are. 0105.
  */
 export function Simulator({ content }: { content: Challenges | null }) {
@@ -85,7 +86,7 @@ export function Simulator({ content }: { content: Challenges | null }) {
             onChange={(event) => setDraft({ ...draft, seed: event.target.value })}
           />
         </label>
-        {[1, 100, 1000].map((runs) => (
+        {[1, 100, 10_000].map((runs) => (
           <button
             key={runs}
             type="button"
@@ -171,7 +172,16 @@ function Fought({
           lost: {loss.side.toUpperCase()} {loss.name} {loss.became}, {loss.effectiveness}% effectiveness
         </p>
       ))}
-      <TugChart tugs={tugBySecond(moments, progression.seconds)} progression={progression} ends={ends} />
+      {batch === undefined ? (
+        <TugChart tugs={tugBySecond(moments, progression.seconds)} progression={progression} ends={ends} />
+      ) : (
+        <SpreadChart
+          batch={batch}
+          seedTugs={tugBySecond(moments, progression.seconds)}
+          progression={progression}
+          happenings={draft.kind === ''}
+        />
+      )}
       <MomentsTable challenge={answer.challenge} draft={draft} content={content} />
     </div>
   );

@@ -40,7 +40,7 @@ export const simulateChallengeSchema = z.object({
   progression: progressionViewSchema.optional(),
   kind: z.string().optional(),
   seed: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).optional(),
-  runs: z.number().int().min(1).max(1000).optional(),
+  runs: z.number().int().min(1).max(10_000).optional(),
 });
 
 const sideSchema = z.enum(['a', 'b']);
@@ -100,6 +100,11 @@ export const challengeSimulatedSchema = z.object({
       pulledByA: z.number().int(),
       pulledByB: z.number().int(),
       meanTug: z.number(),
+      tugEnds: z.number(),
+      /** For every second of the longest run, how many runs stood in each of twenty-two bands of the tug then. */
+      spread: z.array(z.array(z.number().int())),
+      /** How many runs ended in each band: pulled to B's end first, twenty between, pulled to A's end last. */
+      ends: z.array(z.number().int()),
     })
     .optional(),
 });
