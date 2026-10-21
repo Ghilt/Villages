@@ -94,6 +94,14 @@ export const READERS: readonly Reader[] = [
     reads: ['art-atlas'],
   },
   {
+    id: 'road-ground',
+    program: 'page',
+    piece: 'sprites',
+    name: 'the roads worn into the ground',
+    where: 'sprites/ground/roads.ts, useRoadGround.ts',
+    reads: ['roads-map', 'tiles'],
+  },
+  {
     id: 'structure-art',
     program: 'page',
     piece: 'sprites',

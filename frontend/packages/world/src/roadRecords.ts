@@ -153,3 +153,23 @@ export function decodeRoads(bytes: Uint8Array, tileX: number, tileY: number, til
   }
   return chunk;
 }
+
+/** How to read the roads layer, as `world:roads` writes it beside a master's world: no word of where any road is. */
+export interface RoadsMapFile {
+  readonly master: string;
+  readonly layer: 'roads';
+  readonly at: string;
+  readonly world: { readonly side: number; readonly tileUnits: number };
+  readonly kinds: readonly RoadKind[];
+  readonly bridges: { readonly kinds: readonly BridgeKind[]; readonly axes: readonly BridgeAxis[] };
+  /** How wide each grade is drawn, and a bridge, in world units. */
+  readonly widths: {
+    readonly track: number;
+    readonly road: number;
+    readonly trunk: number;
+    readonly bridge: number;
+  };
+  readonly pieces: number;
+  readonly chunks: number;
+  readonly bytes: number;
+}

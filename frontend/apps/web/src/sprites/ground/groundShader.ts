@@ -29,8 +29,9 @@ uniform vec2 uWindowSize;
 uniform vec3 uEarth;
 uniform float uStrength;
 uniform float uFade;
-// How much of a settlement's ground is grass rather than earth.
+// How much of a settlement's ground is grass rather than earth, and the dust a road is packed to.
 uniform float uGrass;
+uniform vec3 uRoad;
 out vec4 fragColor;
 
 ${GROUND_GLSL}
@@ -42,8 +43,6 @@ const float WANDER_FINE = 1.7;
 const float SOFT = 0.18;
 // The grass a ruin's yard is going back to, and a settlement's ground is trodden into.
 const vec3 GRASS = vec3(0.45, 0.5, 0.35);
-// The dust a road is packed to.
-const vec3 PALE = vec3(0.78, 0.7, 0.56);
 
 int wornAt(ivec2 cell) {
   ivec2 at = cell - ivec2(uWindowOrigin);
@@ -89,7 +88,7 @@ void main() {
     colour = mix(colour, GRASS * (1.0 + grain * 0.3), uGrass);
   } else if (worn == 5) {
     // A road is packed and dusty, paler than the earth of a path.
-    colour = mix(colour, PALE, 0.35);
+    colour = uRoad * (1.0 + tint * 0.08 + grain * 0.12);
   }
   float alpha = how * soft * uStrength * uFade;
   fragColor = vec4(colour * alpha, alpha);

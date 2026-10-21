@@ -103,6 +103,9 @@ its street does not pass to the nearest street, the fewest diamonds round the ot
 (`sprites/ground/settlementGround.ts`). Nothing is worn on water or a river. To the paths between buildings the whole
 settlement is one yard, its square's front corner its foot. The kinds are renumbered weakest first - a settlement's
 ground, a path, a ruin's ring, a ring, a road, a ruin's footprint, a footprint - so the stronger is drawn where two
-meet; the roads between settlements (decision record 0115) will be worn as the same road kind. How much of a
+meet; the roads between settlements (decision record 0115) are worn as the same road kind, from the pieces of the
+stands' `roads` layer the page holds, along each piece's line at its grade's width and never less than three-quarters
+of a diamond either side, so a line at any angle across the lattice wears every diamond it crosses; only on land, and
+only on revealed ground (`sprites/ground/roads.ts`). How much of a
 settlement's ground is grass is a lever in the Structures section, beside the earth's colour. See
 `docs/plans/settlements-and-roads.md`.

@@ -554,11 +554,16 @@ stage alone, with none of the debug panel in it (decision record 0079).
   before, **how much of the earth covers the
   paint** is a slider from none to all of it, **how near two buildings stand for a path to join them** is the paths'
   reach in world units, nought for none, **how much of a settlement's ground is grass** is the trodden grass between
-  a village's houses against bare earth, **the earth** is its colour, and **as it was** puts them all back. The line
+  a village's houses against bare earth, **how wide the roads are worn** is a road's width times the roads map's
+  for its grade, **the roads** the colour of their packed dust, **the earth** is its colour, and **as it was** puts
+  them all back. The line
   under them says what is drawn: `85% earth, #806040; paths between buildings within 12 units`. A settlement's ground
   is its whole square, its rim ragged, its two streets paler as a road, a yard under each building and a lane from
   each to its street. The log says under `ground` how many diamonds are worn under how many buildings and
-  settlements, how many paths join them and how many lanes the settlements took. A path is walked only
+  settlements, how many paths join them and how many lanes the settlements took, and how many pieces of road it wears.
+  The roads are the pieces of the `roads` layer the game server sent, worn along their lines wherever the ground is land
+  and the house has revealed it, so a road stops where the revealed ground stops and the river under a bridge shows; no
+  tree grows on one, so a road through a forest is a clear way. A path is walked only
   once the flat tiles under it have come, keeps off open water, and is worn only on ground the house has revealed. They are the look's, Adam's to settle by eye at zoom 9 or 10
   over a few buildings, and are not kept across a reload. The yards come in at 7.5 with the buildings' pictures, and
   keep to the fog as the buildings do: Antarctica's structures show theirs with the fog off. Every building casts its

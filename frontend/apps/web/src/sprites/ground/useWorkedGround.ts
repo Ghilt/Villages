@@ -6,6 +6,7 @@ import type { MapSprite } from '../SpriteRenderer';
 import { createGroundTiles } from './groundTiles';
 import { rememberingPaths, wearPaths } from './paths';
 import { rememberingSettlementGround, rememberingWornTogether } from './settlementGround';
+import { useRoadGround } from './useRoadGround';
 import type { Path } from './paths';
 import { workedGroundStore } from './settings';
 import type { Worked } from './worked';
@@ -31,6 +32,7 @@ export function useWorkedGround(
   const [walk] = useState(rememberingPaths);
   const [settle] = useState(rememberingSettlementGround);
   const [together] = useState(rememberingWornTogether);
+  const [withRoads] = useState(rememberingWornTogether);
   const [known, setKnown] = useState(0);
   const ground = useMemo(() => createGroundTiles(tilesRoot, () => setKnown((was) => was + 1)), [tilesRoot]);
   const wearing = useStore(workedGroundStore, (state) => state.on);
@@ -42,9 +44,11 @@ export function useWorkedGround(
     () => (wearing ? settle(sprites, ground) : null),
     [wearing, settle, sprites, ground],
   );
+  const roads = useRoadGround(tilesRoot, ground, known, revealed);
   const worn = useMemo(
-    () => (wearing ? together(work(yards), settled?.worked ?? NOTHING_WORN) : NOTHING_WORN),
-    [wearing, work, together, yards, settled],
+    () =>
+      wearing ? withRoads(together(work(yards), settled?.worked ?? NOTHING_WORN), roads.worn) : NOTHING_WORN,
+    [wearing, work, together, withRoads, yards, settled, roads.worn],
   );
   const paths = useMemo(
     () => (wearing && reach > 0 ? walk(yards, reach, ground, known) : NO_PATHS),
@@ -57,11 +61,11 @@ export function useWorkedGround(
     const settlements = yards.filter((yard) => yard.settlement).length;
     const now =
       `${worked.size} diamonds of worked ground under ${yards.length - settlements} buildings and ${settlements} ` +
-      `settlements, ${paths.length} paths and ${settled?.lanes ?? 0} lanes`;
+      `settlements, ${paths.length} paths and ${settled?.lanes ?? 0} lanes, and ${roads.pieces} pieces of road`;
     if (now !== said.current) {
       said.current = now;
       note('ground', now);
     }
-  }, [worked, yards, paths, settled]);
+  }, [worked, yards, paths, settled, roads.pieces]);
   return worked;
 }

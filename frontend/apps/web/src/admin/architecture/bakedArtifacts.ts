@@ -166,7 +166,6 @@ export const BAKED: readonly Artifact[] = [
     path: `${M}/sprites/roads/map.json`,
     origin: 'baked',
     what: 'How to read a piece of the roads layer, and how wide each grade is drawn, and no word of where any road is.',
-    development: 'Read by the page once it wears the roads into the ground, step 18 of the plan.',
   },
   {
     id: 'roads-stands',

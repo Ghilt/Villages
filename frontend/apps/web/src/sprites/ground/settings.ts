@@ -18,6 +18,10 @@ export interface WorkedGroundSettings {
   reach: number;
   /** How much of a settlement's ground is trodden grass rather than earth, nought to one. */
   grass: number;
+  /** How wide the roads are worn, times the width the roads map gives each grade. */
+  roadWidth: number;
+  /** The colour of a road's packed dust, as `#rrggbb`. */
+  road: string;
 }
 
 export const WORKED_GROUND_START: WorkedGroundSettings = {
@@ -26,6 +30,8 @@ export const WORKED_GROUND_START: WorkedGroundSettings = {
   earth: '#806040',
   reach: 12,
   grass: 0.45,
+  roadWidth: 1.3,
+  road: '#a8906a',
 };
 
 const ground = createStore<WorkedGroundSettings>({ ...WORKED_GROUND_START });
@@ -40,7 +46,9 @@ export function setWorkedGround(change: Partial<WorkedGroundSettings>): void {
     next.strength === was.strength &&
     next.earth === was.earth &&
     next.reach === was.reach &&
-    next.grass === was.grass
+    next.grass === was.grass &&
+    next.roadWidth === was.roadWidth &&
+    next.road === was.road
   ) {
     return;
   }

@@ -83,6 +83,7 @@ export function createGroundLayer(renderer: Renderer, repaint: () => void): Grou
     uStrength: { value: 1, type: 'f32' },
     uFade: { value: 0, type: 'f32' },
     uGrass: { value: 0, type: 'f32' },
+    uRoad: { value: new Float32Array(3), type: 'vec3<f32>' },
   });
   const nothing = new BufferImageSource({
     resource: new Uint8Array(1),
@@ -158,7 +159,7 @@ export function createGroundLayer(renderer: Renderer, repaint: () => void): Grou
     },
 
     draw(view: CameraView): number | null {
-      const { strength, earth, grass } = workedGroundStore.get();
+      const { strength, earth, grass, road } = workedGroundStore.get();
       const fade = smoothstep(BECOMES_A_MARK_AT, BECOMES_A_MARK_AT + 0.5, view.zoom);
       const at = fade > 0 && worked.size > 0 ? windowOfView(view) : null;
       if (at === null) {
@@ -187,6 +188,10 @@ export function createGroundLayer(renderer: Renderer, repaint: () => void): Grou
       u.uStrength = strength;
       u.uFade = fade;
       u.uGrass = grass;
+      const [roadRed, roadGreen, roadBlue] = channelsOf(road);
+      u.uRoad[0] = roadRed;
+      u.uRoad[1] = roadGreen;
+      u.uRoad[2] = roadBlue;
       uniforms.update();
 
       const resolution = renderer.resolution;

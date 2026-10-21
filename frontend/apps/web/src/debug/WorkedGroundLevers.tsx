@@ -61,6 +61,30 @@ export function WorkedGroundLevers() {
         value={how.grass}
         onChange={(event) => setWorkedGround({ grass: Number(event.target.value) })}
       />
+      <label className="debug-map__label" htmlFor="worked-ground-road-width">
+        How wide the roads are worn
+      </label>
+      <input
+        id="worked-ground-road-width"
+        className="debug__slider"
+        type="range"
+        min={0.5}
+        max={3}
+        step={0.1}
+        value={how.roadWidth}
+        onChange={(event) => setWorkedGround({ roadWidth: Number(event.target.value) })}
+      />
+      <label className="debug-map__label" htmlFor="worked-ground-road">
+        The roads
+      </label>
+      <div className="debug__levers">
+        <input
+          id="worked-ground-road"
+          type="color"
+          value={how.road}
+          onChange={(event) => setWorkedGround({ road: event.target.value })}
+        />
+      </div>
       <label className="debug-map__label" htmlFor="worked-ground-earth">
         The earth
       </label>
