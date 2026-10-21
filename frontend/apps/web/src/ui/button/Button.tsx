@@ -52,7 +52,7 @@ export function FaceLayer({ name, height }: { name: string; height: number }) {
   );
 }
 
-/** Words on a face that stretches to fit them. */
+/** Words on a face that stretches to fit them. With `sends`, it is the one that sends the form it stands in. */
 export function TextButton({
   children,
   face = 'primary',
@@ -60,13 +60,14 @@ export function TextButton({
   onClick,
   disabled = false,
   showing,
-}: Common & { children: ReactNode; face?: string }) {
+  sends = false,
+}: Common & { children: ReactNode; face?: string; sends?: boolean }) {
   const { list } = usePictures();
   const height = BUTTON_HEIGHTS[size];
   const ends = faceOf(list, face, height)?.ends ?? [height / 2, height / 2];
   return (
     <button
-      type="button"
+      type={sends ? 'submit' : 'button'}
       className={`ui-button ui-button--text ui-button--${size}`}
       style={{ height, paddingLeft: ends[0], paddingRight: ends[1] }}
       onClick={onClick}

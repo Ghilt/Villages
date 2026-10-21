@@ -1,10 +1,10 @@
 import './field.css';
 
-import { useId } from 'react';
+import { useId, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 
 import { usePictures } from '../art/pictures';
-import { FaceLayer, MarkButton } from '../button/Button';
+import { FaceLayer, MarkButton, StateButton } from '../button/Button';
 import type { Showing } from '../button/Button';
 import { BUTTON_HEIGHTS, faceOf } from '../button/face';
 import { Mark } from '../mark/Mark';
@@ -82,8 +82,10 @@ export function useFieldFace(size: FieldSize): { height: number; ends: readonly 
  * name over it and a line under it - how it is to be filled, or what is wrong with what is in it, which a
  * screen reader is told too and the rim says by a glow of velvet.
  *
- * Given `onSearch` it is a search: a mark at its end searches, and so does Enter. Held by whoever uses it,
- * `value` and `onChange`, as every field in a form is. See docs/UI-COMPONENTS.md.
+ * Given `onSearch` it is a search: a mark at its end searches, and so does Enter. Of `kind` email or password it
+ * is one a browser's password manager fills and offers to save, as `autoComplete` says - `username`,
+ * `current-password`, `new-password` - and a password's has an eye at its end that shows what is typed. Held by
+ * whoever uses it, `value` and `onChange`, as every field in a form is. See docs/UI-COMPONENTS.md.
  */
 export function TextField({
   value,
@@ -92,6 +94,8 @@ export function TextField({
   problem,
   onSearch,
   maxLength,
+  kind = 'text',
+  autoComplete,
   label,
   hideLabel,
   hint,
@@ -108,12 +112,19 @@ export function TextField({
   /** Searching for what is in it: a field given this is a search. */
   onSearch?: (value: string) => void;
   maxLength?: number;
+  /** What is typed in it: words, an email, or a password, which is hidden until its eye is pressed. */
+  kind?: 'text' | 'email' | 'password';
+  /** What a browser may fill it with, by the web's own names: `username`, `current-password`, `new-password`. */
+  autoComplete?: string;
 }) {
   const id = useId();
+  const [shown, show] = useState(false);
   const { height, ends } = useFieldFace(size);
   const said =
     problem !== undefined && problem !== null ? `${id}-said` : hint === undefined ? undefined : `${id}-said`;
-  const searchAt = onSearch === undefined ? 0 : BUTTON_HEIGHTS.small;
+  const markAt = onSearch !== undefined || kind === 'password';
+  const searchAt = markAt ? BUTTON_HEIGHTS.small : 0;
+  const type = kind === 'password' ? (shown ? 'text' : 'password') : onSearch === undefined ? kind : 'search';
   const style = { height, paddingLeft: ends[0], paddingRight: ends[1] + searchAt } as CSSProperties;
   return (
     <FieldFrame id={id} label={label} hideLabel={hideLabel} hint={hint} problem={problem}>
@@ -128,7 +139,7 @@ export function TextField({
         <input
           id={id}
           className="ui-field__input"
-          type={onSearch === undefined ? 'text' : 'search'}
+          type={type}
           value={value}
           onChange={(event) => onChange(event.target.value)}
           onKeyDown={(event) => {
@@ -140,8 +151,9 @@ export function TextField({
           placeholder={placeholder}
           disabled={disabled}
           maxLength={maxLength}
-          autoComplete="off"
+          autoComplete={autoComplete ?? 'off'}
           spellCheck={false}
+          {...(kind === 'text' ? {} : { autoCapitalize: 'none' })}
           {...(problem === undefined || problem === null ? {} : { 'aria-invalid': true })}
           {...(said === undefined ? {} : { 'aria-describedby': said })}
         />
@@ -152,6 +164,18 @@ export function TextField({
               mark="search"
               size="small"
               onClick={() => onSearch(value)}
+              disabled={disabled}
+            />
+          </span>
+        )}
+        {kind === 'password' && (
+          <span className="ui-field__search" style={{ right: Math.max(ends[1] - 4, 0) }}>
+            <StateButton
+              on={shown}
+              onChange={show}
+              marks={{ on: 'eye-open', off: 'eye-shut' }}
+              labels={{ on: 'Hide the password', off: 'Show the password' }}
+              size="small"
               disabled={disabled}
             />
           </span>

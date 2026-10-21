@@ -81,6 +81,16 @@ export const COLOURS: readonly TokenGroup[] = [
       { name: 'ui-rarity-legendary', for: 'legendary' },
     ],
   },
+  {
+    name: 'Google and Discord',
+    tokens: [
+      { name: 'ui-google-face', for: "Google's sign-in button, by Google's rules" },
+      { name: 'ui-google-rim', for: 'its rim' },
+      { name: 'ui-google-ink', for: 'its words' },
+      { name: 'ui-discord-face', for: "Discord's, its blurple" },
+      { name: 'ui-discord-ink', for: 'its words and its mark' },
+    ],
+  },
 ];
 
 export const SPACES: readonly Token[] = [

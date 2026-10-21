@@ -56,6 +56,13 @@
     --ui-rarity-rare: #4f7fb6;
     --ui-rarity-legendary: #d0822f;
 
+    /* Google's and Discord's sign-in buttons, in the colours their own brand rules give them: theirs, not ours. */
+    --ui-google-face: #ffffff;
+    --ui-google-rim: #747775;
+    --ui-google-ink: #1f1f1f;
+    --ui-discord-face: #5865f2;
+    --ui-discord-ink: #ffffff;
+
     /* Space, in steps that double, so that two things are either together or apart and never nearly. */
     --ui-space-1: 0.25rem;
     --ui-space-2: 0.5rem;

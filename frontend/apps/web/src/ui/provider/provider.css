@@ -1,0 +1,69 @@
+/*
+ * Google's and Discord's sign-in buttons, drawn as their own brand rules draw them rather than painted: Google's white
+ * with a grey rim, its four-colour G and its words in near-black; Discord's blurple with its mark and its words in
+ * white. As tall as a regular button and as wide as what they stand in, rounded as Google's rectangular one is. Under
+ * the pointer a little darker, pressed darker still, the library's gilt ring focused, faded disabled.
+ */
+
+@layer ui {
+  .ui-provider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    box-sizing: border-box;
+    width: 100%;
+    height: 44px;
+    padding: 0 0.75rem;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font:
+      500 14px / 20px Roboto,
+      Arial,
+      sans-serif;
+    letter-spacing: 0.25px;
+    cursor: pointer;
+    transition: filter 0.12s ease;
+  }
+
+  .ui-provider--google {
+    border-color: var(--ui-google-rim);
+    background: var(--ui-google-face);
+    color: var(--ui-google-ink);
+  }
+
+  .ui-provider--discord {
+    background: var(--ui-discord-face);
+    color: var(--ui-discord-ink);
+  }
+
+  .ui-provider__mark {
+    display: grid;
+    flex: none;
+  }
+
+  .ui-provider__words {
+    white-space: nowrap;
+  }
+
+  .ui-provider:hover:not(:disabled),
+  .ui-provider[data-showing='hover'] {
+    filter: brightness(0.95);
+  }
+
+  .ui-provider:active:not(:disabled),
+  .ui-provider[data-showing='pressed'] {
+    filter: brightness(0.88);
+  }
+
+  .ui-provider:focus-visible,
+  .ui-provider[data-showing='focus'] {
+    outline: 2px solid var(--ui-focus);
+    outline-offset: 2px;
+  }
+
+  .ui-provider:disabled {
+    cursor: default;
+    opacity: 0.38;
+  }
+}

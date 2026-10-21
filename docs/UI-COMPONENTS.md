@@ -440,7 +440,20 @@ A line each: what it is for, its variants, and where on the page it is.
   of velvet. Given `onSearch` it is a search, its `search` mark at its end, and Enter searches too. Its words
   are ink whatever it stands on, because the parchment is its own; they are drawn by the browser, which the
   page's contrast switch cannot see, so `readable.test.ts` holds them to it instead. Held with `value` and
-  `onChange`. `small` and `regular`, as tall as a button. *Dialogs and fields*.
+  `onChange`. `small` and `regular`, as tall as a button. *Dialogs and fields*. Of `kind` `email` or `password` it is
+  one a browser's password manager fills and offers to save, as its `autoComplete` names it - `username`,
+  `current-password`, `new-password` - and a password's has the eye at its end, `eye-shut` and `eye-open`, that shows
+  what is typed. *Signing in*.
+- **`Form`**, `ui/form/Form.tsx`: fields one under another and the buttons that answer them under those, the one
+  that sends it last, sent by a `TextButton` given `sends`, or by Enter in any field, which is `onSend`. A real
+  `<form>`, so a password manager finds the email and the password in it; the browser's own checking is off, and what
+  is wrong is said by each field in the game's words. *Signing in*.
+- **`ProviderButton`**, `ui/provider/ProviderButton.tsx`: signing in through Google or Discord, *Continue with
+  Google* and *Continue with Discord*, drawn as their own brand rules draw a sign-in button - Google's white with its
+  four-colour G, Discord's blurple with its mark - in colours that are theirs, `--ui-google-*` and `--ui-discord-*`.
+  **The one button that is neither painted nor ours to choose a mark or words for**: their rules decide, so a player
+  knows each at once from every other site that has one. As tall as a regular button and as wide as what it stands
+  in. *Signing in*.
 - **`Dropdown`**, `ui/field/Dropdown.tsx`: one of many picked, on the same face, the one picked written on
   it and the `fold` mark at its end turned down. The browser's own list is under the painting, so a pointer,
   a finger, the arrow keys and typing the first letters pick, a phone opens its own picker, and an option

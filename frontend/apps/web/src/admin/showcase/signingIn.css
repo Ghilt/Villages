@@ -1,0 +1,5 @@
+/* Google's and Discord's buttons at the width a sign-in form gives them, their words on one line. */
+.showcase__provider-width {
+  width: 17rem;
+  max-width: 100%;
+}

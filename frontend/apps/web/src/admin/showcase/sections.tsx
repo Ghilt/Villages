@@ -13,6 +13,7 @@ import { MarksAndReadouts } from './MarksAndReadouts';
 import { Pictures } from './Pictures';
 import { Quests } from './Quests';
 import { Rolls } from './Rolls';
+import { SigningIn } from './SigningIn';
 import { Slots } from './Slots';
 import { TabsAndSections } from './TabsAndSections';
 
@@ -118,6 +119,12 @@ export const SECTIONS: readonly Section[] = [
     title: 'Dialogs and fields',
     says: 'The dialog, the toast, the text field, the dropdown and the medallion.',
     Body: DialogsAndFields,
+  },
+  {
+    id: 'signing-in',
+    title: 'Signing in',
+    says: "The email and password fields, the form they stand in, and Google's and Discord's buttons.",
+    Body: SigningIn,
   },
   {
     id: 'loading',

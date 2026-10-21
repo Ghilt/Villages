@@ -1,0 +1,22 @@
+/*
+ * A form: its fields one under another with a space between, and its buttons in a row under them, the last on the
+ * right, as a dialog's are. A browser's own checking is off: what is wrong is said by the field, in the game's words.
+ */
+
+@layer ui {
+  .ui-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-3);
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .ui-form__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--ui-space-2);
+  }
+}
