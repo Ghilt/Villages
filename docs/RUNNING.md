@@ -1098,6 +1098,13 @@ and `-- --drop` takes them off; by hand only.
   `accounts: this browser's sign-in has ended; this window is no longer playing`. Every window of that sign-in is
   stood down so, and one of another sign-in plays on. The section, the outbox and the lever are Adam's instruments,
   refused while they are closed, because the mail holds live links.
+- **The settings**, the player's own: the gear in the stage's top right corner opens a dialog of what is not the game's.
+  **Account** says who this browser plays as - for now, a guest, remembered by this browser. **The world moving** is
+  *As my device asks*, *Still* or *Moving*: still holds the clouds, the water, the creatures, the trees and the grass
+  in the wind, the haze, an area's pulse and the light a click on water sends along it, from the next frame, whatever
+  the device asks; the interface's own short movements follow the device alone. **Language** is English, the only one
+  until the words are translated. What is chosen is kept for the player by the game server, a guest's too, so it is
+  the same after a reload and in another browser of the same account; the log says `accounts: settings kept`.
 - **It is kept where the world is**: in the tree's own database, in the collections `signIns` and `players` beside
   `events`, when the world is kept in MongoDB, so a restart of the game server forgets no sign-in; in memory, and gone
   with the server, when the world is.

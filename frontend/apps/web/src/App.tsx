@@ -15,6 +15,7 @@ import { note } from './log/log';
 import { inspect } from './inspect/opening';
 import { WaterClicks } from './inspect/WaterClicks';
 import { RippleAlongWater } from './inspect/RippleAlongWater';
+import { Settings } from './account/Settings';
 import { SignedOut } from './account/SignedOut';
 import { signIn } from './net/auth';
 import { sessionStore, gateway } from './net/gateway';
@@ -354,6 +355,7 @@ export function App({ master, devTools }: AppProps) {
       <Stage
         stage={box.stage}
         panes={panes}
+        corner={<Settings />}
         overlays={
           <>
             <StoodDown />

@@ -2,6 +2,8 @@ import { createStore, forgetOldPlayerToken, oldPlayerToken } from '@villages/cli
 import type { Readable } from '@villages/client-core';
 
 import { note, shortId } from '../log/log';
+import { moveAs } from '../motion/motion';
+import type { Motion } from '../motion/motion';
 
 /**
  * Who this browser is, as the game server's `/auth/me` answers it: a player, their house and the sign-in that makes
@@ -12,6 +14,13 @@ export interface Me {
   house: string | null;
   guest: boolean;
   signIn: SignInView | null;
+  settings: Settings;
+}
+
+/** A player's settings that are not the game's, kept for them by the server. */
+export interface Settings {
+  motion: Motion;
+  language: 'en';
 }
 
 /** A sign-in, as the server says it: how it is kept, the browser as a person would name it, and when it ends. */
@@ -22,9 +31,21 @@ export interface SignInView {
   ends: number;
 }
 
-const NOBODY: Me = { player: null, house: null, guest: false, signIn: null };
+const NOBODY: Me = {
+  player: null,
+  house: null,
+  guest: false,
+  signIn: null,
+  settings: { motion: 'device', language: 'en' },
+};
 
 const known = createStore<{ me: Me | null }>({ me: null });
+
+/** Who this browser is now, and the world moving as their settings say. */
+function knownAs(me: Me): void {
+  moveAs(me.settings.motion);
+  known.set({ me });
+}
 
 /** Who this browser is, once the page has asked: null until then. */
 export const meStore: Readable<{ me: Me | null }> = known;
@@ -67,7 +88,7 @@ export function signIn(): Promise<Me> {
     try {
       const me = await ask('GET', 'me');
       if (me.player !== null) {
-        known.set({ me });
+        knownAs(me);
         return me;
       }
       const old = oldPlayerToken(kept);
@@ -79,14 +100,14 @@ export function signIn(): Promise<Me> {
           ? `the player this browser kept before sign-ins, ${shortId(old)}, is its guest now, house and all`
           : `a newcomer, made a guest, player ${shortId(made.player ?? '')}`,
       );
-      known.set({ me: made });
+      knownAs(made);
       return made;
     } catch (unanswered) {
       note(
         'player',
         `could not sign in: ${unanswered instanceof Error ? unanswered.message : String(unanswered)}`,
       );
-      known.set({ me: NOBODY });
+      knownAs(NOBODY);
       return NOBODY;
     }
   })();
@@ -104,7 +125,17 @@ export async function startOver(): Promise<void> {
 /** Asks again who this browser is, for the debug panel: what the page knew at its load may have ended since. */
 export async function whoAmI(): Promise<Me> {
   const me = await ask('GET', 'me');
-  known.set({ me });
+  knownAs(me);
+  return me;
+}
+
+/**
+ * This player's settings, written whole and kept for them by the server, so they follow an account to another
+ * browser; the world moves as they say from the next frame. What the server refuses is thrown.
+ */
+export async function settle(settings: Settings): Promise<Me> {
+  const me = await ask('POST', 'settings', settings);
+  knownAs(me);
   return me;
 }
 

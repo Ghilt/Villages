@@ -5,6 +5,7 @@ import { pixelsAt } from './waterGround';
 import type { Picked } from './waterPicked';
 import { waterFrom } from './waterReach';
 import type { WaterSeen } from './waters';
+import { worldStill } from '../motion/motion';
 
 /**
  * A crackle of gold out along the water from where a click named it, like a current through a wire: three sharp fronts
@@ -116,7 +117,7 @@ export function removeRipple(map: maplibregl.Map): void {
 /** Plays the light out along what a click on water picked; hands back what stops it. */
 export function rippleAlong(map: maplibregl.Map, seen: WaterSeen, picked: Picked): () => void {
   const source = map.getSource(SOURCE) as maplibregl.GeoJSONSource | undefined;
-  if (source === undefined || matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  if (source === undefined || worldStill()) {
     return () => undefined;
   }
   const { grid, cells, leap, pixels } = picked;

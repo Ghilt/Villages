@@ -20,10 +20,27 @@ interface SignInStore {
 }
 
 /**
- * Who a player is beyond the world's id for them: a guest's record, and in time an account's way in and the player's
- * own settings. Every player signed in has one, a guest included, so there is one place their settings are kept.
+ * Who a player is beyond the world's id for them: when they came, their own settings, and in time an account's way
+ * in. Every player signed in has one, a guest included, so there is one place their settings are kept.
  */
-data class PlayerRecord(val player: PlayerId, val since: Instant)
+data class PlayerRecord(val player: PlayerId, val since: Instant, val settings: Settings = Settings())
+
+/**
+ * A player's settings that are not the game's, kept for the player so they follow an account to another browser:
+ * whether the world moves - the clouds, the water, the creatures, the trees in the wind - as the device asks, or still,
+ * or moving whatever the device asks; and the language, which is English alone until the game's words are translated.
+ */
+data class Settings(val motion: String = MOTIONS.first(), val language: String = LANGUAGES.first()) {
+    init {
+        require(motion in MOTIONS) { "motion is one of $MOTIONS, not $motion" }
+        require(language in LANGUAGES) { "language is one of $LANGUAGES, not $language" }
+    }
+
+    companion object {
+        val MOTIONS = listOf("device", "still", "moving")
+        val LANGUAGES = listOf("en")
+    }
+}
 
 /** Where the players' records are kept: in memory, or in the tree's own MongoDB. One to a player. */
 interface PlayerStore {
@@ -31,6 +48,9 @@ interface PlayerStore {
     fun add(record: PlayerRecord): Boolean
 
     fun of(player: PlayerId): PlayerRecord?
+
+    /** Writes [record] over the one its player has. */
+    fun put(record: PlayerRecord)
 }
 
 /** The accounts' stores, together, as one thing that is opened and closed. */
@@ -66,6 +86,10 @@ class InMemoryAccounts : AccountStores {
         override fun add(record: PlayerRecord): Boolean = records.putIfAbsent(record.player, record) == null
 
         override fun of(player: PlayerId): PlayerRecord? = records[player]
+
+        override fun put(record: PlayerRecord) {
+            records[record.player] = record
+        }
     }
 
     override val keptIn: String = "in memory"

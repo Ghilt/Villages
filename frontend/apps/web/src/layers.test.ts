@@ -16,7 +16,7 @@ const ROWS: readonly (readonly string[])[] = [
   // camera's arithmetic among them, the one way a component reads a store, and the work in hand the loading
   // screen waits for. The component library is the showcase's and the stage's: the stage dresses each tile in
   // its container, and the panes in them take the library up a surface at a time.
-  ['ui', 'version', 'marks', 'log', 'geometry', 'store', 'shaders', 'loading'],
+  ['ui', 'version', 'marks', 'log', 'geometry', 'store', 'shaders', 'loading', 'motion'],
   // The connection to the game server, and the stage the panes are laid out in.
   ['net', 'stage'],
   // The ground, drawn: the map and its paint, the fog over it, the desk under it, and the water moving on it.

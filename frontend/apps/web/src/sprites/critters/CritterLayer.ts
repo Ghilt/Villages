@@ -20,6 +20,7 @@ import { ringTexture, shadowTexture } from './drawnInCode';
 import { CRITTERS_LOOK } from './look';
 import { spawnedAt } from './spawned';
 import type { CritterEvent, Ground, SpawnAsk } from './types';
+import { worldStill } from '../../motion/motion';
 
 /**
  * The critters, as two layers of the sprite canvas: one on the ground under the scenery, of the shadows, of what runs
@@ -79,7 +80,6 @@ export function createCritterLayer(
   const ground = new Container();
   ground.addChild(ripples, shadows, running);
   const flying = new Container();
-  const still = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   // A level or a slider moved shows on the next frame even where nothing else is moving the map.
   const stopWatching = [critterStore, critterTuningStore, shadersStore, critterSpawnStore].map((store) =>
     store.watch(repaint),
@@ -187,7 +187,7 @@ export function createCritterLayer(
       const counted: Record<string, number> = {};
       // What a click asked for comes even where the clock would bring none.
       const asked = critterSpawnStore.get().asked.length + waiting.length + spawned.length > 0;
-      if (level !== 'off' && !still && fade > 0 && !noArt && (tuning.density > 0 || asked)) {
+      if (level !== 'off' && !worldStill() && fade > 0 && !noArt && (tuning.density > 0 || asked)) {
         if (atlas === null && !loading) void loadArt();
         if (atlas !== null) {
           const layer = camera.standingLayer(view);
@@ -326,7 +326,7 @@ export function createCritterLayer(
         counted,
         level === 'off'
           ? 'off'
-          : still
+          : worldStill()
             ? 'none for less motion'
             : fade <= 0
               ? 'from zoom 9 in'

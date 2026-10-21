@@ -285,6 +285,12 @@ record 0109 and `LOOK-AND-FEEL.md`.
 bar on a phone and on the screen in the spread. A place pressed in it opens its window on top, and Recent
 stays below beside it, so the player can go on down the list. In the spread it is a tab in bottom left.
 
+**The settings' mark stands in the stage's top right corner**, in no bay, in both forms: a gear, which opens what is
+not the game's - who the browser plays as, whether the world moves, the language - in a dialog over the stage. In the
+spread it stands just clear of the column down the right edge when one is up, so it never stands on the column's
+tabs; in the bays it is at the corner itself. On a phone it is to move into the bottom bar once that is on main. See
+`docs/plans/accounts.md`.
+
 ## Container queries, not breakpoints
 
 **A media query cannot see the stage.** The stage is a containing block, and it is 390 wide inside a window

@@ -2,6 +2,7 @@ import type { CameraView } from '../geometry/cameraMath';
 
 import type { createFogLayer } from './FogLayer';
 import type { Layer } from './layer';
+import { worldStill } from '../motion/motion';
 
 /** Twelve frames a second: all a haze moving about a unit a second needs, and a fifth of what a display draws. */
 const UNDULATION_MS = 83;
@@ -12,11 +13,10 @@ const UNDULATION_MS = 83;
  * step 7 of docs/plans/fog-of-war.md.
  */
 export function createHazeLayer(fog: ReturnType<typeof createFogLayer>): Layer {
-  const still = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   return {
     draw(view: CameraView, now: number): number | null {
       fog.follow(view);
-      if (still) {
+      if (worldStill()) {
         return null;
       }
       fog.setTime(now / 1000);

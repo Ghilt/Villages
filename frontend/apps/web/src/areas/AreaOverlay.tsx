@@ -10,6 +10,7 @@ import { terrainPalette } from '../geometry/terrainClasses';
 import { MOST_DIAMONDS } from './census';
 import { areasStore, addArea, armDrawing } from './areas';
 import { useStore } from '../store/useStore';
+import { worldStill } from '../motion/motion';
 import {
   DRAFT,
   DRAFT_CLOSE,
@@ -197,8 +198,7 @@ export function AreaOverlay({ map, worldRoot, turn, picked: top, onPick }: AreaO
       map.setPaintProperty(PULSE, 'line-opacity', 0.35 + 0.65 * phase);
       map.setPaintProperty(PULSE, 'line-width', 2 + 2.2 * phase);
     };
-
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (worldStill()) {
       set(1);
       return;
     }

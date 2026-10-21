@@ -62,6 +62,12 @@ class Accounts(
         return Who(used.signIn, stores.players.of(signIn.player), used.cookieAgain)
     }
 
+    /** [player]'s settings, written whole; a value no setting takes is refused before anything is written. */
+    fun settle(player: PlayerId, settings: Settings) {
+        val record = stores.players.of(player) ?: PlayerRecord(player, clock.instant())
+        stores.players.put(record.copy(settings = settings))
+    }
+
     override fun signedIn(secret: String): SignedIn? = who(secret)?.let { SignedIn(it.signIn.player, it.signIn.id) }
 }
 

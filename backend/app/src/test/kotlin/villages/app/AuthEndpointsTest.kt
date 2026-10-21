@@ -34,10 +34,15 @@ class AuthEndpointsTest {
         HttpResponse.BodyHandlers.ofString(),
     )
 
-    private fun post(path: String, origin: String? = "http://localhost:5548", cookie: String? = null): HttpResponse<String> =
+    private fun post(
+        path: String,
+        origin: String? = "http://localhost:5548",
+        cookie: String? = null,
+        body: String = "{}",
+    ): HttpResponse<String> =
         http.send(
             HttpRequest.newBuilder(URI("http://localhost:$port$path"))
-                .POST(HttpRequest.BodyPublishers.ofString("{}"))
+                .POST(HttpRequest.BodyPublishers.ofString(body))
                 .header("Content-Type", "application/json")
                 .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/141.0 Safari/537.36")
                 .apply { origin?.let { header("Origin", it) } }
@@ -105,6 +110,19 @@ class AuthEndpointsTest {
         assertTrue(body(ask("/auth/me", cookie))["player"].isNull)
         assertEquals(200, ask("/auth/outbox").statusCode())
         assertTrue(body(ask("/auth/outbox")).isArray)
+    }
+
+    @Test
+    fun `a player's settings are kept for them, a guest's too, and a setting there is none of is refused`() {
+        val cookie = setCookie(post("/auth/guest")).substringBefore(';')
+        assertEquals("device", body(ask("/auth/me", cookie))["settings"]["motion"].asString())
+
+        val settled = post("/auth/settings", cookie = cookie, body = """{"motion":"still","language":"en"}""")
+
+        assertEquals(200, settled.statusCode())
+        assertEquals("still", body(ask("/auth/me", cookie))["settings"]["motion"].asString())
+        assertEquals(400, post("/auth/settings", cookie = cookie, body = """{"motion":"sideways","language":"en"}""").statusCode())
+        assertEquals(401, post("/auth/settings", body = """{"motion":"still","language":"en"}""").statusCode())
     }
 
     @Test

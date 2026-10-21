@@ -1,0 +1,11 @@
+/* The settings' parts, one under another with a space between, each with its name over it. See account/Settings.tsx. */
+.settings__part {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+  margin-bottom: var(--ui-space-4);
+}
+
+.settings__title {
+  margin: 0;
+}

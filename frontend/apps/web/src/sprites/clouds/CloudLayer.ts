@@ -20,6 +20,7 @@ import { cloudStore, readClouds } from './cloudMode';
 import { CLOUD_DEFAULTS, cloudTuningStore } from './cloudTuning';
 import { CLOUD_FRAGMENT, CLOUD_VERTEX } from './cloudShader';
 import { CLOUD_LOOK } from './look';
+import { worldStill } from '../../motion/motion';
 
 /**
  * The clouds, as a layer of the sprite canvas: over the fog and everything under it, under the selection ring and
@@ -110,7 +111,6 @@ export function createCloudLayer(
     repaint();
   });
 
-  const still = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   // A still sky is the sky as it was when the page opened.
   const stillAt = Date.now();
   // How the wind carries the patches, the clumps, and their detail with the warp: the one sky until a slider
@@ -168,7 +168,7 @@ export function createCloudLayer(
       const clumps = latticeNear(tuning.size);
       const patches = latticeNear(tuning.size * 16);
       const warp = latticeNear(tuning.size * 2);
-      const at = still ? stillAt : Date.now();
+      const at = worldStill() ? stillAt : Date.now();
       const wanted = paces(tuning);
       drifts = drifts.map((drift, part) => respeed(drift, at, wanted[part]!, sharedPaces[part]!));
       const u = uniforms.uniforms;
@@ -220,7 +220,7 @@ export function createCloudLayer(
       sprite.visible = true;
       sprite.width = view.width;
       sprite.height = view.height;
-      return still ? null : 1000 / levelLook.framesPerSecond;
+      return worldStill() ? null : 1000 / levelLook.framesPerSecond;
     },
 
     destroy(): void {

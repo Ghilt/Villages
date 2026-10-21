@@ -15,6 +15,7 @@ import { TREES_LOOK, tintOf } from './look';
 import { SWAY_FRAGMENT, swayVertex } from './swayShader';
 import { treesStore } from './treesMode';
 import { treesTuningStore } from './treesTuning';
+import { worldStill } from '../../motion/motion';
 
 /**
  * The trees in the wind, as a layer of the sprite canvas that draws nothing of its own: the scenery's sprites and
@@ -75,7 +76,6 @@ export function createTreesLayer(renderer: Renderer, repaint: () => void): Trees
   const standing = shaderOf(false);
   const shadows = shaderOf(true);
 
-  const still = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   // What each level costs, measured on the graphics card where it will say, and said once a level.
   const meter = createCostMeter((renderer as WebGLRenderer).gl as WebGL2RenderingContext | undefined);
   const measured = new Set<ShaderLevel>();
@@ -105,7 +105,7 @@ export function createTreesLayer(renderer: Renderer, repaint: () => void): Trees
       }
       const look = level === 'off' ? null : TREES_LOOK.levels[level];
       // The scenery is drawn before this in the stack, so this frame's tally is already in.
-      swaying = look !== null && !still && sceneryDrawn().particles > 0;
+      swaying = look !== null && !worldStill() && sceneryDrawn().particles > 0;
       if (swaying && level !== lastLevel) {
         lastLevel = level;
         if (!measured.has(level)) meter.again();

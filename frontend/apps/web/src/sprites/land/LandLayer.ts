@@ -29,6 +29,7 @@ import { landStore } from './landMode';
 import { LAND_PASSES, LAND_VERTEX } from './landShader';
 import { LAND_LOOK, lookOf, motionOf, strengthOf } from './look';
 import { createMotionUniforms } from './motionUniforms';
+import { worldStill } from '../../motion/motion';
 
 /**
  * The land moving in the wind and the light, one layer for every kind of land, as a layer of the sprite canvas:
@@ -196,7 +197,6 @@ export function createLandLayer(
   const sprite = new Sprite(target);
   sprite.visible = false;
 
-  const still = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   let mask: Mask | null = null;
   let wanted: { range: TileRange; root: string } | null = null;
   // The channel of the mask each class of the palette is drawn in, by its id; null for land the layer leaves alone.
@@ -352,7 +352,7 @@ export function createLandLayer(
       u.uTilt[1] = tilt.sin;
       u.uTilt[2] = tilt.lean;
       // By the wall clock, so every browser has the same gusts: see ../wind.ts.
-      const wall = Date.now();
+      const [wall, still] = [Date.now(), worldStill()];
       u.uTime = still ? 0 : windTime(wall);
       u.uCarried = still ? 0 : gustsCarried(wall);
       u.uFade = fade;

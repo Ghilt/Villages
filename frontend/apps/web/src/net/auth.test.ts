@@ -27,12 +27,14 @@ function server(answers: Record<string, unknown>) {
   });
 }
 
-const nobody = { player: null, house: null, guest: false, signIn: null };
+const settings = { motion: 'device', language: 'en' };
+const nobody = { player: null, house: null, guest: false, signIn: null, settings };
 const guest = (player: string) => ({
   player,
   house: 'h',
   guest: true,
   signIn: { id: 's', keeping: 'guest', browser: 'Chrome on Windows', ends: 0 },
+  settings,
 });
 
 beforeEach(() => {
@@ -87,6 +89,15 @@ describe('signing the browser in', () => {
     expect((await auth.signIn()).player).toBeNull();
     expect(kept.get('villages.playerToken')).toBe(OLD);
     expect(said().at(-1)).toBe('player: could not sign in: Failed to fetch');
+  });
+
+  it("moves the world as the player's settings say, as soon as it knows them", async () => {
+    server({ '/auth/me': { ...guest('p1'), settings: { motion: 'still', language: 'en' } } });
+    const { auth } = await load();
+    const motion = await import('../motion/motion');
+
+    await auth.signIn();
+    expect(motion.worldStill()).toBe(true);
   });
 
   it('signs in once a page, however many ask', async () => {

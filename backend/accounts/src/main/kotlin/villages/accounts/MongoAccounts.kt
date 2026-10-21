@@ -57,6 +57,10 @@ class MongoAccounts(connection: String, val database: String) : AccountStores {
             }
 
         override fun of(player: PlayerId): PlayerRecord? = playerRows.find(eq("_id", player.value.toString())).first()?.player()
+
+        override fun put(record: PlayerRecord) {
+            playerRows.replaceOne(eq("_id", record.player.value.toString()), record.row(), ReplaceOptions().upsert(true))
+        }
     }
 
     override val keptIn: String = "in MongoDB, database $database"
@@ -93,8 +97,12 @@ private fun Document.signIn() = SignIn(
 private fun PlayerRecord.row() = Document()
     .append("_id", player.value.toString())
     .append("since", Date.from(since))
+    .append("settings", Document("motion", settings.motion).append("language", settings.language))
 
 private fun Document.player() = PlayerRecord(
     player = PlayerId(UUID.fromString(getString("_id"))),
     since = getDate("since").toInstant(),
+    settings = get("settings", Document::class.java)
+        ?.let { Settings(motion = it.getString("motion"), language = it.getString("language")) }
+        ?: Settings(),
 )

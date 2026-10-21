@@ -13,6 +13,7 @@ import { easeTowards } from '../sprites/twoForms';
 import { DIVE_MS, keepAbove, overTheHolding, spanTo } from './dive';
 import type { Dive, Going } from './dive';
 import { roomAtTurn, roomOnScreen, sheetAtFloor, spanOf, turnsAt, wheelZooms } from './roomBox';
+import { worldStill } from '../motion/motion';
 
 /**
  * The pull, and the dive: the two halves of leaving the map, and the one number each of them is.
@@ -63,7 +64,7 @@ function settle(next: PullState): void {
 }
 
 function calm(): boolean {
-  return globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true;
+  return worldStill();
 }
 
 interface Hooks {

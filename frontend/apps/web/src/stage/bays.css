@@ -272,3 +272,15 @@
 .tabs__one--up .icon {
   color: var(--gold);
 }
+
+/*
+ * The settings' mark, in the stage's top right corner and in no bay: over the tiles and under the veil, which dims it
+ * with everything else while the letter is open. In the spread its right edge is where the column down the right edge
+ * begins, so it never stands on the column's tabs. See docs/plans/accounts.md.
+ */
+.stage__corner {
+  position: absolute;
+  z-index: 5;
+  top: 0.9rem;
+  margin-right: 0.9rem;
+}
