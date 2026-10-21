@@ -108,6 +108,30 @@ describe('signing the browser in', () => {
     expect(motion.worldStill()).toBe(true);
   });
 
+  it('keeps the answer asked last: a slow one asked before the browser was made a guest leaves it the guest', async () => {
+    let answerLate = () => undefined as void;
+    const late = new Promise<void>((answer) => (answerLate = answer));
+    let asks = 0;
+    vi.stubGlobal('fetch', (path: string) => {
+      const answer = (body: unknown) => new Response(JSON.stringify(body));
+      if (path !== '/auth/me') {
+        return Promise.resolve(answer(guest('p1')));
+      }
+      asks += 1;
+      // The debug panel's question, the second, is asked while the browser is nobody and answered last.
+      return asks === 2 ? late.then(() => answer(nobody)) : Promise.resolve(answer(nobody));
+    });
+    const { auth } = await load();
+
+    const signing = auth.signIn();
+    const stale = auth.whoAmI();
+    await signing;
+    answerLate();
+    await stale;
+
+    expect(auth.meStore.get().me?.player).toBe('p1');
+  });
+
   it('signs in once a page, however many ask', async () => {
     server({ '/auth/me': guest('p1') });
     const { auth } = await load();

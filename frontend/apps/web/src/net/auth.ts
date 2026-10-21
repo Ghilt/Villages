@@ -86,6 +86,25 @@ async function ask<T = Me>(method: 'GET' | 'POST', path: string, body?: object):
   return (await response.json()) as T;
 }
 
+/** How many questions of who this browser is have been sent, and the number of the last whose answer was kept. */
+let sent = 0;
+let latest = 0;
+
+/**
+ * Asks who this browser is, as [ask] asks, and keeps the answer unless one asked after it has been kept already.
+ * Answers come back in any order: on 2026-10-21 the debug panel's, asked before the page made the browser a guest,
+ * came back after, and made the page nobody under a browser the server knew was the guest.
+ */
+async function askWho(method: 'GET' | 'POST', path: string, body?: object): Promise<Me> {
+  const number = ++sent;
+  const me = await ask(method, path, body);
+  if (number > latest) {
+    latest = number;
+    knownAs(me);
+  }
+  return me;
+}
+
 let signingIn: Promise<Me> | null = null;
 
 /**
@@ -97,13 +116,12 @@ let signingIn: Promise<Me> | null = null;
 export function signIn(): Promise<Me> {
   signingIn ??= (async () => {
     try {
-      const me = await ask('GET', 'me');
+      const me = await askWho('GET', 'me');
       if (me.player !== null) {
-        knownAs(me);
         return me;
       }
       const old = oldPlayerToken(kept);
-      const made = await ask('POST', 'guest', old === null ? {} : { adopt: old });
+      const made = await askWho('POST', 'guest', old === null ? {} : { adopt: old });
       forgetOldPlayerToken(kept);
       note(
         'player',
@@ -111,14 +129,16 @@ export function signIn(): Promise<Me> {
           ? `the player this browser kept before sign-ins, ${shortId(old)}, is its guest now, house and all`
           : `a newcomer, made a guest, player ${shortId(made.player ?? '')}`,
       );
-      knownAs(made);
       return made;
     } catch (unanswered) {
       note(
         'player',
         `could not sign in: ${unanswered instanceof Error ? unanswered.message : String(unanswered)}`,
       );
-      knownAs(NOBODY);
+      // Nobody only when nothing is known: an answer that did come is not undone by one that did not.
+      if (known.get().me === null) {
+        knownAs(NOBODY);
+      }
       return NOBODY;
     }
   })();
@@ -134,20 +154,16 @@ export async function startOver(): Promise<void> {
 }
 
 /** Asks again who this browser is, for the debug panel: what the page knew at its load may have ended since. */
-export async function whoAmI(): Promise<Me> {
-  const me = await ask('GET', 'me');
-  knownAs(me);
-  return me;
+export function whoAmI(): Promise<Me> {
+  return askWho('GET', 'me');
 }
 
 /**
  * This player's settings, written whole and kept for them by the server, so they follow an account to another
  * browser; the world moves as they say from the next frame. What the server refuses is thrown.
  */
-export async function settle(settings: Settings): Promise<Me> {
-  const me = await ask('POST', 'settings', settings);
-  knownAs(me);
-  return me;
+export function settle(settings: Settings): Promise<Me> {
+  return askWho('POST', 'settings', settings);
 }
 
 /**
