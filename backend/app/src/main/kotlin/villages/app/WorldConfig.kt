@@ -111,10 +111,10 @@ class WorldConfig {
      * crosses, so that nothing is left holding a house whose events are gone. Everything is every `Resettable` there
      * is, so a read model or a listener added later is emptied without being named here. See decision record 0036.
      * The emptied world is then opened, as a fresh one is when the server starts: it records the catalogues it runs on
-     * and makes its house bots again (0097, 0108).
+     * and makes its house bots and raises its settlements again (0097, 0108, 0114).
      */
     @Bean
     fun worldWipe(world: EventWorld, folded: List<Resettable>, opening: Opening): WorldWipe = WorldWipe {
-        world.wipe(folded).also { opening.open() }
+        world.wipe(folded).also { opening.openAndSay() }
     }
 }

@@ -38,7 +38,7 @@ class SavesConfig {
         world = world,
         clock = clock,
         followers = { followers.orderedStream().toList() },
-        loaded = { opening.open() },
+        loaded = { opening.openAndSay() },
     )
 }
 

@@ -195,6 +195,13 @@ export const READERS: readonly Reader[] = [
   },
   { id: 'folder-names', program: 'server', name: 'names', where: 'FolderNames.kt', reads: ['names-server'] },
   {
+    id: 'folder-settlements',
+    program: 'server',
+    name: 'settlement sites, which the opening raises a settlement on',
+    where: 'FolderSettlements.kt',
+    reads: ['settlements-server'],
+  },
+  {
     id: 'folder-portraits',
     program: 'server',
     name: 'portraits',

@@ -39,6 +39,7 @@ describe('the balance', () => {
     });
     expect(balance.said.challenge).toBe('A challenge.');
     expect(balance.houseBots).toEqual({ count: 250, apartKm: 50, beyondRuinKm: 5 });
+    expect(balance.settlements).toEqual({ clearKm: 3 });
     expect(balance.said.roll).toBe('A roll.');
   });
 

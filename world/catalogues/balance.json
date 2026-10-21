@@ -41,5 +41,9 @@
     "count": 300,
     "apartKm": 60,
     "beyondRuinKm": 6
+  },
+  "settlements": {
+    "$comment": "The villages and fishing villages nobody holds, which the opening raises on every settlement site the world lacks (decision record 0114). None is raised on a site nearer than clearKm to another structure's seat, a house bot's castle among them, so that no village stands on a castle. Where the sites are is world/settlements.json's.",
+    "clearKm": 4
   }
 }

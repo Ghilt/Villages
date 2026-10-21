@@ -84,6 +84,14 @@ value class StructureId(val value: UUID) {
          */
         fun seatOf(house: HouseId): StructureId =
             StructureId(UUID.nameUUIDFromBytes("${NAMED_AFTER}seat:${house.value}".toByteArray(Charsets.UTF_8)))
+
+        /**
+         * The settlement the opening raises on a site the bake chose, by the site's id: worked out from it, so an opening
+         * after a restart raises none twice, and a site that keeps its id through a repaint keeps its settlement. See
+         * decision record 0114.
+         */
+        fun ofSettlement(site: String): StructureId =
+            StructureId(UUID.nameUUIDFromBytes("${NAMED_AFTER}settlement:$site".toByteArray(Charsets.UTF_8)))
     }
 }
 

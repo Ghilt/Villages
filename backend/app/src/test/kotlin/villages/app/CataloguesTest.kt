@@ -105,6 +105,7 @@ class BalanceFileTest {
             balance.challenge,
         )
         assertEquals(villages.application.Balance.HouseBots(250, 50.0, 5.0), balance.houseBots)
+        assertEquals(villages.application.Balance.Settlements(3.0), balance.settlements)
     }
 
     @Test

@@ -87,7 +87,8 @@ export async function startGame(
 ): Promise<void> {
   mkdirSync(join(ROOT, '.logs'), { recursive: true });
   const out = openSync(join(ROOT, '.logs', log), 'a');
-  const args = `--server.port=${port} --villages.store=${store} --villages.broker=${broker} --villages.mongo.database=${database}`;
+  // No settlements: seven thousand structures raised in a fresh database would be most of the test's minute (0114).
+  const args = `--server.port=${port} --villages.store=${store} --villages.broker=${broker} --villages.mongo.database=${database} --villages.settlements=false`;
   // Named whole: a shell told not to look in its own folder for commands finds no gradlew.bat otherwise.
   const gradlew = windows ? `"${join(root, 'backend', 'gradlew.bat')}"` : './gradlew';
   spawn(`${gradlew} --console=plain :app:bootRun "--args=${args}"`, {

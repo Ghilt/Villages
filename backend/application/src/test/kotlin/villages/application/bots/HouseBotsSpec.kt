@@ -111,8 +111,8 @@ class HouseBotsSpec : StringSpec({
         val said = mutableListOf<String>()
         val world = RememberingWorld()
 
-        Opening({ said += "catalogues" }, bots(world, RememberingHouses())).open() shouldBe 2
-        Opening({ said += "catalogues again" }, null).open() shouldBe 0
+        Opening({ said += "catalogues" }, bots(world, RememberingHouses())).open() shouldBe Opening.Opened(2, null)
+        Opening({ said += "catalogues again" }, null).open() shouldBe Opening.Opened(0, null)
 
         said shouldBe listOf("catalogues", "catalogues again")
         world.events.size shouldBe 2

@@ -39,6 +39,8 @@ export interface Balance {
   };
   /** The house bots the world opens with, and how they stand: decision record 0108. */
   readonly houseBots: { readonly count: number; readonly apartKm: number; readonly beyondRuinKm: number };
+  /** The settlements the opening raises, and how far from another structure's seat: decision record 0114. */
+  readonly settlements: { readonly clearKm: number };
   /** What each group's numbers do, in its own words, by the group's name; and the file's own, under `''`. */
   readonly said: Readonly<Record<string, string>>;
 }
@@ -83,6 +85,7 @@ export function parseBalance(text: string): Balance {
   const challenge = group(file, 'challenge');
   const slice = group(challenge, 'slice');
   const houseBots = group(file, 'houseBots');
+  const settlements = group(file, 'settlements');
   const comment = (node: Node) => (typeof node.$comment === 'string' ? node.$comment : '');
   return {
     roll: {
@@ -123,6 +126,7 @@ export function parseBalance(text: string): Balance {
       apartKm: number(houseBots, 'houseBots.apartKm'),
       beyondRuinKm: number(houseBots, 'houseBots.beyondRuinKm'),
     },
+    settlements: { clearKm: number(settlements, 'settlements.clearKm') },
     said: {
       '': comment(file),
       roll: comment(roll),
@@ -131,6 +135,7 @@ export function parseBalance(text: string): Balance {
       newcomers: comment(newcomers),
       challenge: comment(challenge),
       houseBots: comment(houseBots),
+      settlements: comment(settlements),
     },
   };
 }

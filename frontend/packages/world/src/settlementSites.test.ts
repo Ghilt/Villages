@@ -152,6 +152,13 @@ describe('where the settlements stand', () => {
     expect(repainted).not.toEqual(sites);
   });
 
+  it('gives a town carried onto the master twice its sites once, each id once', () => {
+    const twice = [...ruins, { ...ruins[1]!, x: 16_150, y: 11_560 }];
+    const all = settlementSites(file, groundOf(), twice, BOX, WIDTH, SIDE);
+    expect(all.filter((site) => site.by === 'Q123')).toHaveLength(1);
+    expect(new Set(all.map((site) => site.id)).size).toBe(all.length);
+  });
+
   it("keeps a ruin's sites by their ids when its town moves", () => {
     const moved = ruins.map((ruin) =>
       ruin.id === 'Q90' ? { ...ruin, x: ruin.x - 40, y: ruin.y + 20 } : ruin,

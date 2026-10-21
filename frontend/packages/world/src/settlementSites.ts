@@ -224,9 +224,17 @@ export class RuinsNear {
   }
 }
 
-/** The order the ruins are given their sites in: the greatest towns first, and then by their ids. */
+/** The order the ruins are given their sites in: the greatest towns first, and then by their ids, each town once. */
 export function ruinsInOrder(ruins: readonly RuinPlace[]): RuinPlace[] {
-  return [...ruins].sort(
+  // A town carried onto the master twice, where land was copied from one place on Earth to two, is given its sites
+  // once, at its copy furthest north and then west, as its house bot is (0108): its sites' ids are its own.
+  const once = new Map<string, RuinPlace>();
+  for (const ruin of ruins) {
+    const kept = once.get(ruin.id);
+    if (kept === undefined || ruin.y < kept.y || (ruin.y === kept.y && ruin.x < kept.x))
+      once.set(ruin.id, ruin);
+  }
+  return [...once.values()].sort(
     (a, b) => TIERS.indexOf(a.tier) - TIERS.indexOf(b.tier) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0),
   );
 }

@@ -19,5 +19,6 @@
     "effectivenessLost": 15,
     "slice": { "power": 40, "integrity": 60, "summonCount": 2 }
   },
-  "houseBots": { "count": 250, "apartKm": 50, "beyondRuinKm": 5 }
+  "houseBots": { "count": 250, "apartKm": 50, "beyondRuinKm": 5 },
+  "settlements": { "clearKm": 3 }
 }

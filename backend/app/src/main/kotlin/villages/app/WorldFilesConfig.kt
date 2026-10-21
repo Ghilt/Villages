@@ -10,6 +10,7 @@ import villages.application.fate.PlaceNamesByMaster
 import villages.application.Portraits
 import villages.application.Stands
 import villages.application.Shelf
+import villages.application.settlements.SettlementSites
 import java.nio.file.Path
 
 /**
@@ -50,4 +51,9 @@ class WorldFilesConfig {
     @Bean
     fun placeNames(@Value("\${villages.ground:../../world/ground}") folder: String): PlaceNamesByMaster =
         FolderNames(Path.of(folder))
+
+    /** Each master's settlement sites, from the file `world:settlements` writes beside its ground map. See 0114. */
+    @Bean
+    fun settlementSites(@Value("\${villages.ground:../../world/ground}") folder: String): SettlementSites =
+        FolderSettlements(Path.of(folder))
 }

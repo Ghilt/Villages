@@ -25,6 +25,7 @@ object BalanceFile {
         val challenge = group(root, "challenge")
         val slice = group(challenge, "slice")
         val houseBots = group(root, "houseBots")
+        val settlements = group(root, "settlements")
         return Balance(
             roll = Balance.Roll(
                 price = whole(roll, "roll.price"),
@@ -66,6 +67,7 @@ object BalanceFile {
                 apartKm = number(houseBots, "houseBots.apartKm"),
                 beyondRuinKm = number(houseBots, "houseBots.beyondRuinKm"),
             ),
+            settlements = Balance.Settlements(clearKm = number(settlements, "settlements.clearKm")),
         )
     }
 

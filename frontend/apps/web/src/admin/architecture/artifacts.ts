@@ -310,8 +310,6 @@ export const ARTIFACTS: readonly Artifact[] = [
     path: 'world/ground/<m>/settlements.json',
     origin: 'baked',
     what: 'Every settlement site, beside the ground map, which the game server raises a settlement on at the opening.',
-    development:
-      'Nothing reads it yet: the game server raises settlements on its sites from step 8 of the plan.',
   },
   {
     id: 'settlements-pictures',

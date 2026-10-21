@@ -31,6 +31,7 @@ internal val RIG_BALANCE = Balance(
     newcomers = Balance.Newcomers(youngest = 18, oldest = 50),
     challenge = ChallengeRules(100.0, 10.0, 0.2, 0.5, 10.0, SliceStart(50.0, 50.0, 3)),
     houseBots = Balance.HouseBots(count = 300, apartKm = 60.0, beyondRuinKm = 6.0),
+    settlements = Balance.Settlements(clearKm = 4.0),
 )
 
 /** The names the rig's newcomers are given: a woman of eighteen is Agnes Achterberg, as she always was. */

@@ -288,7 +288,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   this browser's sign-in, makes it a newcomer's, and reloads, so the opening can be tried again from nothing; the house the old
   player founded stays in the world, because events are never deleted. `wipe` beside it empties the world
   for everyone connected to it, and every window reloads and arrives anew, on a world opened again as at a start: its
-  catalogues recorded and its house bots made. See `docs/adr/0036`.
+  catalogues recorded, its house bots made and its settlements raised, which takes a minute or so. See `docs/adr/0036`.
   `save` asks for a name, `completed-many-quests`, and writes every event of this tree's world to
   `E:/Code/Villages/.saves/<name>.jsonl`, beside the shared `.git`, so every tree sees it; the log says
   `saved the world as <name>: <n> events`, and a name taken, or not lower-case letters, digits and single hyphens, is
@@ -491,6 +491,16 @@ stage alone, with none of the debug panel in it (decision record 0079).
   bots`. The World section's players list counts them under **house bots**. They never act. Another house's castle is seen only through the fog, so *see everything* shows them all;
   the balance page tunes how many, how far apart and how far past the ruin. `--villages.house-bots=false` leaves them
   out. See decision record 0108 and `docs/plans/house-bots.md`.
+- The world's own villages: **settlements**. The world opens with them too, after the house bots: a village or a
+  fishing village held by nobody on every settlement site `world:settlements` chose for the world's master, under
+  its name - *village by the ruins of Dantzic*, *fishing village on the Rhone* - and none on a site nearer a bot's
+  castle than the balance's `settlements.clearKm`. Each is a `villages.structure.raised.v1` in the events log; the
+  server's log says `the world is open, with 300 house bots and 7387 settlement sites: 7337 settlements raised, 48
+  passed over for a seat, in 69.7 s` on a fresh world, measured on 2026-10-21, and a restart over a world kept in
+  MongoDB raises none twice, in a second. Until the page lays them out each is drawn as the plain house every type
+  without a picture is, and is seen only through the fog, so *see everything* shows them all.
+  `--villages.settlements=false` leaves them out, as the tests that start a server and the end-to-end test do. See
+  decision record 0114 and `docs/plans/settlements-and-roads.md`.
 - Every type standing at once: **Antarctica**. While the instruments are open the game server raises one structure of
   every type when it starts, held by nobody, at its first level, four to a row about six kilometres apart on the
   island, the village and the fishing village in a row of their own a row further south and twice as far apart, off the tip of the Antarctic Peninsula, about 63.25 south and 56.03 west - the Antarctic castle at the

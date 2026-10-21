@@ -20,6 +20,7 @@ data class Balance(
     /** A challenge's numbers that belong to no one effect, which its own type holds to its rules. */
     val challenge: ChallengeRules,
     val houseBots: HouseBots,
+    val settlements: Settlements,
 ) {
     /**
      * A choice roll: what it costs in wealth, how many options it deals, the chance out of a hundred of each rarity,
@@ -58,6 +59,12 @@ data class Balance(
      */
     data class HouseBots(val count: Int, val apartKm: Double, val beyondRuinKm: Double)
 
+    /**
+     * The settlements the opening raises: none on a site nearer another structure's seat than [clearKm], so that no
+     * village stands on a castle. See decision record 0114.
+     */
+    data class Settlements(val clearKm: Double)
+
     /** What must hold of the numbers themselves; throws [CatalogueRefused] naming the place that does not. */
     fun check(): Balance {
         fun refuse(at: String, must: String): Nothing = throw CatalogueRefused(Catalogues.BALANCE, "$at $must")
@@ -80,6 +87,7 @@ data class Balance(
         if (houseBots.count < 0 || houseBots.apartKm < 0 || houseBots.beyondRuinKm < 0) {
             refuse("houseBots", "count from nothing, and stand nothing or more apart and beyond a ruin")
         }
+        if (settlements.clearKm < 0) refuse("settlements.clearKm", "is nothing or more")
         return this
     }
 

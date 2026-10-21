@@ -9,13 +9,18 @@ import villages.application.Balance
 import villages.application.FoundHouseService
 import villages.application.Opening
 import villages.application.Shelf
+import villages.application.StructureCommandExecutor
 import villages.application.WorldClock
 import villages.application.bots.HouseBotPlace
 import villages.application.bots.HouseBotPlaces
 import villages.application.bots.HouseBots
 import villages.application.fate.GroundMaps
 import villages.application.fate.PlaceNamesByMaster
+import villages.application.settlements.SettlementSite
+import villages.application.settlements.SettlementSites
+import villages.application.settlements.Settlements
 import villages.occurrent.EventWorld
+import villages.projections.StructuresProjection
 import java.nio.file.Files
 import java.nio.file.Path
 import java.time.Clock
@@ -23,10 +28,11 @@ import java.time.Clock
 private val openingLog = LoggerFactory.getLogger("villages.opening")
 
 /**
- * The opening, and the house bots it makes: what the game server does when a world begins - as it starts, here, and
- * after a wipe and after a load, where those are wired. The bots are the world's and not a lever, so the instruments
- * do not gate them; `villages.house-bots=false` leaves them out, which the tests that start a server do. See decision
- * record 0108.
+ * The opening, and the house bots and the settlements it makes: what the game server does when a world begins - as
+ * it starts, here, and after a wipe and after a load, where those are wired. The bots and the settlements are the
+ * world's and not levers, so the instruments do not gate them; `villages.house-bots=false` and
+ * `villages.settlements=false` leave them out, which the tests that start a server do. See decision records 0108 and
+ * 0114.
  */
 @Configuration
 class OpeningConfig {
@@ -42,23 +48,60 @@ class OpeningConfig {
         @Value("\${villages.master:$WORLD_MASTER}") master: String,
         @Value("\${villages.ruins:../../world/ruins.json}") ruins: String,
         @Value("\${villages.house-bots:true}") houseBots: Boolean,
-    ): Opening = Opening(
-        recordCatalogues = { shelf.recordAll() },
-        houseBots = HouseBots(
-            world = world.worldExecutor(CatalogueDiff::changes),
-            houses = foundHouse,
-            places = { placesOn(master, ground, names, Path.of(ruins), shelf.balance.houseBots) },
-            clock = { clock.instant() },
-            worldClock = worldClock,
-        ).takeIf { houseBots },
-    )
+        structures: StructureCommandExecutor,
+        onTheMap: StructuresProjection,
+        sites: SettlementSites,
+        @Value("\${villages.settlements:true}") settlements: Boolean,
+    ): Opening {
+        val bots = { placesOn(master, ground, names, Path.of(ruins), shelf.balance.houseBots) }
+        return Opening(
+            recordCatalogues = { shelf.recordAll() },
+            houseBots = HouseBots(
+                world = world.worldExecutor(CatalogueDiff::changes),
+                houses = foundHouse,
+                places = bots,
+                clock = { clock.instant() },
+                worldClock = worldClock,
+            ).takeIf { houseBots },
+            settlements = Settlements(
+                structures = structures,
+                standing = onTheMap,
+                sites = { sitesOn(master, sites) },
+                seats = { if (houseBots) bots().map { it.seat } else emptyList() },
+                clearKm = { shelf.balance.settlements.clearKm },
+                clock = { clock.instant() },
+                world = worldClock,
+            ).takeIf { settlements },
+        )
+    }
 
     /** The world opened once everything is wired and following the feed. */
     @Bean
-    fun openTheWorld(opening: Opening): ApplicationRunner = ApplicationRunner {
-        openingLog.info("the world is open, with {} house bots", opening.open())
-    }
+    fun openTheWorld(opening: Opening): ApplicationRunner = ApplicationRunner { opening.openAndSay() }
 }
+
+/** Opens the world, and says in the log what the opening did and how long it took. */
+internal fun Opening.openAndSay(): Opening.Opened {
+    val started = System.nanoTime()
+    val opened = open()
+    val seconds = (System.nanoTime() - started) / 1e9
+    val settlements = opened.settlements
+    if (settlements == null) {
+        openingLog.info("the world is open, with {} house bots, in {} s", opened.bots, "%.1f".format(seconds))
+    } else {
+        openingLog.info(
+            "the world is open, with {} house bots and {} settlement sites: {} settlements raised, {} passed over for a seat, in {} s",
+            opened.bots, settlements.sites, settlements.raised, settlements.passedOver, "%.1f".format(seconds),
+        )
+    }
+    return opened
+}
+
+/** The settlement sites of the world's master, none and a line in the log when a tree has not chosen them yet. */
+private fun sitesOn(master: String, sites: SettlementSites) =
+    sites.of(master) ?: emptyList<SettlementSite>().also {
+        openingLog.warn("no settlements: the master {} has no sites; npm run world:ready --prefix frontend", master)
+    }
 
 /**
  * Where the bots of the world's master stand, read off its ground, its names and the ruins as they are on disk now;
