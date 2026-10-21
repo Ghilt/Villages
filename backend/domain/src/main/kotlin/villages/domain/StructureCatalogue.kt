@@ -25,10 +25,20 @@ value class StructureType(val name: String) {
     /** Its name as words, for a name the world gives it before anyone names it better: `printingHouse`, printing house. */
     val inWords: String get() = name.replace(Regex("[A-Z]")) { " ${it.value.lowercase()}" }
 
+    /**
+     * Whether it is a settlement, a village or a fishing village: drawn as the buildings the page lays out for it, on a
+     * square of ground of its own, and raised at the opening from a site the bake chose (decision record 0114).
+     */
+    val isASettlement: Boolean get() = this == VILLAGE || this == FISHING_VILLAGE
+
     override fun toString(): String = name
 
     companion object {
         private val NAME = Regex("[a-z][a-zA-Z]{0,39}")
+
+        /** The two types of settlement, by their names in the catalogue, which the bake's sites name them by. */
+        val VILLAGE = StructureType("village")
+        val FISHING_VILLAGE = StructureType("fishingVillage")
     }
 }
 

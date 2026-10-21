@@ -47,6 +47,23 @@ class AntarcticaSpec : StringSpec({
         Antarctica.placeOf(15) shouldBe Location(-63.328, -55.85)
     }
 
+    "the settlements stand in a row of their own, south of the rest and twice as far apart" {
+        val store = Raised()
+        val withSettlements = StructureCatalogue(
+            listOf("castle", "village", "mill", "fishingVillage")
+                .associate { StructureType(it) to StructureSpec(listOf(level), emptyList()) },
+        )
+
+        Antarctica(store, { withSettlements }, { noon }, { WorldTime(653_705) }).raise() shouldBe 4
+
+        store.commands.associate { it.structureType.name to it.place } shouldBe mapOf(
+            "castle" to Location(-63.166, -56.21),
+            "mill" to Location(-63.166, -56.09),
+            "village" to Location(-63.436, -56.21),
+            "fishingVillage" to Location(-63.436, -55.97),
+        )
+    }
+
     "starting again over a kept world raises none of them twice" {
         val store = Raised()
         val antarctica = Antarctica(store, { catalogue }, { noon }, { WorldTime(653_705) })

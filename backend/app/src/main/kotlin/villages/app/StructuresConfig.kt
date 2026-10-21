@@ -27,8 +27,8 @@ import java.util.UUID
 
 /**
  * Structures, wired: the catalogue of their types, the one the shelf holds in force, `world/catalogues/structures.json`;
- * their streams, in the one store with everything else; and the sixteen standing in
- * Antarctica. A configuration of its own rather than more of `WorldConfig`, so that structures grow here. See
+ * their streams, in the one store with everything else; and the one of every type standing
+ * in Antarctica. A configuration of its own rather than more of `WorldConfig`, so that structures grow here. See
  * docs/plans/structures.md and decision record 0093.
  */
 @Configuration
@@ -74,7 +74,7 @@ class StructuresConfig {
         Antarctica(structures, { shelf.structures }, { clock.instant() }, worldClock)
 
     /**
-     * The sixteen raised once everything is wired and following the feed, and only while the instruments are open:
+     * The ones in Antarctica raised once everything is wired and following the feed, and only while the instruments are open:
      * Adam's furniture, which a server with its instruments closed has none of (0076).
      */
     @Bean

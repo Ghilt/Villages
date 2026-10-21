@@ -205,7 +205,7 @@ data class RuinPayload(val structureId: String, val cause: String) : CommandPayl
 /** Raise a ruin again as what it was, at its first level, for nobody: Adam's *rebuild this building*. */
 data class RebuildPayload(val structureId: String) : CommandPayload
 
-/** Raise whichever of the sixteen in Antarctica a wipe took, as the server does when it starts. A lever of Adam's. */
+/** Raise whichever of the structures in Antarctica a wipe took, as the server does when it starts. A lever of Adam's. */
 class RaiseAntarcticaPayload : CommandPayload {
     override fun equals(other: Any?): Boolean = other is RaiseAntarcticaPayload
 

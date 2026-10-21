@@ -257,7 +257,7 @@ export function rebuildStructure(structureId: string, name: string): void {
   pull('structures', `rebuilding ${name}`, { type: 'rebuildStructure', structureId });
 }
 
-/** Raises whichever of the sixteen in Antarctica a wipe took. */
+/** Raises whichever of the structures in Antarctica a wipe took. */
 export function raiseAntarctica(): void {
-  pull('structures', "raising Antarctica's sixteen again", { type: 'raiseAntarctica' });
+  pull('structures', "raising Antarctica's structures again", { type: 'raiseAntarctica' });
 }

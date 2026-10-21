@@ -925,7 +925,7 @@ its controller income of various resources". The pane that lists a house's own i
 
 ### What it is
 
-A thing in the world with a history of its own, not a part of a house. It has a **type** - one of sixteen
+A thing in the world with a history of its own, not a part of a house. It has a **type** - one of eighteen
 in the catalogue, from a castle to a printing house - a name, a place, a **level**, higher being better,
 and a **holder**: a house, or nobody. A structure seen from its holder is one of that house's
 **holdings**, and a house may hold any number.
@@ -1022,7 +1022,7 @@ other and takes the same bays.
 
 ### Where it stands
 
-The catalogue is: sixteen types in `world/catalogues/structures.json`, read by the game server when it starts and listed at
+The catalogue is: eighteen types in `world/catalogues/structures.json`, read by the game server when it starts and listed at
 `/admin/inspect-structures`. A structure's history is on the server, and one of every type stands in Antarctica,
 raised by the server when it starts while the instruments are open, and the debug panel's Structures section
 raises one where the map looks. The page is sent them through the fog, each in the face its house last saw, and

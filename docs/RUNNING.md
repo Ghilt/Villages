@@ -281,7 +281,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   it, so a structure raised, a house founded, a person who moved, vision gained, the first seat a choice offered.
   It opens the game in that tab at `/?at=<lat>,<lon>&zoom=10`, over the place instead of over the seat, and the
   log says `opened at ..., as the link asked`; the camera is all it moves, so ground the house cannot see is still
-  under the fog; Antarctica's sixteen are seen through it while the instruments are open. A new tab would take the player over from any other
+  under the fog; Antarctica's structures are seen through it while the instruments are open. A new tab would take the player over from any other
   game tab. *Back* loads the page again rather than showing it as it was left: a page the browser restores from its
   back/forward cache has lost its connection, and would sit *closed* drawing nothing. The `found a house here` button in it sends a
   real command and is how to make an event happen on purpose. The `restart` button beside `copy` ends
@@ -493,11 +493,11 @@ stage alone, with none of the debug panel in it (decision record 0079).
   out. See decision record 0108 and `docs/plans/house-bots.md`.
 - Every type standing at once: **Antarctica**. While the instruments are open the game server raises one structure of
   every type when it starts, held by nobody, at its first level, four to a row about six kilometres apart on the
-  island off the tip of the Antarctic Peninsula, about 63.25 south and 56.03 west - the Antarctic castle at the
-  north-west corner. Each is a `villages.structure.raised.v1` in the events log, sixteen of them at every start,
+  island, the village and the fishing village in a row of their own a row further south and twice as far apart, off the tip of the Antarctic Peninsula, about 63.25 south and 56.03 west - the Antarctic castle at the
+  north-west corner. Each is a `villages.structure.raised.v1` in the events log, one a type at every start,
   and an id worked out from its type means a server starting over a kept world raises none twice; a world kept
   from before they moved keeps them where they were first raised. A wipe takes them with everything else, and the
-  Structures section's **raise Antarctica again** puts back whichever are gone. All sixteen are on the screen at
+  Structures section's **raise Antarctica again** puts back whichever are gone. All of them are on the screen at
   once from zoom 9 over the island, and every window sees them through the fog while the instruments are open, as
   if they stood in its vision, what their slots hold included; with *see everything* on, below the zoom each
   one's significance is drawn from too; **on the map** under each one's `raised` in the events log opens the game
@@ -505,13 +505,13 @@ stage alone, with none of the debug panel in it (decision record 0079).
   The map mark in the Structures bar, there folded or open, flies the camera to the island at zoom 9.
 - Raising one where you look: the **Structures** section of the debug panel, after Resources. A type from the
   catalogue, a level it has, **yours** or **nobody's**, and **raise here** raises one at the middle of the map,
-  named *a new mill* and the like; **raise Antarctica again** is the sixteen. Each is a command said in the log
+  named *a new mill* and the like; **raise Antarctica again** is every type. Each is a command said in the log
   under `structures` with its answer, and a raising is a `villages.structure.raised.v1` in the events log. Yours
   without a house is refused `noSuchHouse`; a type the catalogue lacks would be `noSuchType`. Adam's levers,
   standing in for a house building one; closed with the other instruments (0076). The log's `cells` lines count
   the structures each burst of snapshots brought, and a batch names one raised in a cell the page holds, `a new
   mill raised`. What is sent is each one's face as the fog allows it: today's where the house sees, the one it
-  last saw on revealed ground, nothing on unknown ground - but for Antarctica's sixteen, which every window sees
+  last saw on revealed ground, nothing on unknown ground - but for Antarctica's structures, which every window sees
   through the fog while the instruments are open.
 - Taking one: **take control of this building**, under the raising levers, hands the structure whose window was
   opened last to your house; the line under it names that building, or asks for a structure's window first. One
@@ -533,7 +533,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `ground` how many diamonds are worn under how many buildings and how many paths join them. A path is walked only
   once the flat tiles under it have come, keeps off open water, and is worn only on ground the house has revealed. They are the look's, Adam's to settle by eye at zoom 9 or 10
   over a few buildings, and are not kept across a reload. The yards come in at 7.5 with the buildings' pictures, and
-  keep to the fog as the buildings do: Antarctica's sixteen show theirs with the fog off. Every building casts its
+  keep to the fog as the buildings do: Antarctica's structures show theirs with the fog off. Every building casts its
   shadow on its yard, from the base to the left, cut with its picture by `world:structures`; how dark is the Scenery
   section's shadows lever, the trees' and the buildings' alike, and a picture drawn in code casts none.
 - A house's seat: founding raises its castle, *Ravenscar Castle*, where the house was founded, held by it, and names

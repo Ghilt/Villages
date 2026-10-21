@@ -33,7 +33,7 @@ internal inline fun <reified P : CommandPayload> Commands.lever(open: Boolean, n
 }
 
 /**
- * Adam's levers for structures, standing in for the world: one raised where the panel looks, Antarctica's sixteen
+ * Adam's levers for structures, standing in for the world: one raised where the panel looks, Antarctica's structures
  * raised again after a wipe has taken them, one handed to the sender's house, one raised or lowered a level, a
  * place of a slot filled or emptied, and one ruined or rebuilt. Registered by the instruments and closed with them. A type the catalogue
  * lacks is refused `noSuchType`, a level the type lacks `invalidLevel`, a place off the world `invalidLocation`, and a

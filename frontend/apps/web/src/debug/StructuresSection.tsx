@@ -22,7 +22,7 @@ import {
 } from './levers';
 
 /**
- * The middle of Antarctica's sixteen, on the island the server raises them on (`Antarctica.placeOf` in the
+ * The middle of Antarctica's structures, on the island the server raises them on (`Antarctica.placeOf` in the
  * application module), and the zoom from which all of them are on the screen at once.
  */
 const ANTARCTICA = { lat: -63.247, lon: -56.03, zoom: 9 };
@@ -33,7 +33,7 @@ interface StructuresSectionProps {
 
 /**
  * Adam's levers for structures, standing in for the world: one raised at the middle of the map, of a type and a level,
- * his own house's or nobody's, Antarctica's sixteen raised again after a wipe has taken them, and the one whose window
+ * his own house's or nobody's, Antarctica's structures raised again after a wipe has taken them, and the one whose window
  * is open handed to his house, standing in for a story handing it over or a house taking it; its level, its slots
  * filled and emptied, its ruin. Each is a real
  * command, said in the log under `structures` with its answer, and each raising is an event in the events log. The
@@ -94,8 +94,8 @@ export function StructuresSection({ map }: StructuresSectionProps) {
           className="debug__button debug__mapmark"
           disabled={map === null}
           onClick={() => map?.flyTo({ center: [ANTARCTICA.lon, ANTARCTICA.lat], zoom: ANTARCTICA.zoom })}
-          title="take the camera to Antarctica's sixteen"
-          aria-label="take the camera to Antarctica's sixteen"
+          title="take the camera to Antarctica's structures"
+          aria-label="take the camera to Antarctica's structures"
         >
           <Icon name="map" />
         </button>
@@ -156,7 +156,7 @@ export function StructuresSection({ map }: StructuresSectionProps) {
           type="button"
           className="debug__button"
           disabled={connection !== 'open'}
-          title="raise whichever of the sixteen in Antarctica a wipe took"
+          title="raise whichever of the structures in Antarctica a wipe took"
           onClick={raiseAntarctica}
         >
           raise Antarctica again

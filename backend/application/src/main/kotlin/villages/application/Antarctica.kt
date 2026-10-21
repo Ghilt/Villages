@@ -23,8 +23,15 @@ class Antarctica(
     private val clock: Clock,
     private val world: WorldClock,
 ) {
-    /** Raises whichever of them does not stand yet, at its first level, and says how many it raised. */
-    fun raise(): Int = inForce().types.keys.withIndex().count { (at, type) -> raised(type, placeOf(at)) }
+    /**
+     * Raises whichever of them does not stand yet, at its first level, and says how many it raised: the settlements in
+     * a row of their own, the rest four to a row.
+     */
+    fun raise(): Int {
+        val (settlements, others) = inForce().types.keys.partition(StructureType::isASettlement)
+        return others.withIndex().count { (at, type) -> raised(type, placeOf(at)) } +
+            settlements.withIndex().count { (at, type) -> raised(type, settlementPlaceOf(at)) }
+    }
 
     private fun raised(type: StructureType, place: Location): Boolean = try {
         structures.execute(
@@ -62,5 +69,12 @@ class Antarctica(
          * Counted in thousandths of a degree, so a place is the number it is written as and not a hair off it.
          */
         fun placeOf(at: Int): Location = Location((-63_166 - 54 * (at / 4)) / 1000.0, (-56_210 + 120 * (at % 4)) / 1000.0)
+
+        /**
+         * Where the [at]th type of settlement stands: in a row of its own, a row's gap south of the fourth and twice as
+         * far apart, because a settlement's square of ground is wider than the six kilometres between the others. The
+         * island runs on that far south, on the master of 2026-10-03.
+         */
+        fun settlementPlaceOf(at: Int): Location = Location((-63_166 - 54 * 5) / 1000.0, (-56_210 + 240 * at) / 1000.0)
     }
 }
