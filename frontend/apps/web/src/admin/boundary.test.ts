@@ -16,9 +16,10 @@ const ADMIN_ONLY_PACKAGES = [/^@xyflow\/react/, /^@dagrejs\/dagre/];
 /**
  * The game's folders an inspect page may take from: the socket, the component library, the portraits, and the log,
  * whose lines the logs' page reads as the debug panel does; and for the renders page, which draws a world of its own
- * with the map's own layers, the sprite canvas's layers, the geometry they are placed by, and which master is drawn.
+ * with the map's own layers, the sprite canvas's layers, the geometry they are placed by, and which master is drawn;
+ * and for the challenges page, the spectacle a run is watched in (0116).
  */
-const GAME_TAKEN = ['net', 'ui', 'figures', 'log', 'sprites', 'geometry', 'map'];
+const GAME_TAKEN = ['net', 'ui', 'figures', 'log', 'sprites', 'geometry', 'map', 'spectacle'];
 
 /** What the entry may import from the inspect pages without `import()`: the list of them, for routing. */
 const ENTRY_STATIC = ['./admin/inspectViews'];

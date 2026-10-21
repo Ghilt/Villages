@@ -670,6 +670,10 @@ Three things follow for the architecture:
 - **What must hold is held inside the run**: the tug within its ends, a slice matching exactly while the happening has its aspect, no side past the sum
   of its slices' summon counts - checked as each summon comes - and a thing on the line on it once. A property spec
   fights hundreds of challenges made up at random against them, and a golden log keeps one challenge as a table.
+- **The spectacle is folded on the page** (0116). A run's moments, the summons it names and its progression are all
+  the replay needs, with the slices the page sent: `spectacle/replay.ts`, in the web app's row of surfaces, folds
+  them into the field at every second - who stands there, what each bears and until when, each slice's state, the
+  tug - purely, so a second scrubbed back to is the same as one played to, and the frames do not change for it.
 
 ## What the setting asks of the architecture
 
