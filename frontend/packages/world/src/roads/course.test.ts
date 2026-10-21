@@ -1,0 +1,147 @@
+import { describe, expect, it } from 'vitest';
+
+import { GROUND_LATTICE, frameOf } from '../lattice.ts';
+import { BRIDGEABLE, RIVER, WATER, courseBetween, unitKey } from './course.ts';
+import type { Course, CourseGround, CourseRules, Point } from './course.ts';
+import { unitsAlong } from './line.ts';
+
+const RULES: CourseRules = { climb: 0.01, bridge: 2, bridgeAt: 4, longestSpan: 4, trunk: 0.5, margin: 12 };
+
+/** Ground from a picture of it: `.` land, `~` open water, `r` a river small enough to bridge, `R` one too big. */
+function groundOf(
+  paint: (x: number, y: number) => string,
+  road: ReadonlySet<number> = new Set(),
+): CourseGround {
+  return {
+    cost: (x, y) => {
+      const at = paint(x, y);
+      return at === '~' ? WATER : at === 'r' ? BRIDGEABLE : at === 'R' ? RIVER : 1;
+    },
+    height: () => 0,
+    barred: () => false,
+    road: (x, y) => road.has(unitKey(x, y)),
+  };
+}
+
+/** Every unit a course passes over between its points that a bridge does not, and which a bridge does. */
+function unitsUnder(course: Course): { walked: Set<string>; bridged: Set<string> } {
+  const walked = new Set<string>();
+  const bridged = new Set<string>();
+  const onBridge = new Set(course.bridges.map((bridge) => bridge.at));
+  for (let at = 0; at + 1 < course.points.length; at += 1) {
+    const a = course.points[at]!;
+    const b = course.points[at + 1]!;
+    unitsAlong(a.x, a.y, b.x, b.y, (x, y) => {
+      (onBridge.has(at) ? bridged : walked).add(`${x},${y}`);
+      return true;
+    });
+  }
+  return { walked, bridged };
+}
+
+const FRAME = frameOf(GROUND_LATTICE);
+const HALF = Math.SQRT1_2;
+const AXES: readonly Point[] = [
+  { x: FRAME.cos, y: FRAME.sin },
+  { x: -FRAME.sin, y: FRAME.cos },
+  { x: (FRAME.cos - FRAME.sin) * HALF, y: (FRAME.sin + FRAME.cos) * HALF },
+  { x: (FRAME.cos + FRAME.sin) * HALF, y: (FRAME.sin - FRAME.cos) * HALF },
+];
+
+const west: Point = { x: 5.5, y: 20.5 };
+const east: Point = { x: 45.5, y: 20.5 };
+
+describe("a road's course", () => {
+  it('goes round open water, never over it', () => {
+    const lake = (x: number, y: number) => (x >= 20 && x < 30 && y >= 5 && y < 35 ? '~' : '.');
+    const course = courseBetween([west], [east], groundOf(lake), RULES)!;
+    expect(course).not.toBeNull();
+    const { walked } = unitsUnder(course);
+    for (const unit of walked) {
+      const [x, y] = unit.split(',').map(Number);
+      expect(lake(x!, y!)).toBe('.');
+    }
+    expect(course.points[0]).toEqual(west);
+    expect(course.points[course.points.length - 1]).toEqual(east);
+  });
+
+  it('crosses a river only by a bridge, straight along one of the four axes', () => {
+    const river = (x: number) => (x === 25 || x === 26 ? 'r' : '.');
+    const course = courseBetween(
+      [west],
+      [east],
+      groundOf((x) => river(x)),
+      RULES,
+    )!;
+    expect(course.bridges.length).toBe(1);
+    const { walked, bridged } = unitsUnder(course);
+    for (const unit of walked) expect(river(Number(unit.split(',')[0]))).toBe('.');
+    expect([...bridged].some((unit) => river(Number(unit.split(',')[0])) === 'r')).toBe(true);
+    for (const bridge of course.bridges) {
+      const a = course.points[bridge.at]!;
+      const b = course.points[bridge.at + 1]!;
+      const long = Math.hypot(b.x - a.x, b.y - a.y);
+      expect(long).toBeCloseTo(bridge.span, 6);
+      const along = AXES.map((axis) => Math.abs((axis.x * (b.x - a.x) + axis.y * (b.y - a.y)) / long));
+      expect(Math.max(...along)).toBeCloseTo(1, 9);
+    }
+  });
+
+  it('never slips between two units of a river joined only at their corners', () => {
+    // A river one unit wide running down a diagonal, too big to bridge: no way across it at all.
+    const diagonal = (x: number, y: number) => (x - y === 10 ? 'R' : '.');
+    expect(
+      courseBetween([{ x: 5.5, y: 20.5 }], [{ x: 45.5, y: 20.5 }], groundOf(diagonal), RULES),
+    ).toBeNull();
+    // And small enough to bridge, it is crossed only by one.
+    const small = (x: number, y: number) => (x - y === 10 ? 'r' : '.');
+    const course = courseBetween([{ x: 5.5, y: 20.5 }], [{ x: 45.5, y: 20.5 }], groundOf(small), RULES)!;
+    expect(course.bridges.length).toBeGreaterThan(0);
+    const { walked } = unitsUnder(course);
+    for (const unit of walked) {
+      const [x, y] = unit.split(',').map(Number);
+      expect(small(x!, y!)).toBe('.');
+    }
+  });
+
+  it('builds no bridge longer than the longest span', () => {
+    const wide = (x: number) => (x >= 22 && x < 30 ? 'r' : '.');
+    expect(
+      courseBetween(
+        [west],
+        [east],
+        groundOf((x) => wide(x)),
+        RULES,
+      ),
+    ).toBeNull();
+  });
+
+  it('follows a road already there, so two roads merge into a trunk', () => {
+    const open = () => '.';
+    const first = courseBetween([{ x: 5.5, y: 10.5 }], [east], groundOf(open), RULES)!;
+    const road = new Set(first.units);
+    const alone = courseBetween([{ x: 5.5, y: 30.5 }], [east], groundOf(open), RULES)!;
+    const merged = courseBetween([{ x: 5.5, y: 30.5 }], [east], groundOf(open, road), RULES)!;
+    const shared = (course: Course) => course.units.filter((unit) => road.has(unit)).length;
+    expect(shared(merged)).toBeGreaterThan(shared(alone) + 10);
+    expect(shared(merged)).toBeGreaterThan(merged.units.length / 2);
+  });
+
+  it('is the same course however often it is walked', () => {
+    const lake = (x: number, y: number) =>
+      x >= 20 && x < 30 && y >= 5 && y < 35 ? '~' : x === 38 ? 'r' : '.';
+    const once = courseBetween([west], [east], groundOf(lake), RULES);
+    expect(courseBetween([west], [east], groundOf(lake), RULES)).toEqual(once);
+  });
+});
+
+describe('the units along a line', () => {
+  it('takes both units beside a corner it passes exactly through', () => {
+    const seen: string[] = [];
+    unitsAlong(0.5, 0.5, 2.5, 2.5, (x, y) => {
+      seen.push(`${x},${y}`);
+      return true;
+    });
+    expect(seen).toEqual(['0,0', '1,0', '0,1', '1,1', '2,1', '1,2', '2,2']);
+  });
+});
