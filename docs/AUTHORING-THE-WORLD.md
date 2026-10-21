@@ -124,8 +124,9 @@ the settlement the world raised on one is never raised again somewhere else. `le
 villages and large villages rather than hamlets. See `docs/plans/settlements-and-roads.md`.
 
 **And the roads between them follow the ground you painted.** Nobody paints a road either: `world:roads` lays them
-by `world/roads.json`. `longestKm` is the longest road there is, so a village further than that from anyone stands
-alone. `ground` is what a step costs on each class beside farmland, one or more - a forest dearer, a marsh dearer
+by `world/roads.json`. `longestKm` is the longest road the graph of neighbours makes; a village it leaves with no
+other village in its network is joined to the nearest one it can reach as far as `lonely.farKm`, trying the nearest
+`lonely.tries` in turn, so only a village on an island, or with nobody within that, stands alone. `ground` is what a step costs on each class beside farmland, one or more - a forest dearer, a marsh dearer
 still - and `climb` what a metre up or down costs, so a road goes round a hill or a bog when the way round is
 cheaper. `trunk` is the share of a step along a road already there, so roads share ground. A river is crossed only
 by a bridge: `bridges.longestSpan` is the most river one spans, `biggestRiver` the biggest river by `world:flow`'s

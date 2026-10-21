@@ -14,11 +14,12 @@ import {
   roadKindByte,
 } from '../src/roadRecords.ts';
 import type { RoadPiece } from '../src/roadRecords.ts';
-import { BRIDGEABLE, RIVER, WATER, courseBetween, unitKey } from '../src/roads/course.ts';
+import { BRIDGEABLE, RIVER, WATER, unitKey } from '../src/roads/course.ts';
 import type { Course, CourseGround } from '../src/roads/course.ts';
 import { ruinEnds, ruinUnits, settlementEnds, settlementUnits } from '../src/roads/ends.ts';
 import { placesJoined } from '../src/roads/graph.ts';
-import type { RoadPlace } from '../src/roads/graph.ts';
+import type { Join, RoadPlace } from '../src/roads/graph.ts';
+import { Networks, lonelyOffers } from '../src/roads/lonely.ts';
 import { chainsOf, shapeChain } from '../src/roads/network.ts';
 import type { Chain, RoadEnd } from '../src/roads/network.ts';
 import { UNNAMED_GROUND, networkRules, parseRoads } from '../src/roads/roadsFile.ts';
@@ -38,6 +39,7 @@ import { args, flag, named } from './lib/flags.ts';
 import { freshFolder, writtenAt } from './lib/outputs.ts';
 import { GROUND_DIR, OUTPUT_DIR, PALETTE, RENDER, REPO, STANDS_DIR, masterAt } from './lib/paths.ts';
 import { drawRoadPictures } from './lib/roadPictures.ts';
+import { roadRouter } from './lib/roadRouting.ts';
 import { reportRoads } from './lib/roadsReport.ts';
 import { standsReader } from './lib/stills.ts';
 
@@ -49,8 +51,9 @@ import { standsReader } from './lib/stills.ts';
  * Reads the master's settlement sites from `world/ground/<master>/settlements.json`, its ruined towns from its
  * names and its ruins' records, and its ground as its zoom-7 tiles have it - the class under every world unit, its
  * height and its rivers - and joins the places by `world/roads.json`: every settlement to its neighbours and the ruins
- * near it, by the cheapest way over the ground, a river crossed only by a bridge along one of the lattice's four axes,
- * into a settlement by its streets and into a ruin by its gates. The network is cut into pieces of the stands' eight
+ * near it, by the cheapest way over the ground, a river crossed only by a bridge along one of its eight ways, into a
+ * settlement by its streets and into a ruin by its gates; and every village the graph leaves alone to the nearest
+ * village it can reach, out to a far limit. The network is cut into pieces of the stands' eight
  * bytes and written into `world/stands/<master>/roads/`, which only the game server reads and sends through the fog,
  * and how to read them into the master's `sprites/roads/map.json`, which says nothing of where any road is (decision
  * record 0115). With `--picture` it also draws the roads over the ground around a few towns into
@@ -201,7 +204,9 @@ say(`${joins.length.toLocaleString()} joins between ${places.length.toLocaleStri
 
 const road = new Set<number>();
 const withRoads: CourseGround = { ...ground, road: (x, y) => road.has(unitKey(x, y)) };
+const route = roadRouter(tiles, withRoads, rules, road);
 const courses: Course[] = [];
+const routed: Join[] = [];
 const reached = new Set<string>();
 const joined = new Set(joins.flatMap((join) => [join.a, join.b]));
 let unreached = 0;
@@ -209,32 +214,7 @@ let unreachedRuins = 0;
 for (const [done, { join }] of ordered.entries()) {
   const a = byId.get(join.a)!;
   const b = byId.get(join.b)!;
-  const all = [...a.ends, ...b.ends];
-  const xs = all.map((one) => one.x);
-  const ys = all.map((one) => one.y);
-  const pad =
-    rules.margin +
-    0.25 * Math.hypot(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)) +
-    rules.longestSpan +
-    4;
-  await tiles.prepare(
-    Math.min(...xs) - pad,
-    Math.min(...ys) - pad,
-    Math.max(...xs) + pad,
-    Math.max(...ys) + pad,
-  );
-  let course = courseBetween(a.ends, b.ends, withRoads, rules);
-  if (course === null) {
-    // Round a fjord or a lake the way can stray further than a road's box allows: once more, four times as far.
-    const wider = pad + 3 * rules.margin;
-    await tiles.prepare(
-      Math.min(...xs) - wider,
-      Math.min(...ys) - wider,
-      Math.max(...xs) + wider,
-      Math.max(...ys) + wider,
-    );
-    course = courseBetween(a.ends, b.ends, withRoads, { ...rules, margin: rules.margin * 4 });
-  }
+  const course = await route(a, b);
   if (done % 2000 === 1999)
     say(`routed ${(done + 1).toLocaleString()} of ${ordered.length.toLocaleString()}`);
   if (course === null) {
@@ -243,12 +223,44 @@ for (const [done, { join }] of ordered.entries()) {
     continue;
   }
   courses.push(course);
+  routed.push(join);
   reached.add(a.id).add(b.id);
-  for (const unit of course.units) road.add(unit);
 }
 say(
   `${courses.length.toLocaleString()} roads routed, ${unreached.toLocaleString()} joins no way reached, ` +
     `${unreachedRuins.toLocaleString()} of them to a ruin`,
+);
+
+// Every village the graph left with no other village in its network: joined to the nearest it can reach, out to the
+// far limit, a few tried nearest first.
+const networks = new Networks(places);
+for (const join of routed) networks.join(join.a, join.b);
+const lonely = lonelyOffers(places, networks, file.lonely.farKm, file.lonely.tries, kmPerUnit);
+let lonelyJoined = 0;
+let lonelyNoWay = 0;
+for (const { id, offers } of lonely) {
+  if (networks.joinedToAnother(id)) continue;
+  let joinedNow = false;
+  for (const offer of offers) {
+    if (networks.of(offer.a) === networks.of(offer.b)) continue;
+    const course = await route(byId.get(offer.a)!, byId.get(offer.b)!);
+    if (course === null) continue;
+    courses.push(course);
+    reached.add(offer.a).add(offer.b);
+    networks.join(offer.a, offer.b);
+    joinedNow = true;
+    break;
+  }
+  if (joinedNow) lonelyJoined += 1;
+  else lonelyNoWay += 1;
+}
+const villages = places.filter((place) => place.kind === 'settlement');
+const alone = villages.filter((place) => !networks.joinedToAnother(place.id)).length;
+say(
+  `${lonely.length.toLocaleString()} villages left alone by the graph, ${lonelyJoined.toLocaleString()} joined to another ` +
+    `within ${file.lonely.farKm} km; ${(((villages.length - alone) / villages.length) * 100).toFixed(1)}% of villages ` +
+    `have a road to another village, ${alone.toLocaleString()} do not: ${(alone - lonelyNoWay).toLocaleString()} with ` +
+    `none within ${file.lonely.farKm} km, ${lonelyNoWay.toLocaleString()} with no way through to one`,
 );
 
 const raw = chainsOf(courses, rules)

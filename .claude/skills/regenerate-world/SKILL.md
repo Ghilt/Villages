@@ -63,8 +63,9 @@ when it was made; `-- --only <step> --force` makes it again to read all of it:
   sea. `-- --picture` draws every town's ruins as rings around a few great cities into `world/painterly/ruins/`.
 - `world:settlements`: how many settlement sites, of each type, level and culture, and how many beside the ruins.
   `-- --picture` draws them over the ground around a few towns into `world/painterly/settlements/`.
-- `world:roads`: how much road of each grade, how many bridges of each kind on each axis, the settlements no road
-  reaches and why, and the stretches of road over a building, a ruin's piece or water, which must be none: a number
+- `world:roads`: how much road of each grade, how many bridges on each of their eight ways, the share of villages
+  with a road to another village (95% or more, or say why not) and why the rest have none, the settlements no road
+  reaches at all, and the stretches of road over a building, a ruin's piece or water, which must be none: a number
   above nought is a fault to fix, not a number to report. `-- --picture` draws them into `world/painterly/roads/`.
 - `world:sprites`: the density of every biome against experiment 0006's ceiling. Without a sprite map a
   master draws no scenery at all.

@@ -8,6 +8,8 @@ import type { NetworkRules } from './network.ts';
 
 export interface RoadsFile {
   readonly longestKm: number;
+  /** How far a village the graph leaves alone looks for another to be joined to, and how many it tries. */
+  readonly lonely: { readonly farKm: number; readonly tries: number };
   readonly ground: Readonly<Record<string, number>>;
   readonly climb: number;
   readonly trunk: number;
@@ -64,6 +66,14 @@ export function parseRoads(text: string): RoadsFile {
   ) {
     throw new Error('world/roads.json: ground wants what a step costs, one or more, for each class it names');
   }
+  numbers('lonely', file['lonely'], ['farKm'], positive, 'a number above nought');
+  numbers(
+    'lonely',
+    file['lonely'],
+    ['tries'],
+    (value) => Number.isInteger(value) && (value as number) >= 1,
+    'a whole number, one or more',
+  );
   numbers(
     'bridges',
     file['bridges'],

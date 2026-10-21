@@ -826,15 +826,18 @@ and `-- --drop` takes them off; by hand only.
   ruined towns near it, by `world/roads.json`: two places are joined when no third stands nearer both, no further
   apart than the longest road and never one ruin to another, each road the cheapest way over the zoom-7 tiles by
   their ground and their climb, the cheaper along a road already there so roads merge, a river crossed only by a
-  bridge straight along one of eight ways - the lattice's axes, its diagonals and the four between - into a settlement by its streets and into a ruin by
-  its gates or past its outline, never over a square or a ruin's piece. The roads are joined into one network, cut
+  bridge straight along one of eight ways - the lattice's axes, its diagonals and the four between - into a
+  settlement by its streets and into a ruin by its gates or past its outline, never over a square or a ruin's piece.
+  Then every village with no other village in its network - none, or only a ruin - is joined to the nearest village
+  it can reach out to `lonely.farKm`, the nearest few tried in turn. The roads are joined into one network, cut
   into stretches between junctions, ends and bridges, each shaped once and graded a track, a road or a trunk by how
   many roads use it, and written as pieces of the stands' eight bytes into `world/stands/<master>/roads/`, which only
   the game server reads, with how to read them in the master's `sprites/roads/map.json`. It prints how much road of
-  each grade, the bridges on each way, the settlements no road reaches and why, and the stretches over a
-  building, a ruin's piece or water, which must be none; on the master of 2026-10-03, 341,000 km of road and 2,142
-  bridges between 10,838 places, 877 settlements left alone - 798 with no place within 90 km, in the far north and
-  the deserts - in a minute and a quarter. `world:ready` makes it again whenever the tiles, the flow, the height, the
+  each grade, the bridges on each way, the share of villages with a road to another village and why the rest have
+  none, the settlements no road reaches at all, and the stretches over a building, a ruin's piece or water, which
+  must be none; on the master of 2026-10-03, 463,000 km of road and 2,792 bridges between 10,838 places, 98.5% of the
+  villages joined to another - of the 113 that are not, 21 with no village within 400 km and 92 with no way through,
+  most of them on islands - in three minutes. `world:ready` makes it again whenever the tiles, the flow, the height, the
   names, the ruins, the settlements or `world/roads.json` changed. `-- --picture` draws the roads over the ground
   around Paris, Grand Cairo, Jeddo, New Orleans, Vienna and Dantzic into `world/painterly/roads/` - a track brown, a
   road pale, a trunk yellow, a bridge red, a settlement a pale square, a ruin's pieces grey; `--around` and `--scale`
