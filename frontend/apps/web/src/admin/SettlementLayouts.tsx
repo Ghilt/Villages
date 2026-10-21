@@ -108,10 +108,18 @@ function Laid({
       const at = onScreen(jetty.u, jetty.v);
       return { frame, at, footX: frame?.footX ?? 0.5, footY: frame?.footY ?? 0.5, low: true };
     }),
-    ...laid.buildings.map((building) => {
-      const frame = atlas.frames[settlementPieceKey(building.piece, building.culture)];
-      const at = onScreen(building.u, building.v);
-      return { frame, at, footX: frame?.footX ?? 0.5, footY: 1, low: building.piece === 'boat' };
+    // A mill or a market is a structure of the catalogue, its picture not in this atlas, so it is left out here.
+    ...laid.buildings
+      .filter((building) => building.type === 'house')
+      .map((building) => {
+        const frame = atlas.frames[settlementPieceKey('house', culture)];
+        const at = onScreen(building.u, building.v);
+        return { frame, at, footX: frame?.footX ?? 0.5, footY: 1, low: false };
+      }),
+    ...laid.dress.map((one) => {
+      const frame = atlas.frames[settlementPieceKey(one.piece, one.culture)];
+      const at = onScreen(one.u, one.v);
+      return { frame, at, footX: frame?.footX ?? 0.5, footY: 1, low: one.piece === 'boat' };
     }),
   ].sort((a, b) => Number(b.low) - Number(a.low) || a.at.y - b.at.y);
   const all = diamonds.flatMap(({ u, v }) => [

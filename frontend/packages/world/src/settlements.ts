@@ -44,6 +44,8 @@ export interface SettlementsFile {
    * poorer ground, by its score. The rest are hamlets.
    */
   readonly levels: { readonly village: number; readonly large: number };
+  /** How far from its middle a structure is part of a settlement, in world units, a level at a time. */
+  readonly radius: readonly [number, number, number];
   readonly beside: BesideRuins;
 }
 
@@ -91,6 +93,10 @@ export function parseSettlements(text: string): SettlementsFile {
     throw new Error(
       'world/settlements.json: levels wants the share of villages and the smaller share of large villages',
     );
+  }
+  const radius = file.radius;
+  if (!Array.isArray(radius) || radius.length !== 3 || !radius.every(positive)) {
+    throw new Error('world/settlements.json: radius wants three numbers above nought, a level at a time');
   }
   const beside = (file.beside ?? {}) as Partial<Record<keyof BesideRuins, unknown>>;
   const sites = (beside.sites ?? {}) as Partial<Record<Tier, unknown>>;

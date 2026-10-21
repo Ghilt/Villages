@@ -31,6 +31,8 @@ import type { Culture } from '../src/structures.ts';
 
 import { TILE, WorldTiles } from './lib/classTiles.ts';
 import { args, flag, named } from './lib/flags.ts';
+import { laySite } from './lib/settlementBuildings.ts';
+import type { LaidSite } from './lib/settlementBuildings.ts';
 import { ownFile, writtenAt } from './lib/outputs.ts';
 import {
   CULTURES_FILE,
@@ -170,6 +172,16 @@ const nameOf = (site: Site): string => {
 };
 const nameById = new Map(sites.map((site) => [site.id, nameOf(site)]));
 
+// Each laid out as the page lays it out, row by row so the tiles read are the few rows about the one being laid out.
+const laid = new Map<string, LaidSite>();
+for (const site of [...sites].sort((a, b) => a.y - b.y || (a.id < b.id ? -1 : 1))) {
+  laid.set(site.id, await laySite(site, cultureOf(site), tiles));
+}
+const lngLat = (x: number, y: number): [number, number] => {
+  const { lng, lat } = fromWorld(x, y, width);
+  return [lng, lat];
+};
+
 const at = new Date().toISOString();
 const out = fileSettlements(
   master,
@@ -184,6 +196,12 @@ const out = fileSettlements(
       lng,
       lat,
       by: site.by,
+      radius: file.radius[site.level - 1]!,
+      buildings: laid.get(site.id)!.buildings.map((one) => ({
+        type: one.type,
+        level: one.level,
+        at: lngLat(one.x, one.y),
+      })),
     };
   }),
 );
@@ -191,6 +209,12 @@ const groundDir = writtenAt(resolve(GROUND_DIR, master));
 ownFile(resolve(groundDir, 'settlements.json'), 'the settlements');
 await mkdir(groundDir, { recursive: true });
 await writeFile(resolve(groundDir, 'settlements.json'), `${JSON.stringify(out)}\n`);
+const built = [...laid.values()].flatMap((one) => one.buildings);
+const ofType = (type: string) => built.filter((one) => one.type === type).length.toLocaleString();
+say(
+  `${built.length.toLocaleString()} buildings to raise: ${ofType('house')} houses, ${ofType('mill')} mills, ` +
+    `${ofType('market')} markets`,
+);
 
 const count = (pick: (one: Site) => string) =>
   sites.reduce<Record<string, number>>(

@@ -1,23 +1,24 @@
-import { PIECE_SIDES } from './settlementLooks.ts';
-import type { JettyAxis, SettlementPiece } from './settlementLooks.ts';
+import type { JettyAxis } from './settlementLooks.ts';
 import { settlementSquare } from './settlements.ts';
 import type { SettlementSquare, SettlementType } from './settlements.ts';
 import type { Culture } from './structures.ts';
 
 /*
- * A settlement laid out in buildings, worked out by the page from what the gateway sent of its structure - its id, its
- * type, its level - the culture under it and the ground, and from nothing else, so every page that holds it lays it
- * out alike, as a ruined city is laid out from its record (decision records 0104 and 0114). Pure, in the lattice's
- * whole numbers, and asking no engine's trigonometry.
+ * A settlement laid out, worked out from its site - its id, its type, its level - the culture under it and the ground,
+ * and from nothing else: by the bake, which files its buildings for the opening to raise, each a structure of its own,
+ * and by the page, which lays out what is not a structure - its streets, its jetties, its net racks and boats - the
+ * same way from the same tiles (decision records 0114 and 0117). Pure, in the lattice's whole numbers, and asking no
+ * engine's trigonometry.
  *
  * Its middle is a corner of the ground's lattice. Two streets run through it along the lattice's two axes, a row and
  * a column of diamonds, and the green is where they meet; neither ever holds a building. About them the ground is cut
  * into lots three diamonds a side, ring after ring: a hamlet stands in the ring next to the green, a village reaches a
  * ring further and a large village one more, so its square of ground is seven, thirteen or nineteen diamonds a side.
  * Each lot is kept or left by a roll of its own against its ring's share, and holds at most one building, standing
- * against the street; so a higher level holds every building of the lower, and more about them. A building is never
- * laid where its base would stand on water. A fishing village's lots by the water hold its huts and net racks, with a
- * jetty from the shore and a boat beside it.
+ * against the street: a house; in a village or larger, a mill on the best lot by a river or a lake; in a large village,
+ * a market on the four lots of a quarter nearest the green. So a higher level holds every building of the lower, and
+ * more about them. A building is never laid where its base would stand on water. A fishing village's lots by the water
+ * hold its houses and net racks, with a jetty from the shore and a boat beside it.
  */
 
 /** What a diamond of ground is to a settlement: land to build on, a river or open water, or not known yet. */
@@ -26,15 +27,28 @@ export type DiamondFooting = 'land' | 'river' | 'water' | null;
 /** The ground under a diamond of the lattice, by its two whole numbers. */
 export type FootingOf = (u: number, v: number) => DiamondFooting;
 
-/** One building of a settlement: its piece in its culture, the lattice corner of its foot, its base's side, its rank. */
+/** The structures a settlement is built of, each of the catalogue, and the side of its base at its first level. */
+export const BUILDING_SIDES = { house: 3, mill: 2, market: 5 } as const;
+export type SettlementBuilding = keyof typeof BUILDING_SIDES;
+
+/** One building of a settlement, a structure of its own: its type, the lattice corner of its foot, its side, its rank. */
 export interface Building {
-  readonly piece: SettlementPiece;
-  readonly culture: Culture;
+  readonly type: SettlementBuilding;
   /** The front corner of its base: the base covers the diamonds `u - side` to `u - 1`, and the same of `v`. */
   readonly u: number;
   readonly v: number;
   readonly side: number;
   /** Its lot's roll, the lower the nearer the core: what thins a settlement drawn at a lower dial. */
+  readonly rank: number;
+}
+
+/** What stands about a fishing village and is no structure: a net rack or a boat, in its culture, where its foot is. */
+export interface Dress {
+  readonly piece: 'netRack' | 'boat';
+  readonly culture: Culture;
+  readonly u: number;
+  readonly v: number;
+  readonly side: number;
   readonly rank: number;
 }
 
@@ -48,6 +62,7 @@ export interface Jetty {
 export interface LaidOut {
   readonly square: SettlementSquare;
   readonly buildings: readonly Building[];
+  readonly dress: readonly Dress[];
   readonly jetties: readonly Jetty[];
 }
 
@@ -123,8 +138,8 @@ function baseIn(lot: Lot, side: number): { fromU: number; fromV: number } {
 }
 
 /**
- * The settlement whose structure is `id`, of a type at a level, its middle the lattice corner `u`, `v`, in a culture:
- * its square, its buildings and its jetties. `'unknown'` while any of the ground it asks after is not known yet, so it is
+ * The settlement whose site is `id`, of a type at a level, its middle the lattice corner `u`, `v`, in a culture: its
+ * square, its buildings, its dress and its jetties. `'unknown'` while any of the ground it asks after is not known yet, so it is
  * never laid out on a guess and laid out again differently a moment later.
  */
 export function settlementIn(
@@ -160,6 +175,16 @@ export function settlementIn(
     }
     return true;
   };
+  const covers = (one: Building, du: number, dv: number) =>
+    du >= one.u - one.side && du < one.u && dv >= one.v - one.side && dv < one.v;
+  const wetAround = (one: Building) => {
+    for (let du = one.u - one.side - 2; du <= one.u + 1; du += 1) {
+      for (let dv = one.v - one.side - 2; dv <= one.v + 1; dv += 1) {
+        if (footOf(du, dv) === 'water') return true;
+      }
+    }
+    return false;
+  };
   const wetBy = (lot: Lot) => {
     for (let du = lot.fromU - 1; du <= lot.fromU + LOT; du += 1) {
       for (let dv = lot.fromV - 1; dv <= lot.fromV + LOT; dv += 1) {
@@ -171,40 +196,57 @@ export function settlementIn(
   const kept = lots
     .map((lot) => ({ lot, rank: roll(seed, lot.k, lot.j, 1) }))
     .filter(({ lot, rank }) => rank < KEPT[lot.ring]!);
-  // The chapel stands on the best lot of the second ring, so a hamlet has none and a village keeps the same one.
-  const chapel = kept
-    .filter(({ lot }) => lot.ring === 1)
-    .sort((a, b) => a.rank - b.rank)
-    .find(({ lot }) =>
-      dry(baseIn(lot, PIECE_SIDES.chapel).fromU, baseIn(lot, PIECE_SIDES.chapel).fromV, PIECE_SIDES.chapel),
-    );
+  // A village's mill on the best of its inner lots by a river or a lake, the same at every level from a village up.
+  const mill =
+    rings >= 2
+      ? kept
+          .filter(({ lot }) => lot.ring <= 1 && wetBy(lot))
+          .sort((one, other) => one.rank - other.rank)
+          .find(({ lot }) => {
+            const base = baseIn(lot, BUILDING_SIDES.mill);
+            return dry(base.fromU, base.fromV, BUILDING_SIDES.mill);
+          })
+      : undefined;
+  // A large village's market on the four lots of a quarter nearest the green, never the mill's, which no house then
+  // takes: the one place a higher level does not hold what the lower did.
+  const quarterOf = (lot: Lot) => [1, -1].indexOf(lot.su) * 2 + [1, -1].indexOf(lot.sv);
+  const first = Math.floor(roll(seed, 0, 0, 3) * 4);
+  const quarter =
+    rings >= 3
+      ? ([0, 1, 2, 3]
+          .map((step) => (first + step) % 4)
+          .find((one) => mill === undefined || quarterOf(mill.lot) !== one) ?? -1)
+      : -1;
+  const inQuarter = (lot: Lot) => quarterOf(lot) === quarter && Math.abs(lot.k) <= 2 && Math.abs(lot.j) <= 2;
   const buildings: Building[] = [];
+  const dress: Dress[] = [];
   const jetties: Jetty[] = [];
+  const market = lots.find((lot) => inQuarter(lot) && Math.abs(lot.k) === 1 && Math.abs(lot.j) === 1);
+  if (market !== undefined) {
+    // Against both streets, across the inner lot and into the next one out.
+    const side = BUILDING_SIDES.market;
+    const fromU = market.su === 1 ? market.fromU : market.fromU + LOT - side;
+    const fromV = market.sv === 1 ? market.fromV : market.fromV + LOT - side;
+    if (dry(fromU, fromV, side)) {
+      buildings.push({ type: 'market', u: fromU + side, v: fromV + side, side, rank: 0 });
+    }
+  }
   for (const { lot, rank } of kept) {
+    if (inQuarter(lot) && buildings.some((one) => one.type === 'market')) continue;
     const shore = type === 'fishingVillage' && wetBy(lot);
-    const pick = roll(seed, lot.k, lot.j, 2);
-    const piece: SettlementPiece =
-      chapel !== undefined && lot === chapel.lot
-        ? 'chapel'
-        : shore
-          ? 'fishingHut'
-          : pick < (lot.ring === 0 ? 0.45 : 0.25)
-            ? 'house'
-            : pick < 0.7
-              ? 'cottage'
-              : 'barn';
-    const side = PIECE_SIDES[piece];
+    const what: SettlementBuilding = mill !== undefined && lot === mill.lot && !shore ? 'mill' : 'house';
+    const side = BUILDING_SIDES[what];
     const base = baseIn(lot, side);
     if (!dry(base.fromU, base.fromV, side)) continue;
-    buildings.push({ piece, culture, u: base.fromU + side, v: base.fromV + side, side, rank });
-    if (piece !== 'fishingHut') continue;
-    // A net rack in the lot's far corner, where the hut leaves room.
+    buildings.push({ type: what, u: base.fromU + side, v: base.fromV + side, side, rank });
+    if (!shore) continue;
+    // A net rack in the lot's far corner, where the house leaves room.
     const rack = {
       fromU: lot.su === 1 ? lot.fromU + LOT - 1 : lot.fromU,
       fromV: lot.sv === 1 ? lot.fromV + LOT - 1 : lot.fromV,
     };
-    if (dry(rack.fromU, rack.fromV, 1)) {
-      buildings.push({
+    if (dry(rack.fromU, rack.fromV, 1) && !buildings.some((one) => covers(one, rack.fromU, rack.fromV))) {
+      dress.push({
         piece: 'netRack',
         culture,
         u: rack.fromU + 1,
@@ -214,9 +256,12 @@ export function settlementIn(
       });
     }
   }
-  // Jetties from the shore: the huts' lots nearest the green first, as many as the level, each out along an axis where
-  // open water runs three diamonds from the lot's edge, with a boat moored at its end.
-  const huts = buildings.filter((one) => one.piece === 'fishingHut').sort((a, b) => a.rank - b.rank);
+  // Jetties from the shore: the houses by the water nearest the green first, as many as the level, each out along an
+  // axis where open water runs three diamonds from the house's edge, with a boat moored at its end.
+  const huts =
+    type === 'fishingVillage'
+      ? buildings.filter((one) => one.type === 'house' && wetAround(one)).sort((a, b) => a.rank - b.rank)
+      : [];
   for (const hut of huts) {
     if (jetties.length >= rings) break;
     for (const [axis, du, dv] of [
@@ -228,7 +273,7 @@ export function settlementIn(
       const startU = du === 0 ? hut.u - 1 : du === 1 ? hut.u : hut.u - hut.side - 1;
       const startV = dv === 0 ? hut.v - 1 : dv === 1 ? hut.v : hut.v - hut.side - 1;
       const reach = [0, 1, 2, 3].map((step) => footOf(startU + du * step, startV + dv * step));
-      if (reach[0] === 'water' || !reach.slice(1).every((footing) => footing === 'water')) continue;
+      if (!reach.slice(1).every((footing) => footing === 'water')) continue;
       jetties.push({ axis: axis as JettyAxis, u: startU + du * 2 + 0.5, v: startV + dv * 2 + 0.5 });
       // A boat on open water beside the jetty's far end, on whichever side has room for it.
       const endU = startU + du * 3;
@@ -247,7 +292,7 @@ export function settlementIn(
         [0, 1].every((a) => [0, 1].every((b) => footOf(fromU + a, fromV + b) === 'water')),
       );
       if (moored !== undefined) {
-        buildings.push({
+        dress.push({
           piece: 'boat',
           culture,
           u: moored.fromU + 2,
@@ -260,5 +305,6 @@ export function settlementIn(
     }
   }
   buildings.sort((a, b) => a.rank - b.rank);
-  return { square, buildings, jetties };
+  dress.sort((a, b) => a.rank - b.rank);
+  return { square, buildings, dress, jetties };
 }

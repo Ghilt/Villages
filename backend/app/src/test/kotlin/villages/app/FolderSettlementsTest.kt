@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import villages.application.settlements.SettlementBuilding
 import villages.application.settlements.SettlementSite
 import villages.domain.Location
 import villages.domain.StructureType
@@ -24,13 +25,24 @@ class FolderSettlementsTest {
     }
 
     @Test
-    fun `the shared fixture reads as the world package filed it, every site`(@TempDir masters: Path) {
+    fun `the shared fixture reads as the world package filed it, every site with its radius and buildings`(@TempDir masters: Path) {
         file(masters, "fixture")
 
         assertEquals(
             listOf(
                 SettlementSite(
-                    "ruin:Q1792:0", StructureType.VILLAGE, 3, "village by the ruins of Dantzic", Location(54.42, 18.71), "Q1792",
+                    "ruin:Q1792:0",
+                    StructureType.VILLAGE,
+                    3,
+                    "village by the ruins of Dantzic",
+                    Location(54.42, 18.71),
+                    "Q1792",
+                    14.0,
+                    listOf(
+                        SettlementBuilding(StructureType("market"), 1, Location(54.421, 18.712)),
+                        SettlementBuilding(StructureType("mill"), 1, Location(54.4185, 18.705)),
+                        SettlementBuilding(StructureType("house"), 1, Location(54.4222222, 18.7111111)),
+                    ),
                 ),
                 SettlementSite(
                     "site:1130:325",
@@ -39,6 +51,8 @@ class FolderSettlementsTest {
                     "fishing village on the Lake of Geneva",
                     Location(46.4512346, 6.5123457),
                     null,
+                    5.0,
+                    listOf(SettlementBuilding(StructureType("house"), 1, Location(46.451, 6.5130001))),
                 ),
             ),
             FolderSettlements(masters).of("fixture"),

@@ -61,7 +61,8 @@ when it was made; `-- --only <step> --force` makes it again to read all of it:
 - `world:culture`: what share of the land is of each culture. The Culture renderer is its picture.
 - `world:ruins`: how many towns of 1790 are in ruins in each tier and each culture, and how many stand in a square of
   sea. `-- --picture` draws every town's ruins as rings around a few great cities into `world/painterly/ruins/`.
-- `world:settlements`: how many settlement sites, of each type, level and culture, and how many beside the ruins.
+- `world:settlements`: how many settlement sites, of each type, level and culture, how many beside the ruins, and
+  how many buildings of each type the opening will raise on them.
   `-- --picture` draws them over the ground around a few towns into `world/painterly/settlements/`.
 - `world:roads`: how much road of each grade, how many bridges on each of their eight ways, the share of villages
   with a road to another village (95% or more, or say why not) and why the rest have none, the settlements no road

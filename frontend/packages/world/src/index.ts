@@ -91,10 +91,18 @@ export {
   streetEnds,
 } from './settlements.ts';
 export type { SettlementSquare, SettlementType } from './settlements.ts';
-export { SETTLEMENT_SIDES, settlementIn } from './settlementLayout.ts';
+export { BUILDING_SIDES, SETTLEMENT_SIDES, settlementIn } from './settlementLayout.ts';
 export { ROAD_KINDS, decodeRoads, readRoadKind } from './roadRecords.ts';
 export type { RoadChunk, RoadKind, RoadPieceKind, RoadsMapFile } from './roadRecords.ts';
-export type { Building, DiamondFooting, FootingOf, Jetty, LaidOut } from './settlementLayout.ts';
+export type {
+  Building,
+  DiamondFooting,
+  Dress,
+  FootingOf,
+  Jetty,
+  LaidOut,
+  SettlementBuilding,
+} from './settlementLayout.ts';
 export { ruinFrameKey } from './ruinLooks.ts';
 export { CULTURES, STRUCTURE_RESOURCES, parseStructureCatalogue } from './structures.ts';
 export { RARITIES, parseBalance } from './balance.ts';

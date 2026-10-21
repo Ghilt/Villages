@@ -1,5 +1,5 @@
 {
-  "$comment": "Written by npm run world:settlements: every settlement site, which the game server raises a settlement on at the opening (decision record 0114). Worked out again from world/settlements.json, the tiles, the names and the ruins, never edited.",
+  "$comment": "Written by npm run world:settlements: every settlement site, its radius and its buildings, which the game server raises a structure each of at the opening (decision records 0114 and 0117). Worked out again from world/settlements.json, the tiles, the names and the ruins, never edited.",
   "master": "fixture",
   "at": "2026-10-21T12:00:00.000Z",
   "sites": [
@@ -8,16 +8,60 @@
       "type": "village",
       "level": 3,
       "name": "village by the ruins of Dantzic",
-      "at": [18.71, 54.42],
-      "by": "Q1792"
+      "at": [
+        18.71,
+        54.42
+      ],
+      "by": "Q1792",
+      "radius": 14,
+      "buildings": [
+        {
+          "type": "market",
+          "level": 1,
+          "at": [
+            18.712,
+            54.421
+          ]
+        },
+        {
+          "type": "mill",
+          "level": 1,
+          "at": [
+            18.705,
+            54.4185
+          ]
+        },
+        {
+          "type": "house",
+          "level": 1,
+          "at": [
+            18.7111111,
+            54.4222222
+          ]
+        }
+      ]
     },
     {
       "id": "site:1130:325",
       "type": "fishingVillage",
       "level": 1,
       "name": "fishing village on the Lake of Geneva",
-      "at": [6.5123457, 46.4512346],
-      "by": null
+      "at": [
+        6.5123457,
+        46.4512346
+      ],
+      "by": null,
+      "radius": 5,
+      "buildings": [
+        {
+          "type": "house",
+          "level": 1,
+          "at": [
+            6.5130001,
+            46.451
+          ]
+        }
+      ]
     }
   ]
 }

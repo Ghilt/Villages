@@ -121,7 +121,9 @@ scores better, so two stand at least that far apart and about twice it as a rule
 lake or a large river over a share of its ground is a fishing village. Paint farmland and villages come to it; paint
 a marsh over one and it goes, and the sites more than two spacings away stay where they were, under the same ids, so
 the settlement the world raised on one is never raised again somewhere else. `levels` is how many of them are
-villages and large villages rather than hamlets. See `docs/plans/settlements-and-roads.md`.
+villages and large villages rather than hamlets, and `radius` how far from its middle a structure is part of one, a
+level at a time. Each is laid out in houses, with a mill by its water and a market in a large one, every building a
+structure the world raises. See `docs/plans/settlements-and-roads.md` and `docs/plans/houses-bridges-and-road-render.md`.
 
 **And the roads between them follow the ground you painted.** Nobody paints a road either: `world:roads` lays them
 by `world/roads.json`. `longestKm` is the longest road the graph of neighbours makes; a village it leaves with no

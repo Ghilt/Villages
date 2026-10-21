@@ -92,7 +92,12 @@ export function dressSettlement(
     pieces.push({ sprite, shadow, ...at, tall: picture.tall, low });
   };
   for (const jetty of laid.jetties) add(jettyKey(jetty.axis), corner(jetty.u, jetty.v), true);
+  const culture = entry.spec.structure?.settlement?.culture ?? 'european';
+  // A mill or a market is drawn by the structures' own pictures, as the structure it is raised as.
   for (const one of laid.buildings) {
+    if (one.type === 'house') add(settlementPieceKey('house', culture), corner(one.u, one.v), false);
+  }
+  for (const one of laid.dress) {
     add(settlementPieceKey(one.piece, one.culture), corner(one.u, one.v), one.piece === 'boat');
   }
   // Farthest first: what lies on the water under the rest, then up the screen to down it, the camera looking north.

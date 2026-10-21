@@ -10,7 +10,7 @@ const fixture = JSON.parse(
 ) as unknown;
 
 describe('the settlement sites, filed for the game server', () => {
-  it('are the shared fixture: a village by the ruins of Dantzic and a fishing village in open country', () => {
+  it('are the shared fixture: a village by the ruins of Dantzic with its buildings, and a fishing village in open country', () => {
     const filed = fileSettlements('fixture', '2026-10-21T12:00:00.000Z', [
       {
         id: 'site:1130:325',
@@ -20,6 +20,8 @@ describe('the settlement sites, filed for the game server', () => {
         lng: 6.512345678,
         lat: 46.4512345678,
         by: null,
+        radius: 5,
+        buildings: [{ type: 'house', level: 1, at: [6.5130001234, 46.451] }],
       },
       {
         id: 'ruin:Q1792:0',
@@ -29,6 +31,12 @@ describe('the settlement sites, filed for the game server', () => {
         lng: 18.71,
         lat: 54.42,
         by: 'Q1792',
+        radius: 14,
+        buildings: [
+          { type: 'market', level: 1, at: [18.712, 54.421] },
+          { type: 'mill', level: 1, at: [18.705, 54.4185] },
+          { type: 'house', level: 1, at: [18.7111111111, 54.4222222222] },
+        ],
       },
     ]);
     expect(filed).toEqual(fixture);

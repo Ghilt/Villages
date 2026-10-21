@@ -822,8 +822,11 @@ and `-- --drop` takes them off; by hand only.
   unit, its height and its rivers - its towns of 1790 and `world/settlements.json`: so many beside every ruin by its
   tier, just past its overgrowth, and the rest in open country on good ground, each kept where nothing within the
   spacing scores better, fishing villages by the sea, a lake or a large river. Each stands on a corner of the ground's
-  lattice under an id that outlives a repaint, and goes into `world/ground/<master>/settlements.json`, which only the
-  game server reads. It prints how many of each type, level and culture; on the master of 2026-10-03, 7,389 - 3,050
+  lattice under an id that outlives a repaint, and is laid out as the page lays it out: a house on each lot kept, a
+  mill on the best lot by a river or a lake from a village up, a market by the green of a large village. Each site goes
+  into `world/ground/<master>/settlements.json`, which only the game server reads, with its radius and its buildings,
+  each of which the opening raises as a structure of its own. It prints how many of each type, level and culture, and
+  how many buildings of each type there are to raise; on the master of 2026-10-03, 7,389 - 3,050
   beside the ruins, 1,597 of them fishing villages - in under two minutes. `world:ready` makes it again whenever the
   tiles, the flow, the height, the names, the cultures, `world/ruins.json`, the structures' catalogue or
   `world/settlements.json` changed. `-- --picture` draws the sites over the ground around Paris, Grand Cairo, Jeddo,
