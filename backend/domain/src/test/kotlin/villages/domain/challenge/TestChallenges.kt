@@ -21,7 +21,8 @@ val TEST_CATALOGUE = ChallengeCatalogue(
         ChallengeEffect("reason.seenThrough", Aspect.REASON, Fires.PASSIVE, mapOf("chance" to 20.0, "seconds" to 10.0), puts = "weakened"),
         ChallengeEffect("authority.watch", Aspect.AUTHORITY, Fires.TRIGGER, summons = "enforcer", matching = true),
         ChallengeEffect("authority.curfew", Aspect.AUTHORITY, Fires.TRIGGER, mapOf("seconds" to 8.0), matching = true, puts = "aspectBound"),
-        ChallengeEffect("authority.firmHand", Aspect.AUTHORITY, Fires.PASSIVE, mapOf("power" to 5.0), matching = true),
+        ChallengeEffect("authority.firmHand", Aspect.AUTHORITY, Fires.TRIGGER, mapOf("seconds" to 10.0), matching = true, puts = "penalised"),
+        ChallengeEffect("nature.dread", Aspect.NATURE, Fires.TRIGGER, mapOf("seconds" to 8.0), matching = true, puts = "weakened"),
         ChallengeEffect("freedom.commons", Aspect.FREEDOM, Fires.TRIGGER, summons = "rebel"),
         ChallengeEffect("freedom.againstTheGrain", Aspect.FREEDOM, Fires.PASSIVE, mapOf("amount" to 20.0)),
         ChallengeEffect("freedom.ownWill", Aspect.FREEDOM, Fires.PASSIVE),
@@ -66,7 +67,8 @@ val TEST_CATALOGUE = ChallengeCatalogue(
     debuffs = mapOf(
         "stunned" to Lasting(setOf(Bearer.SUMMON)),
         "aspectBound" to Lasting(setOf(Bearer.SUMMON)),
-        "weakened" to Lasting(setOf(Bearer.SUMMON), mapOf("percent" to 30.0)),
+        "weakened" to Lasting(setOf(Bearer.SUMMON, Bearer.SLICE), mapOf("percent" to 30.0)),
+        "penalised" to Lasting(setOf(Bearer.SLICE), mapOf("amount" to 8.0)),
         "eroding" to Lasting(setOf(Bearer.SUMMON), mapOf("integrity" to 4.0)),
     ),
 )

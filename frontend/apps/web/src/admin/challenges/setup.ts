@@ -149,6 +149,7 @@ export const WHAT_SAID: Readonly<Record<string, string>> = {
   held: 'stood fast',
   actedAgain: 'acted again',
   echoed: 'echoed',
+  penalised: 'penalised',
   cancelled: 'cancelled',
   integrityLost: 'wore integrity',
   auraOn: 'aura on',

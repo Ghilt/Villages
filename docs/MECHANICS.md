@@ -1206,8 +1206,9 @@ summon counts add up to.
 slice or a summon for some seconds. Their names say what they do - *stunned*, *aspect-bound*, *weakened*, *eroding* -
 and the effects that put them on carry the flavour: Authority's Curfew leaves every enemy summon aspect-bound, acting
 only in happenings of its own aspect, and the Enforcer stuns the enemy's hardest puller; Reason sees through an enemy
-summon's tricks and weakens it; as a happening leaves Nature the briars close, and the enemy's summons are eroding,
-losing integrity at each act until they are gone. Generosity's Tend the Wounded **cleanses** its side of every debuff.
+summon's tricks and weakens it, and Nature's Dread of the Wilds weakens every enemy slice; as a happening leaves Nature
+the briars close, and the enemy's summons are eroding, losing integrity at each act until they are gone. Authority's
+Firm Hand lays down the law: every enemy slice is *penalised*, so a trigger it fires out of its aspect costs its side. Generosity's Tend the Wounded **cleanses** its side of every debuff.
 Buffs help the same way: *empowered*, which is the aspect boost; *hastened*, acting again in some seconds, which
 Violence's War Drums beat and Industry's Well-Oiled gives; *echoing*, a trigger firing twice, as the word spreads for
 Freedom; *warded*, which no debuff takes, Reason's Foresight; and *steadfast*, never turned, sworn by Authority's Oaths

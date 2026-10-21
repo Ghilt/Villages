@@ -2,7 +2,9 @@ package villages.domain.challenge
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import villages.domain.Stat
 import villages.domain.challenge.Aspect.AUTHORITY
+import villages.domain.challenge.Aspect.DIPLOMACY
 import villages.domain.challenge.Aspect.FREEDOM
 import villages.domain.challenge.Aspect.REASON
 import villages.domain.challenge.Aspect.VIOLENCE
@@ -43,13 +45,15 @@ class AuthorityFreedomSpec : StringSpec({
         result.saying(What.PULLED).filter { it.side == Side.B }.map { it.second } shouldBe (1..4).toList() + (12..14).toList()
     }
 
-    "The Firm Hand lowers the opponent's power while the tug favours its side" {
-        val result = fight(listOf(slice(VIOLENCE, "violence.sellswords"), slice(AUTHORITY, "authority.firmHand")), IDLE, 6, Happening(VIOLENCE), Happening(AUTHORITY))
+    "The Firm Hand penalises the enemy's slices: each trigger they fire off their aspect costs their side, and one on it nothing" {
+        val ines = StandIn.KeyFigure("Ines", mapOf(Stat.KINDNESS to 12))
+        val envoy = listOf(slice(DIPLOMACY, "diplomacy.envoy", slotted = mapOf("diplomacy.envoy" to ines)))
+        val result = fight(listOf(slice(AUTHORITY, "authority.firmHand")), envoy, 12, Happening(AUTHORITY), Happening(AUTHORITY), Happening(DIPLOMACY))
 
-        val on = result.saying(What.AURA_ON).single()
-        on.second shouldBe 3
-        on.effect shouldBe "authority.firmHand"
-        on.amount shouldBe 7.5
+        result.saying(What.DEBUFFED).map { Triple(it.second, it.status, it.target.toString()) } shouldBe
+            listOf(Triple(0, "penalised", "b1"), Triple(4, "penalised", "b1"))
+        result.saying(What.PENALISED).map { Triple(it.second, it.effect, it.amount) } shouldBe listOf(Triple(4, "diplomacy.envoy", -8.0))
+        result.saying(What.PENALISED).single().tugDelta shouldBe 8.0
     }
 
     "a Rebel pulls five a second, and ten while its side is behind" {

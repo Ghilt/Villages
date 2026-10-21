@@ -105,6 +105,9 @@ enum class What {
     /** A slice's trigger fired a second time, echoing. */
     ECHOED,
 
+    /** A penalised slice paid for a trigger fired on a happening its aspect does not match, the amount its cost. */
+    PENALISED,
+
     /** A trigger was cancelled before it fired. */
     CANCELLED,
     INTEGRITY_LOST,

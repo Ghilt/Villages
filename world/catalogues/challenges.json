@@ -112,9 +112,10 @@
       },
       "firmHand": {
         "name": "The Firm Hand",
-        "fires": "passive",
-        "words": "While this side leads, the opponent's power is {power} lower.",
-        "numbers": { "power": 5 },
+        "fires": "trigger",
+        "words": "Lays down the law: every enemy slice is penalised for {seconds} s.",
+        "puts": "penalised",
+        "numbers": { "seconds": 10 },
         "matching": true
       },
       "fealty": {
@@ -192,6 +193,14 @@
         "words": "As the happening changes away from Nature, the briars close: every enemy summon is eroding for {seconds} s.",
         "numbers": { "seconds": 10 },
         "puts": "eroding"
+      },
+      "dread": {
+        "name": "Dread of the Wilds",
+        "fires": "trigger",
+        "words": "The wilds close in on the enemy: every slice of theirs is weakened for {seconds} s.",
+        "puts": "weakened",
+        "numbers": { "seconds": 8 },
+        "matching": true
       }
     },
     "industry": {
@@ -304,7 +313,7 @@
     },
     "weakened": {
       "name": "Weakened",
-      "on": ["summon"],
+      "on": ["summon", "slice"],
       "words": "Works {percent}% less.",
       "numbers": { "percent": 30 }
     },
@@ -313,6 +322,12 @@
       "on": ["summon"],
       "words": "Each act costs it {integrity} integrity; at nothing it is gone.",
       "numbers": { "integrity": 4 }
+    },
+    "penalised": {
+      "name": "Penalised",
+      "on": ["slice"],
+      "words": "Each trigger it fires on a happening its aspect does not match costs its side {amount}.",
+      "numbers": { "amount": 8 }
     }
   },
   "kinds": {

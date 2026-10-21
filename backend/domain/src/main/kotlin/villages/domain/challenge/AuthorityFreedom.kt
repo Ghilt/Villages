@@ -2,20 +2,6 @@ package villages.domain.challenge
 
 /** The six effects of the Authority-Freedom pair, the Enforcer and the Rebel. See `docs/plans/challenges.md`. */
 
-/** Curfew: every enemy summon is put under the debuff its entry names, aspect-bound, for `seconds`, boosted and cut to whole seconds. */
-private object Curfew : EffectBehaviour {
-    override val reads = setOf("seconds")
-
-    override fun activated(scene: Scene): List<Change> = scene.summons(scene.side.other).map { scene.putOn(it.actor, scene.number("seconds")) }
-}
-
-/** The Firm Hand: while the tug favours its side, the opponent's power is `power` lower. */
-private object FirmHand : EffectBehaviour {
-    override val reads = setOf("power")
-
-    override fun aura(scene: Scene): Double = if (scene.favours(scene.side)) scene.boost(scene.number("power")) else 0.0
-}
-
 /** Against the Grain: `amount` at each happening its slice's aspect does not match, which is the only time it fires. */
 private object AgainstTheGrain : EffectBehaviour {
     override val reads = setOf("amount")
@@ -53,9 +39,9 @@ private object Enforcer : SummonBehaviour {
 
 internal val authorityAndFreedom: Map<String, EffectBehaviour> = mapOf(
     "authority.watch" to Hires,
-    "authority.curfew" to Curfew,
+    "authority.curfew" to Afflicts(Own.SUMMONS),
     "authority.fealty" to Rallies(Own.SUMMONS),
-    "authority.firmHand" to FirmHand,
+    "authority.firmHand" to Afflicts(Own.SLICES),
     "freedom.commons" to Hires,
     "freedom.againstTheGrain" to AgainstTheGrain,
     "freedom.ownWill" to OwnWill,

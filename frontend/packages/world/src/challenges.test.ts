@@ -59,9 +59,7 @@ describe("the challenge's content", () => {
     const challenges = parseChallenges(world);
     expect(
       ASPECTS.map((aspect) => challenges.effects.filter((effect) => effect.aspect === aspect).length),
-    ).toEqual(
-      ASPECTS.map((aspect) => (['diplomacy', 'greed', 'nature', 'industry'].includes(aspect) ? 3 : 4)),
-    );
+    ).toEqual(ASPECTS.map((aspect) => (['diplomacy', 'greed', 'industry'].includes(aspect) ? 3 : 4)));
   });
 
   it('refuses a field it cannot read, naming where', () => {

@@ -48,7 +48,7 @@ class ChallengesFileTest {
     fun `the real one reads, three or four effects to every aspect, and is in the one form`() {
         val challenges = ChallengesFile.parse(real)
 
-        assertEquals(Aspect.entries.associateWith { if (it in setOf(Aspect.DIPLOMACY, Aspect.GREED, Aspect.NATURE, Aspect.INDUSTRY)) 3 else 4 }, Aspect.entries.associateWith { challenges.effectsOf(it).size })
+        assertEquals(Aspect.entries.associateWith { if (it in setOf(Aspect.DIPLOMACY, Aspect.GREED, Aspect.INDUSTRY)) 3 else 4 }, Aspect.entries.associateWith { challenges.effectsOf(it).size })
         assertEquals(setOf("battle", "debate", "tradeWar", "sermon", "even"), challenges.kinds.keys)
         assertEquals(real, CatalogueText.format(real))
     }

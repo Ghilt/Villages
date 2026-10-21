@@ -53,6 +53,7 @@ internal val natureAndIndustry: Map<String, EffectBehaviour> = mapOf(
     "nature.wildHunt" to Hires,
     "nature.teeming" to Teeming,
     "nature.wildRemembers" to BriarsClose,
+    "nature.dread" to Afflicts(Own.SLICES),
     "industry.engines" to Hires,
     "industry.works" to Slotted,
     "industry.wellOiled" to WellOiled,

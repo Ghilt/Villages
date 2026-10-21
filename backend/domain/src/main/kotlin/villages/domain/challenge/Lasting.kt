@@ -39,6 +39,9 @@ interface LastingBehaviour {
 
     /** On a summon: it cannot be turned while it is on. */
     val steadies: Boolean get() = false
+
+    /** On a slice: what each trigger it fires on a happening its aspect does not match costs its side, by its [entry]'s numbers. */
+    fun penalty(entry: Lasting): Double = 0.0
 }
 
 /** The buff a happening puts on whatever matches it, which is the aspect boost; the catalogue must have it. */
@@ -66,6 +69,13 @@ private object Eroding : LastingBehaviour {
     override val reads = setOf("integrity")
 
     override fun wears(entry: Lasting): Double = entry.number("integrity")
+}
+
+/** Penalised: each trigger the slice fires on a happening its aspect does not match costs its side `amount`. The Firm Hand's. */
+private object Penalised : LastingBehaviour {
+    override val reads = setOf("amount")
+
+    override fun penalty(entry: Lasting): Double = entry.number("amount")
 }
 
 /** Empowered: its bearer does `percent` more, half as much again to begin with. What a happening gives whatever matches it. */
@@ -109,7 +119,12 @@ internal val lastingBehaviours: Map<String, LastingBehaviour> = mapOf(
     "echoing" to Echoing,
     "warded" to Warded,
     "steadfast" to Steadfast,
+    "penalised" to Penalised,
 )
+
+/** What a trigger of [side]'s slice [slice] fired off its aspect costs its side: each penalty it bears, together. */
+internal fun Contest.penaltyOf(side: Side, slice: Int): Double =
+    bearings.getValue(side)[slice].keys.sumOf { id -> lastingBehaviours[id]?.penalty(catalogue.lasting(id)!!) ?: 0.0 }
 
 /** How much what bears [bearing] has what it does grown: each buff's growth, all of them together. */
 internal fun Contest.empowerment(bearing: Map<String, Int>): Double =

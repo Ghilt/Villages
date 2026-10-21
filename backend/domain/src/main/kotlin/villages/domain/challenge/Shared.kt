@@ -60,3 +60,15 @@ internal class Rallies(private val own: Own) : EffectBehaviour {
         return (slices + summons).map { scene.putOn(it, scene.number("seconds")) }
     }
 }
+
+/** Puts the debuff its entry names on every one of [enemy]'s side for `seconds`, as it fires: slices, summons, or both. */
+internal class Afflicts(private val enemy: Own) : EffectBehaviour {
+    override val reads = setOf("seconds")
+
+    override fun activated(scene: Scene): List<Change> {
+        val them = scene.side.other
+        val slices = if (enemy == Own.SUMMONS) emptyList() else scene.slices(them)
+        val summons = if (enemy == Own.SLICES) emptyList() else scene.summons(them).map { it.actor }
+        return (slices + summons).map { scene.putOn(it, scene.number("seconds")) }
+    }
+}

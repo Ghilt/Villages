@@ -127,10 +127,18 @@ internal class Contest(
                     return@flatMap listOf(Change.Say(What.CANCELLED, side.other, Actor.OfSlice(side.other, by), their.id, Actor.OfSlice(side, slice), targetEffect = effect.id))
                 }
             }
-            val fired = behaviour.activated(scene(side, slice, effect))
+            val fired = firing(side, slice, effect, behaviour)
             if (effect.fires != Fires.TRIGGER || !rng.chance(echoChance(side, slice))) return@flatMap fired
-            fired + Change.Say(What.ECHOED, side, Actor.OfSlice(side, slice), effect.id) + behaviour.activated(scene(side, slice, effect))
+            fired + Change.Say(What.ECHOED, side, Actor.OfSlice(side, slice), effect.id) + firing(side, slice, effect, behaviour)
         }
+    }
+
+    /** What [effect] of [side]'s slice [slice] asks for as it meets the happening, and, a trigger fired off its aspect, the penalty it pays. */
+    private fun firing(side: Side, slice: Int, effect: ChallengeEffect, behaviour: EffectBehaviour): List<Change> {
+        val asked = behaviour.activated(scene(side, slice, effect))
+        if (effect.fires != Fires.TRIGGER || matching.getValue(side)[slice]) return asked
+        val penalty = penaltyOf(side, slice)
+        return if (penalty > 0.0) asked + Change.Pull(side, -penalty, Actor.OfSlice(side, slice), effect.id, false, What.PENALISED) else asked
     }
 
     private fun act() {

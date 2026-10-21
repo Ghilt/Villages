@@ -2,6 +2,9 @@ package villages.domain.challenge
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import villages.domain.Stat
+import io.kotest.matchers.doubles.plusOrMinus
+import villages.domain.challenge.Aspect.DIPLOMACY
 import villages.domain.challenge.Aspect.GREED
 import villages.domain.challenge.Aspect.INDUSTRY
 import villages.domain.challenge.Aspect.NATURE
@@ -65,5 +68,15 @@ class NatureIndustrySpec : StringSpec({
     "Works and Forges puts its building on the line as it fires" {
         val works = listOf(slice(INDUSTRY, "industry.works", slotted = mapOf("industry.works" to StandIn.Building("Carron ironworks", 1))))
         fight(works, IDLE, 2, Happening(INDUSTRY)).saying(What.ARRIVED).single().amount shouldBe 15.0
+    }
+
+    "Dread of the Wilds weakens every enemy slice, so a key figure of theirs lends a share less" {
+        val ines = StandIn.KeyFigure("Ines", mapOf(Stat.KINDNESS to 12))
+        val envoy = listOf(slice(DIPLOMACY, "diplomacy.envoy", slotted = mapOf("diplomacy.envoy" to ines)))
+        val result = fight(listOf(slice(NATURE, "nature.dread")), envoy, 8, Happening(NATURE), Happening(NATURE))
+
+        val lent = result.saying(What.LENT).map { it.amount!! }
+        lent.first() shouldBe 12.0
+        lent.last() shouldBe (8.4 plusOrMinus 1e-9)
     }
 })
