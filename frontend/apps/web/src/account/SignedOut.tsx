@@ -12,7 +12,7 @@ import { SignInForm } from './Forms';
  * What a window says once the browser's sign-in has ended: signed out here or from another browser, or left unused
  * past its time. The window is finished as a taken-over one is - it holds no cells and is sent nothing - so it has to
  * look finished, over everything, with nothing to put it away but an answer: signing in again, or playing on as a
- * guest, who is somebody new. See decision record 0109.
+ * guest, who is somebody new. See decision record 0111.
  */
 export function SignedOut() {
   const connection = useStore(sessionStore, (state) => state.connection);

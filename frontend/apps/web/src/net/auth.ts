@@ -7,7 +7,7 @@ import type { Motion } from '../motion/motion';
 
 /**
  * Who this browser is, as the game server's `/auth/me` answers it: a player, their house and the sign-in that makes
- * the browser them, or nobody. Times are milliseconds. See decision record 0109.
+ * the browser them, or nobody. Times are milliseconds. See decision record 0111.
  */
 export interface Me {
   player: string | null;

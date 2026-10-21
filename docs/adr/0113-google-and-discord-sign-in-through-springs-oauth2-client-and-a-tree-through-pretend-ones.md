@@ -1,9 +1,9 @@
-# 0111. Google and Discord sign in through Spring's OAuth2 client, and a tree through pretend ones
+# 0113. Google and Discord sign in through Spring's OAuth2 client, and a tree through pretend ones
 
 - Status: accepted
 - Date: 2026-10-21
 - Plan: `docs/plans/accounts.md`
-- Builds on 0109, a browser signed in by a cookie the server keeps, and 0110, an account an email and a password
+- Builds on 0111, a browser signed in by a cookie the server keeps, and 0112, an account an email and a password
 
 ## Context
 

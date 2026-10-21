@@ -10,7 +10,7 @@ import { startGame, stopGame, testPorts } from './servers.ts';
  * closed and opened again, which keeps only the cookies told to outlast it, signed in still when ticked and signed out
  * when not; two tabs that never sign each other out; and the game server stopped and started, which forgets no
  * sign-in. How long each kind lasts on the server is `SignInsSpec`'s, on a clock it moves by hand. See
- * docs/plans/accounts.md and decision records 0109 and 0110.
+ * docs/plans/accounts.md and decision records 0111 and 0112.
  */
 test('remember me: kept through a closed browser when ticked and not when unticked, in two tabs, and through a restart', async ({
   browser,

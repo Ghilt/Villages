@@ -11,7 +11,7 @@ export const PLAYER_TOKEN_KEY = 'villages.playerToken';
  * The player this browser played as before there were sign-ins, or null when it kept none, or a blank one. The page
  * hands it to the server once, to be made a guest of that same player, which keeps the house it founded, and then
  * forgets it. Who a browser plays as is its sign-in now, a cookie the page cannot read, so nothing is written here
- * again. See decision record 0109.
+ * again. See decision record 0111.
  */
 export function oldPlayerToken(store: TokenStore): string | null {
   const kept = store.get(PLAYER_TOKEN_KEY);

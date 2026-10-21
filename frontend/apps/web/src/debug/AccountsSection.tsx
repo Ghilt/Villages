@@ -25,7 +25,7 @@ function when(at: number): string {
  * **Its one lever stands in for time, and for nothing a player does**: *let this sign-in run out* ends this browser's
  * sign-in now, as one left unused past its time does, and the window is stood down as a signed-out one. Signing out
  * and in are the player's, in the settings. All of it is Adam's instruments, since the outbox holds live links. See
- * decision record 0109.
+ * decision record 0111.
  */
 export function AccountsSection() {
   const me = useStore(meStore, (state) => state.me);

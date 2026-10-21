@@ -1,6 +1,6 @@
 # 0008. Anonymous player tokens for now
 
-- Status: superseded by 0109, 2026-10-21: a browser is signed in by a cookie the server keeps
+- Status: superseded by 0111, 2026-10-21: a browser is signed in by a cookie the server keeps
 - Date: 2026-09-01
 
 ## Context

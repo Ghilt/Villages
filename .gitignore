@@ -95,5 +95,5 @@ frontend/apps/web/public/art/
 frontend/apps/web/public/ui/
 
 # The ids and secrets of the applications registered with Google and Discord, beside the shared .git and the main
-# checkout's alone: a secret is never committed. See docs/adr/0111.
+# checkout's alone: a secret is never committed. See docs/adr/0113.
 .secrets/

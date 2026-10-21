@@ -1,4 +1,4 @@
-# 0109. A browser is signed in by a cookie the server keeps, and an account is not the world's
+# 0111. A browser is signed in by a cookie the server keeps, and an account is not the world's
 
 - Status: accepted
 - Date: 2026-10-21

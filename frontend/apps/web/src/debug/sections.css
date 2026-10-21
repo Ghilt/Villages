@@ -152,7 +152,7 @@
   color: var(--ink-soft);
 }
 
-/* The mail the game server sent, one a row, its link pressable: the Accounts section's outbox. See docs/adr/0109. */
+/* The mail the game server sent, one a row, its link pressable: the Accounts section's outbox. See docs/adr/0111. */
 .accounts__outbox {
   margin: 0.25rem 0 0;
   padding: 0;

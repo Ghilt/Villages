@@ -12,7 +12,7 @@ import { freePort } from './devServer.ts';
  * public folder - hundreds of megabytes of tiles - into the build, which is what a deploy would do and what this need
  * not. Nothing of the dev server's own answers is there, as on a built page; the page is told its game server is the
  * tool's, and `/auth` is passed through to it, as whatever serves the page to a player must, so it signs in at its own
- * address (decision record 0109).
+ * address (decision record 0111).
  */
 export interface BuiltPage {
   readonly url: string;

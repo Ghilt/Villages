@@ -53,7 +53,7 @@ let connection: Connection | null = null;
  * Connects once, the first time anything asks, to draw `master`: said in hello, so the gateway sends that
  * world's stands and no other. See decision record 0067. Not watching events: those are read on their own page,
  * which watches without playing. See 0023. Who it plays as is the browser's sign-in, which the socket's handshake
- * carries, so the page signs in first: `signIn` in `auth.ts`, and decision record 0109.
+ * carries, so the page signs in first: `signIn` in `auth.ts`, and decision record 0111.
  */
 export function gateway(master: string): Connection {
   if (connection !== null) return connection;

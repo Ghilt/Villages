@@ -41,7 +41,7 @@ internal fun closedTo(frame: ClientFrame) =
 
 /**
  * Stands down every window of [signIn], which has ended - signed out, run out, or ended from another browser - with
- * `signedOut`, as a takeover stands one down: a window belongs to a live sign-in. See decision record 0109.
+ * `signedOut`, as a takeover stands one down: a window belongs to a live sign-in. See decision record 0111.
  */
 fun Gateway.signInEnded(signIn: SignInId) {
     live.filter { it.isOf(signIn) }.forEach { it.finish(SignedOut("this browser's sign-in has ended")) }
@@ -58,7 +58,7 @@ internal sealed interface Arriving {
  * Who [frame] arrives as: the player its connection's sign-in plays as, which the socket's handshake read from the
  * browser's cookie, or, while Adam's instruments are open, whoever it says to play as - the seeder's twenty houses,
  * the swarm's thousands. A browser holds no secret it could send, so nothing else in a hello names a player. See
- * docs/plans/accounts.md and decision record 0109.
+ * docs/plans/accounts.md and decision record 0111.
  */
 internal fun arrivingAs(frame: Hello, signedIn: SignedIn?, instrumentsOpen: Boolean): Arriving {
     val playAs = frame.playAs

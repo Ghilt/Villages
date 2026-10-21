@@ -158,7 +158,7 @@ export function App({ master, devTools }: AppProps) {
   );
 
   // The one connection to the gateway, opened as the app mounts, once the browser is signed in: the socket's
-  // handshake is what carries the sign-in to the game. See `net/auth.ts` and decision record 0109.
+  // handshake is what carries the sign-in to the game. See `net/auth.ts` and decision record 0111.
   useEffect(() => {
     void signIn().then(() => gateway(master));
   }, [master]);

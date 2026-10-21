@@ -1,13 +1,13 @@
-# 0110. An account is an email and a password, kept as its Argon2id hash
+# 0112. An account is an email and a password, kept as its Argon2id hash
 
 - Status: accepted
 - Date: 2026-10-21
 - Plan: `docs/plans/accounts.md`
-- Builds on 0109, which signs a browser in by a cookie the server keeps, and on 0028, which gives a player one house
+- Builds on 0111, which signs a browser in by a cookie the server keeps, and on 0028, which gives a player one house
 
 ## Context
 
-A player was a guest: a sign-in that one browser remembers (0109). Adam asked for players who sign in, so a house
+A player was a guest: a sign-in that one browser remembers (0111). Adam asked for players who sign in, so a house
 can be played from any browser and is not lost with one browser's cookies. The way in had to be chosen, kept safely,
 and made hard to guess, and what becomes of a guest's house had to be said.
 
@@ -26,7 +26,7 @@ and never the email. At most 128 letters, so hashing one is no way to tire the s
 **Signing in swaps the browser's sign-in for a new one**, with a new secret, so whoever knew the old one knows nothing
 now; making an account does the same. Whatever the browser played as before is left: a guest who signs in to another
 account leaves the guest's house behind, which the form says first. *Remember me* is ticked unless unticked, and
-makes the sign-in remembered for sixty days after its last use; unticked, it lasts until the browser closes (0109).
+makes the sign-in remembered for sixty days after its last use; unticked, it lasts until the browser closes (0111).
 
 **A wrong password and an email nobody has are answered alike, and as slowly**: an unknown email is compared against
 a hash nobody's password matches. Five wrong tries for an email, or twenty from one address, in a quarter of an hour
@@ -37,7 +37,7 @@ address in an hour, likewise. Counted in memory, which is enough while there is 
 else. The answer's shape is the same either way; that the asker is not signed in to the email shows it was taken,
 which the limit on asking keeps from being a way to harvest addresses.
 
-**Signing out ends the sign-in on the server**, so a copied cookie stops working, stands its windows down (0109), and
+**Signing out ends the sign-in on the server**, so a copied cookie stops working, stands its windows down (0111), and
 clears the cookie.
 
 ## Consequences

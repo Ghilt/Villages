@@ -25,7 +25,7 @@ database of each tree's own, and outlives a restart of the game server; RabbitMQ
 A newcomer plays at once as a guest, signed in by a cookie the server keeps, and makes an account later - an email
 and a password, or Google or Discord - keeping the house: the email verified, remember me that outlasts the
 browser, the places one is signed in listed, a settings mark of what is not the game's, and the instruments open to
-Adam's account alone on a server others play on (`docs/plans/accounts.md`, 0109 to 0111).
+Adam's account alone on a server others play on (`docs/plans/accounts.md`, 0111 to 0113).
 
 ## Now
 

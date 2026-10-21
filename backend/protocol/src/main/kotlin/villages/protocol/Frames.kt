@@ -138,7 +138,7 @@ sealed interface ClientFrame
 
 /**
  * A window arriving to play, and which wire it speaks. Who it plays as is not said: the socket's handshake carried the
- * browser's sign-in, and that is who (decision record 0109). `playAs` is the one exception, a player's id that the
+ * browser's sign-in, and that is who (decision record 0111). `playAs` is the one exception, a player's id that the
  * seeder and the swarm play as and that only Adam's instruments honour. `master` is the world the page draws, by its
  * name in the Debug map section, so that the gateway sends that world's stands; left out, it sends none. The gateway
  * checks it against the masters it has stands for rather than trusting it as a name. See decision records 0025 and 0067.
@@ -303,7 +303,7 @@ data class TakenOver(val message: String) : ServerFrame
 
 /**
  * The browser's sign-in has ended - signed out here or from another browser, run out, or the account gone - and this
- * session is finished as a taken-over one is. A window belongs to a live sign-in. See decision record 0109.
+ * session is finished as a taken-over one is. A window belongs to a live sign-in. See decision record 0111.
  */
 data class SignedOut(val message: String) : ServerFrame
 

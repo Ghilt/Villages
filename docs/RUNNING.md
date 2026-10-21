@@ -300,7 +300,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   under **house bots** and how many there are, which the dropdown's hover says too: `switch` signs this browser in as
   the one picked and reloads as them, which is how to look at a world from a seeded house's seat, or a bot's; `load`
   arrives as a save's maker the same way, and both are refused while the instruments are closed. See decision records
-  0101, 0108 and 0109.
+  0101, 0108 and 0111.
   What the log says is what was worth saying, through `note(area, message)` in `apps/web/src/log/log.ts`:
   moving the camera about writes nothing, and the cells a move brought back are counted and said in one line
   only when they carried something. `window.villagesPainterly()` gives the paint counters from a console.
@@ -1078,7 +1078,7 @@ and `-- --drop` takes them off; by hand only.
   `http://localhost:<this tree's game port>/auth/me` in the browser the game is played in and it says the player,
   their house, and the sign-in - how it is kept, `guest`, `remembered` or `forNow`, the browser as a person would name
   it, and when it ends in milliseconds - or `"player": null` for a browser signed in to nothing. A browser is made a
-  guest by `POST /auth/guest`, which only a page of ours may send. See `docs/plans/accounts.md` and decision record 0109.
+  guest by `POST /auth/guest`, which only a page of ours may send. See `docs/plans/accounts.md` and decision record 0111.
 - **The sign-in is a cookie no script can read**, named for the tree, `villages-<tree>-signin` in a worktree and
   `villages-signin` in the main checkout, so trees on the same machine never sign each other out. The browser's
   developer tools show it under Application, Cookies, `http://localhost`: HttpOnly, SameSite Lax, and four hundred

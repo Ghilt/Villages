@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 /*
  * Signing in before the socket opens, as the page does it once a load: asking the game server's `/auth` who this
  * browser is, and making a newcomer a guest, of the player it kept in local storage before there were sign-ins when it
- * kept one. See decision record 0109.
+ * kept one. See decision record 0111.
  */
 
 const OLD = '0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d';

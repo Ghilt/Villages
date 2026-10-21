@@ -19,7 +19,7 @@ export interface ConnectionOptions {
   socket: SocketLike;
   /**
    * Whether this connection plays, saying hello as it opens: as whoever the browser is signed in as, which the
-   * socket's handshake carried (decision record 0109), or as [playAs] when that is given.
+   * socket's handshake carried (decision record 0111), or as [playAs] when that is given.
    *
    * Not playing, no hello is sent, and the gateway therefore knows of no player: nothing is founded, nothing is
    * asked, and no session is taken over. That is what an event viewer is. A player plays from one place (decision

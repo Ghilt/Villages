@@ -30,7 +30,7 @@ const tree = worktreeHere(REPO);
 
 // Where this tree's game server answers HTTP, which the dev server passes `/auth` through to, so the page talks to its
 // own address and the sign-in's cookie is the page's own: the game server's of the socket an explicit VITE_GATEWAY_URL
-// names, as the end-to-end test names its own, or else the tree's. See decision record 0109.
+// names, as the end-to-end test names its own, or else the tree's. See decision record 0111.
 const named = process.env['VITE_GATEWAY_URL'];
 const GAME =
   named === undefined

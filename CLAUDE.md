@@ -378,7 +378,7 @@ Commands are added here as the increments land:
   start also gives it, RabbitMQ carries every event stored, in this tree's own virtual host (0094).
   Signing in through Google and Discord is the real ones in the main checkout once `.secrets/oauth.properties`
   beside the shared `.git` holds their applications' ids and secrets, and a pretend Google and Discord of the game
-  server's own on every worktree; `--villages.oauth=real|pretend|off` says otherwise (decision record 0111).
+  server's own on every worktree; `--villages.oauth=real|pretend|off` says otherwise (decision record 0113).
   `--villages.instruments.for=<email>,<email>` opens them to the verified accounts of those emails alone, the way to
   keep them for Adam on a server others play on (decision record 0076, amended).
   `--villages.instruments=false` closes Adam's instruments: every lever

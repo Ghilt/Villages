@@ -46,7 +46,7 @@ export interface SessionPorts {
 }
 
 export interface ConnectOptions {
-  /** A socket whose handshake carries the browser's sign-in, which is who it plays as. See decision record 0109. */
+  /** A socket whose handshake carries the browser's sign-in, which is who it plays as. See decision record 0111. */
   socket: SocketLike;
   protocolVersion: number;
   /** The master the page draws, said in hello so the gateway sends that world's stands. See 0067. */
@@ -207,7 +207,7 @@ export function createSession(ports: SessionPorts): Session {
     worldWiped: () => ports.arriveAnew(),
     // A player plays from one place. This window is finished; the socket goes with it. See 0028.
     takenOver: () => connection?.close(),
-    // A window belongs to a live sign-in, and this one's has ended: finished as a taken-over one is. See 0109.
+    // A window belongs to a live sign-in, and this one's has ended: finished as a taken-over one is. See 0111.
     signedOut: () => connection?.close(),
     // A player's window never asks for stored events; they have a page of their own. See 0023.
     event: () => undefined,

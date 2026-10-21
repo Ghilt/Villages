@@ -51,7 +51,7 @@ class WebSocketConfig(
  * Who the browser opening a socket is signed in as, read off the handshake's cookie and kept on the session for the
  * gateway's connection: the one place a player comes from, because the page holds no secret it could send in hello.
  * A handshake signed in to nobody still opens, for the pages that only watch; its hello is refused. See decision
- * record 0109.
+ * record 0111.
  */
 internal class SignedInAtTheHandshake(private val signedIn: SignedInPlayers, private val cookie: SignInCookie) : HandshakeInterceptor {
     override fun beforeHandshake(
