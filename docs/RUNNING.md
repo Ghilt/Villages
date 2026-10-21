@@ -1039,11 +1039,20 @@ and `-- --drop` takes them off; by hand only.
   integrity and summon count, two at most of its aspect's effects, and a stand-in in the slot of each that has one, a
   key figure of four stats or a building of a level, made up there - and the progression is drawn from a challenge
   kind of the catalogue by the seed, the same seed drawing the same one, or written by hand: its seconds, and its
-  happenings, one aspect or two each, beginning where the engine spaces them. It opens on a sample,
-  Violence against Diplomacy. **run** has the server's engine fight it out with the catalogue in force - not edits not
+  happenings, one aspect or two each, beginning where the engine spaces them. It opens on a sample, a sermon: A's Holy,
+  the Cathedral of Varga on the line, and Diplomacy with Lady Ilse, against B's Reason with Master Oswin and
+  Generosity, over eight happenings of a minute. **run** has the server's engine fight it out with the catalogue in force - not edits not
   yet saved - from the seed typed, or from one it draws when the box is empty, and shows what it came to: the seed,
   with **keep this seed** to fight the same challenge again, how it ended and in which second, the tug toward the side
-  it favours, who won, what was gained and lost; the tug drawn second by second, side A up, each happening marked; and
+  it favours, who won, what was gained and lost; the run's **spectacle**, the challenge played out in the square seen
+  as the map sees it (decision record 0116): the map's palace, market and manor at the back, each side's speaker on a
+  platform at the back of its bank - A on the left in lapis, B on the right in vermilion - its summons beside it as
+  they come, turning and falling, a thing on the line standing as the map's own picture of it, and twenty townsfolk
+  between who walk to whoever is winning them, the share of them the tug's; over it the tug bar and the happening and
+  whom it lights; along the bottom each side's slices in its tray, lit while matching, a chip pressed to open the
+  slice and say what each effect needs and whether it works now, a side's name to fold its tray; and the replay -
+  play and pause, three paces, to the end, the happenings as bands with the tug drawn over them, a tick where
+  something arrived or fell, and a scrub the arrow keys step a second at a time; the tug drawn second by second, side A up, each happening marked; and
   every moment as a table, a side or a kind of moment kept alone, a boosted amount marked ×. **run 100** and **run
   10000** fight the same sides that many times and say how often each side won, how many ended even, how many each
   pulled to the end, the mean end tug and how long the batch took; the first run is the seed's, and its moments are the

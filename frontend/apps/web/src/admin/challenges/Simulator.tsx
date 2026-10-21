@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { parseBalance } from '@villages/world';
 import type { Challenges } from '@villages/world';
 
+import { Spectacle } from '../../spectacle/Spectacle';
+import type { HouseShown } from '../../spectacle/Spectacle';
 import { useCatalogue } from '../frame/useCatalogue';
 import { MomentsTable } from './MomentsTable';
 import { ProgressionEditor } from './ProgressionEditor';
@@ -121,6 +123,12 @@ export function Simulator({ content }: { content: Challenges | null }) {
   );
 }
 
+/** The two sides as the spectacle shows them, which have no houses on this page: A in lapis, B in vermilion. */
+const SIDES_SHOWN: Readonly<Record<'a' | 'b', HouseShown>> = {
+  a: { name: 'A', colour: '#3d6aa6' },
+  b: { name: 'B', colour: '#a8452a' },
+};
+
 function Fought({
   answer,
   draft,
@@ -172,6 +180,11 @@ function Fought({
           lost: {loss.side.toUpperCase()} {loss.name} {loss.became}, {loss.effectiveness}% effectiveness
         </p>
       ))}
+      {batch === undefined && content !== null && (
+        <div className="challenges-spectacle">
+          <Spectacle run={answer.challenge} sides={draft} content={content} houses={SIDES_SHOWN} />
+        </div>
+      )}
       {batch === undefined ? (
         <TugChart tugs={tugBySecond(moments, progression.seconds)} progression={progression} ends={ends} />
       ) : (

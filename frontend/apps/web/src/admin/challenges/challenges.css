@@ -277,3 +277,14 @@
 .challenges-grid__top-said {
   color: #b52f2e;
 }
+
+/* The spectacle of a single run, held wide: the square, sixteen by ten, as wide as the page lets it be. */
+.challenges-spectacle {
+  width: 100%;
+  max-width: 1280px;
+  aspect-ratio: 16 / 10;
+  margin: 0.75rem 0;
+  border: 1px solid #3d3427;
+  border-radius: 4px;
+  overflow: hidden;
+}

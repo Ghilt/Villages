@@ -38,43 +38,67 @@ export function sliceOf(aspect: Aspect, start: SliceStart, content: Challenges |
 }
 
 /**
- * The sample the page opens on: Violence against Diplomacy over half a minute, the golden log's sides - Sellswords and
- * No Quarter against Trusted Envoy, with Ines in its slot, and Sweeter Terms, beside a Violence slice of Sellswords and
- * Spoils of the Field. No seed, so the server draws one.
+ * The sample the page opens on: a sermon over a minute, played out in the square. A brings Holy - Ordination, and the
+ * Cathedral of Varga put on the line by Sanctuary - and Diplomacy, with Lady Ilse lending her kindness to Trusted Envoy;
+ * B brings Reason, with Master Oswin lending his to Learned Counsel and Sow Doubt answering Holy, and Generosity, its
+ * Benefactors pulling harder while B is behind. No seed, so the server draws one. Not a battle, on Adam's word that the game is not
+ * to be battle focused.
  */
 export const SAMPLE: Draft = {
   a: [
     {
-      aspect: 'violence',
+      aspect: 'holy',
       ...FIRST_SLICE,
-      power: 60,
-      effects: ['violence.sellswords', 'violence.noQuarter'],
-      slotted: {},
+      effects: ['holy.ordination', 'holy.sanctuary'],
+      slotted: { 'holy.sanctuary': { kind: 'building', name: 'the Cathedral of Varga', level: 2 } },
     },
-  ],
-  b: [
     {
       aspect: 'diplomacy',
       ...FIRST_SLICE,
-      summonCount: 2,
       effects: ['diplomacy.envoy', 'diplomacy.sweeterTerms'],
       slotted: {
         'diplomacy.envoy': {
           kind: 'keyFigure',
-          name: 'Ines',
+          name: 'Lady Ilse',
           stats: { piety: 9, reason: 11, kindness: 14, physical: 8 },
         },
       },
     },
+  ],
+  b: [
     {
-      aspect: 'violence',
+      aspect: 'reason',
       ...FIRST_SLICE,
-      integrity: 40,
-      effects: ['violence.sellswords', 'violence.noQuarter'],
+      integrity: 46,
+      effects: ['reason.counsel', 'reason.doubt'],
+      slotted: {
+        'reason.counsel': {
+          kind: 'keyFigure',
+          name: 'Master Oswin',
+          stats: { piety: 6, reason: 16, kindness: 8, physical: 7 },
+        },
+      },
+    },
+    {
+      aspect: 'generosity',
+      ...FIRST_SLICE,
+      effects: ['generosity.alms', 'generosity.tend'],
       slotted: {},
     },
   ],
-  progression: { seconds: 30, happenings: [['violence'], ['diplomacy'], ['violence', 'diplomacy']] },
+  progression: {
+    seconds: 60,
+    happenings: [
+      ['holy'],
+      ['generosity'],
+      ['reason'],
+      ['diplomacy'],
+      ['holy'],
+      ['generosity'],
+      ['reason'],
+      ['diplomacy'],
+    ],
+  },
   kind: '',
   seed: '',
 };
