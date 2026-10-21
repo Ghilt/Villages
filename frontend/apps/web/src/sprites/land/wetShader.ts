@@ -26,6 +26,11 @@ const P = W.pools;
 const R = W.rings;
 const S = W.stems;
 const M = W.mist;
+// The reeds look at five cells across, less than two world units, so the roots they look at stand in at most three by
+// three of the mask's world units, which is what the tallest stem about a pixel is read from.
+if (5 * S.cell >= 2)
+  throw new Error(`a stem's cell of ${S.cell} world units is too big for the reeds' reach`);
+
 /** The ripples' lattice, which comes round with the world's width as the gusts' does, so they never jump. */
 const RIPPLES = latticeNear(P.ripple);
 
@@ -280,8 +285,22 @@ vec4 wetHere(vec2 world) {
       // Reeds and tufts, scattered in clumps.
       vec2 cells = reach / STEM_CELL;
       ivec2 middle = ivec2(floor(cells));
+      // Only the cells whose stems could reach this pixel are worked out (landShader.ts's reachOf), as tall as the tallest
+      // a root in them can grow: of the looks of every world unit one can stand in, read as the stems read theirs.
+      ivec2 fromTexel = ivec2(floor(vec2(middle - 2) * STEM_CELL - uMaskOrigin));
+      ivec2 toTexel = ivec2(floor(vec2(middle + 3) * STEM_CELL - uMaskOrigin));
+      float tallestHere = 0.0;
+      for (int ty = 0; ty <= 2; ty++) {
+        for (int tx = 0; tx <= 2; tx++) {
+          int look = clamp(lookOfTexel(min(fromTexel + ivec2(tx, ty), toTexel)), 0, WET_LOOKS - 1);
+          tallestHere = max(tallestHere, WET_TALL[look]);
+        }
+      }
+      float reachable = tallestHere * uStems * uScale * 1.2;
+      Reach near = reachOf(middle, STEM_CELL, reachable, downWind, blow * STEM_BEND - STEM_SWAY, blow * STEM_BEND + STEM_SWAY, thick * 0.5 + uPixel);
       for (int dy = -2; dy <= 2; dy++) {
         for (int dx = -2; dx <= 2; dx++) {
+          if (!reaches(near, ivec2(dx, dy))) continue;
           ivec2 at = middle + ivec2(dx, dy);
           vec2 rootWorld = (vec2(at) + vec2(hash(at, 91), hash(at, 92))) * STEM_CELL;
           if (rootsAt(rootWorld)[WET] < 0.5) continue;

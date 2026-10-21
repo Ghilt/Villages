@@ -60,6 +60,44 @@ float segment(vec2 p, vec2 a, vec2 b) {
   return length(pa - ba * h);
 }
 
+// Which cells of a lattice of roots, this many world units across, can put a stroke on this pixel at all. A cell's
+// root lies anywhere in it; a stroke rises from its root at most \`tallest\` pixels, leaning down the wind by a share of
+// its height from \`leanFrom\` to \`leanTo\`, and inks the pixels within \`halfWidth\` of itself. A cell beyond that is
+// passed over before anything of it is worked out, which leaves out only strokes that could not have touched the
+// pixel: the same picture, for the work of the cells that could (experiment 0027).
+struct Reach {
+  vec2 corner;
+  vec2 east;
+  vec2 south;
+  vec2 low;
+  vec2 high;
+};
+
+Reach reachOf(ivec2 middle, float cell, float tallest, vec2 downWind, float leanFrom, float leanTo, float halfWidth) {
+  Reach reach;
+  // Where the middle cell's corner lands on the screen, and how one cell east and one south move it there.
+  reach.corner = screenOf(vec2(middle) * cell);
+  reach.east = cell * uScale * vec2(uTilt.x, -uTilt.y * uTilt.z);
+  reach.south = cell * uScale * vec2(uTilt.y, uTilt.x * uTilt.z);
+  vec2 footLow = min(min(vec2(0.0), reach.east), min(reach.south, reach.east + reach.south));
+  vec2 footHigh = max(max(vec2(0.0), reach.east), max(reach.south, reach.east + reach.south));
+  // A stroke's points from its root: its height times its lean less straight up, at its corners nought or the tallest.
+  vec2 leanLow = tallest * (downWind * leanFrom - vec2(0.0, 1.0));
+  vec2 leanHigh = tallest * (downWind * leanTo - vec2(0.0, 1.0));
+  // A twentieth of a pixel more each way, for the rounding between these sums and the strokes' own, which is some
+  // ten-thousandths of one at the world's sizes.
+  float margin = halfWidth + 0.05;
+  reach.low = footLow + min(vec2(0.0), min(leanLow, leanHigh)) - margin;
+  reach.high = footHigh + max(vec2(0.0), max(leanLow, leanHigh)) + margin;
+  return reach;
+}
+
+// Whether a cell so many cells east and south of the middle one can put a stroke on this pixel.
+bool reaches(Reach reach, ivec2 offset) {
+  vec2 from = vScreen - (reach.corner + float(offset.x) * reach.east + float(offset.y) * reach.south);
+  return all(greaterThanEqual(from, reach.low)) && all(lessThanEqual(from, reach.high));
+}
+
 // How much of each motion one of the mask's textures says the land here has, nought to one each, softened over a world
 // unit or so, so the square master pixels of a meadow's edge are not drawn as squares.
 vec4 softenedIn(sampler2D mask, vec2 world) {
@@ -100,13 +138,17 @@ vec4 rootedExactly(vec2 world) {
   return texelFetch(uMask, texel, 0);
 }
 
-// Which of its motion's looks the land at a point of the ground has - heath, scrub or tundra, say - unblended.
-int lookAt(vec2 world) {
-  ivec2 texel = ivec2(floor(world - uMaskOrigin));
+// The look of one world unit of the mask, by its texel, nought off the tiles the mask was pieced from.
+int lookOfTexel(ivec2 texel) {
   if (any(lessThan(texel, ivec2(0))) || any(greaterThanEqual(texel, ivec2(uMaskSize)))) {
     return 0;
   }
   return int(texelFetch(uLooks, texel, 0).r * 255.0 + 0.5);
+}
+
+// Which of its motion's looks the land at a point of the ground has - heath, scrub or tundra, say - unblended.
+int lookAt(vec2 world) {
+  return lookOfTexel(ivec2(floor(world - uMaskOrigin)));
 }
 `;
 
