@@ -56,6 +56,21 @@
     --ui-rarity-rare: #4f7fb6;
     --ui-rarity-legendary: #d0822f;
 
+    /*
+     * The ten aspects a challenge is fought in, each pair an aspect and its anti-aspect, deep enough that a cream mark
+     * reads on any of them: the disc of a slice's chip, a happening's band. Decision record 0116.
+     */
+    --ui-aspect-violence: #9a3426;
+    --ui-aspect-diplomacy: #2a7a77;
+    --ui-aspect-holy: #9c7414;
+    --ui-aspect-reason: #44569a;
+    --ui-aspect-authority: #643a73;
+    --ui-aspect-freedom: #2f6f9c;
+    --ui-aspect-greed: #7c5c17;
+    --ui-aspect-generosity: #a14c69;
+    --ui-aspect-nature: #456f30;
+    --ui-aspect-industry: #5e5650;
+
     /* Google's and Discord's sign-in buttons, in the colours their own brand rules give them: theirs, not ours. */
     --ui-google-face: #ffffff;
     --ui-google-rim: #747775;

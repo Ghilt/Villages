@@ -174,6 +174,7 @@ const HOLDS: Record<RecipeName, () => ReactNode> = {
     </>
   ),
   'card.pins': () => <p className="ui-body">A crowd of marks opened: see Collections.</p>,
+  'card.slice': () => <p className="ui-body">A challenge’s slice opened: see Challenges.</p>,
 };
 
 export function Containers() {

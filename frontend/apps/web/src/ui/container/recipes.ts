@@ -109,6 +109,9 @@ export const RECIPES = {
   /** A crowd of marks opened over the map: the narrow gilt frame on night, as mockup A of 2026-10-15 drew it. */
   'card.pins': { border: 'gilt-thin', fill: 'night', padding: 4 },
 
+  /** A challenge's slice opened above its house's tray: the narrow gilt frame on parchment, as a key figure's card. */
+  'card.slice': { border: 'gilt-thin', fill: 'parchment', text: 'ink', padding: 5 },
+
   /**
    * A place's name and its figure, on the moodboard's Paris plate: its own parchment, and as wide as its
    * words. That parchment is darker than a sheet, too dark for the softer ink, so it has none.

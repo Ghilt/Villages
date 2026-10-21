@@ -1,0 +1,309 @@
+/*
+ * A challenge's slices: the chip, the tray of a house's chips, the slice opened, and the pips of what a slice or a
+ * summon bears. A chip is a plate of night raised in a gilt hairline, so it reads on night and parchment alike; its
+ * state is said twice, in its words and in its edge - lit gold matching, ringed in its aspect's colour answering, dim
+ * idle. Pressable, its states are every button's: lighter under the pointer, darker pressed, a gilt ring focused.
+ * Drawn rather than painted for now. A fifth of a second or less for any change.
+ */
+
+@layer ui {
+  .ui-aspect-disc {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    border-radius: 50%;
+    color: var(--ui-cream);
+    box-shadow:
+      0 0 0 1px var(--ui-gilt-deep),
+      inset 0 1px 2px color-mix(in srgb, var(--ui-cream) 18%, transparent);
+  }
+
+  .ui-pips {
+    display: inline-flex;
+    flex: none;
+    gap: 3px;
+  }
+
+  .ui-pip {
+    padding: 0 0.35em;
+    border-radius: 0.5em;
+    font-family: var(--ui-font-text);
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.5;
+    white-space: nowrap;
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+
+  .ui-pip--buff {
+    color: var(--ui-ink);
+    background: var(--ui-gilt-light);
+  }
+
+  .ui-pip--debuff {
+    color: var(--ui-cream);
+    background: var(--ui-velvet-light);
+  }
+
+  .ui-slice-chip {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: var(--ui-space-2);
+    box-sizing: border-box;
+    min-width: 11.5rem;
+    min-height: 3.25rem;
+    margin: 0;
+    padding: 0.35rem 0.6rem;
+    border: 0;
+    border-radius: 6px;
+    font: inherit;
+    text-align: left;
+    background: linear-gradient(180deg, var(--ui-night-raised) 0%, var(--ui-night) 100%);
+    box-shadow: 0 0 0 1px var(--ui-gilt-deep);
+    cursor: pointer;
+    transition:
+      filter 0.12s ease,
+      box-shadow 0.15s ease,
+      opacity 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ui-slice-chip__words {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-width: 0;
+    line-height: 1.15;
+  }
+
+  .ui-slice-chip__name {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .ui-slice-chip__state {
+    font-size: 0.85rem;
+    color: var(--ui-text-soft);
+  }
+
+  .ui-slice-chip--matching {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--ui-gilt-deep) 38%, var(--ui-night-raised)) 0%,
+      var(--ui-night-raised) 100%
+    );
+    box-shadow:
+      0 0 0 1.5px var(--ui-gilt-light),
+      0 0 14px color-mix(in srgb, var(--ui-gilt-light) 55%, transparent);
+  }
+
+  .ui-slice-chip--matching .ui-slice-chip__state {
+    color: var(--ui-gilt-light);
+  }
+
+  .ui-slice-chip--answering {
+    box-shadow:
+      0 0 0 1px var(--ui-gilt-deep),
+      0 0 0 3px var(--ui-slice-aspect);
+  }
+
+  .ui-slice-chip--idle {
+    opacity: 0.62;
+  }
+
+  .ui-slice-chip--chosen {
+    box-shadow:
+      inset 0 0 0 1.5px var(--ui-gilt),
+      0 0 0 1px var(--ui-gilt-light);
+  }
+
+  .ui-slice-chip:hover:not(:disabled),
+  .ui-slice-chip--showing-hover {
+    filter: brightness(1.18);
+  }
+
+  .ui-slice-chip:active:not(:disabled),
+  .ui-slice-chip--showing-pressed {
+    filter: brightness(0.85);
+  }
+
+  .ui-slice-chip:focus-visible,
+  .ui-slice-chip--showing-focus {
+    outline: 2px solid var(--ui-focus);
+    outline-offset: 2px;
+  }
+
+  .ui-slice-chip:disabled {
+    cursor: default;
+    opacity: 0.45;
+  }
+
+  .ui-slice-tray {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-1);
+  }
+
+  .ui-slice-tray--start {
+    align-items: flex-start;
+  }
+
+  .ui-slice-tray--end {
+    align-items: flex-end;
+  }
+
+  .ui-slice-tray__head {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    min-height: 2.75rem;
+    margin: 0;
+    padding: 0 0.85rem 0 0.6rem;
+    border: 0;
+    border-radius: 6px;
+    font: inherit;
+    background: color-mix(in srgb, var(--ui-night) 92%, transparent);
+    box-shadow: 0 0 0 1px var(--ui-gilt-deep);
+    cursor: pointer;
+    transition: filter 0.12s ease;
+  }
+
+  .ui-slice-tray__head:hover,
+  .ui-slice-tray__head--showing-hover {
+    filter: brightness(1.18);
+  }
+
+  .ui-slice-tray__head:active,
+  .ui-slice-tray__head--showing-pressed {
+    filter: brightness(0.85);
+  }
+
+  .ui-slice-tray__head:focus-visible,
+  .ui-slice-tray__head--showing-focus {
+    outline: 2px solid var(--ui-focus);
+    outline-offset: 2px;
+  }
+
+  .ui-slice-tray__fold {
+    display: inline-grid;
+    transition: transform 0.2s ease;
+  }
+
+  .ui-slice-tray[data-open='true'] .ui-slice-tray__fold {
+    transform: rotate(90deg);
+  }
+
+  .ui-slice-tray__pennant {
+    width: 0.8rem;
+    height: 1.1rem;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%);
+    box-shadow: inset 0 0 0 1px var(--ui-gilt-deep);
+  }
+
+  .ui-slice-tray__house {
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  .ui-slice-tray__chips {
+    display: flex;
+    gap: var(--ui-space-1);
+  }
+
+  .ui-slice-tray__chips--row {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .ui-slice-tray__chips--column {
+    flex-direction: column;
+  }
+
+  .ui-slice-tray--end .ui-slice-tray__chips--row {
+    justify-content: flex-end;
+  }
+
+  .ui-slice-opened {
+    max-width: 100%;
+  }
+
+  .ui-slice-opened__head {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+  }
+
+  .ui-slice-opened__title {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-width: 0;
+    line-height: 1.15;
+  }
+
+  .ui-slice-opened__effects {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-2);
+    margin: var(--ui-space-2) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ui-slice-opened__effect {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ui-space-2);
+  }
+
+  .ui-slice-opened__effect-words {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+  }
+
+  .ui-slice-need {
+    flex: none;
+    width: 5.6rem;
+    margin-top: 0.15rem;
+    padding: 0.05rem 0;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-align: center;
+    text-transform: uppercase;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-text) 55%, transparent);
+  }
+
+  .ui-slice-need--match {
+    background: color-mix(in srgb, var(--ui-gilt-light) 55%, transparent);
+  }
+
+  .ui-slice-need--anti {
+    background: color-mix(in srgb, var(--ui-lapis-light) 35%, transparent);
+  }
+
+  .ui-slice-opened__works {
+    font-weight: 600;
+  }
+
+  .ui-slice-opened__waits {
+    color: var(--ui-text-soft);
+    font-style: italic;
+  }
+
+  .ui-slice-opened__slot {
+    margin: var(--ui-space-2) 0 0;
+  }
+
+  .ui-slice-opened__numbers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ui-space-3);
+    margin: var(--ui-space-2) 0 0;
+    padding-top: var(--ui-space-1);
+    border-top: 1px solid color-mix(in srgb, var(--ui-text) 25%, transparent);
+  }
+}

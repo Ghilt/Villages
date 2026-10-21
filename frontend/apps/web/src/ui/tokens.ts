@@ -82,6 +82,21 @@ export const COLOURS: readonly TokenGroup[] = [
     ],
   },
   {
+    name: 'Aspects',
+    tokens: [
+      { name: 'ui-aspect-violence', for: 'Violence, a challenge’s aspect' },
+      { name: 'ui-aspect-diplomacy', for: 'Diplomacy, its anti-aspect' },
+      { name: 'ui-aspect-holy', for: 'Holy' },
+      { name: 'ui-aspect-reason', for: 'Reason, its anti-aspect' },
+      { name: 'ui-aspect-authority', for: 'Authority' },
+      { name: 'ui-aspect-freedom', for: 'Freedom, its anti-aspect' },
+      { name: 'ui-aspect-greed', for: 'Greed' },
+      { name: 'ui-aspect-generosity', for: 'Generosity, its anti-aspect' },
+      { name: 'ui-aspect-nature', for: 'Nature' },
+      { name: 'ui-aspect-industry', for: 'Industry, its anti-aspect' },
+    ],
+  },
+  {
     name: 'Google and Discord',
     tokens: [
       { name: 'ui-google-face', for: "Google's sign-in button, by Google's rules" },

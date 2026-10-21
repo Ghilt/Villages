@@ -423,6 +423,17 @@ A line each: what it is for, its variants, and where on the page it is.
   the last socket says how many more. Drawn, a velvet recess in a gilt line, and reads no picture of its own:
   the portraits and the items' pictures are the pane's to give. `ui/socket/slots.ts` is its arithmetic.
   *Slots*.
+- **`SliceChip`**, **`SliceTray`** and **`SliceOpened`**, `ui/slice/Slice.tsx`: a challenge's slices, as its
+  spectacle shows them (decision record 0116). A **chip** is one slice: its aspect's disc, `AspectDisc`, a mark in
+  cream on the aspect's colour, its name, and whether it can work in the happening going on, said in its words and
+  in its edge - **matching**, lit gold; **answering** its anti-aspect, ringed in its aspect's colour; **working**,
+  plain; **idle**, dim - with `Pips` of what it bears, a buff on gilt and a debuff on velvet, a letter and the
+  seconds left, its whole name the tooltip. Pressed it opens the slice; `chosen` is the one open; every button's
+  states. A **tray** is a house's chips under a head of its pennant and name that folds them away and back, in a
+  row or a column, keeping to the house's edge, with the slice opened standing above the head. A slice **opened**
+  is its two effects, each with what it needs of the happening - matching, anti-aspect or any - and whether it works
+  now, its slot and its numbers, in the `card.slice` recipe, closed by its mark. Drawn, and reads no picture of its
+  own; the aspects' colours are the `--ui-aspect-…` tokens. `ui/slice/sliceWords.ts` is its words. *Challenges*.
 - **`Dialog`** and **`DialogBox`**, `ui/dialog/Dialog.tsx`: a question that has to be answered before
   anything else - kill this key figure? - over the whole page, the page behind dimmed with night and out of
   reach. The browser's own modal dialog is under it, so it is drawn over everything, the keyboard stays in

@@ -3,6 +3,7 @@ import type { ComponentType } from 'react';
 import { Bars } from './Bars';
 import { BordersAndFills } from './BordersAndFills';
 import { Buttons } from './Buttons';
+import { Challenges } from './Challenges';
 import { Collections } from './Collections';
 import { Containers } from './Containers';
 import { Controls } from './Controls';
@@ -125,6 +126,12 @@ export const SECTIONS: readonly Section[] = [
     title: 'Signing in',
     says: "The email and password fields, the form they stand in, and Google's and Discord's buttons.",
     Body: SigningIn,
+  },
+  {
+    id: 'challenges',
+    title: 'Challenges',
+    says: 'What a challenge is watched with: a slice’s chip, a house’s tray, a slice opened.',
+    Body: Challenges,
   },
   {
     id: 'loading',
