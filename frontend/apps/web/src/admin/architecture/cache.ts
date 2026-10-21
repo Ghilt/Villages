@@ -25,6 +25,7 @@ export const WORLD_CACHE = {
     'world:culture',
     'world:ruins',
     'world:height',
+    'world:settlements',
   ],
   files: [
     'outlines',
@@ -42,5 +43,6 @@ export const WORLD_CACHE = {
     'ruins-map',
     'ruins-stands',
     'height',
+    'settlements-server',
   ],
 } as const;

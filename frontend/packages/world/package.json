@@ -24,6 +24,7 @@
     "names": "node --max-old-space-size=4096 bin/namesWorld.ts",
     "culture": "node --max-old-space-size=4096 bin/cultureWorld.ts",
     "ruins": "node --max-old-space-size=2048 bin/ruinsWorld.ts",
+    "settlements": "node --max-old-space-size=4096 bin/settlementsWorld.ts",
     "structures": "node bin/cutStructures.ts",
     "height": "node bin/fetchWorld.ts --only etopo && node --max-old-space-size=8192 bin/heightWorld.ts",
     "paint": "node --max-old-space-size=8192 bin/renderPainterly.ts",

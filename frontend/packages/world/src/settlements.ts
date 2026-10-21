@@ -34,9 +34,16 @@ export interface SettlementsFile {
   readonly spacingKm: number;
   readonly grid: number;
   readonly riverBonus: number;
-  readonly fishing: { readonly water: readonly [number, number]; readonly river: number };
-  /** The score from which a site is a village, and then a large village; below the first it is a hamlet. */
-  readonly levels: readonly [number, number];
+  readonly fishing: {
+    readonly water: readonly [number, number];
+    readonly river: number;
+    readonly favour: number;
+  };
+  /**
+   * The share of the sites on the best ground that are villages or larger, and that are large villages; fewer on
+   * poorer ground, by its score. The rest are hamlets.
+   */
+  readonly levels: { readonly village: number; readonly large: number };
   readonly beside: BesideRuins;
 }
 
@@ -65,23 +72,24 @@ export function parseSettlements(text: string): SettlementsFile {
   if (!Number.isInteger(file.grid)) {
     throw new Error('world/settlements.json: grid wants a whole number of world units');
   }
-  const fishing = (file.fishing ?? {}) as { water?: unknown; river?: unknown };
+  const fishing = (file.fishing ?? {}) as { water?: unknown; river?: unknown; favour?: unknown };
   const water = Array.isArray(fishing.water) ? (fishing.water as unknown[]) : [];
   if (
     water.length !== 2 ||
     !share(water[0]) ||
     !share(water[1]) ||
     water[0] >= water[1] ||
-    !share(fishing.river)
+    !share(fishing.river) ||
+    !share(fishing.favour)
   ) {
     throw new Error(
       'world/settlements.json: fishing wants a water share from one to a larger, and a river size',
     );
   }
-  const levels = Array.isArray(file.levels) ? (file.levels as unknown[]) : [];
-  if (levels.length !== 2 || !share(levels[0]) || !share(levels[1]) || levels[0] >= levels[1]) {
+  const levels = (file.levels ?? {}) as { village?: unknown; large?: unknown };
+  if (!share(levels.village) || !share(levels.large) || levels.large > levels.village) {
     throw new Error(
-      'world/settlements.json: levels wants the score of a village and the larger one of a large village',
+      'world/settlements.json: levels wants the share of villages and the smaller share of large villages',
     );
   }
   const beside = (file.beside ?? {}) as Partial<Record<keyof BesideRuins, unknown>>;

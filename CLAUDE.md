@@ -303,7 +303,7 @@ Commands are added here as the increments land:
   compiling first, installs the packages again when `package-lock.json` has changed since they were installed
   (stopping this checkout's dev server first, because Windows will not replace a running program), and makes
   the default master's world current with `world:ready`: every world step - the coast, the tiles, the styles,
-  the rivers' flow, the sprite map, the ground map, the origin map, the names and the culture map, the height -
+  the rivers' flow, the sprite map, the ground map, the origin map, the names and the culture map, the ruins, the height, the settlements' sites -
   borrowed from the world cache when any tree has made it from the same master, files and tools, made once for
   every tree when nobody has, and nothing done when nothing changed; it borrows the main checkout's downloads
   first (decision record 0095). It cuts the sprites and the interface pictures again (seconds when nothing is
@@ -336,7 +336,7 @@ Commands are added here as the increments land:
   beside the folder it reads: `world:ready` makes a master's world current through the world cache, borrowing
   every step another tree has made from the same inputs and making the rest once for all (decision record 0095), and
   `world:prune` clears what no tree uses of it (`-- --drop` to act), `world:sprites` works out a master's sprite map, `world:flow` which way its rivers
-  run, `world:origin` where on Earth each part of it came from and `world:names` the names carried through that, `world:culture` the building tradition each part is drawn in, `world:ruins` every town of 1790 laid in ruins, `world:ground` the ground map the game server reads, `world:height` the whole world's height the relief is shaded from, `world:scenery` paints stills of the sprite map, `world:paint` paints the painterly stills and writes the
+  run, `world:origin` where on Earth each part of it came from and `world:names` the names carried through that, `world:culture` the building tradition each part is drawn in, `world:ruins` every town of 1790 laid in ruins, `world:settlements` where every village nobody holds stands, `world:ground` the ground map the game server reads, `world:height` the whole world's height the relief is shaded from, `world:scenery` paints stills of the sprite map, `world:paint` paints the painterly stills and writes the
   runtime copy of the styles (`-- --config-only` for that alone), `world:art` cuts the sprites, `world:structures` the structures' pictures, `world:critters` the critters' frames, `world:ui` the
   interface pictures, and `world:portraits` and `world:scenes` draw placeholders, never over a file that is
   there.

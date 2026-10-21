@@ -111,6 +111,18 @@ from the estimates for about 1800; to make a town bigger or smaller, change its 
 town that is not a town of 1790 by the name the review gives it then, and a size whose ruins would reach past the
 63.75 units a stand holds. See `docs/plans/ruined-cities.md`.
 
+**And the villages the fall spared stand where its ground says.** Nobody paints a settlement: `world:settlements`
+chooses every site from what you painted, by `world/settlements.json`. `ground` is how good each class is to live on,
+nought to one - farmland, a floodplain and paddy best, a forest less, ice, desert, bare rock, marsh and bog not at
+all - and a site's score is the mean of the ground about it, the open water left out. A site in open country stands
+where it scores at least `least`, its ground climbs no more than `reliefMetres`, and nothing within `spacingKm`
+scores better, so two stand at least that far apart and about twice it as a rule. Beside every ruin stand
+`beside.sites` more by its tier, `gapKm` past its overgrowth and `apartKm` from each other. A site with the sea, a
+lake or a large river over a share of its ground is a fishing village. Paint farmland and villages come to it; paint
+a marsh over one and it goes, and the sites more than two spacings away stay where they were, under the same ids, so
+the settlement the world raised on one is never raised again somewhere else. `levels` is how many of them are
+villages and large villages rather than hamlets. See `docs/plans/settlements-and-roads.md`.
+
 ## Seeing your edit
 
 Save the image, alt-tab to the running app, and pick it in the **Debug map** part of the debug panel,

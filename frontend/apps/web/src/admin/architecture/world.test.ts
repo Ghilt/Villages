@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-import { WORLD_STEPS } from '../../../../../packages/world/bin/lib/worldSteps.ts';
+import { WORLD_STEPS, stepNamed } from '../../../../../packages/world/bin/lib/worldSteps.ts';
 
 import { WORLD_CACHE } from './cache';
 import { STAGES } from './starting';
@@ -104,9 +104,15 @@ describe('the architecture page', () => {
       const tool = TOOLS.find((t) => t.entry === step.tool.slice(step.tool.lastIndexOf('/') + 1));
       if (tool === undefined) return [`${step.name}: no tool on the page`];
       return [
-        ...[...step.from.map((input) => input.is), ...step.after]
+        ...step.from
+          .map((input) => input.is)
           .filter((is) => !tool.reads.includes(is))
           .map((is) => `${step.name} is made from ${is}, which the page's ${tool.script} does not read`),
+        ...step.after
+          .filter((name) => !stepNamed(name).makes.some((made) => tool.reads.includes(made.is)))
+          .map(
+            (name) => `${step.name} comes after ${name}, nothing of which the page's ${tool.script} reads`,
+          ),
         ...step.makes
           .map((made) => made.is)
           .filter((is) => !tool.writes.includes(is))

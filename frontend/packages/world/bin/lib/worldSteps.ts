@@ -21,7 +21,8 @@ export type StepName =
   | 'names'
   | 'culture'
   | 'ruins'
-  | 'height';
+  | 'height'
+  | 'settlements';
 
 /** A file a step is made from. */
 export interface MadeFrom {
@@ -254,6 +255,26 @@ export const WORLD_STEPS: readonly WorldStep[] = [
     makes: [{ path: `${M}/height`, is: 'height', folder: true }],
     doing: 'fitting the height of the world',
     done: 'the relief has its height',
+  },
+  {
+    name: 'settlements',
+    tool: `${BIN}/settlementsWorld.ts`,
+    options: [],
+    memory: 4096,
+    heavy: false,
+    perMaster: true,
+    from: [
+      { path: 'world/settlements.json', is: 'settlements' },
+      { path: 'world/catalogues/structures.json', is: 'catalogues' },
+      { path: 'world/ruins.json', is: 'ruins' },
+      { path: 'world/cultures.json', is: 'cultures' },
+      PALETTE,
+      RENDER,
+    ],
+    after: ['tile', 'flow', 'names', 'culture', 'height'],
+    makes: [{ path: 'world/ground/<m>/settlements.json', is: 'settlements-server' }],
+    doing: 'choosing where the settlements stand',
+    done: 'the settlements have their sites',
   },
 ];
 

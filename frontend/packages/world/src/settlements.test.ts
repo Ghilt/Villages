@@ -24,9 +24,9 @@ describe('the settlements file', () => {
 
   it('refuses a number it cannot use, naming it', () => {
     const broken = JSON.parse(world) as Record<string, unknown>;
-    broken['levels'] = [0.9, 0.8];
+    broken['levels'] = { village: 0.2, large: 0.4 };
     expect(() => parseSettlements(JSON.stringify(broken))).toThrow('world/settlements.json: levels');
-    broken['levels'] = [0.8, 0.9];
+    broken['levels'] = { village: 0.4, large: 0.2 };
     broken['grid'] = 12.5;
     expect(() => parseSettlements(JSON.stringify(broken))).toThrow('world/settlements.json: grid');
   });

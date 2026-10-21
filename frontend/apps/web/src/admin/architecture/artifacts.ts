@@ -78,6 +78,14 @@ export const ARTIFACTS: readonly Artifact[] = [
     what: 'How big every town of 1790 was, and so how much ground its ruins cover.',
   },
   {
+    id: 'settlements',
+    form: 'file',
+    name: 'settlements',
+    path: 'world/settlements.json',
+    origin: 'authored',
+    what: 'How good each ground is to live on, how far apart villages stand, and how many stand beside each ruin.',
+  },
+  {
     id: 'sprite-pictures',
     form: 'folder',
     name: 'sprite pictures',
@@ -294,6 +302,25 @@ export const ARTIFACTS: readonly Artifact[] = [
     path: 'world/ground/<m>/names.json, regions.bin',
     origin: 'baked',
     what: 'The same names, beside the ground map, for the game server.',
+  },
+  {
+    id: 'settlements-server',
+    form: 'file',
+    name: 'settlement sites',
+    path: 'world/ground/<m>/settlements.json',
+    origin: 'baked',
+    what: 'Every settlement site, beside the ground map, which the game server raises a settlement on at the opening.',
+    development:
+      'Nothing reads it yet: the game server raises settlements on its sites from step 8 of the plan.',
+  },
+  {
+    id: 'settlements-pictures',
+    form: 'folder',
+    name: 'settlements pictures',
+    path: 'world/painterly/settlements/',
+    origin: 'baked',
+    what: 'Every settlement site over the ground around a few towns of 1790, a dot each by its type and level.',
+    development: 'Looked at to see where the villages stand and how thickly.',
   },
   {
     id: 'height',

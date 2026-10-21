@@ -61,6 +61,8 @@ when it was made; `-- --only <step> --force` makes it again to read all of it:
 - `world:culture`: what share of the land is of each culture. The Culture renderer is its picture.
 - `world:ruins`: how many towns of 1790 are in ruins in each tier and each culture, and how many stand in a square of
   sea. `-- --picture` draws every town's ruins as rings around a few great cities into `world/painterly/ruins/`.
+- `world:settlements`: how many settlement sites, of each type, level and culture, and how many beside the ruins.
+  `-- --picture` draws them over the ground around a few towns into `world/painterly/settlements/`.
 - `world:sprites`: the density of every biome against experiment 0006's ceiling. Without a sprite map a
   master draws no scenery at all.
 - `world:scenery`: the counts beside every picture. Say which places moved and by how much.

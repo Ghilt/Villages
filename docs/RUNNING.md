@@ -27,7 +27,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   screen itself is the library's `LoadingScreen`.
 - Which world is drawn: the **Debug map** part of the debug panel, down the right-hand side. Its terrain dropdown
   is every PNG in `world/master/`, with each one's size, and it says whether this tree's world of it is current:
-  each of its ten world steps is worked out from what it is made from, never from dates, and the panel says the
+  each of its world steps is worked out from what it is made from, never from dates, and the panel says the
   first that is out of date and why - *tile: world/master/terrain.png changed*, *sprites: world/biomes.json
   changed* - which it re-checks whenever the window is given focus. A master nobody has cut here gets a button,
   and pressing it runs `world:ready` from the dev server, with its output going into the debug log: whatever the
@@ -641,8 +641,8 @@ part it makes - the borrowed names go, the world cache's files stay - so what it
 will not write where a junction stands above its folder, which is another checkout's. See decision record 0095.
 
 **The world cache** is how the world is made in a tree without making it again: `npm run world:ready --prefix
-frontend` makes a master's world current, each of its ten **world steps** - import, tile, styles, flow, sprites,
-ground, origin, names, culture, height - borrowed from the shelf when it has the entry this tree's inputs name, and
+frontend` makes a master's world current, each of its twelve **world steps** - import, tile, styles, flow, sprites,
+ground, origin, names, culture, ruins, height, settlements - borrowed from the shelf when it has the entry this tree's inputs name, and
 made, filed and borrowed when nobody has made it yet. The shelf is `E:\Code\Villages\.git\world-cache\`, one for
 the machine; a borrowed folder is hard links to the shelf's files, a few seconds for a whole master, and the few
 loose files are copies. It prints a line a step: *current*, *borrowed from the world cache, made in* the tree that
@@ -770,6 +770,19 @@ and `-- --drop` takes them off; by hand only.
   draws every town's ruins as rings over the culture map around Paris, Pekin, Grand Cairo, Mexico and London into
   `world/painterly/ruins/`, the built radius solid and the overgrown reach faint; `--around Q84,Q90` picks the towns.
   Nothing draws the ruins yet: see `docs/plans/ruined-cities.md`.
+- The villages and fishing villages of 1790, which nobody holds: `npm run world:settlements --prefix frontend` chooses
+  every **settlement site** of a master, reading its ground as its zoom-7 tiles have it - the class of every world
+  unit, its height and its rivers - its towns of 1790 and `world/settlements.json`: so many beside every ruin by its
+  tier, just past its overgrowth, and the rest in open country on good ground, each kept where nothing within the
+  spacing scores better, fishing villages by the sea, a lake or a large river. Each stands on a corner of the ground's
+  lattice under an id that outlives a repaint, and goes into `world/ground/<master>/settlements.json`, which only the
+  game server reads. It prints how many of each type, level and culture; on the master of 2026-10-03, 7,389 - 3,050
+  beside the ruins, 1,597 of them fishing villages - in under two minutes. `world:ready` makes it again whenever the
+  tiles, the flow, the height, the names, the cultures, `world/ruins.json`, the structures' catalogue or
+  `world/settlements.json` changed. `-- --picture` draws the sites over the ground around Paris, Grand Cairo, Jeddo,
+  New Orleans and Vienna into `world/painterly/settlements/` - white in open country, orange beside a ruin, blue a
+  fishing village, larger a level up, every ruin a faint ring; `--around` and `--scale` as the ruins'. Nothing raises
+  them yet: see `docs/plans/settlements-and-roads.md`.
 - How high the ground is, for the relief: `npm run world:height --prefix frontend` reads ETOPO 2022's whole world,
   a height every 60 arc-seconds, through the master's origin map, so every point of the master has the height of
   where on Earth it was cut from, and invented land is given ground of the kind the master paints on it, and
@@ -989,7 +1002,7 @@ and `-- --drop` takes them off; by hand only.
   running game depends on. Then **Starting a tree**: each part of the quick start a bar on one clock, where it
   began and how long it took in a brand-new worktree measured on 2026-10-12, the game server's green bar
   beside the rest, and what each took before the world cache; its parts are held to the script's own words by
-  `world.test.ts`. Then a master step by step, its ten world steps in the order `world:ready` makes them, each
+  `world.test.ts`. Then a master step by step, its world steps in the order `world:ready` makes them, each
   a bar as long as its tool takes. Below is the diagram, flowing down the page. Along its top, on one row, every
   file the world is made from - what Adam authors (gold) and what is downloaded (blue) - each under the tools
   that read it, with `world:fetch-all` above the downloads it fetches and a gold line under the row; under the
