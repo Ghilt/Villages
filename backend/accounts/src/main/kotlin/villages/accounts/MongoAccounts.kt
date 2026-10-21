@@ -13,6 +13,7 @@ import com.mongodb.client.model.ReplaceOptions
 import org.bson.Document
 import villages.application.SignInId
 import villages.domain.PlayerId
+import java.time.Instant
 import java.util.Date
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -29,6 +30,7 @@ class MongoAccounts(connection: String, val database: String) : AccountStores {
     private val signInRows: MongoCollection<Document> = client.getDatabase(database).getCollection(SIGN_INS).also {
         it.createIndex(Indexes.ascending("hash"), IndexOptions().unique(true))
         it.createIndex(Indexes.ascending("player"))
+        it.createIndex(Indexes.ascending("lastUsed"))
     }
 
     private val playerRows: MongoCollection<Document> = client.getDatabase(database).getCollection(PLAYERS).also {
@@ -57,6 +59,9 @@ class MongoAccounts(connection: String, val database: String) : AccountStores {
             signInRows.find(eq("player", player.value.toString())).map { it.signIn() }.toList()
 
         override fun remove(id: SignInId): Boolean = signInRows.deleteOne(eq("_id", id.value.toString())).deletedCount > 0
+
+        override fun usedBefore(instant: Instant): List<SignIn> =
+            signInRows.find(Filters.lt("lastUsed", Date.from(instant))).map { it.signIn() }.toList()
     }
 
     override val players: PlayerStore = object : PlayerStore {

@@ -17,6 +17,9 @@ interface SignInStore {
 
     /** False when there was no such sign-in. */
     fun remove(id: SignInId): Boolean
+
+    /** Every sign-in last used before [instant]: those that may have ended, for the sweep to read the end of. */
+    fun usedBefore(instant: Instant): List<SignIn>
 }
 
 /**
@@ -124,6 +127,8 @@ class InMemoryAccounts : AccountStores {
         override fun of(player: PlayerId): List<SignIn> = byId.values.filter { it.player == player }
 
         override fun remove(id: SignInId): Boolean = byId.remove(id) != null
+
+        override fun usedBefore(instant: Instant): List<SignIn> = byId.values.filter { it.lastUsed.isBefore(instant) }
     }
 
     override val players: PlayerStore = object : PlayerStore {

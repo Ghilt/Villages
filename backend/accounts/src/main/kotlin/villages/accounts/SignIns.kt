@@ -110,6 +110,18 @@ class SignIns(private val store: SignInStore, private val clock: Clock, private 
         store.of(player).filter { it.id != kept }.forEach { end(it.id) }
     }
 
+    /**
+     * The sweep, every few minutes: each sign-in with a window open, [inUse], used now, since a window open is a
+     * sign-in being used however long since it was opened; and every other past its end ended and said so, which a
+     * sign-in found ended would be anyway, so none lingers in the store. See docs/plans/accounts.md.
+     */
+    fun sweep(inUse: Set<SignInId>) {
+        inUse.forEach { id -> store.byId(id)?.let(::use) }
+        val now = now()
+        val soonest = Keeping.entries.minOf { it.unused }
+        store.usedBefore(now - soonest).filter { it.id !in inUse && !it.ends.isAfter(now) }.forEach { end(it.id) }
+    }
+
     /** Ends [id], and says so; false when there was no such sign-in. */
     fun end(id: SignInId): Boolean = store.remove(id).also { if (it) ended(id) }
 

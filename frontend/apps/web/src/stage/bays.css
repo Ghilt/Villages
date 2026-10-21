@@ -274,13 +274,14 @@
 }
 
 /*
- * The settings' mark, in the stage's top right corner and in no bay: over the tiles and under the veil, which dims it
- * with everything else while the letter is open. In the spread its right edge is where the column down the right edge
- * begins, so it never stands on the column's tabs. See docs/plans/accounts.md.
+ * The settings' mark, in the stage's top right corner and in no bay: over everything on the stage, the veil and the
+ * letter opened out over it included, because a newcomer whose founding letter is open may want to sign in to the
+ * account they have rather than found a house, and the corner is clear of the letter. In the spread its right edge is
+ * where the column down the right edge begins, so it never stands on the column's tabs. See docs/plans/accounts.md.
  */
 .stage__corner {
   position: absolute;
-  z-index: 5;
+  z-index: 8;
   top: 0.9rem;
   margin-right: 0.9rem;
 }

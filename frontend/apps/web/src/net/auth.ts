@@ -187,6 +187,32 @@ export function changePassword(was: string, password: string): Promise<Me> {
   return ask('POST', 'password', { was, password });
 }
 
+/** One of this player's sign-ins, as the settings list them. Times are milliseconds. */
+export interface SignInRow {
+  id: string;
+  browser: string;
+  keeping: SignInView['keeping'];
+  lastUsed: number;
+  ends: number;
+  /** Whether it is this browser's own. */
+  here: boolean;
+}
+
+/** Every browser signed in to this player, the newest used first. */
+export function signIns(): Promise<SignInRow[]> {
+  return ask<SignInRow[]>('GET', 'signins');
+}
+
+/** One of this player's sign-ins ended, and its windows stood down. */
+export async function signOutThere(id: string): Promise<void> {
+  await ask('POST', 'signins/out', { id });
+}
+
+/** Every sign-in of this player's ended but this browser's. */
+export async function signOutEverywhereElse(): Promise<void> {
+  await ask('POST', 'signins/others-out');
+}
+
 /** This browser signed out: its sign-in ended on the server, and its windows stood down. */
 export async function signOut(): Promise<void> {
   await ask('POST', 'signout');

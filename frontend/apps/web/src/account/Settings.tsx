@@ -14,6 +14,7 @@ import { Dropdown } from '../ui/field/Dropdown';
 import { AccountPart } from './AccountPart';
 import { CreateAccountForm, SignInForm } from './Forms';
 import { ChangePasswordForm } from './PasswordForms';
+import { SignInsPart } from './SignInsPart';
 
 const MOTIONS: readonly { id: Motion; label: string }[] = [
   { id: 'device', label: 'As my device asks' },
@@ -96,6 +97,7 @@ export function Settings() {
               onSignIn={() => show('signIn')}
               onPassword={() => show('password')}
             />
+            {signedIn && !me.guest && <SignInsPart />}
             <section className="settings__part" aria-label="The world moving">
               <h3 className="ui-caps settings__title">The world moving</h3>
               <p className="ui-label">The clouds, the water, the creatures and the trees in the wind.</p>

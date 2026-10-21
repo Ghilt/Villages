@@ -32,6 +32,10 @@ import java.util.concurrent.ExecutorService
  */
 @Configuration
 class GatewayConfig {
+    /** The gateway on its WebSocket, which also says which sign-ins have a window open. See `WebSocketConfig`. */
+    @Bean
+    fun gatewaySocket(gateway: Gateway): GatewaySocket = GatewaySocket(gateway)
+
     @Bean(destroyMethod = "close")
     @Suppress("LongParameterList")
     fun gateway(

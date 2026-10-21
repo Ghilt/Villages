@@ -57,7 +57,10 @@ whom is there, and `app` holds only the cookie and the shapes of the answers. No
 - An ended sign-in is never accepted again: one found past its end is deleted there and then. **A window belongs to
   a live sign-in**: the accounts tell the gateway of every sign-in that ends, however it ends, and the gateway stands
   its windows down with `signedOut` (protocol 63), as a takeover stands one down. Until the frame lands the window can
-  still send a command, and it is that player's own, so the moment between is harmless.
+  still send a command, and it is that player's own, so the moment between is harmless. **A window open is a sign-in
+  in use**: every five minutes the game server uses each sign-in with a socket open, however long ago the socket
+  opened, and ends every other past its end, so a window open all day keeps its sign-in and none lingers ended in
+  the store.
 
 ## Alternatives considered
 

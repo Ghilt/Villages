@@ -146,6 +146,38 @@ class SignInsSpec : StringSpec({
         told shouldBe listOf(ended.signIn.id, runOut.signIn.id)
     }
 
+    "the sweep keeps a sign-in with a window open alive however long, and ends the rest past their end" {
+        val clock = HandClock()
+        val told = mutableListOf<villages.application.SignInId>()
+        val signIns = SignIns(InMemoryAccounts().signIns, clock) { told += it }
+        val playing = signIns.begin(player, Keeping.FOR_NOW, "Chrome on Windows")
+        val left = signIns.begin(player, Keeping.FOR_NOW, "Firefox on Linux")
+        val remembered = signIns.begin(player, Keeping.REMEMBERED, "Safari on an iPhone")
+
+        repeat(4) {
+            clock.pass(Duration.ofHours(5))
+            signIns.sweep(setOf(playing.signIn.id))
+        }
+
+        told shouldBe listOf(left.signIn.id)
+        signIns.find(playing.secret).shouldNotBeNull()
+        signIns.find(remembered.secret).shouldNotBeNull()
+    }
+
+    "every other sign-in of a player ends, and this one stays" {
+        val told = mutableListOf<villages.application.SignInId>()
+        val signIns = SignIns(InMemoryAccounts().signIns, HandClock()) { told += it }
+        val here = signIns.begin(player, Keeping.REMEMBERED, "Chrome on Windows")
+        val there = signIns.begin(player, Keeping.REMEMBERED, "Firefox on Linux")
+        val someoneElse = signIns.begin(PlayerId(UUID.randomUUID()), Keeping.REMEMBERED, "Edge on Windows")
+
+        signIns.endEveryOther(player, kept = here.signIn.id)
+
+        told shouldBe listOf(there.signIn.id)
+        signIns.find(here.secret).shouldNotBeNull()
+        signIns.find(someoneElse.secret).shouldNotBeNull()
+    }
+
     "a browser is named as a person would name it" {
         browserOf(
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0 Safari/537.36",

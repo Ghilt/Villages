@@ -1114,7 +1114,11 @@ and `-- --drop` takes them off; by hand only.
   **`/account/reset`**, where a new password signs out every browser signed in to the account, signs this one in, and
   verifies the email, since the link reached it; it works once, for an hour. **Change password**, in Account once
   signed in, asks for the one it has and a new one, signs out every other browser of the account, and loads the page
-  again with a new secret. Signed in, Account says the email, and **Log out** at the
+  again with a new secret. **Where you are signed in** lists every browser signed in to the account, the newest used
+  first, this one marked, each remembered or until the browser closes and when it was last used: *Sign out there* ends
+  that sign-in on the server and dims its windows under **Signed out** within a second, and *Sign out everywhere
+  else* does it to all of them. A sign-in with a window open counts as used however long ago it opened: every five
+  minutes the game server uses those, and ends any other past its end. Signed in, Account says the email, and **Log out** at the
   foot ends the sign-in on the server and dims the window under **Signed out**, whose *Sign in* signs in again there.
   **The world moving** is
   *As my device asks*, *Still* or *Moving*: still holds the clouds, the water, the creatures, the trees and the grass

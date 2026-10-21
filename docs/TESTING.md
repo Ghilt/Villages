@@ -85,6 +85,11 @@ Commands are filled in here as the increments land.
   Chrome, the one on the machine, headless,
   and reads what Adam reads: the debug panel's log. A failure leaves a trace in `.logs/e2e/results`, opened with
   `npx playwright show-trace`, and the report is `.logs/e2e/report`. The game server's output is `.logs/e2e-game.log`.
+  Two tests: `smoke.e2e.ts`, the map, a house founded and seen from another window, an action taken and a restart;
+  and `accounts.e2e.ts`, remember me as a player meets it - an account made from a guest through the settings, the
+  browser closed and opened again keeping only the cookies told to outlast it, signed in still when ticked and out
+  when not, two tabs, and a restart that forgets no sign-in. How long each kind of sign-in lasts is `SignInsSpec`'s,
+  on a clock it moves by hand. About four minutes for both, most of it the game server's two restarts.
 
 ## Definition of done for an increment
 

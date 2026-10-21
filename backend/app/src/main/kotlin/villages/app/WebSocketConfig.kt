@@ -12,6 +12,7 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 import org.springframework.web.socket.handler.TextWebSocketHandler
 import org.springframework.web.socket.server.HandshakeInterceptor
+import villages.application.SignInId
 import villages.application.SignedIn
 import villages.application.SignedInPlayers
 import villages.gateway.Gateway
@@ -35,12 +36,12 @@ import kotlin.concurrent.withLock
 @Configuration
 @EnableWebSocket
 class WebSocketConfig(
-    private val gateway: Gateway,
+    private val socket: GatewaySocket,
     private val signedIn: SignedInPlayers,
     private val cookie: SignInCookie,
 ) : WebSocketConfigurer {
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
-        registry.addHandler(GatewaySocket(gateway), "/ws")
+        registry.addHandler(socket, "/ws")
             .addInterceptors(SignedInAtTheHandshake(signedIn, cookie))
             .setAllowedOriginPatterns(OUR_PAGES)
     }
@@ -82,13 +83,19 @@ class GatewaySocket(private val gateway: Gateway) : TextWebSocketHandler() {
     private val connections = ConcurrentHashMap<String, Gateway.Connection>()
     private val gathering = ConcurrentHashMap<String, StringBuilder>()
 
+    /** The sign-in each open socket was signed in by, which the sweep keeps alive while its window is open. */
+    private val signedIn = ConcurrentHashMap<String, SignedIn>()
+
+    /** Every sign-in with a window open now. */
+    fun signInsInUse(): Set<SignInId> = signedIn.values.mapTo(HashSet()) { it.signIn }
+
     override fun supportsPartialMessages(): Boolean = true
 
     override fun afterConnectionEstablished(session: WebSocketSession) {
         session.attributes[SENDING] = ReentrantLock()
-        connections[session.id] = gateway.connect(session.attributes[SIGNED_IN] as? SignedIn) { frame ->
-            session.sendUnlessGoing(frame)
-        }
+        val by = session.attributes[SIGNED_IN] as? SignedIn
+        by?.let { signedIn[session.id] = it }
+        connections[session.id] = gateway.connect(by) { frame -> session.sendUnlessGoing(frame) }
     }
 
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
@@ -111,6 +118,7 @@ class GatewaySocket(private val gateway: Gateway) : TextWebSocketHandler() {
 
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
         gathering.remove(session.id)
+        signedIn.remove(session.id)
         connections.remove(session.id)?.disconnected()
     }
 

@@ -95,6 +95,30 @@ class AccountEndpointsTest {
     }
 
     @Test
+    fun `an account's sign-ins are listed, and one ended there, or every one but this`() {
+        val email = anEmail()
+        val here = setCookie(post("/auth/signup", asked(email))).substringBefore(';')
+        val there = setCookie(post("/auth/signin", asked(email))).substringBefore(';')
+        val third = setCookie(post("/auth/signin", asked(email))).substringBefore(';')
+
+        val listed = json.readTree(
+            http.send(
+                HttpRequest.newBuilder(URI("http://localhost:$port/auth/signins")).header("Cookie", here).GET().build(),
+                HttpResponse.BodyHandlers.ofString(),
+            ).body(),
+        )
+        assertEquals(3, listed.size())
+        assertEquals(1, listed.count { it["here"].asBoolean() })
+
+        val thereId = me(there)["signIn"]["id"].asString()
+        assertEquals(200, post("/auth/signins/out", """{"id":"$thereId"}""", here).statusCode())
+        assertTrue(me(there)["player"].isNull)
+        assertEquals(200, post("/auth/signins/others-out", cookie = here).statusCode())
+        assertTrue(me(third)["player"].isNull)
+        assertEquals(email, me(here)["email"].asString())
+    }
+
+    @Test
     fun `signing out ends the sign-in on the server, so the cookie names nobody`() {
         val email = anEmail()
         val cookie = setCookie(post("/auth/signup", asked(email))).substringBefore(';')
