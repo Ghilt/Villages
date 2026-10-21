@@ -193,8 +193,8 @@ started; worked ground is planned and not started; and challenges, the newest, a
 - **House bots**: the world begins populated, with a few hundred houses whose player is the world itself, each
   standing outside the ruin of a town of 1790 and named after it, made at every opening - as the server starts,
   after a wipe, after a load - and never twice. In this first version they never act; their AI waits on the
-  resources and the rolls being balanced. Four steps, one commit each, in `docs/plans/house-bots.md`; the first, the
-  documents, is written. Asked for by Adam on 2026-10-21.
+  resources and the rolls being balanced. Four steps, one commit each, in `docs/plans/house-bots.md`; all four are
+  built, and the debug panel's players list counts them. Asked for by Adam on 2026-10-21.
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps
 its world in MongoDB whenever Docker is running, and RabbitMQ carries every event it stores to the read models.
