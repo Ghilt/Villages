@@ -99,10 +99,12 @@ Roughly in the order the eye reads them, and each one is a layer the next can le
    frequency noise over the terrain, so that two forests of the same class are not the same forest.
    *Taken out and made buildable as the **biome** in `docs/plans/biome-sprite-map.md`.*
 2. **Settlements.** Where people chose to be. Inferred from the terrain: water, fertile ground,
-   shelter, a crossing. Sparse, global, and the anchor everything human hangs off.
+   shelter, a crossing. Sparse, global, and the anchor everything human hangs off. *Taken out and made
+   buildable in `docs/plans/settlements-and-roads.md`, a settlement a structure nobody holds (0114).*
 3. **Ways between them.** A track from one settlement to the next, following valleys, crossing rivers
    where a river is crossable. Roads are the single strongest signal that a place is inhabited, and
-   the one most obviously missing today.
+   the one most obviously missing today. *Taken out and made buildable as the roads of
+   `docs/plans/settlements-and-roads.md` (0115).*
 4. **Worked ground.** Fields, pasture and orchards, thickest by a settlement and thinning with the
    walk from it. This is what turns "farmland" from a colour into somebody's farm.
 5. **Marks of time.** A ruin, an old boundary through a wood, a coppice, a dead tree. Rare by design.
@@ -117,6 +119,9 @@ The order matters. Six without the others is what we have now, and it is wallpap
 **One and six left this document and became `docs/plans/biome-sprite-map.md`**, because they are the
 two that can be built without answering a single question about people. Two to five stay here, and the
 seam is already cut for them: a sprite map is a directory, and a settlement layer is another one.
+
+**Two and three left on 2026-10-21 for `docs/plans/settlements-and-roads.md`**, when Adam asked for villages,
+fishing villages and the roads between them. Four and five stay here.
 
 ## The shape it probably wants
 
@@ -140,14 +145,14 @@ forty metres from a road.
 - ~~**Infer the human world, or import it?**~~ **Answered on timing.** Infer it while the map is still
   moving; lean on the real world once it settles, and gather what would be needed — historical sites
   and buildings among them — in the meantime. See the section above.
-- **Does a settlement here have anything to do with a player's house?** A generated town and a founded
-  house are different things, and whether they may share ground is a question for `MECHANICS.md`, not
-  for the generator.
+- ~~**Does a settlement here have anything to do with a player's house?**~~ **Answered on 2026-10-21.** A
+  settlement is a structure nobody holds, which a house may one day take (0114); a house bot's seat and a settlement
+  keep off each other's ground.
 - **How much does the generator owe the painterly treatment?** A field drawn as scenery and a field
   drawn as a wash are two answers to one question, and 0052 already records that the handoff between
   them is unfinished.
-- **Where does the fiction constrain it?** `SETTING.md` decides whether this world has cities, roads,
-  ruins at all. The generator should be told, not guess.
+- ~~**Where does the fiction constrain it?**~~ **Answered.** The cities are ruins (0103), and the countryside,
+  its villages and its roads were spared (`SETTING.md`, *The age*).
 - ~~**How is it reviewed?**~~ **Answered for the first two layers.** The stills answer it for the paint
   (0021) and `biome-sprite-map.md` reuses the same six views, with a `biome` renderer in the Debug map
   dropdown for the part of it a still cannot show. Layers two to five will want the same and have not

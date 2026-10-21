@@ -43,6 +43,13 @@ but nobody goes without risk, and nobody can say quite what the risk is. Where t
 rose into the gap**: whatever can organise people now does, and some of what can is nothing anybody would have
 chosen.
 
+**The countryside was spared.** Whatever brought the towns down pressed least where people were few, so the
+villages still stand, and the fishing villages on the shores of the seas, the lakes and the great rivers, and the old
+roads still join them and run on to the shunned gates of the cities. Some stand within sight of a ruin, where the
+people who fled it stopped; most stand where good ground and water always put them. **Nobody holds them**: their
+lords died in the towns or keep court somewhere else, and the villages carry on as they can. Adam's word of
+2026-10-21, *uncontrolled settlements*.
+
 To everyone living through it this is a calamity with no author. A bad century. A run of failures. Judgement,
 or somebody's fault, or the weather. Every explanation the world offers is wrong.
 

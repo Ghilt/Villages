@@ -35,7 +35,8 @@ character dialogue; the UI component library is built and waiting on Adam's eye,
 and so is the origin map, the first of real names on the edited world. Structures are planned and not
 started; the world cache is built and waiting on Adam's eye; quests are built and on main, waiting on Adam's
 eye for their experiment; catalogues are built and waiting on Adam's eye; ruined cities are planned and not
-started; worked ground is planned and not started; and challenges, the newest, are planned and not started.
+started; worked ground is planned and not started; challenges are planned and not started; and settlements and
+roads, the newest, are planned and not started.
 
 - **Characters and key figures**: the people of the world, each with a history of their own, and the
   house's tie to the few it acts through, shown in a pane in the corner beside the house status. The shape
@@ -199,6 +200,12 @@ started; worked ground is planned and not started; and challenges, the newest, a
   after a wipe, after a load - and never twice. In this first version they never act; their AI waits on the
   resources and the rolls being balanced. Four steps, one commit each, in `docs/plans/house-bots.md`; all four are
   built, and the debug panel's players list counts them. Asked for by Adam on 2026-10-21.
+- **Settlements and roads**: villages and fishing villages nobody holds, dotted over the countryside the fall spared,
+  beside the ruins and away from them, each a structure raised at the opening from a site the bake chose and laid
+  out by the browser on worn ground of its own; roads baked between them and to the ruins' gates, worn into the
+  ground; and a bridge, timber or stone on one of four axes, wherever a road crosses a river. The pictures are
+  painted by asseterizer over placeholders. The shape is decision records 0114 and 0115, and the twenty steps, one
+  commit each, are in `docs/plans/settlements-and-roads.md`; none is built. Asked for by Adam on 2026-10-21.
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps
 its world in MongoDB whenever Docker is running, and RabbitMQ carries every event it stores to the read models.
@@ -250,8 +257,9 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
   about people. A program that reads the master, decides what kind of place every part of the world is,
   and arranges the scenery into stands that a painted forest shapes, instead of the even carpet 0006
   measured. Seven increments in `docs/plans/biome-sprite-map.md`; the hypothesis is experiment 0007.
-- **The world-generator**, the other half: settlements inferred from the terrain, ways between them,
-  worked ground around them, and marks of time. Experiment 0006 proved the machine will draw it and
+- **The world-generator**, the other half: fields and pasture round the settlements, and marks of time. Its
+  settlements and the ways between them left it for *Settlements and roads*, under Now, on 2026-10-21.
+  Experiment 0006 proved the machine will draw it and
   found the budget by hand; the path is `docs/plans/world-generator.md`. The largest thing on this list
   and the one that would change how the world reads most.
 - **More than one game server on one world**: what RabbitMQ was chosen for, and what the broker of decision

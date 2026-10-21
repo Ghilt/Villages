@@ -953,6 +953,12 @@ A house gets its castle from founding and, for now, everything else from the deb
 house will come by one are wanted: building it, a story handing it over, taking it, and finding it standing
 in the world of 1790.
 
+**The first that stand in the world of 1790 are the settlements**: villages and fishing villages held by nobody,
+dotted over the countryside the fall spared, beside the ruins and away from them, and joined by roads. Each is one
+structure, a hamlet, a village or a large village by its level, its buildings laid out on worn ground of its own.
+How a house comes to hold one, and what it gives, are not designed yet. See decision record 0114 and
+`docs/plans/settlements-and-roads.md`.
+
 ### What it is for
 
 Two things first, in Adam's words: they "should give vision to controller", and income.
@@ -1008,7 +1014,7 @@ other and takes the same bays.
 - **Building one**: what it costs, how long it takes, where a house may raise it.
 - **Taking one**: by force, by purchase, by inheritance, and what a garrison does about it.
 - **Factions** as holders, all but the Vigil, which holds nothing in its own name (see *Faction*), and the
-  structures standing in the world of 1790 before any house arrives.
+  structures standing in the world of 1790 before any house arrives, but for the settlements.
 - **Upkeep**: whether holding costs as well as pays.
 - **How a seatless house names another**, and what it lacks until it does.
 - **The words**: every type's word in each culture is a first draft.
