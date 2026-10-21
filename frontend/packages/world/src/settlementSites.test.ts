@@ -2,7 +2,8 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-import { cornerNear, scoreAt, settlementSites } from './settlementSites.ts';
+import { settlementSites } from './settlementSites.ts';
+import { cornerNear, scoreAt } from './siteScore.ts';
 import type { RuinPlace, Site, SiteGround } from './settlementSites.ts';
 import { parseSettlements, unitsOfKm } from './settlements.ts';
 
