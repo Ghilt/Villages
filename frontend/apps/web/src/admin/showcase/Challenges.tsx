@@ -1,4 +1,5 @@
 import { ChallengeDiorama } from './ChallengeDiorama';
+import { ChallengeDrawer } from './ChallengeDrawer';
 import { ChallengeFigures } from './ChallengeFigures';
 import { ChallengeReadouts } from './ChallengeReadouts';
 import { ChallengeSlices } from './ChallengeSlices';
@@ -11,6 +12,7 @@ export function Challenges() {
       <ChallengeReadouts />
       <ChallengeFigures />
       <ChallengeDiorama />
+      <ChallengeDrawer />
     </>
   );
 }

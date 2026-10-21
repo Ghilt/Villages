@@ -465,6 +465,11 @@ A line each: what it is for, its variants, and where on the page it is.
   and what is placed walks to where it is next put. A picture has no way to be turned round: a building is never
   mirrored. Reads no picture of its own: the sheets are whoever shows it's to give. `ui/diorama/dioramaFit.ts` is its
   arithmetic. *Challenges*.
+- **`Drawer`**, `ui/drawer/Drawer.tsx`: what a mark opens over a stage without leaving it - a challenge's history,
+  behind the `history` mark - sliding in `from` the stage's right edge when it is held wide and from its bottom when
+  it is held deep, so it takes the longer side and leaves the rest to be watched (decision record 0116). Its title
+  and close mark at its head, what it holds in a `ScrollArea` under them; shut, nothing in it can be reached. Held by
+  whoever opens it, inside a stage that is `position: relative`. In the `pane.drawer` recipe. *Challenges*.
 - **`Dialog`** and **`DialogBox`**, `ui/dialog/Dialog.tsx`: a question that has to be answered before
   anything else - kill this key figure? - over the whole page, the page behind dimmed with night and out of
   reach. The browser's own modal dialog is under it, so it is drawn over everything, the keyboard stays in
