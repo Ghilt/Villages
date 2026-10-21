@@ -11,20 +11,20 @@ class AuthorityFreedomSpec : StringSpec({
 
     val hiring = listOf(slice(VIOLENCE, "violence.sellswords", summonCount = 1))
 
-    "an Enforcer costs its side five a second, unboosted, and keeps the enemy summon pulling hardest silenced" {
+    "an Enforcer costs its side five a second, unboosted, and keeps the enemy summon pulling hardest stunned" {
         val anywhere = TEST_CATALOGUE.marked("authority.watch", false).marked("violence.sellswords", false)
         val result = fight(listOf(slice(AUTHORITY, "authority.watch")), hiring, 8, Happening(REASON), catalogue = anywhere)
 
         result.saying(What.COST).map { it.second to it.amount } shouldBe (1..7).map { it to -5.0 }
-        result.saying(What.DEBUFFED).first().let { it.status to it.amount } shouldBe ("silenced" to 3.0)
+        result.saying(What.DEBUFFED).first().let { it.status to it.amount } shouldBe ("stunned" to 3.0)
         result.saying(What.PULLED).filter { it.side == Side.B }.map { it.second } shouldBe listOf(1)
     }
 
-    "an Enforcer's silence is boosted in a happening of its own aspect, and cut to whole seconds" {
+    "an Enforcer's stun is boosted in a happening of its own aspect, and cut to whole seconds" {
         fight(listOf(slice(AUTHORITY, "authority.watch")), hiring, 4, Happening(AUTHORITY, VIOLENCE)).saying(What.DEBUFFED).first().amount shouldBe 4.0
     }
 
-    "a silenced summon does not act until its silence is lifted, and a silence put on again lasts from then" {
+    "a stunned summon does not act until the stun is lifted, and a stun put on again lasts from then" {
         val anywhere = TEST_CATALOGUE.marked("authority.watch", false).marked("violence.sellswords", false)
         val result = fight(listOf(slice(AUTHORITY, "authority.watch")), hiring, 9, Happening(REASON), catalogue = anywhere)
 
@@ -32,14 +32,14 @@ class AuthorityFreedomSpec : StringSpec({
         result.saying(What.LIFTED) shouldBe emptyList()
     }
 
-    "Curfew puts every enemy summon under curfew: it sits out a happening without its own aspect until the curfew lifts" {
+    "Curfew makes every enemy summon aspect-bound: it sits out a happening without its own aspect until that lifts" {
         val curfew = listOf(slice(AUTHORITY, "authority.curfew"))
         val anywhere = TEST_CATALOGUE.marked("violence.sellswords", false).with("authority.curfew", "seconds", 4.0)
         val result = fight(curfew, hiring, 15, Happening(AUTHORITY), Happening(AUTHORITY), Happening(REASON), catalogue = anywhere)
 
-        result.saying(What.DEBUFFED).map { Triple(it.second, it.status, it.amount) } shouldBe listOf(Triple(5, "underCurfew", 6.0))
+        result.saying(What.DEBUFFED).map { Triple(it.second, it.status, it.amount) } shouldBe listOf(Triple(5, "aspectBound", 6.0))
         result.saying(What.IDLE).map { it.second } shouldBe listOf(5, 10)
-        result.saying(What.LIFTED).map { it.second to it.status } shouldBe listOf(12 to "underCurfew")
+        result.saying(What.LIFTED).map { it.second to it.status } shouldBe listOf(12 to "aspectBound")
         result.saying(What.PULLED).filter { it.side == Side.B }.map { it.second } shouldBe (1..4).toList() + (12..14).toList()
     }
 

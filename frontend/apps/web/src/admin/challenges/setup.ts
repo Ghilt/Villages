@@ -140,6 +140,8 @@ export const WHAT_SAID: Readonly<Record<string, string>> = {
   buffed: 'buffed',
   debuffed: 'debuffed',
   lifted: 'lifted',
+  cleansed: 'cleansed',
+  worn: 'worn',
   cancelled: 'cancelled',
   integrityLost: 'wore integrity',
   auraOn: 'aura on',

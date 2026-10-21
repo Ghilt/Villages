@@ -4,6 +4,7 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import villages.domain.Resource
 import villages.domain.Stat
+import villages.domain.challenge.Aspect.AUTHORITY
 import villages.domain.challenge.Aspect.GENEROSITY
 import villages.domain.challenge.Aspect.GREED
 import villages.domain.challenge.Aspect.REASON
@@ -77,5 +78,15 @@ class GreedGenerositySpec : StringSpec({
         val ines = StandIn.KeyFigure("Ines", mapOf(Stat.KINDNESS to 14))
         val patron = listOf(slice(GENEROSITY, "generosity.patron", slotted = mapOf("generosity.patron" to ines)))
         fight(patron, IDLE, 2, Happening(GENEROSITY)).saying(What.LENT).single().amount shouldBe 21.0
+    }
+
+    "Tend the Wounded lifts every debuff on its side, one put on in its own second too, so a summon never sits out aspect-bound" {
+        val tending = listOf(slice(GENEROSITY, "generosity.alms", "generosity.tend", summonCount = 1))
+        val curfew = listOf(slice(AUTHORITY, "authority.curfew"))
+        val result = fight(tending, curfew, 12, Happening(AUTHORITY), Happening(AUTHORITY), Happening(REASON))
+
+        result.saying(What.DEBUFFED).single().let { it.second to it.status } shouldBe (4 to "aspectBound")
+        result.saying(What.CLEANSED).single().let { Triple(it.second, it.status, it.target.toString()) } shouldBe Triple(4, "aspectBound", "#1")
+        result.saying(What.PULLED).filter { it.side == Side.A }.map { it.second } shouldBe (1..11).toList()
     }
 })

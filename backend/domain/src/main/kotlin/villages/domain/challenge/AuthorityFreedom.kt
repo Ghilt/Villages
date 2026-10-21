@@ -2,7 +2,7 @@ package villages.domain.challenge
 
 /** The six effects of the Authority-Freedom pair, the Enforcer and the Rebel. See `docs/plans/challenges.md`. */
 
-/** Curfew: every enemy summon is put under the debuff its entry names, under curfew, for `seconds`, boosted and cut to whole seconds. */
+/** Curfew: every enemy summon is put under the debuff its entry names, aspect-bound, for `seconds`, boosted and cut to whole seconds. */
 private object Curfew : EffectBehaviour {
     override val reads = setOf("seconds")
 
@@ -33,11 +33,11 @@ private object OwnWill : EffectBehaviour {
 }
 
 /**
- * The Enforcer: each act costs its side `costs`, never boosted, and silences the enemy summon pulling hardest for
- * `silences` seconds, boosted and cut to whole seconds; a silence refreshes, never stacks.
+ * The Enforcer: each act costs its side `costs`, never boosted, and puts the debuff its entry names, stunned, on the
+ * enemy summon pulling hardest for `stuns` seconds, boosted and cut to whole seconds; put on again, it lasts from then.
  */
 private object Enforcer : SummonBehaviour {
-    override val reads = setOf("costs", "silences")
+    override val reads = setOf("costs", "stuns")
 
     override fun pull(scene: Scene, summon: Summon): Double = -scene.number("costs")
 
@@ -47,7 +47,7 @@ private object Enforcer : SummonBehaviour {
         if (enemies.isEmpty()) return listOf(cost)
         val hardest = enemies.maxOf { scene.pullOf(it) }
         val target = scene.pick(enemies.filter { scene.pullOf(it) == hardest })
-        return listOf(cost, scene.putOn(target.actor, scene.number("silences")))
+        return listOf(cost, scene.putOn(target.actor, scene.number("stuns")))
     }
 }
 

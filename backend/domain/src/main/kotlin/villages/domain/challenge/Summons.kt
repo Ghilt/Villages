@@ -6,14 +6,16 @@ import kotlin.math.max
  * How what a moment asked for lands, in three passes: first the tug and the coffers move, as everything acted on the
  * state the moment began with; then the dead fall, so a summon both killed and turned is killed, and the room a death
  * leaves is there for what comes next; then summons turn and come, things come on the line, slices are worn, and buffs
- * and debuffs go on. Each change is said as it lands, a moment each. The rules that must hold are held here: no side
+ * and debuffs go on; and last the cleansings, so that one lifts a debuff put on in its own second too, whichever side
+ * put it on. Each change is said as it lands, a moment each. The rules that must hold are held here: no side
  * ever has more summons than its slices let it have, and a thing on the line comes on it once. See decision record 0107.
  */
 internal fun Contest.land(changes: List<Change>) {
     val (moving, rest) = changes.partition { it is Change.Pull || it is Change.Say || it is Change.Deposit || it is Change.Pour }
     moving.forEach { landOne(it) }
     rest.filterIsInstance<Change.Kill>().forEach { landOne(it) }
-    rest.filterNot { it is Change.Kill }.forEach { landOne(it) }
+    rest.filterNot { it is Change.Kill || it is Change.Cleanse }.forEach { landOne(it) }
+    rest.filterIsInstance<Change.Cleanse>().forEach { landOne(it) }
 }
 
 private fun Contest.landOne(change: Change) {
@@ -24,6 +26,13 @@ private fun Contest.landOne(change: Change) {
         is Change.Turn -> turn(change)
         is Change.OnTheLine -> comeOnTheLine(change)
         is Change.PutOn -> putOn(change)
+        is Change.Cleanse -> cleanse(change)
+        is Change.WearSummon -> alive(change.target)?.let {
+            val worn = minOf(change.amount, it.integrity)
+            it.integrity -= worn
+            say(What.WORN, it.side.other, it.actor, amount = worn, status = change.lasting)
+            if (it.integrity <= 0.0) fall(it, it.actor, null, change.lasting)
+        }
         is Change.Wear -> {
             val worn = integrity.getValue(change.side)
             worn.indices.forEach { worn[it] = max(0.0, worn[it] - change.amount) }
@@ -68,8 +77,13 @@ private fun Contest.hire(change: Change.Hire) {
 
 private fun Contest.kill(change: Change.Kill) {
     val target = alive(change.target) ?: return
+    fall(target, change.actor, change.effect, null)
+}
+
+/** [target] is gone, killed by [actor] - by [effect], or worn to nothing by the debuff [status] - with all that follows. */
+private fun Contest.fall(target: Summon, actor: Actor, effect: String?, status: String?) {
     field.remove(target)
-    say(What.KILLED, target.side.other, change.actor, change.effect, target.actor)
+    say(What.KILLED, target.side.other, actor, effect, target.actor, status = status)
     if (target.coffer > 0.0) say(What.COFFER_LOST, target.side, target.actor, amount = target.coffer)
     target.line?.let { line ->
         val fits = if (line is StandIn.Building) Fits.STRUCTURE else Fits.KEY_FIGURE

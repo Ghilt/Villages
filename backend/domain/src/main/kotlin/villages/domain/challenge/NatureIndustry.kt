@@ -35,10 +35,24 @@ private object Predator : SummonBehaviour {
     }
 }
 
+/**
+ * The Wild Remembers: as the happening changes away from Nature, the briars close on every enemy summon, the debuff its
+ * entry names, for `seconds`.
+ */
+private object BriarsClose : EffectBehaviour {
+    override val reads = setOf("seconds")
+
+    override fun changed(scene: Scene): List<Change> {
+        val was = scene.previous ?: return emptyList()
+        if (Aspect.NATURE !in was.aspects || Aspect.NATURE in scene.happening.aspects) return emptyList()
+        return scene.summons(scene.side.other).map { scene.putOn(it.actor, scene.number("seconds")) }
+    }
+}
+
 internal val natureAndIndustry: Map<String, EffectBehaviour> = mapOf(
     "nature.wildHunt" to Hires,
     "nature.teeming" to Teeming,
-    "nature.wildRemembers" to ChangingAway(Aspect.NATURE),
+    "nature.wildRemembers" to BriarsClose,
     "industry.engines" to Hires,
     "industry.works" to Slotted,
     "industry.wellOiled" to WellOiled,

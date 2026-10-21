@@ -22,6 +22,11 @@ private class OnAKilling(private val friendly: Boolean) : EffectBehaviour {
         if (friend == friendly) listOf(Change.Pull(scene.side, scene.boost(scene.number("amount")), scene.actor, scene.effect, scene.boosted)) else emptyList()
 }
 
+/** Tend the Wounded: every debuff on its side, on its slices and its summons, is lifted. */
+private object Tends : EffectBehaviour {
+    override fun activated(scene: Scene): List<Change> = listOf(Change.Cleanse(scene.side, scene.actor, scene.effect))
+}
+
 /**
  * The Collector: each act costs its side `costs`, never boosted, and puts `deposits`, boosted, in its coffer, which
  * the contest pours into the tug at the next change of happening or at the end, and which is lost with the Collector.
@@ -44,6 +49,7 @@ internal val greedAndGenerosity: Map<String, EffectBehaviour> = mapOf(
     "generosity.patron" to Slotted,
     "generosity.alms" to Hires,
     "generosity.remembered" to OnAKilling(friendly = true),
+    "generosity.tend" to Tends,
 )
 
 internal val greedAndGenerositySummons: Map<String, SummonBehaviour> = mapOf("collector" to Collector, "benefactor" to PullsHarderBehind)

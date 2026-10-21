@@ -60,11 +60,12 @@ class HolyReasonSpec : StringSpec({
         result.saying(What.SUMMONED) shouldBe emptyList()
     }
 
-    "Seen Through pulls each time an enemy summon acts, when its chance comes up" {
+    "Seen Through weakens an enemy summon as it acts, when its chance comes up, and it works a share less while that lasts" {
         val seeing = listOf(slice(REASON, "reason.seenThrough"))
         val result = fight(seeing, hiring, 4, Happening(VIOLENCE), catalogue = TEST_CATALOGUE.with("reason.seenThrough", "chance", 100.0))
 
-        result.saying(What.PULLED).filter { it.effect == "reason.seenThrough" }.map { it.second to it.amount } shouldBe (1..3).map { it to 5.0 }
+        result.saying(What.DEBUFFED).first().let { Triple(it.second, it.status, it.amount) } shouldBe Triple(1, "weakened", 10.0)
+        result.saying(What.PULLED).filter { it.side == Side.B }.map { it.amount!! } shouldBe listOf(15.0, 10.5, 10.5)
     }
 
     "Learned Counsel lends the counsellor's reason, and a counsellor put on the line comes on it once and can be fatigued" {

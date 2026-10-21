@@ -14,26 +14,69 @@ interface LastingBehaviour {
     val reads: Set<String> get() = emptySet()
 
     /** On a summon: it does not act. */
-    val silences: Boolean get() = false
+    val stuns: Boolean get() = false
 
     /** On a summon: it acts only while the happening has its own aspect, as a kind that needs a matching aspect does. */
     val needsMatch: Boolean get() = false
+
+    /** How much of itself its bearer still is while it is on, from nought to one, by its [entry]'s numbers. */
+    fun effectiveness(entry: Lasting): Double = 1.0
+
+    /** On a summon: the integrity it loses each time it acts, by its [entry]'s numbers. */
+    fun wears(entry: Lasting): Double = 0.0
 }
 
-/** Silenced: the summon does not act. The Enforcer's. */
-private object Silenced : LastingBehaviour {
-    override val silences = true
+/** Stunned: the summon does not act. The Enforcer's. */
+private object Stunned : LastingBehaviour {
+    override val stuns = true
 }
 
-/** Under curfew: the summon acts only while the happening has its own aspect. Curfew's. */
-private object UnderCurfew : LastingBehaviour {
+/** Aspect-bound: the summon acts only while the happening has its own aspect. Curfew's. */
+private object AspectBound : LastingBehaviour {
     override val needsMatch = true
 }
 
-internal val lastingBehaviours: Map<String, LastingBehaviour> = mapOf("silenced" to Silenced, "underCurfew" to UnderCurfew)
+/** Weakened: its bearer works `percent` less, as long as it is on; a share past a hundred leaves it nothing. Seen Through's. */
+private object Weakened : LastingBehaviour {
+    override val reads = setOf("percent")
 
-/** Whether [summon] bears something that silences it. */
-internal fun silenced(summon: Summon): Boolean = summon.bearing.keys.any { lastingBehaviours[it]?.silences == true }
+    override fun effectiveness(entry: Lasting): Double = (1.0 - entry.number("percent") / 100.0).coerceIn(0.0, 1.0)
+}
+
+/** Eroding: each act costs the summon `integrity`, and at nothing it is gone. The Wild Remembers'. */
+private object Eroding : LastingBehaviour {
+    override val reads = setOf("integrity")
+
+    override fun wears(entry: Lasting): Double = entry.number("integrity")
+}
+
+internal val lastingBehaviours: Map<String, LastingBehaviour> =
+    mapOf("stunned" to Stunned, "aspectBound" to AspectBound, "weakened" to Weakened, "eroding" to Eroding)
+
+/** How much of itself what bears [bearing] still is: each buff's and debuff's share of itself, all of them together. */
+internal fun Contest.effectiveness(bearing: Map<String, Int>): Double =
+    bearing.keys.fold(1.0) { left, id -> left * (lastingBehaviours[id]?.effectiveness(catalogue.lasting(id)!!) ?: 1.0) }
+
+/** What [summon] asks to lose of its integrity as it acts: each debuff that wears it, saying which. */
+internal fun Contest.wearOf(summon: Summon): List<Change> = summon.bearing.keys.mapNotNull { id ->
+    val worn = lastingBehaviours[id]?.wears(catalogue.lasting(id)!!) ?: 0.0
+    if (worn > 0.0) Change.WearSummon(summon.serial, worn, id) else null
+}
+
+/** Lifts every debuff from [change]'s side, its slices and its summons, saying each. */
+internal fun Contest.cleanse(change: Change.Cleanse) {
+    val bearers = field.filter { it.side == change.side }.map { it.actor to it.bearing } +
+        bearings.getValue(change.side).mapIndexed { slice, bearing -> Actor.OfSlice(change.side, slice) to bearing }
+    bearers.forEach { (bearer, bearing) ->
+        bearing.keys.filter { it in catalogue.debuffs }.forEach { id ->
+            bearing.remove(id)
+            say(What.CLEANSED, change.side, change.actor, change.effect, bearer, status = id)
+        }
+    }
+}
+
+/** Whether [summon] bears something that stuns it. */
+internal fun stunned(summon: Summon): Boolean = summon.bearing.keys.any { lastingBehaviours[it]?.stuns == true }
 
 /** Whether [summon] acts only while the happening has its own aspect: by its kind's mark, or by a debuff it bears. */
 internal fun Contest.needsMatch(summon: Summon): Boolean =

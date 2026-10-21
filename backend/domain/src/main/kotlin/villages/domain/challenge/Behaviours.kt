@@ -75,7 +75,7 @@ interface Scene {
 
     fun number(name: String): Double
 
-    /** [amount] grown by the aspect boost when it holds. */
+    /** [amount] grown by the aspect boost when it holds, and cut to the share of itself its bearer still is. */
     fun boost(amount: Double): Double
 
     fun chance(percent: Double): Boolean
@@ -115,14 +115,14 @@ interface Scene {
     val effect: String?
 }
 
-/** A summon on the field: its [kind], its aspect, its fixed [integrity], and whose it is now. */
+/** A summon on the field: its [kind], its aspect, its [integrity], fixed as it came unless a debuff wears it, and whose it is now. */
 class Summon internal constructor(
     val serial: Int,
     val kind: String,
     val aspect: Aspect,
     side: Side,
     owner: Int,
-    val integrity: Double,
+    integrity: Double,
     val arrived: Int,
     /** A building or a person put on the line, and the effect whose slot put it there; none for a summon proper. */
     val line: StandIn? = null,
@@ -133,6 +133,8 @@ class Summon internal constructor(
     var side: Side = side
         internal set
     var owner: Int = owner
+        internal set
+    var integrity: Double = integrity
         internal set
 
     /** Its buffs and debuffs by their ids, each with the last second it lasts. */
@@ -158,6 +160,12 @@ sealed interface Change {
 
     /** [lasting], a buff or a debuff, goes on [target], a slice or a summon, until the second [until], put on by [actor] of [side]. */
     data class PutOn(val side: Side, val target: Actor, val lasting: String, val until: Int, val actor: Actor, val effect: String?) : Change
+
+    /** A summon loses [amount] of its integrity to [lasting], a debuff it bears, and at nothing it is gone. */
+    data class WearSummon(val target: Int, val amount: Double, val lasting: String) : Change
+
+    /** Every debuff on [side]'s slices and summons is lifted, by [actor]. */
+    data class Cleanse(val side: Side, val actor: Actor, val effect: String?) : Change
 
     /** Every slice of [side] loses [amount] of integrity. */
     data class Wear(val side: Side, val amount: Double, val actor: Actor, val effect: String, val boosted: Boolean) : Change

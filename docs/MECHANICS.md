@@ -1202,9 +1202,12 @@ and pulls once a second until it is killed, turned, or the challenge ends, a sid
 summon counts add up to.
 
 **Buffs and debuffs.** An effect or a summon may put a **buff**, which helps, or a **debuff**, which hinders, on a
-slice or a summon for some seconds: Authority's Curfew puts every enemy summon *under curfew*, so that it acts only in
-happenings of its own aspect, and the Enforcer *silences* the enemy's hardest puller. The same one put on again lasts
-from then and never stacks; different ones add up. The page charts them all.
+slice or a summon for some seconds. Their names say what they do - *stunned*, *aspect-bound*, *weakened*, *eroding* -
+and the effects that put them on carry the flavour: Authority's Curfew leaves every enemy summon aspect-bound, acting
+only in happenings of its own aspect, and the Enforcer stuns the enemy's hardest puller; Reason sees through an enemy
+summon's tricks and weakens it; as a happening leaves Nature the briars close, and the enemy's summons are eroding,
+losing integrity at each act until they are gone. Generosity's Tend the Wounded **cleanses** its side of every debuff.
+The same one put on again lasts from then and never stacks; different ones add up. The page charts them all.
 
 **Things on the line.** A slot may put what is in it on the line: a building or a person then stands in the
 challenge as a summon, stronger than most and paying its side as it arrives, and if it is killed the building

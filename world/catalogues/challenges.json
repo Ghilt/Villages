@@ -1,7 +1,7 @@
 {
   "$comment": "The challenge's content, Adam's to change: the effects a slice carries, the summons they bring, and the kinds of challenge progressions are drawn from. A first draft, planned with Adam on 2026-10-20, every name and number in it to be tuned. Not in the game yet: the simulator on /admin/inspect-challenges runs the server's engine on what is here, and shows and edits it; the game server takes on a change while it runs. The numbers that belong to no one entry are the balance's. See docs/plans/challenges.md and decision record 0107.",
   "effects": {
-    "$comment": "Each aspect's effects by their ids, three to an aspect, of which a slice of that aspect carries two. Every slice meets every happening: a trigger fires as it meets one, and a passive works from second to second. An effect marked matching does so only while the latest happening has its slice's aspect; one not marked, in every happening. An effect's words name its numbers in braces, which the page fills in; one that summons names the summon, whose own numbers are below; one with a slot fits a keyFigure, lending one of their stats, or a structure, and one whose slot is onTheLine puts what is in it into the challenge as a summon, once; one that puts a buff or a debuff on names it, its seconds among its numbers. The aspect boost, half as much again, grows what an effect does while the happening has its aspect, and never a chance or a cost. The names are a first draft for Adam to change.",
+    "$comment": "Each aspect's effects by their ids, three or four to an aspect, of which a slice of that aspect carries two. Every slice meets every happening: a trigger fires as it meets one, and a passive works from second to second. An effect marked matching does so only while the latest happening has its slice's aspect; one not marked, in every happening. An effect's words name its numbers in braces, which the page fills in; one that summons names the summon, whose own numbers are below; one with a slot fits a keyFigure, lending one of their stats, or a structure, and one whose slot is onTheLine puts what is in it into the challenge as a summon, once; one that puts a buff or a debuff on names it, its seconds among its numbers. The aspect boost, half as much again, grows what an effect does while the happening has its aspect, and never a chance or a cost. The names are a first draft for Adam to change.",
     "violence": {
       "sellswords": { "name": "Sellswords", "fires": "trigger", "words": "Hires a Mercenary, who pulls for this side every second.", "summons": "mercenary", "matching": true },
       "noQuarter": {
@@ -72,17 +72,18 @@
       "seenThrough": {
         "name": "Seen Through",
         "fires": "passive",
-        "words": "An enemy summon acts: {chance}% chance of +{amount}.",
-        "numbers": { "chance": 20, "amount": 5 }
+        "words": "An enemy summon acts: {chance}% chance its tricks are seen through, and it is weakened for {seconds} s.",
+        "numbers": { "chance": 20, "seconds": 10 },
+        "puts": "weakened"
       }
     },
     "authority": {
-      "watch": { "name": "Raise the Watch", "fires": "trigger", "words": "Raises an Enforcer: costs this side, silences the enemy's hardest-pulling summon.", "summons": "enforcer", "matching": true },
+      "watch": { "name": "Raise the Watch", "fires": "trigger", "words": "Raises an Enforcer: costs this side, stuns the enemy's hardest-pulling summon.", "summons": "enforcer", "matching": true },
       "curfew": {
         "name": "Curfew",
         "fires": "trigger",
-        "words": "Rings the curfew bell: every enemy summon is under curfew for {seconds} s.",
-        "puts": "underCurfew",
+        "words": "Rings the curfew bell: every enemy summon is aspect-bound for {seconds} s.",
+        "puts": "aspectBound",
         "numbers": { "seconds": 8 },
         "matching": true
       },
@@ -134,7 +135,8 @@
         "fires": "passive",
         "words": "+{amount} whenever a summon of this side is killed.",
         "numbers": { "amount": 15 }
-      }
+      },
+      "tend": { "name": "Tend the Wounded", "fires": "trigger", "words": "Binds the wounded and lifts their burdens: every debuff on this side is cleansed." }
     },
     "nature": {
       "wildHunt": { "name": "The Wild Hunt", "fires": "trigger", "words": "Looses a Predator, who pulls, or now and then kills an enemy summon it can beat.", "summons": "predator", "matching": true },
@@ -149,8 +151,9 @@
       "wildRemembers": {
         "name": "The Wild Remembers",
         "fires": "passive",
-        "words": "+{amount} when the happening changes away from Nature.",
-        "numbers": { "amount": 30 }
+        "words": "As the happening changes away from Nature, the briars close: every enemy summon is eroding for {seconds} s.",
+        "numbers": { "seconds": 10 },
+        "puts": "eroding"
       }
     },
     "industry": {
@@ -187,9 +190,9 @@
     "enforcer": {
       "name": "Enforcer",
       "aspect": "authority",
-      "words": "Costs its side {costs} a second; silences the hardest-pulling enemy summon {silences} seconds.",
-      "numbers": { "costs": 5, "silences": 3 },
-      "puts": "silenced"
+      "words": "Costs its side {costs} a second; stuns the hardest-pulling enemy summon {stuns} seconds.",
+      "numbers": { "costs": 5, "stuns": 3 },
+      "puts": "stunned"
     },
     "rebel": {
       "name": "Rebel",
@@ -234,8 +237,15 @@
   },
   "debuffs": {
     "$comment": "Debuffs, which hinder, by their ids: what each goes on, a slice or a summon, its words and its own numbers. An effect or a summon that puts one on names it, and says for how many seconds; put on again, it lasts from then and never stacks, and different ones add up. What each does is code, by its id.",
-    "silenced": { "name": "Silenced", "on": "summon", "words": "Does not act." },
-    "underCurfew": { "name": "Under curfew", "on": "summon", "words": "Acts only while the happening has its own aspect." }
+    "stunned": { "name": "Stunned", "on": "summon", "words": "Does not act." },
+    "aspectBound": { "name": "Aspect-bound", "on": "summon", "words": "Acts only while the happening has its own aspect." },
+    "weakened": { "name": "Weakened", "on": "summon", "words": "Works {percent}% less.", "numbers": { "percent": 30 } },
+    "eroding": {
+      "name": "Eroding",
+      "on": "summon",
+      "words": "Each act costs it {integrity} integrity; at nothing it is gone.",
+      "numbers": { "integrity": 4 }
+    }
   },
   "kinds": {
     "$comment": "Each challenge kind by its id: the seconds a challenge of it lasts and the happenings it has, each the least and the most, the chance out of a hundred that a happening has a second aspect, and how much each aspect weighs when a happening's aspects are drawn. A kind never has more happenings than the fewest seconds it lasts, so each begins on a second of its own.",

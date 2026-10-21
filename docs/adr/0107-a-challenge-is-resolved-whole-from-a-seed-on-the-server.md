@@ -95,6 +95,6 @@ nothing is stored yet, and the agreed `ChallengeResolved` carries the engine's v
 Buffs and debuffs came with it, Adam's words: one goes on a slice or a summon for the seconds the effect or summon that
 puts it on says, and comes off when they are up; the same one put on again lasts from then and never stacks, and
 different ones add up. Like an effect, its words, numbers and what it goes on are the catalogue's and what it does is
-code, held to each other both ways. The Enforcer's silence became the first debuff, and *Curfew* took the place of *By
+code, held to each other both ways. A buff or a debuff is named for what it does, not for one effect's flavour, so that many effects can put on the same one. The Enforcer's silence became the first debuff, *stunned*, and *Curfew* took the place of *By
 Decree*, which never fired between slices of equal numbers. The moments name each one put on and lifted, at
-protocol 64.
+protocol 64. A debuff may take a share off what a summon does, or wear its integrity, which was fixed as it came; at nothing the summon is gone, counted as killed. A cleansing lifts every debuff on its side.

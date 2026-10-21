@@ -32,13 +32,13 @@ private object Refutation : EffectBehaviour {
     override fun cancels(scene: Scene, trigger: ChallengeEffect): Boolean = scene.chance(scene.number("chance"))
 }
 
-/** Seen Through: each time an enemy summon acts, a `chance` of `amount` to the tug. */
+/** Seen Through: an enemy summon acts, and a `chance` it is seen through, and weakened, the debuff its entry names, for `seconds`. */
 private object SeenThrough : EffectBehaviour {
-    override val reads = setOf("chance", "amount")
+    override val reads = setOf("chance", "seconds")
 
     override fun enemyActed(scene: Scene, summon: Summon): List<Change> {
         if (!scene.chance(scene.number("chance"))) return emptyList()
-        return listOf(Change.Pull(scene.side, scene.boost(scene.number("amount")), scene.actor, scene.effect, scene.boosted))
+        return listOf(scene.putOn(summon.actor, scene.number("seconds")))
     }
 }
 

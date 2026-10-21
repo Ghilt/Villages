@@ -128,13 +128,14 @@ internal class Contest(
         val changes = mutableListOf<Change>()
         Side.entries.forEach { side -> changes += working(side).flatMap { (slice, effect, behaviour) -> behaviour.everySecond(scene(side, slice, effect)) } }
         field.toList().forEach { summon ->
-            if (summon.arrived >= second || silenced(summon)) return@forEach
+            if (summon.arrived >= second || stunned(summon)) return@forEach
             if (needsMatch(summon) && !happening.matches(summon.aspect)) {
                 if (idle.add(summon.serial to at)) changes += Change.Say(What.IDLE, summon.side, summon.actor, null)
                 return@forEach
             }
             val enemy = summon.side.other
             changes += actOf(summon)
+            changes += wearOf(summon)
             changes += working(enemy).flatMap { (slice, effect, behaviour) -> behaviour.enemyActed(scene(enemy, slice, effect), summon) }
             changes += working(summon.side).flatMap { (slice, effect, behaviour) -> behaviour.friendActed(scene(summon.side, slice, effect), summon) }
         }
@@ -230,7 +231,11 @@ internal class Contest(
 
         override fun number(name: String): Double = numbers(name)
 
-        override fun boost(amount: Double): Double = if (boosted) amount * rules.boost else amount
+        override fun boost(amount: Double): Double = (if (boosted) amount * rules.boost else amount) * effectiveness(bearing)
+
+        /** What this scene's own bearer bears: the summon's, or its slice's. */
+        private val bearing: Map<String, Int>
+            get() = if (entry == null) this@Contest.field.firstOrNull { it.actor == actor }?.bearing.orEmpty() else bearings.getValue(side)[slice]
 
         override fun chance(percent: Double): Boolean = rng.chance(percent)
 

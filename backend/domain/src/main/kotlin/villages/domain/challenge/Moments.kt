@@ -87,6 +87,12 @@ enum class What {
     /** A buff or a debuff came off as its seconds ran out, [ChallengeMoment.status] naming it. */
     LIFTED,
 
+    /** A debuff was lifted before its seconds were up, by a cleansing, [ChallengeMoment.status] naming it. */
+    CLEANSED,
+
+    /** A summon lost integrity to a debuff it bears, [ChallengeMoment.status] naming it. */
+    WORN,
+
     /** A trigger was cancelled before it fired. */
     CANCELLED,
     INTEGRITY_LOST,

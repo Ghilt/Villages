@@ -166,5 +166,5 @@ recorded over. See decision record 0037. What each one changed:
   batch of runs a pairing on progressions drawn from a challenge kind, or by `simulationRefused`. Instruments, refused
   while they are closed. See decision record 0107.
 - **64** - a moment in `challengeSimulated` names the buff or the debuff it put on or lifted, as `status`, with the new
-  moments `buffed`, `debuffed` and `lifted`; `silenced` and `stopped` are gone, the first now a debuff. See
+  moments `buffed`, `debuffed` and `lifted`; `silenced` and `stopped` are gone, the first now the debuff `stunned`. See
   `docs/plans/challenge-matching.md`.

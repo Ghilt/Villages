@@ -67,15 +67,17 @@ The chart, as the page will show it:
 
 | | Name | On | What it does | Put on by |
 |---|---|---|---|---|
-| Debuff | **Silenced** | summon | does not act | the Enforcer (*Raise the Watch*), as now |
-| Debuff | **Under curfew** | summon | acts only while the happening has its own aspect: the mark, put on an enemy | *Curfew*, Authority, new |
-| Debuff | **In the briars** | summon | each act tears {integrity} integrity from it | *The Wild Remembers*, Nature, reworked |
-| Debuff | **Seen through** | summon | works {percent}% less | *Seen Through*, Reason, reworked |
-| Debuff | **Terrified** | slice | works {percent}% less | *Terror*, Violence, new |
-| Debuff | **Out of order** | slice | each trigger it fires on a happening its aspect does not match costs its side {amount} | *The Firm Hand*, Authority, reworked |
-| Buff | **Oiled** | summon | acts half again as often: each second, {rate}% chance of a second act | *Well-Oiled*, Industry, reworked |
-| Buff | **Roused** | slice | {chance}% more chance each trigger fires twice | *The Word Spreads*, Freedom, new |
+| Debuff | **Stunned** | summon | does not act | the Enforcer (*Raise the Watch*), as now |
+| Debuff | **Aspect-bound** | summon | acts only while the happening has its own aspect: the mark, put on an enemy | *Curfew*, Authority, new |
+| Debuff | **Eroding** | summon | each act costs it {integrity} integrity | *The Wild Remembers*, Nature, reworked |
+| Debuff | **Weakened** | summon or slice | works {percent}% less | *Seen Through*, Reason, reworked; *Terror*, Violence, new |
+| Debuff | **Penalised** | slice | each trigger it fires on a happening its aspect does not match costs its side {amount} | *The Firm Hand*, Authority, reworked |
+| Buff | **Hastened** | summon | acts half again as often: each second, {rate}% chance of a second act | *Well-Oiled*, Industry, reworked |
+| Buff | **Echoing** | slice | {chance}% more chance each trigger fires twice | *The Word Spreads*, Freedom, new |
 | Cleanse | | | lifts every debuff on its side | *Tend the Wounded*, Generosity, new |
+
+Each is named for what it does, not for one effect's flavour, so effects of many flavours can put on the same one
+(Adam's word of 2026-10-21); the effects carry the flavour.
 
 A trigger fires twice with the balance's `doubleTrigger` chance, nought to begin with, plus what buffs add.
 
@@ -85,15 +87,15 @@ Led by flavour, as Adam asked. Names and numbers are first drafts, renamed on th
 
 | Aspect | Effect | Now | Was |
 |---|---|---|---|
-| Authority | **Curfew** (trigger) | Rings the curfew bell: every enemy summon is *under curfew* for {seconds} s | replaces *By Decree*, which never fires against slices of equal numbers |
-| Authority | **The Firm Hand** (trigger) | Lays down the law: every enemy slice is *out of order* for {seconds} s | lowered the opponent's power while ahead, which Authority never was |
-| Nature | **The Wild Remembers** (passive) | As the happening changes away from Nature, the briars close: every enemy summon is *in the briars* for {seconds} s | +30 as it changed away, the same as *Spoils of the Field* |
-| Reason | **Seen Through** (passive) | An enemy summon acts: {chance}% chance it is *seen through* for {seconds} s | {chance}% chance of +5 |
-| Industry | **Well-Oiled** (passive) | A summon of this side acts: {chance}% chance it is *oiled* for {seconds} s | {chance}% chance it pulled 5 more |
-| Violence | **Terror** (trigger), new | Spreads terror: every enemy slice is *terrified* for {seconds} s | - |
-| Freedom | **The Word Spreads** (trigger), new | Every slice of this side is *roused* for {seconds} s | - |
+| Authority | **Curfew** (trigger) | Rings the curfew bell: every enemy summon is *aspect-bound* for {seconds} s | replaces *By Decree*, which never fires against slices of equal numbers |
+| Authority | **The Firm Hand** (trigger) | Lays down the law: every enemy slice is *penalised* for {seconds} s | lowered the opponent's power while ahead, which Authority never was |
+| Nature | **The Wild Remembers** (passive) | As the happening changes away from Nature, the briars close: every enemy summon is *eroding* for {seconds} s | +30 as it changed away, the same as *Spoils of the Field* |
+| Reason | **Seen Through** (passive) | An enemy summon acts: {chance}% chance it is *weakened* for {seconds} s | {chance}% chance of +5 |
+| Industry | **Well-Oiled** (passive) | A summon of this side acts: {chance}% chance it is *hastened* for {seconds} s | {chance}% chance it pulled 5 more |
+| Violence | **Terror** (trigger), new | Spreads terror: every enemy slice is *weakened* for {seconds} s | - |
+| Freedom | **The Word Spreads** (trigger), new | Every slice of this side is *echoing* for {seconds} s | - |
 | Generosity | **Tend the Wounded** (trigger), new | Binds wounds and lifts burdens: every debuff on this side is cleansed | - |
-| Authority | *Raise the Watch* | The Enforcer's silence is the debuff *Silenced*, its seconds as before | silenced by a rule of its own |
+| Authority | *Raise the Watch* | The Enforcer's silence is the debuff *Stunned*, its seconds as before | silenced by a rule of its own |
 
 Violence, Freedom and Generosity have four effects then, the rest three; a slice still carries two of its aspect's.
 
@@ -151,9 +153,9 @@ three new effects and the five reworked, as the tables above name them.
 | # | Step | Verification requests |
 |---|---|---|
 | 15 | **Matching aspect.** Every slice meets every happening; the mark on effects and summon kinds, with the first marks; the boost only on a match; Freedom's two kept to their meaning; the engine at version 2; the mark shown and ticked on the page; the moments say who matches; `MECHANICS.md`, `GLOSSARY.md`, 0107 amended, `RUNNING.md` | 👀 Run the sample: each happening says which slices match, and an unmarked trigger fires out of its aspect without the boost; 👀 untick a mark, save, run again and see it work in every happening; 👀 the matchup grid on Even: what dropping the old routing did |
-| 16 | **Buffs and debuffs: the machinery and the chart.** The catalogue's buffs and debuffs, both readers and the check; putting on, refreshing, lifting, the moments; the Enforcer's silence as *Silenced*; *Curfew* in place of *By Decree*; the chart on the page | 👀 The chart lists each buff and debuff, what it does, on what, and which effect puts it on; 👀 Authority with Curfew against Industry: the Machines idle out of Industry's happenings until the curfew lifts, and the moments say so |
-| 17 | **The summons' debuffs, and cleansing.** *In the briars* and a summon's integrity falling to its end; *Seen through* and effectiveness; *Tend the Wounded* | 👀 The briars wear an enemy summon down until it is gone, and Pick the Bones hears of it; 👀 a seen-through summon pulls its share less; 👀 Tend the Wounded lifts them |
-| 18 | **The slices' debuffs, and the buffs.** *Terrified*, *Out of order*, *Oiled*, *Roused*, and the balance's `doubleTrigger` | 👀 Terror cuts what the enemy slices pull while it lasts; 👀 an out-of-order trigger costs its side; 👀 oiled summons act twice in some seconds, roused triggers fire twice now and then |
+| 16 | **Buffs and debuffs: the machinery and the chart.** The catalogue's buffs and debuffs, both readers and the check; putting on, refreshing, lifting, the moments; the Enforcer's silence as *Stunned*; *Curfew* in place of *By Decree*; the chart on the page | 👀 The chart lists each buff and debuff, what it does, on what, and which effect puts it on; 👀 Authority with Curfew against Industry: the Machines idle out of Industry's happenings until the curfew lifts, and the moments say so |
+| 17 | **The summons' debuffs, and cleansing.** *Eroding* and a summon's integrity falling to its end; *Weakened* and effectiveness; *Tend the Wounded* | 👀 The briars wear an enemy summon down until it is gone, and Pick the Bones hears of it; 👀 a seen-through summon pulls its share less; 👀 Tend the Wounded lifts them |
+| 18 | **The slices' debuffs, and the buffs.** *Weakened* on slices, *Penalised*, *Hastened*, *Echoing*, and the balance's `doubleTrigger` | 👀 Terror weakens the enemy slices, cutting what they pull while it lasts; 👀 a penalised trigger fired off its aspect costs its side; 👀 hastened summons act twice in some seconds, echoing triggers fire twice now and then |
 | 19 | **The anti-aspect in the effects.** For each aspect, a way to meet its anti-aspect's happenings, proposed to Adam with names and numbers before anything is built; the grid weighed again | Read and agree the proposals first; 👀 the grid on Battle and on Sermon, Diplomacy holding in a battle |
 
 Steps 17 and 18 do not lean on each other. 19 waits on Adam's word on its proposals.
