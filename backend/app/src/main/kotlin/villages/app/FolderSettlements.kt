@@ -3,6 +3,7 @@ package villages.app
 import tools.jackson.databind.JsonNode
 import tools.jackson.databind.json.JsonMapper
 import villages.application.settlements.SettlementBuilding
+import villages.application.settlements.SettlementKind
 import villages.application.settlements.SettlementSite
 import villages.application.settlements.SettlementSites
 import villages.domain.Location
@@ -46,7 +47,7 @@ class FolderSettlements(private val masters: Path) : SettlementSites {
 
         private fun siteOf(node: JsonNode): SettlementSite? {
             val id = node.text("id")
-            val type = node.text("type")?.let { runCatching { StructureType(it) }.getOrNull() }
+            val type = node.text("type")?.let(SettlementKind::of)
             val level = node["level"]?.takeIf { it.isInt }?.asInt()
             val name = node.text("name")
             val lon = node["at"]?.get(0)?.takeIf { it.isNumber }?.asDouble()
@@ -54,7 +55,7 @@ class FolderSettlements(private val masters: Path) : SettlementSites {
             if (id == null || type == null || level == null || name == null || lon == null || lat == null) {
                 return null
             }
-            if (!type.isASettlement || level !in 1..3 || lon !in -180.0..180.0 || lat !in -90.0..90.0) {
+            if (level !in 1..3 || lon !in -180.0..180.0 || lat !in -90.0..90.0) {
                 return null
             }
             val radius = node["radius"]?.takeIf { it.isNumber }?.asDouble() ?: 0.0

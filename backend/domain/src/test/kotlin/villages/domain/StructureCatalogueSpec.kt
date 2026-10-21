@@ -37,10 +37,4 @@ class StructureCatalogueSpec : StringSpec({
         shouldThrow<IllegalArgumentException> { StructureCatalogue(emptyMap()) }
     }
 
-    "a village and a fishing village are settlements, and nothing else is" {
-        StructureType("village").isASettlement shouldBe true
-        StructureType("fishingVillage").isASettlement shouldBe true
-        StructureType("castle").isASettlement shouldBe false
-        StructureType("harbour").isASettlement shouldBe false
-    }
 })

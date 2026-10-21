@@ -81,7 +81,7 @@ class GatewayConfig {
             instrumentsFor = gate.takeIf { it.forSome }?.let { it::openTo },
             worldKept = world,
             settlements = {
-                opening.settlementsTally()?.let { SettlementsNow(it.sites, it.standing, it.passedOver, it.orphans) }
+                opening.settlementsTally()?.let { SettlementsNow(it.sites, it.standing, it.passedOver, it.buildings) }
             },
 
             structureCatalogue = { shelf.structures },

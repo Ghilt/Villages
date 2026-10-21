@@ -23,7 +23,7 @@ export const welcomeFrameSchema = z.object({
       sites: z.number().int(),
       standing: z.number().int(),
       passedOver: z.number().int(),
-      orphans: z.number().int(),
+      buildings: z.number().int(),
     })
     .nullable()
     .optional(),

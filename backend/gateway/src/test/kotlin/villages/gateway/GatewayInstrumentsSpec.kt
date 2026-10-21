@@ -81,7 +81,7 @@ class GatewayInstrumentsSpec : StringSpec({
     }
 
     "a window is told at hello how many settlements the world has, only while the instruments are open" {
-        val counted = villages.protocol.SettlementsNow(sites = 12, standing = 10, passedOver = 1, orphans = 1)
+        val counted = villages.protocol.SettlementsNow(sites = 12, standing = 10, passedOver = 1, buildings = 70)
         fun welcomeFrom(rig: Rig): Welcome {
             val sent = mutableListOf<ServerFrame>()
             rig.connect { sent += it }.receive(hello)

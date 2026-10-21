@@ -175,7 +175,7 @@ export function WorldSection({ map }: WorldSectionProps) {
         >
           Settlements: {settlements.standing.toLocaleString()} standing on the master's{' '}
           {settlements.sites.toLocaleString()} sites, {settlements.passedOver.toLocaleString()} passed over
-          for a seat, {settlements.orphans.toLocaleString()} on no site
+          for a seat; {settlements.buildings.toLocaleString()} of their buildings standing
         </p>
       )}
       <p className="debug__quiet">

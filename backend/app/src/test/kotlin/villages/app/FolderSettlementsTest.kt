@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import villages.application.settlements.SettlementBuilding
+import villages.application.settlements.SettlementKind
 import villages.application.settlements.SettlementSite
 import villages.domain.Location
 import villages.domain.StructureType
@@ -32,7 +33,7 @@ class FolderSettlementsTest {
             listOf(
                 SettlementSite(
                     "ruin:Q1792:0",
-                    StructureType.VILLAGE,
+                    SettlementKind.VILLAGE,
                     3,
                     "village by the ruins of Dantzic",
                     Location(54.42, 18.71),
@@ -46,7 +47,7 @@ class FolderSettlementsTest {
                 ),
                 SettlementSite(
                     "site:1130:325",
-                    StructureType.FISHING_VILLAGE,
+                    SettlementKind.FISHING_VILLAGE,
                     1,
                     "fishing village on the Lake of Geneva",
                     Location(46.4512346, 6.5123457),

@@ -21,12 +21,13 @@ import {
   sitesSoFar,
 } from '../src/settlementSites.ts';
 import type { Candidate, RuinPlace, Site } from '../src/settlementSites.ts';
+import { SETTLEMENT_SIDES } from '../src/settlementLayout.ts';
 import { SettlementNamer } from '../src/settlementNames.ts';
 import { fileSettlements } from '../src/settlementsFile.ts';
 import type { Region } from '../src/settlementNames.ts';
 import { parseSettlements, unitsOfKm } from '../src/settlements.ts';
 import { fromWorld, toWorld } from '../src/sphere.ts';
-import { CULTURES, parseStructureCatalogue } from '../src/structures.ts';
+import { CULTURES } from '../src/structures.ts';
 import type { Culture } from '../src/structures.ts';
 
 import { TILE, WorldTiles } from './lib/classTiles.ts';
@@ -55,7 +56,7 @@ import {
  * `world/settlements.json`: some beside every ruin, the rest in open country, each on a corner of the ground's lattice
  * with an id that outlives a repaint. Writes them into `world/ground/<master>/settlements.json`, which only the game
  * server reads: it raises a settlement on every site the world lacks, at the opening (decision record 0114). A
- * settlement's square is the structures' catalogue's footprint for a hamlet. With `--picture` it also draws the sites
+ * settlement's square is a hamlet's, `SETTLEMENT_SIDES`. With `--picture` it also draws the sites
  * over the ground around a few towns into `world/painterly/settlements/`, to look at. A minute or two, most of it
  * reading the tiles. See docs/plans/settlements-and-roads.md.
  */
@@ -67,14 +68,8 @@ const say = (line: string) => console.log(`[${((Date.now() - started) / 1000).to
 
 // Refused before anything is read: a file that cannot be read is said, and nothing is written.
 const file = parseSettlements(await readFile(resolve(REPO, 'world', 'settlements.json'), 'utf8'));
-const catalogue = parseStructureCatalogue(
-  await readFile(resolve(REPO, 'world', 'catalogues', 'structures.json'), 'utf8'),
-);
-const village = catalogue.types.find((one) => one.type === 'village');
-if (village === undefined) {
-  throw new Error('world/catalogues/structures.json has no village, whose footprint is a settlement square');
-}
-const side = village.footprint[0]!;
+// A hamlet's square: what a site keeps clear of a ruin and of the sea.
+const side = SETTLEMENT_SIDES[0];
 const ruinsFile = parseRuins(await readFile(resolve(REPO, 'world', 'ruins.json'), 'utf8'));
 const palette = JSON.parse(await readFile(PALETTE, 'utf8')) as Palette & { master: { width: number } };
 const render = JSON.parse(await readFile(RENDER, 'utf8')) as { colours: Record<string, string>; sea: string };
@@ -162,12 +157,11 @@ const namer = new SettlementNamer(
       }
     : null,
 );
-const words = new Map(catalogue.types.map((one) => [one.type, one.words]));
 const nameOf = (site: Site): string => {
   const [lng, lat] = placeOf(site);
   return namer.nameOf(
     { type: site.type, by: site.by, first: site.id.endsWith(':0'), lng, lat },
-    words.get(site.type)![cultureOf(site)],
+    file.words[site.type][cultureOf(site)] ?? site.type,
   );
 };
 const nameById = new Map(sites.map((site) => [site.id, nameOf(site)]));

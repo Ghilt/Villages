@@ -2,7 +2,7 @@
 
 - Status: accepted
 - Date: 2026-10-21
-- Amended 2026-10-21 by 0114: the opening also raises a settlement on every settlement site the world lacks, after the
+- Amended 2026-10-21 by 0114, and by 0117 the same day, building by building: the opening also raises a settlement on every settlement site the world lacks, after the
   bots, and passes over a site nearer a bot's seat than the balance's `settlements.clearKm`
 
 ## Context

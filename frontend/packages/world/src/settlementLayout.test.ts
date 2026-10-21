@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { BUILDING_SIDES, SETTLEMENT_SIDES, settlementIn } from './settlementLayout.ts';
 import { parseStructureCatalogue } from './structures.ts';
 import type { Building, DiamondFooting, FootingOf, LaidOut } from './settlementLayout.ts';
-import { inSquare, onStreet } from './settlements.ts';
+import { inSquare, onStreet, parseSettlements } from './settlements.ts';
 
 const land: FootingOf = () => 'land';
 /** The sea to the front and right of a middle at the origin, past a shore running across the square's corner. */
@@ -25,15 +25,14 @@ function baseOf(building: { u: number; v: number; side: number }): [number, numb
 }
 
 describe('a settlement laid out', () => {
-  it("has the square the structures' catalogue gives its type at each level", () => {
-    const catalogue = parseStructureCatalogue(
-      readFileSync(new URL('../../../../world/catalogues/structures.json', import.meta.url), 'utf8'),
+  it('has a square of its level, which the radius world/settlements.json gives the level reaches every corner of', () => {
+    const file = parseSettlements(
+      readFileSync(new URL('../../../../world/settlements.json', import.meta.url), 'utf8'),
     );
-    for (const type of ['village', 'fishingVillage']) {
-      expect(catalogue.types.find((one) => one.type === type)?.footprint).toEqual([...SETTLEMENT_SIDES]);
-      expect(laid(settlementIn('a', 'village', 2, 'european', 0, 0, land)).square.side).toBe(
-        SETTLEMENT_SIDES[1],
-      );
+    for (const level of [1, 2, 3]) {
+      const { side } = laid(settlementIn('a', 'village', level, 'european', 0, 0, land)).square;
+      expect(side).toBe(SETTLEMENT_SIDES[level - 1]);
+      expect(file.radius[level - 1]).toBeGreaterThanOrEqual((side / 2) * Math.SQRT2 - 0.5);
     }
   });
 

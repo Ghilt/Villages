@@ -46,6 +46,8 @@ export interface SettlementsFile {
   readonly levels: { readonly village: number; readonly large: number };
   /** How far from its middle a structure is part of a settlement, in world units, a level at a time. */
   readonly radius: readonly [number, number, number];
+  /** What each kind of settlement is called in each culture: the word its name begins with. */
+  readonly words: Readonly<Record<SettlementType, Readonly<Record<string, string>>>>;
   readonly beside: BesideRuins;
 }
 
@@ -97,6 +99,13 @@ export function parseSettlements(text: string): SettlementsFile {
   const radius = file.radius;
   if (!Array.isArray(radius) || radius.length !== 3 || !radius.every(positive)) {
     throw new Error('world/settlements.json: radius wants three numbers above nought, a level at a time');
+  }
+  const words = (file.words ?? {}) as Record<string, Record<string, unknown> | undefined>;
+  for (const type of SETTLEMENT_TYPES) {
+    const said = words[type];
+    if (said === undefined || !Object.values(said).every((word) => typeof word === 'string' && word !== '')) {
+      throw new Error(`world/settlements.json: words wants what a ${type} is called in each culture`);
+    }
   }
   const beside = (file.beside ?? {}) as Partial<Record<keyof BesideRuins, unknown>>;
   const sites = (beside.sites ?? {}) as Partial<Record<Tier, unknown>>;

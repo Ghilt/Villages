@@ -200,24 +200,6 @@
       "footprint": [3, 3, 3],
       "yields": {},
       "slots": []
-    },
-    "village": {
-      "words": { "european": "village", "islamic": "village", "eastAsian": "village", "african": "village" },
-      "significance": [6, 8, 10],
-      "sightKm": [8, 10, 12],
-      "groundHeight": [4.5, 5, 5.5],
-      "footprint": [7, 13, 19],
-      "yields": {},
-      "slots": []
-    },
-    "fishingVillage": {
-      "words": { "european": "fishing village", "islamic": "fishing village", "eastAsian": "fishing village", "african": "fishing village" },
-      "significance": [6, 8, 10],
-      "sightKm": [8, 10, 12],
-      "groundHeight": [4.5, 5, 5.5],
-      "footprint": [7, 13, 19],
-      "yields": {},
-      "slots": []
     }
   }
 }

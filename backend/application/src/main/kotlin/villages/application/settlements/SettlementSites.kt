@@ -3,6 +3,18 @@ package villages.application.settlements
 import villages.domain.Location
 import villages.domain.StructureType
 
+/** What a settlement is: a village, or a fishing village by the water. Not a structure's type, as no structure is one. */
+enum class SettlementKind(val word: String) {
+    VILLAGE("village"),
+    FISHING_VILLAGE("fishingVillage"),
+    ;
+
+    companion object {
+        /** The kind of the word the bake files it by, or null for one that is not a kind of settlement. */
+        fun of(word: String): SettlementKind? = entries.firstOrNull { it.word == word }
+    }
+}
+
 /** A building of a settlement as the bake laid it out: its type of the catalogue, its level, and where its foot is. */
 data class SettlementBuilding(val type: StructureType, val level: Int, val place: Location)
 
@@ -14,7 +26,7 @@ data class SettlementBuilding(val type: StructureType, val level: Int, val place
  */
 data class SettlementSite(
     val id: String,
-    val type: StructureType,
+    val type: SettlementKind,
     val level: Int,
     val name: String,
     val place: Location,
@@ -23,7 +35,6 @@ data class SettlementSite(
     val buildings: List<SettlementBuilding> = emptyList(),
 ) {
     init {
-        require(type.isASettlement) { "a settlement site is a village or a fishing village, not a $type" }
         require(level in 1..3) { "a settlement is a hamlet, a village or a large village, level 1 to 3, not $level" }
     }
 }

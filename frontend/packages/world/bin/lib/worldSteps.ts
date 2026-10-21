@@ -266,7 +266,6 @@ export const WORLD_STEPS: readonly WorldStep[] = [
     perMaster: true,
     from: [
       { path: 'world/settlements.json', is: 'settlements' },
-      { path: 'world/catalogues/structures.json', is: 'catalogues' },
       { path: 'world/ruins.json', is: 'ruins' },
       { path: 'world/cultures.json', is: 'cultures' },
       PALETTE,

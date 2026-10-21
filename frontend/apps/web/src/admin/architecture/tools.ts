@@ -118,7 +118,6 @@ export const TOOLS: readonly Tool[] = [
     group: 'master',
     reads: [
       'settlements',
-      'catalogues',
       'ruins',
       'cultures',
       'palette',

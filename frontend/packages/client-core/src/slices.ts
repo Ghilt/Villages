@@ -82,7 +82,7 @@ export interface SessionState {
    * The world's settlements counted, as welcome said while the instruments are open, or null: the master's sites, the
    * settlements standing on them, the sites passed over for a seat, and the settlements on no site. See 0114.
    */
-  settlements: { sites: number; standing: number; passedOver: number; orphans: number } | null;
+  settlements: { sites: number; standing: number; passedOver: number; buildings: number } | null;
   /**
    * Whether this window has asked to see everything: every house in the cells it holds, whatever its
    * significance, which is Adam's switch and not the player's eye. Off at every load. See decision record 0038.

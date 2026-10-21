@@ -86,12 +86,12 @@ value class StructureId(val value: UUID) {
             StructureId(UUID.nameUUIDFromBytes("${NAMED_AFTER}seat:${house.value}".toByteArray(Charsets.UTF_8)))
 
         /**
-         * The settlement the opening raises on a site the bake chose, by the site's id: worked out from it, so an opening
-         * after a restart raises none twice, and a site that keeps its id through a repaint keeps its settlement. See
-         * decision record 0114.
+         * A building the opening raises of a settlement the bake laid out, by its site's id and its number among the
+         * site's buildings: worked out from them, so an opening after a restart raises none twice, and a site that keeps
+         * its id through a repaint keeps its buildings. See decision records 0114 and 0117.
          */
-        fun ofSettlement(site: String): StructureId =
-            StructureId(UUID.nameUUIDFromBytes("${NAMED_AFTER}settlement:$site".toByteArray(Charsets.UTF_8)))
+        fun ofSettlementBuilding(site: String, number: Int): StructureId =
+            StructureId(UUID.nameUUIDFromBytes("${NAMED_AFTER}settlement:$site:$number".toByteArray(Charsets.UTF_8)))
     }
 }
 

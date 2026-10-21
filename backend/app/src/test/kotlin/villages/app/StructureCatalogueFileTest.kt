@@ -48,9 +48,9 @@ class StructureCatalogueFileTest {
     }
 
     @Test
-    fun `the world's own catalogue reads, nineteen types of three levels`() {
+    fun `the world's own catalogue reads, seventeen types of three levels`() {
         val catalogue = StructureCatalogueFile.parse(File("../../world/catalogues/structures.json").readText())
-        assertEquals(19, catalogue.types.size)
+        assertEquals(17, catalogue.types.size)
         assertTrue(catalogue.types.values.all { it.highest == 3 })
     }
 

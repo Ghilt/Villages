@@ -303,8 +303,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   the one picked and reloads as them, which is how to look at a world from a seeded house's seat, or a bot's; `load`
   arrives as a save's maker the same way, and both are refused while the instruments are closed. See decision records
   0101, 0108 and 0111. Under them, while the instruments are open, a line counts the world's settlements as the game
-  server did when this window came: `Settlements: 7,618 standing on the master's 7,674 sites, 52 passed over for a seat,
-  4 on no site` - the last being settlements a repaint left without a site, which nothing moves (decision record 0114).
+  server did when this window came: `Settlements: 7,618 standing on the master's 7,674 sites, 52 passed over for a seat;
+  43,100 of their buildings standing` - a settlement standing when every building of it does (decision records 0114 and
+  0117).
   What the log says is what was worth saying, through `note(area, message)` in `apps/web/src/log/log.ts`:
   moving the camera about writes nothing, and the cells a move brought back are counted and said in one line
   only when they carried something. `window.villagesPainterly()` gives the paint counters from a console.
@@ -505,13 +506,14 @@ stage alone, with none of the debug panel in it (decision record 0079).
   site and of a road as `settlements.clearKm` says, turning to the next direction past them, so a fresh world, or one
   wiped, stands no castle on a village or across a road. `--villages.house-bots=false` leaves them
   out. See decision record 0108 and `docs/plans/house-bots.md`.
-- The world's own villages: **settlements**. The world opens with them too, after the house bots: a village or a
-  fishing village held by nobody on every settlement site `world:settlements` chose for the world's master, under
-  its name - *village by the ruins of Dantzic*, *fishing village on the Rhone* - and none on a site nearer a bot's
-  castle than the balance's `settlements.clearKm`. Each is a `villages.structure.raised.v1` in the events log; the
-  server's log says `the world is open, with 300 house bots and 7387 settlement sites: 7337 settlements raised, 48
-  passed over for a seat, in 69.7 s` on a fresh world, measured on 2026-10-21, and a restart over a world kept in
-  MongoDB raises none twice, in a second. From zoom 7.5 in the page lays each out in its buildings by `settlementIn`,
+- The world's own villages: **settlements**. The world opens with them too, after the house bots: every building of
+  every settlement site `world:settlements` laid out for the world's master - its houses, a mill, a market - a
+  structure each, held by nobody, named by its settlement - *house in the village by the ruins of Dantzic* - and none
+  on a site nearer a bot's castle than the balance's `settlements.clearKm`. Nothing is raised for the settlement
+  itself: it is its buildings, its name and its radius. Each building is a `villages.structure.raised.v1` in the
+  events log, raised side by side; the server's log says `the world is open, with 300 house bots and 7674 settlement
+  sites: 43424 of their buildings raised, 0 sites passed over for a seat, in 82.7 s` on a fresh world, measured on
+  2026-10-21, and a restart over a world kept in MongoDB raises none twice. From zoom 7.5 in the page lays each out in its buildings by `settlementIn`,
   once the ground about it has come, and draws them from `public/art/settlements.webp`, all of them one thing among
   the trees on its square; further out, and until its ground has come, it is its one mark. A click on any of its
   buildings opens its window. The log's `settlements` line says how many are laid out and in how many buildings, and
@@ -521,7 +523,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   decision record 0114 and `docs/plans/settlements-and-roads.md`.
 - Every type standing at once: **Antarctica**. While the instruments are open the game server raises one structure of
   every type when it starts, held by nobody, at its first level, four to a row about six kilometres apart on the
-  island, the village and the fishing village in a row of their own a row further south and twice as far apart, off the tip of the Antarctic Peninsula, about 63.25 south and 56.03 west - the Antarctic castle at the
+  island, off the tip of the Antarctic Peninsula, about 63.25 south and 56.03 west - the Antarctic castle at the
   north-west corner. Each is a `villages.structure.raised.v1` in the events log, one a type at every start,
   and an id worked out from its type means a server starting over a kept world raises none twice; a world kept
   from before they moved keeps them where they were first raised. A wipe takes them with everything else, and the
@@ -832,7 +834,7 @@ and `-- --drop` takes them off; by hand only.
   `world/settlements.json` changed. `-- --picture` draws the sites over the ground around Paris, Grand Cairo, Jeddo,
   New Orleans and Vienna into `world/painterly/settlements/` - white in open country, orange beside a ruin, blue a
   fishing village, larger a level up, every ruin a faint ring; `--around` and `--scale` as the ruins'. The game
-  server raises a settlement on each at the opening: see `docs/plans/settlements-and-roads.md`.
+  server raises every building of each at the opening: see `docs/plans/houses-bridges-and-road-render.md`.
 - The roads of 1790: `npm run world:roads --prefix frontend` joins every settlement site to its neighbours and to the
   ruined towns near it, by `world/roads.json`: two places are joined when no third stands nearer both, no further
   apart than the longest road and never one ruin to another, each road the cheapest way over the zoom-7 tiles by

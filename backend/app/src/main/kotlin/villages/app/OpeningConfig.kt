@@ -102,7 +102,7 @@ internal fun Opening.openAndSay(): Opening.Opened {
         openingLog.info("the world is open, with {} house bots, in {} s", opened.bots, "%.1f".format(seconds))
     } else {
         openingLog.info(
-            "the world is open, with {} house bots and {} settlement sites: {} settlements raised, {} passed over for a seat, in {} s",
+            "the world is open, with {} house bots and {} settlement sites: {} of their buildings raised, {} sites passed over for a seat, in {} s",
             opened.bots, settlements.sites, settlements.raised, settlements.passedOver, "%.1f".format(seconds),
         )
     }
