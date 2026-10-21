@@ -1,6 +1,6 @@
 import {
-  BRIDGE_AXES,
-  BRIDGE_KINDS,
+  BRIDGE_SPAN,
+  BRIDGE_WAYS,
   CULTURES,
   JETTY_AXES,
   PIECE_SIDES,
@@ -9,6 +9,7 @@ import {
   jettyKey,
   settlementPieceKey,
 } from '@villages/world';
+import type { BridgeWay } from '@villages/world';
 
 import { bridgeFootingOf } from './footing';
 import { useAtlas } from './frame/Atlas';
@@ -86,19 +87,17 @@ export function SettlementPieces() {
             <Lying atlas={atlas} at={jettyKey(axis)} axis={axis} span={3.4} name={`jetty along ${axis}`} />
           </span>
         ))}
-        {BRIDGE_KINDS.flatMap((kind) =>
-          BRIDGE_AXES.map((axis) => (
-            <span key={`${kind}-${axis}`} className={placeholder(bridgeKey(kind, axis))}>
-              <Lying
-                atlas={atlas}
-                at={bridgeKey(kind, axis)}
-                axis={axis}
-                span={4}
-                name={`${kind} bridge along ${axis}`}
-              />
-            </span>
-          )),
-        )}
+        {BRIDGE_WAYS.map((way) => (
+          <span key={way} className={placeholder(bridgeKey(way))}>
+            <Lying
+              atlas={atlas}
+              at={bridgeKey(way)}
+              axis={way}
+              span={BRIDGE_SPAN}
+              name={`bridge along ${way}`}
+            />
+          </span>
+        ))}
       </div>
     </section>
   );
@@ -114,7 +113,7 @@ function Lying({
 }: {
   atlas: StructuresAtlas;
   at: string;
-  axis: 'u' | 'v' | 'uv' | 'vu';
+  axis: BridgeWay;
   span: number;
   name: string;
 }) {

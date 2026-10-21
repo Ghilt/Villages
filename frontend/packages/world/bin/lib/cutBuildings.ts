@@ -51,6 +51,28 @@ export async function drawMissing(into: Folder, file: string, svg: () => string)
   return true;
 }
 
+/**
+ * Draws a placeholder from a picture made `fine` times larger than it is kept, where a folder has no such file, never over
+ * one that is there; says whether it drew it.
+ */
+export async function drawMissingPicture(
+  into: Folder,
+  file: string,
+  picture: () => Rgba,
+  fine: number,
+): Promise<boolean> {
+  const path = resolve(into.dir, file);
+  if (existsSync(path)) return false;
+  const { width, height, data } = picture();
+  const png = await sharp(Buffer.from(data), { raw: { width, height, channels: 4 } })
+    .resize(Math.round(width / fine), Math.round(height / fine), { kernel: 'lanczos3' })
+    .png({ compressionLevel: 9 })
+    .toBuffer();
+  await writeFile(path, png);
+  into.placeholders[file] = sha(png);
+  return true;
+}
+
 /** Every picture a folder holds, by its name, in order. */
 export async function picturesIn(from: Folder): Promise<{ from: Folder; file: string }[]> {
   return (await readdir(from.dir))
@@ -63,7 +85,7 @@ export async function picturesIn(from: Folder): Promise<{ from: Folder; file: st
 export type Sizing =
   { readonly tall: number } | { readonly drawnPerUnit: number; readonly cutPerUnit: number };
 
-/** A picture to cut: from where, under what key, and whether it stands on its front corner or its middle. */
+/** A picture to cut: from where, under what key, and where on it it stands. */
 export interface ToCut {
   readonly from: Folder;
   readonly file: string;
@@ -71,8 +93,11 @@ export interface ToCut {
   readonly source: string;
   /** A sign rather than a building, which casts no shadow. */
   readonly pin: boolean;
-  /** A building stands on the front corner of its base; a bridge on the middle of its deck. */
-  readonly stands: 'corner' | 'middle';
+  /**
+   * A building stands on the front corner of its base; a jetty on the middle of its deck, halfway between where its ends
+   * are lowest; the bridge on the middle of its picture, where its deck's middle is drawn on the ground.
+   */
+  readonly stands: 'corner' | 'middle' | 'centre';
 }
 
 /**
@@ -119,7 +144,12 @@ export async function cutAtlas(
       .raw()
       .toBuffer();
     // Read before the picture is scaled down, where the corner is still sharp.
-    const foot = stands === 'corner' ? { x: footOfBuilding(cropped), y: null } : footOfBridge(cropped);
+    const foot =
+      stands === 'corner'
+        ? { x: footOfBuilding(cropped), y: null }
+        : stands === 'centre'
+          ? { x: (whole.width / 2 - box.x) / box.width, y: (whole.height / 2 - box.y) / box.height }
+          : footOfBridge(cropped);
     pieces.push({
       key: from.keyOf(file)!,
       source,

@@ -11,9 +11,8 @@ import { critterPlaceholderKinds } from './critterPlaceholders.ts';
 import { MARK_NAMES, placeholderKinds } from './placeholderArt.ts';
 import { ruinFrameKey, ruinPictureName } from './ruinLooks.ts';
 import { RUIN_PIECES } from './ruins.ts';
+import { BRIDGE_WAYS } from './bridgeModel.ts';
 import {
-  BRIDGE_AXES,
-  BRIDGE_KINDS,
   JETTY_AXES,
   SETTLEMENT_PIECES,
   bridgeFile,
@@ -65,7 +64,7 @@ describe("the sprites folder, which is Adam's", () => {
       ...JETTY_AXES.map(jettyFile),
     ];
     expect(namesIn('settlements').sort()).toEqual(pieces.map((file) => file.slice(0, -4)).sort());
-    const bridges = BRIDGE_KINDS.flatMap((kind) => BRIDGE_AXES.map((axis) => bridgeFile(kind, axis)));
+    const bridges = BRIDGE_WAYS.map(bridgeFile);
     expect(namesIn('bridges').sort()).toEqual(bridges.map((file) => file.slice(0, -4)).sort());
   });
 

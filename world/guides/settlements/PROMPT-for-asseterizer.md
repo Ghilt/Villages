@@ -1,4 +1,4 @@
-I want asseterizer to paint the pieces of Villages' settlements and its bridges, in the map's own perspective, over
+I want asseterizer to paint the pieces of Villages' settlements, in the map's own perspective, over
 placeholders a Villages session drew for them. Villages now has villages and fishing villages that nobody holds,
 dotted over the countryside, and roads between them that cross rivers by bridges. Please plan this as a new section
 of PLAN.md with steps and 🔍 checks, the way we always work, and stop for my "perform up to X" before building
@@ -6,10 +6,11 @@ anything.
 
 ## The pictures
 
-Thirty-eight files, every one a placeholder now, in Villages' repository:
+Thirty files, every one a placeholder now, in Villages' repository:
 
     E:\Code\Villages\world\sprites\settlements\    30 files, and placeholders.json
-    E:\Code\Villages\world\sprites\bridges\        8 files, and placeholders.json
+
+The bridges have a brief of their own now, `world/guides/bridges/`: one stone bridge modelled in 3D on eight ways.
 
 They reach that checkout once the work that made them is on Villages' main; until then they are in the worktree
 `E:\Code\Villages\.claude\worktrees\road-system-settlements-4caa66\world\sprites\`. Asseterizer's root is the main
@@ -18,8 +19,6 @@ checkout's `world`, so wait for main rather than adding the worktree as a root: 
 - `<piece>-<culture>.png`, seven pieces in each of the four cultures (`european`, `islamic`, `eastAsian`, `african`):
   a `cottage`, a `house`, a `barn`, a `chapel`, a `fishingHut`, a `netRack` and a `boat`.
 - `jetty-u.png` and `jetty-v.png`: a jetty of planks on posts, along each of the ground's two axes.
-- `timber-<axis>.png` and `stone-<axis>.png` for each of four axes, `u`, `v`, `uv` and `vu`: the ground's two axes and
-  its two diagonals. A bridge reads the same from either end, so these four are its eight directions.
 
 **Each placeholder is the block-out to paint over.** It is drawn in exactly the map's projection, its masses in plain
 shaded shapes in the culture's colours, at its true footprint and height. Use the placeholder itself as image 1, "keep
@@ -30,7 +29,8 @@ its shape, its perspective and its footprint", as the castle's block-out was for
 Copy `E:\Code\Villages\world\guides\settlements\` into this repository first (say `docs/guides/villages-settlements/`):
 
 - `1-every-piece-on-its-footprint.png`: every piece in every culture, the square its base covers dashed in red.
-- `2-every-bridge-and-jetty-on-its-axis.png`: every bridge and jetty over the strip of ground its deck lies along.
+- `2-every-bridge-and-jetty-on-its-axis.png`: every jetty over the strip of ground its deck lies along; the bridges in
+  it are the old timber and stone ones, which are retired.
 - The buildings' guides in `..\buildings\`, and their `PROMPT-for-asseterizer.md`, say the same perspective at more
   length; `draw_guides.py` there has the projection in Python.
 
@@ -72,10 +72,9 @@ whitewashed cubes, flat roofs with low parapets, small windows. East Asian: dark
 and flaring at the eaves. African: round mud huts under conical thatch, walls of a warm earth colour.
 
 **The jetties** are timber planks on posts, three and a half units long and one wide, a post at each end and one
-between, standing in water that is not drawn. **The bridges** are four units long and about one wide: timber, a plank
-deck with a railing either side on three trestles; and stone, a masonry deck on arches with a low parapet either side.
-Paint **each end meeting the bank at the edge of the picture**, and nothing hanging below the ends: Villages stands a
-bridge on the middle of its deck, halfway between where its two ends are lowest, and draws the river under it itself.
+between, standing in water that is not drawn. Paint **each end meeting the bank at the edge of the picture**, and
+nothing hanging below the ends: Villages stands a jetty on the middle of its deck, halfway between where its two ends
+are lowest, and draws the water under it itself.
 
 ## Watch for
 
@@ -85,7 +84,6 @@ jetty, no boat moored to it.
 
 ## Done means
 
-The European cottage, house and chapel, the European boat and the timber bridge along `u`, regenerated as candidates
-whose bases lie on the dashed squares of the guide - and whose bridge lies along its strip. Then the other pieces in
-all four cultures, the jetties, and the other seven bridges, the same way. I pick in the verify queue as usual; a pick
+The European cottage, house and chapel and the European boat, regenerated as candidates whose bases lie on the dashed
+squares of the guide. Then the other pieces in all four cultures and the jetties, the same way. I pick in the verify queue as usual; a pick
 writes over the file in Villages' `world/sprites/`, and its dev server cuts it into the map a moment later.

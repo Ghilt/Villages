@@ -1,12 +1,11 @@
 import { facesSvg } from '../src/blockOut.ts';
+import { BRIDGE_WAYS } from '../src/bridgeModel.ts';
+import { renderBridge } from '../src/bridgeRender.ts';
 import {
-  BRIDGE_AXES,
-  BRIDGE_KINDS,
   CUT_PER_UNIT,
   DRAWN_PER_UNIT,
   JETTY_AXES,
   SETTLEMENT_PIECES,
-  bridgeFaces,
   bridgeFile,
   jettyFaces,
   jettyFile,
@@ -27,7 +26,14 @@ import {
 import { keyOfStructureMarkFile, structureMarkFile, structureMarkSvg } from '../src/structureMarks.ts';
 import { CULTURES } from '../src/structures.ts';
 
-import { cutAtlas, drawMissing, folderOf, picturesIn, savePlaceholders } from './lib/cutBuildings.ts';
+import {
+  cutAtlas,
+  drawMissing,
+  drawMissingPicture,
+  folderOf,
+  picturesIn,
+  savePlaceholders,
+} from './lib/cutBuildings.ts';
 import { ART_DIR, BRIDGES_DIR, SETTLEMENTS_DIR, STRUCTURE_MARKS_DIR, STRUCTURES_DIR } from './lib/paths.ts';
 
 /**
@@ -45,8 +51,8 @@ import { ART_DIR, BRIDGES_DIR, SETTLEMENTS_DIR, STRUCTURE_MARKS_DIR, STRUCTURES_
  * and cut the same way into the same atlas, with a record of their own.
  *
  * Then the same for `world/sprites/settlements/` - a cottage, a house, a barn, a chapel, a fishing hut, a net rack and a
- * boat in every culture, and a jetty along each axis - and `world/sprites/bridges/`, timber and stone on each of the
- * lattice's four axes: placeholders drawn in the map's own camera at `DRAWN_PER_UNIT` pixels to the world unit, the
+ * boat in every culture, and a jetty along each axis - and `world/sprites/bridges/`, the bridge along each of its eight
+ * ways, modelled in 3D (`bridgeModel.ts`): placeholders drawn in the map's own camera at `DRAWN_PER_UNIT` pixels to the world unit, the
  * scale a picture painted over one keeps, cut at `CUT_PER_UNIT` into `public/art/settlements.webp`, each frame saying how
  * many world units it stands. Nothing is written when nothing is new. Seconds. See docs/plans/structures.md and
  * docs/plans/settlements-and-roads.md.
@@ -85,10 +91,10 @@ for (const piece of SETTLEMENT_PIECES) {
 for (const axis of JETTY_AXES) {
   await draw(pieces, jettyFile(axis), () => facesSvg(jettyFaces(axis), DRAWN_PER_UNIT));
 }
-for (const kind of BRIDGE_KINDS) {
-  for (const axis of BRIDGE_AXES) {
-    await draw(bridges, bridgeFile(kind, axis), () => facesSvg(bridgeFaces(kind, axis), DRAWN_PER_UNIT));
-  }
+// The bridge is modelled in 3D and drawn three times larger, so its edges are smooth once it is shrunk.
+for (const way of BRIDGE_WAYS) {
+  if (await drawMissingPicture(bridges, bridgeFile(way), () => renderBridge(way, DRAWN_PER_UNIT, 3), 3))
+    drawn += 1;
 }
 
 const structures = await cutAtlas(
@@ -126,7 +132,7 @@ const settlements = await cutAtlas(
       file,
       source: `../bridges/${file}`,
       pin: false,
-      stands: 'middle' as const,
+      stands: 'centre' as const,
     })),
   ],
   { drawnPerUnit: DRAWN_PER_UNIT, cutPerUnit: CUT_PER_UNIT },

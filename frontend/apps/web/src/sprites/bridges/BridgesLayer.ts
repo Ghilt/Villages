@@ -15,7 +15,7 @@ import { bridgesAmong, deckOf } from './bridges';
 import type { Bridge } from './bridges';
 
 /*
- * The bridges, drawn: every bridge among the roads the game server sent, its picture by its kind and its axis from the
+ * The bridges, drawn: every bridge among the roads the game server sent, its picture by the way it runs from the
  * settlements' atlas, hung at the middle of its deck and scaled to its span, standing among the trees on the strip of
  * its deck as a structure stands on its footprint (0110). Where its road is worn into the ground it is drawn, from zoom
  * 7.5 in, fading in as the worked ground does; further out, and until the pictures are read, nothing. See
@@ -77,7 +77,7 @@ export function createBridgesLayer(pictures: SettlementPictures, standing: Stand
       const things: StandingThing[] = [];
       drawn = 0;
       for (const one of held.values()) {
-        const picture = pictures.of(bridgeKey(one.bridge.kind, one.bridge.axis));
+        const picture = pictures.of(bridgeKey(one.bridge.axis));
         if (picture === null) continue;
         if (one.sprite === null || one.sprite.texture !== picture.texture) {
           one.sprite?.destroy();

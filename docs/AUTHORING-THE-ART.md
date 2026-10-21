@@ -80,20 +80,23 @@ atlas of their own, `public/art/settlements.webp`. `world/sprites/settlements/` 
 a cottage, a house, a barn, a chapel - each culture's own place of worship: a chapel, a small mosque, a
 shrine-temple, a thatched shrine - a fishing hut, a net rack and a boat - a smack, a felucca, a sampan, a dugout -
 in each of the four cultures, and `jetty-u.png` and `jetty-v.png`, a jetty along each of the ground's two axes;
-`world/sprites/bridges/` holds `timber-<axis>.png` and `stone-<axis>.png` for each of its four axes, `u`, `v`,
-`uv` and `vu`, the two axes and the two diagonals, which with a bridge reading the same from either end are its
-eight directions. Thirty-eight placeholders, each with its own `placeholders.json`, drawn as block-outs in the
-map's own camera - the ground turned 26 degrees, seen from the south and 45 degrees above, the light from the right
+`world/sprites/bridges/` holds `bridge-<way>.png`, one stone bridge for every culture along each of the eight ways a
+bridge runs - the ground's two axes `u` and `v`, its two diagonals `uv` and `vu`, and the four halfway between them,
+`u-uv`, `uv-v`, `v-vu` and `vu-u` - which with a bridge reading the same from either end are every direction.
+Thirty-eight placeholders, each with its own `placeholders.json`, drawn as block-outs in the map's own camera - the ground turned 26 degrees, seen from the south and 45 degrees above, the light from the right
 - at 200 pixels to the world unit. **Paint over a placeholder at its own size**, as asseterizer does, because the
 size is the scale: the tool reads how many world units a picture stands from its pixels at that scale, and cuts it
 at 24 to the unit. A piece stands on the front corner of its base, its lowest point, on a square of the ground's
 diamonds two or three a side, as the structures' pictures do, and casts its shadow as they do; paint no shadow. A
-bridge and a jetty stand on the middle of their deck, which the tool finds halfway between where their two ends
-are lowest, so paint each end meeting the bank at the edge of the picture, and nothing hanging below. Never mirror
+jetty stands on the middle of its deck, which the tool finds halfway between where its two ends are lowest, so paint
+each end meeting the bank at the edge of the picture, and nothing hanging below. The bridge is modelled in 3D
+(`bridgeModel.ts`) and rendered with a depth buffer (`bridgeRender.ts`), the middle of its deck on the ground at the
+middle of its picture, which is where the map stands it: so **keep a bridge's file the size it is and the bridge
+where it is in it**. The map stretches it along its deck to each river's span. Never mirror
 one direction to make another: the light would come from the left. Each is shown on `/admin/inspect-structures`,
 standing on its footprint or lying over its axis's diamonds, and on `/admin/inspect-pictures`. The block-outs are
-`packages/world/src/settlementLooks.ts`; the brief for painting them is `world/guides/settlements/`. See
-`docs/plans/settlements-and-roads.md`.
+`packages/world/src/settlementLooks.ts`; the briefs for painting them are `world/guides/settlements/` and
+`world/guides/bridges/`. See `docs/plans/settlements-and-roads.md` and `docs/plans/houses-bridges-and-road-render.md`.
 
 **A critter is a strip of frames**, cut by a tool of its own from `world/sprites/critters/`, with its own
 `placeholders.json`: `<kind>.png` for every kind in `world/critters.json`, its frames side by side from left to

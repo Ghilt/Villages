@@ -78,6 +78,8 @@ export {
   settlementPieceKey,
 } from './settlementLooks.ts';
 export type { BridgeAxis, BridgeKind, JettyAxis, SettlementPiece } from './settlementLooks.ts';
+export { BRIDGE_WAYS, WAY_STEPS } from './bridgeModel.ts';
+export type { BridgeWay } from './bridgeModel.ts';
 export {
   SETTLEMENT_TYPES,
   inSquare,

@@ -1,4 +1,5 @@
-import { GROUND_LATTICE, frameOf, worldXOf, worldYOf } from '@villages/world';
+import { GROUND_LATTICE, WAY_STEPS, frameOf, worldXOf, worldYOf } from '@villages/world';
+import type { BridgeWay } from '@villages/world';
 
 /**
  * How a building stands on its footprint, drawn as the map draws it closest in: the camera looking north and down at
@@ -59,13 +60,12 @@ export function footingOf(height: number, aspect: number, foot: number, side: nu
   };
 }
 
-/** The four ways a bridge lies on the lattice, as steps along its two axes: either axis, or either diagonal. */
-const AXES: Readonly<Record<'u' | 'v' | 'uv' | 'vu', readonly [number, number]>> = {
-  u: [1, 0],
-  v: [0, 1],
-  uv: [Math.SQRT1_2, Math.SQRT1_2],
-  vu: [Math.SQRT1_2, -Math.SQRT1_2],
-};
+/** Which way a bridge's deck runs along the lattice's two axes, a unit long. */
+function directionOf(way: BridgeWay): readonly [number, number] {
+  const [u, v] = WAY_STEPS[way];
+  const length = Math.hypot(u, v);
+  return [u / length, v / length];
+}
 
 /**
  * A bridge [height] world units tall, [aspect] times as wide, standing at [footX] across its picture and [footY] down
@@ -73,14 +73,14 @@ const AXES: Readonly<Record<'u' | 'v' | 'uv' | 'vu', readonly [number, number]>>
  * lie along its diamonds or not.
  */
 export function bridgeFootingOf(
-  axis: keyof typeof AXES,
+  axis: BridgeWay,
   span: number,
   height: number,
   aspect: number,
   footX: number,
   footY: number,
 ): Footing {
-  const [du, dv] = AXES[axis];
+  const [du, dv] = directionOf(axis);
   const diamonds: Point[][] = [];
   const reach = Math.ceil(span);
   for (let u = -reach; u < reach; u += 1) {

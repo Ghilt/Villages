@@ -1,15 +1,18 @@
 import { along, box, gable, hip, round } from './blockOut.ts';
-import type { Face, P3 } from './blockOut.ts';
+import type { Face } from './blockOut.ts';
+import { BRIDGE_LENGTH, BRIDGE_WAYS } from './bridgeModel.ts';
+import type { BridgeWay } from './bridgeModel.ts';
 import { CULTURES } from './structures.ts';
 import type { Culture } from './structures.ts';
 
 /*
- * The placeholder pictures of a settlement's pieces and of the bridges, drawn in code in the map's own camera - the
+ * The placeholder pictures of a settlement's pieces, drawn in code in the map's own camera - the
  * ground turned 26 degrees onto its lattice, the camera looking north and down at 45, the light from the right - so
  * that each stands on the diamonds of its footprint as a painted one will: the front corner of its base the lowest
  * thing in it. Block-outs of boxes, roofs, round huts, hulls and decks in each culture's colours, for asseterizer to
  * paint over (decision record 0114, docs/plans/settlements-and-roads.md). Data, as the structures' are, so the tool
- * that draws them and the tests that hold them read the same shapes.
+ * that draws them and the tests that hold them read the same shapes. The bridge is modelled in 3D instead
+ * (`bridgeModel.ts`); its files and keys are named here, beside the pieces'.
  */
 
 /** The pieces a settlement is laid out in, each in every culture; the jetty is one for all, along each axis. */
@@ -40,7 +43,7 @@ export const JETTY = 'jetty';
 export const JETTY_AXES = ['u', 'v'] as const;
 export type JettyAxis = (typeof JETTY_AXES)[number];
 
-/** The bridges: two kinds, each along one of the lattice's four axes. A bridge reads the same from either end. */
+/** The kinds and axes the roads' records name a bridge by, until they name only its way. */
 export const BRIDGE_KINDS = ['timber', 'stone'] as const;
 export type BridgeKind = (typeof BRIDGE_KINDS)[number];
 export const BRIDGE_AXES = ['u', 'v', 'uv', 'vu'] as const;
@@ -189,62 +192,8 @@ export function jettyFaces(axis: JettyAxis): Face[] {
   ];
 }
 
-/** How long a bridge's picture is drawn, end to end, in world units: the map scales it to each bridge's span. */
-export const BRIDGE_SPAN = 4;
-
-/** A bridge's deck along its axis, its middle at the frame's origin, and what holds it up: piers, or stone arches. */
-export function bridgeFaces(kind: BridgeKind, axis: BridgeAxis, span = BRIDGE_SPAN): Face[] {
-  const [da, db] =
-    axis === 'u'
-      ? [1, 0]
-      : axis === 'v'
-        ? [0, 1]
-        : axis === 'uv'
-          ? [Math.SQRT1_2, Math.SQRT1_2]
-          : [Math.SQRT1_2, -Math.SQRT1_2];
-  const [wa, wb] = [-db, da];
-  const deck = kind === 'stone' ? 0.7 : 0.45;
-  const at = (s: number, w: number, z: number): P3 => [s * da + w * wa, s * db + w * wb, z];
-  const half = span / 2;
-  const slab = (
-    s0: number,
-    s1: number,
-    w0: number,
-    w1: number,
-    z0: number,
-    z1: number,
-    fill: string,
-  ): Face[] => [
-    {
-      at: [at(s0, w0, z0), at(s1, w0, z0), at(s1, w0, z1), at(s0, w0, z1)],
-      fill,
-      normal: [-wb * 0.6, wa * 0.6, 0],
-    },
-    {
-      at: [at(s0, w1, z0), at(s1, w1, z0), at(s1, w1, z1), at(s0, w1, z1)],
-      fill,
-      normal: [wb * 0.6, -wa * 0.6, 0],
-    },
-    { at: [at(s0, w0, z1), at(s1, w0, z1), at(s1, w1, z1), at(s0, w1, z1)], fill, normal: [0, 0, 1] },
-  ];
-  const wood = '#8a6a48';
-  const stone = '#b7ab96';
-  const faces: Face[] = [];
-  if (kind === 'stone') {
-    faces.push(...slab(-half, half, -0.55, 0.55, 0, deck, stone));
-    faces.push(
-      ...slab(-half, half, -0.6, -0.5, deck, deck + 0.3, stone),
-      ...slab(-half, half, 0.5, 0.6, deck, deck + 0.3, stone),
-    );
-  } else {
-    for (const s of [-half + 0.4, 0, half - 0.4])
-      faces.push(...slab(s - 0.08, s + 0.08, -0.45, 0.45, -0.3, deck, '#5a4230'));
-    faces.push(...slab(-half, half, -0.5, 0.5, deck - 0.1, deck, wood));
-    for (const w of [-0.48, 0.42])
-      faces.push(...slab(-half, half, w, w + 0.06, deck + 0.35, deck + 0.42, wood));
-  }
-  return faces;
-}
+/** How long a bridge's picture is drawn, end to end, in world units: the map stretches it to each bridge's span. */
+export const BRIDGE_SPAN = BRIDGE_LENGTH;
 
 /** The file a piece's picture is in: `cottage-european.png`. */
 export function settlementPieceFile(piece: SettlementPiece, culture: Culture): string {
@@ -256,9 +205,9 @@ export function jettyFile(axis: JettyAxis): string {
   return `${JETTY}-${axis}.png`;
 }
 
-/** The file a bridge's picture is in: `timber-u.png`. */
-export function bridgeFile(kind: BridgeKind, axis: BridgeAxis): string {
-  return `${kind}-${axis}.png`;
+/** The file the bridge's picture along a way is in: `bridge-u-uv.png`. */
+export function bridgeFile(way: BridgeWay): string {
+  return `bridge-${way}.png`;
 }
 
 /** How many pixels to the world unit a placeholder is drawn at: the scale a picture painted over one keeps. */
@@ -266,7 +215,7 @@ export const DRAWN_PER_UNIT = 200;
 /** And how many it is cut at into the atlas: at the closest zoom a world unit is sixteen pixels of the screen. */
 export const CUT_PER_UNIT = 24;
 
-/** The name the map asks the settlements' atlas for a picture by: `cottage@european`, `jetty:u`, `bridge:stone-uv`. */
+/** The name the map asks the settlements' atlas for a picture by: `cottage@european`, `jetty:u`, `bridge:u-uv`. */
 export function settlementPieceKey(piece: SettlementPiece, culture: Culture): string {
   return `${piece}@${culture}`;
 }
@@ -275,8 +224,8 @@ export function jettyKey(axis: JettyAxis): string {
   return `${JETTY}:${axis}`;
 }
 
-export function bridgeKey(kind: BridgeKind, axis: BridgeAxis): string {
-  return `bridge:${kind}-${axis}`;
+export function bridgeKey(way: BridgeWay): string {
+  return `bridge:${way}`;
 }
 
 /** The key of a picture in `world/sprites/settlements/`, or null for a file that is not one. */
@@ -294,6 +243,8 @@ export function keyOfSettlementFile(file: string): string | null {
 
 /** The key of a picture in `world/sprites/bridges/`, or null for a file that is not one. */
 export function keyOfBridgeFile(file: string): string | null {
-  const match = /^(timber|stone)-(u|v|uv|vu)\.png$/.exec(file);
-  return match === null ? null : bridgeKey(match[1] as BridgeKind, match[2] as BridgeAxis);
+  const match = /^bridge-([a-z-]+)\.png$/.exec(file);
+  return match !== null && (BRIDGE_WAYS as readonly string[]).includes(match[1]!)
+    ? bridgeKey(match[1] as BridgeWay)
+    : null;
 }

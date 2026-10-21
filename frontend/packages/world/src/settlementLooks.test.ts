@@ -1,12 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
 import { screen } from './blockOut.ts';
+import { BRIDGE_WAYS } from './bridgeModel.ts';
 import {
-  BRIDGE_AXES,
-  BRIDGE_KINDS,
   JETTY_AXES,
   SETTLEMENT_PIECES,
-  bridgeFaces,
   bridgeFile,
   bridgeKey,
   jettyFile,
@@ -41,26 +39,15 @@ describe("the placeholders of a settlement's pieces", () => {
       }
     }
     for (const axis of JETTY_AXES) expect(keyOfSettlementFile(jettyFile(axis))).toBe(jettyKey(axis));
-    for (const kind of BRIDGE_KINDS) {
-      for (const axis of BRIDGE_AXES)
-        expect(keyOfBridgeFile(bridgeFile(kind, axis))).toBe(bridgeKey(kind, axis));
-    }
+    for (const way of BRIDGE_WAYS) expect(keyOfBridgeFile(bridgeFile(way))).toBe(bridgeKey(way));
     expect(keyOfSettlementFile('castle-european.png')).toBeNull();
     expect(keyOfSettlementFile('placeholders.json')).toBeNull();
-    expect(keyOfBridgeFile('iron-u.png')).toBeNull();
+    expect(keyOfBridgeFile('bridge-uu.png')).toBeNull();
+    expect(keyOfBridgeFile('stone-u.png')).toBeNull();
   });
 });
 
-describe('the placeholders of the bridges', () => {
-  it('lie along their axis, the same both ways from their middle', () => {
-    for (const kind of BRIDGE_KINDS) {
-      for (const axis of BRIDGE_AXES) {
-        const xs = bridgeFaces(kind, axis).flatMap((face) => face.at.map((point) => screen(point)[0]));
-        expect(Math.max(...xs) + Math.min(...xs), `${kind} along ${axis}`).toBeCloseTo(0, 5);
-      }
-    }
-  });
-
+describe('the jetties', () => {
   it('stand on the middle of the deck, halfway between where its ends meet the ground', () => {
     // A deck from the bottom left to the top right of a picture eight wide and four tall, a pixel thick.
     const width = 8;
