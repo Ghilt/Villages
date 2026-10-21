@@ -1,14 +1,15 @@
 import { useState } from 'react';
 
-import { CULTURES, jettyKey, onStreet, settlementIn, settlementPieceKey } from '@villages/world';
+import { CULTURES, jettyKey, onStreet, pictureKey, settlementIn, settlementPieceKey } from '@villages/world';
 import type { Culture, FootingOf, SettlementType } from '@villages/world';
 
 import { onScreen } from './footing';
 import { useAtlas } from './frame/Atlas';
 import type { StructuresAtlas } from './Standing';
 
-/** The settlements' atlas, which `world:structures` cuts beside the structures'. */
+/** The settlements' atlas, which `world:structures` cuts beside the structures', and the structures' own. */
 const IMAGE = '/art/settlements.webp';
+const STRUCTURES_IMAGE = '/art/structures.webp';
 /** How many pixels a world unit is drawn here. */
 const UNIT = 7;
 
@@ -18,11 +19,18 @@ const SHORE: FootingOf = (u, v) => (u + v > 5 ? 'water' : 'land');
 
 /**
  * Every settlement laid out as the map will lay it out - a village and a fishing village, a hamlet, a village and a
- * large village, in every culture - on made-up ground, its square's diamonds under it, its streets and green worn, and
- * its buildings from the settlements' atlas standing on their feet, the farthest first. What a change to the layout
+ * large village, in every culture - on made-up ground, its square's diamonds under it, its streets and green worn, its
+ * buildings, structures of the catalogue, from the structures' atlas as tall as the catalogue says, and its jetties,
+ * net racks and boats from the settlements' atlas, standing on their feet, the farthest first. What a change to the layout
  * looks like before any of it is on the map. See docs/plans/settlements-and-roads.md.
  */
-export function SettlementLayouts() {
+export function SettlementLayouts({
+  structures,
+  heightOf,
+}: {
+  structures: StructuresAtlas | null;
+  heightOf: (type: string) => number | null;
+}) {
   const atlas = useAtlas<StructuresAtlas>('settlements');
   const [type, setType] = useState<SettlementType>('village');
   if (atlas === null || atlas === 'missing') return null;
@@ -58,7 +66,14 @@ export function SettlementLayouts() {
                 <td>{['a hamlet', 'a village', 'a large village'][level - 1]}</td>
                 {CULTURES.map((culture) => (
                   <td key={culture}>
-                    <Laid atlas={atlas} type={type} level={level} culture={culture} />
+                    <Laid
+                      atlas={atlas}
+                      structures={structures}
+                      heightOf={heightOf}
+                      type={type}
+                      level={level}
+                      culture={culture}
+                    />
                   </td>
                 ))}
               </tr>
@@ -72,11 +87,15 @@ export function SettlementLayouts() {
 
 function Laid({
   atlas,
+  structures,
+  heightOf,
   type,
   level,
   culture,
 }: {
   atlas: StructuresAtlas;
+  structures: StructuresAtlas | null;
+  heightOf: (type: string) => number | null;
   type: SettlementType;
   level: number;
   culture: Culture;
@@ -106,20 +125,21 @@ function Laid({
     ...laid.jetties.map((jetty) => {
       const frame = atlas.frames[jettyKey(jetty.axis)];
       const at = onScreen(jetty.u, jetty.v);
-      return { frame, at, footX: frame?.footX ?? 0.5, footY: frame?.footY ?? 0.5, low: true };
+      return { frame, at, footX: frame?.footX ?? 0.5, footY: frame?.footY ?? 0.5, low: true, from: atlas };
     }),
-    // A mill or a market is a structure of the catalogue, its picture not in this atlas, so it is left out here.
-    ...laid.buildings
-      .filter((building) => building.type === 'house')
-      .map((building) => {
-        const frame = atlas.frames[settlementPieceKey('house', culture)];
-        const at = onScreen(building.u, building.v);
-        return { frame, at, footX: frame?.footX ?? 0.5, footY: 1, low: false };
-      }),
+    ...laid.buildings.flatMap((building) => {
+      const frame = structures?.frames[pictureKey(building.type, culture)];
+      const tall = heightOf(building.type);
+      if (structures === null || frame === undefined || tall === null) return [];
+      const at = onScreen(building.u, building.v);
+      return [
+        { frame: { ...frame, tall }, at, footX: frame.footX ?? 0.5, footY: 1, low: false, from: structures },
+      ];
+    }),
     ...laid.dress.map((one) => {
       const frame = atlas.frames[settlementPieceKey(one.piece, one.culture)];
       const at = onScreen(one.u, one.v);
-      return { frame, at, footX: frame?.footX ?? 0.5, footY: 1, low: one.piece === 'boat' };
+      return { frame, at, footX: frame?.footX ?? 0.5, footY: 1, low: one.piece === 'boat', from: atlas };
     }),
   ].sort((a, b) => Number(b.low) - Number(a.low) || a.at.y - b.at.y);
   const all = diamonds.flatMap(({ u, v }) => [
@@ -144,7 +164,7 @@ function Laid({
       {diamonds.map(({ u, v, kind }) => (
         <polygon key={`${u}:${v}`} className={`settlements-ground is-${kind}`} points={corners(u, v)} />
       ))}
-      {standing.map(({ frame, at, footX, footY }, index) => {
+      {standing.map(({ frame, at, footX, footY, from }, index) => {
         if (frame === undefined) return null;
         const tall = frame.tall ?? 1;
         const wide = (tall * frame.width) / frame.height;
@@ -158,7 +178,11 @@ function Laid({
             viewBox={`${frame.x} ${frame.y} ${frame.width} ${frame.height}`}
             preserveAspectRatio="none"
           >
-            <image href={`${IMAGE}?v=${atlas.version}`} width={atlas.width} height={atlas.height} />
+            <image
+              href={`${from === atlas ? IMAGE : STRUCTURES_IMAGE}?v=${from.version}`}
+              width={from.width}
+              height={from.height}
+            />
           </svg>
         );
       })}

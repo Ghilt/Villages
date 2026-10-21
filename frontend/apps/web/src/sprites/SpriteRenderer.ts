@@ -35,9 +35,9 @@ export interface MapSprite {
     groundHeight?: number;
     footprint?: number;
     ruin?: boolean;
-    /** A settlement, which the page lays out in buildings: its type, its level and the culture under it. */
+    /** A settlement, which the page lays out from its record: its type, its level and the culture under it. */
     settlement?: { type: SettlementType; level: number; culture: Culture };
-    /** The buildings a settlement is laid out in, once the ground about it is known. See `useSettlementLayouts`. */
+    /** How a settlement is laid out, once the ground about it is known: its square, streets and dress. See `useSettlements`. */
     laid?: LaidOut;
   };
   /**
@@ -45,6 +45,11 @@ export interface MapSprite {
    * or a bust, and is drawn at every zoom. Anyone else's stays itself, shrinks with the map and fades at the floor.
    */
   yours?: boolean;
+  /**
+   * The settlement a structure stands in, by its sprite's id and its name: with which it stands among the trees as one
+   * thing, and which its window names. Absent for one in none. See decision record 0117.
+   */
+  partOf?: { id: string; name: string };
   /** How much it matters to the world, which decides which of a crowd of marks far out leads it. See 0096. */
   significance?: number;
   /** What it is called, for the card a crowd of marks opens into. */

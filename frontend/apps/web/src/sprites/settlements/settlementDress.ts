@@ -13,10 +13,11 @@ import type { StandingThing } from '../standing/StandingLayer';
 import type { SettlementPictures } from './settlementPictures';
 
 /*
- * A settlement drawn as its buildings rather than as one picture: each piece its layout put down - a cottage, a
- * chapel, a jetty, a boat - a sprite of its own from the settlements' atlas, standing on its own foot, all of them
- * together one thing among the trees, its footprint the settlement's square (0110). What the marks layer asks of a
- * settlement's mark, apart from it so the layer stays one size. See docs/plans/settlements-and-roads.md.
+ * A settlement's dress: what its layout puts down that is no structure - a jetty, a net rack, a boat - a sprite each
+ * from the settlements' atlas, standing on its own foot, all of them together one thing among the trees with the
+ * structures inside the settlement, its footprint the settlement's square (0110, `standTogether.ts`). Its houses, its
+ * mill and its market are structures, drawn as structures are. What the marks layer asks of a settlement's mark, apart
+ * from it so the layer stays one size. See docs/plans/houses-bridges-and-road-render.md.
  */
 
 const FRAME = frameOf(GROUND_LATTICE);
@@ -92,11 +93,6 @@ export function dressSettlement(
     pieces.push({ sprite, shadow, ...at, tall: picture.tall, low });
   };
   for (const jetty of laid.jetties) add(jettyKey(jetty.axis), corner(jetty.u, jetty.v), true);
-  const culture = entry.spec.structure?.settlement?.culture ?? 'european';
-  // A mill or a market is drawn by the structures' own pictures, as the structure it is raised as.
-  for (const one of laid.buildings) {
-    if (one.type === 'house') add(settlementPieceKey('house', culture), corner(one.u, one.v), false);
-  }
   for (const one of laid.dress) {
     add(settlementPieceKey(one.piece, one.culture), corner(one.u, one.v), one.piece === 'boat');
   }
@@ -160,8 +156,7 @@ export function hideSettlement(entry: SettlementMark): void {
 export function settlementStanding(entry: SettlementMark): StandingThing | null {
   const dress = entry.settlement;
   if (dress === null || dress.pieces.length === 0) return null;
-  const { square } = dress.laid;
-  const place = corner(square.fromU + square.side, square.fromV + square.side);
+  const place = squareCorner(dress.laid.square);
   let left = 0;
   let right = 0;
   let top = 0;
@@ -178,11 +173,16 @@ export function settlementStanding(entry: SettlementMark): StandingThing | null 
     sprites: dress.pieces.map((piece) => piece.sprite),
     place,
     anchor: -left / wide,
-    footprint: footprintAt(place, square.side),
+    footprint: footprintAt(place, dress.laid.square.side),
     tall: Math.max(0.1, -top),
     wide,
     shown: dress.pieces.some((piece) => piece.sprite.visible),
   };
+}
+
+/** The front corner of a settlement's square, in world units: where it stands among the trees. */
+export function squareCorner(square: LaidOut['square']): { x: number; y: number } {
+  return corner(square.fromU + square.side, square.fromV + square.side);
 }
 
 /** How far from a point a settlement's nearest piece drawn under it stands, or null for none under it. */

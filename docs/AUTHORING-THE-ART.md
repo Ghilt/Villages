@@ -75,15 +75,16 @@ pale face. Upright, on a transparent background, its point on the bottom edge: t
 stands. It is cropped and scaled to 160 tall and drawn about 44 pixels tall for a castle, so paint it 320 tall or
 more and keep the shape bold. A pennant flies from the middle of its top.
 
-**A settlement is laid out in pieces, and a road crosses a river by a bridge**, both cut by the same tool into an
-atlas of their own, `public/art/settlements.webp`. `world/sprites/settlements/` holds `<piece>-<culture>.png` for
-a cottage, a house, a barn, a chapel - each culture's own place of worship: a chapel, a small mosque, a
-shrine-temple, a thatched shrine - a fishing hut, a net rack and a boat - a smack, a felucca, a sampan, a dugout -
-in each of the four cultures, and `jetty-u.png` and `jetty-v.png`, a jetty along each of the ground's two axes;
+**A settlement is its structures, dressed by the water, and a road crosses a river by a bridge.** A settlement's
+houses, mill and market are structures, painted as structures are: the house is `world/sprites/structures/house-<culture>.png`.
+What dresses a fishing village and the bridges are cut by the same tool into an atlas of their own,
+`public/art/settlements.webp`. `world/sprites/settlements/` holds `<piece>-<culture>.png` for a net rack and a boat -
+a smack, a felucca, a sampan, a dugout - in each of the four cultures, and `jetty-u.png` and `jetty-v.png`, a jetty
+along each of the ground's two axes;
 `world/sprites/bridges/` holds `bridge-<way>.png`, one stone bridge for every culture along each of the eight ways a
 bridge runs - the ground's two axes `u` and `v`, its two diagonals `uv` and `vu`, and the four halfway between them,
 `u-uv`, `uv-v`, `v-vu` and `vu-u` - which with a bridge reading the same from either end are every direction.
-Thirty-eight placeholders, each with its own `placeholders.json`, drawn as block-outs in the map's own camera - the ground turned 26 degrees, seen from the south and 45 degrees above, the light from the right
+Eighteen placeholders, each with its own `placeholders.json`, drawn as block-outs in the map's own camera - the ground turned 26 degrees, seen from the south and 45 degrees above, the light from the right
 - at 200 pixels to the world unit. **Paint over a placeholder at its own size**, as asseterizer does, because the
 size is the scale: the tool reads how many world units a picture stands from its pixels at that scale, and cuts it
 at 24 to the unit. A piece stands on the front corner of its base, its lowest point, on a square of the ground's

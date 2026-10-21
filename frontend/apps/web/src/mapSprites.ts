@@ -1,5 +1,5 @@
 import type { CharacterOnMapView, ChoiceView, StructureView } from '@villages/protocol';
-import { RUIN_PICTURE, isASettlement, pictureKey } from '@villages/world';
+import { RUIN_PICTURE, pictureKey } from '@villages/world';
 import type { Culture, StructureCatalogue } from '@villages/world';
 
 import { onACorner } from './geometry/footing';
@@ -74,16 +74,6 @@ export function toStructureSprite(
       ...(groundHeight === undefined ? {} : { groundHeight }),
       ...(footprint === undefined ? {} : { footprint }),
       ...(structure.ruin === true ? { ruin: true } : {}),
-      // A settlement is laid out by the page in buildings of the culture under it; a ruined one is a ruin.
-      ...(isASettlement(structure.structureType) && structure.ruin !== true
-        ? {
-            settlement: {
-              type: structure.structureType,
-              level: structure.level,
-              culture: culture ?? 'european',
-            },
-          }
-        : {}),
     },
     ...(structure.holder === undefined ? {} : { pennant: tinctureColour(structure.holder.banner.field) }),
   };

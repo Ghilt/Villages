@@ -1,4 +1,4 @@
-I want asseterizer to paint the pieces of Villages' settlements, in the map's own perspective, over
+I want asseterizer to paint what dresses Villages' fishing villages - net racks, boats and jetties - in the map's own perspective, over
 placeholders a Villages session drew for them. Villages now has villages and fishing villages that nobody holds,
 dotted over the countryside, and roads between them that cross rivers by bridges. Please plan this as a new section
 of PLAN.md with steps and 🔍 checks, the way we always work, and stop for my "perform up to X" before building
@@ -6,18 +6,20 @@ anything.
 
 ## The pictures
 
-Thirty files, every one a placeholder now, in Villages' repository:
+Ten files, every one a placeholder now, in Villages' repository:
 
-    E:\Code\Villages\world\sprites\settlements\    30 files, and placeholders.json
+    E:\Code\Villages\world\sprites\settlements\    10 files, and placeholders.json
 
-The bridges have a brief of their own now, `world/guides/bridges/`: one stone bridge modelled in 3D on eight ways.
+The bridges have a brief of their own now, `world/guides/bridges/`: one stone bridge modelled in 3D on eight ways. A
+settlement's houses, mill and market are structures now, painted as the structures are: the house is
+`world/sprites/structures/house-<culture>.png`, by the buildings' brief in `world/guides/buildings/`.
 
 They reach that checkout once the work that made them is on Villages' main; until then they are in the worktree
 `E:\Code\Villages\.claude\worktrees\road-system-settlements-4caa66\world\sprites\`. Asseterizer's root is the main
 checkout's `world`, so wait for main rather than adding the worktree as a root: a worktree goes away.
 
-- `<piece>-<culture>.png`, seven pieces in each of the four cultures (`european`, `islamic`, `eastAsian`, `african`):
-  a `cottage`, a `house`, a `barn`, a `chapel`, a `fishingHut`, a `netRack` and a `boat`.
+- `<piece>-<culture>.png`, two pieces in each of the four cultures (`european`, `islamic`, `eastAsian`, `african`):
+  a `netRack` and a `boat`.
 - `jetty-u.png` and `jetty-v.png`: a jetty of planks on posts, along each of the ground's two axes.
 
 **Each placeholder is the block-out to paint over.** It is drawn in exactly the map's projection, its masses in plain
@@ -28,7 +30,8 @@ its shape, its perspective and its footprint", as the castle's block-out was for
 
 Copy `E:\Code\Villages\world\guides\settlements\` into this repository first (say `docs/guides/villages-settlements/`):
 
-- `1-every-piece-on-its-footprint.png`: every piece in every culture, the square its base covers dashed in red.
+- `1-every-piece-on-its-footprint.png`: every piece in every culture, the square its base covers dashed in red; the
+  cottage, house, barn, chapel and fishing hut in it are retired.
 - `2-every-bridge-and-jetty-on-its-axis.png`: every jetty over the strip of ground its deck lies along; the bridges in
   it are the old timber and stone ones, which are retired.
 - The buildings' guides in `..\buildings\`, and their `PROMPT-for-asseterizer.md`, say the same perspective at more
@@ -59,11 +62,6 @@ paint inside the placeholder's frame, at its scale.
 
 | piece | base | what it is |
 |---|---|---|
-| cottage | 2 × 2 | the smallest home: one room, a door, a chimney or a smoke hole |
-| house | 3 × 3 | a larger home of two floors, or a courtyard house where the culture builds round a court |
-| barn | 3 × 3 | a barn or a granary, timber or mud, its doors wide |
-| chapel | 3 × 3 | the village's place of worship: a small stone church with a spire (European), a small mosque with a dome and a minaret (Islamic), a shrine-temple under a double roof (East Asian), a thatched shrine taller than the huts (African) |
-| fishingHut | 2 × 2 | a low hut of a fisherman, nets and floats hung on it |
 | netRack | 1 × 1 | two posts with a net hung between them to dry |
 | boat | 2 × 1, on the water | a smack with a gaff sail (European), a felucca with a lateen sail (Islamic), a sampan with a woven canopy (East Asian), a dugout (African); its hull to the waterline, no water drawn |
 
@@ -84,6 +82,6 @@ jetty, no boat moored to it.
 
 ## Done means
 
-The European cottage, house and chapel and the European boat, regenerated as candidates whose bases lie on the dashed
-squares of the guide. Then the other pieces in all four cultures and the jetties, the same way. I pick in the verify queue as usual; a pick
+The European net rack and boat, regenerated as candidates whose bases lie on the dashed squares of the guide. Then
+the others in all four cultures and the jetties, the same way. I pick in the verify queue as usual; a pick
 writes over the file in Villages' `world/sprites/`, and its dev server cuts it into the map a moment later.

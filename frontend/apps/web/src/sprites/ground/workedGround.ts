@@ -39,7 +39,8 @@ const FRAME = frameOf(GROUND_LATTICE);
 /** The yard of a structure on the map, or null for anything else and for one the catalogue gives no footprint yet. */
 export function yardOf(sprite: MapSprite): Yard | null {
   const side = sprite.structure?.footprint;
-  if (sprite.kind !== 'structure' || side === undefined) {
+  // A structure inside a settlement is worn into the settlement's own ground, its yard and its lane with the rest.
+  if (sprite.kind !== 'structure' || side === undefined || sprite.partOf !== undefined) {
     return null;
   }
   const at = toMercator(sprite.at);

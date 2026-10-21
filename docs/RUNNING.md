@@ -515,14 +515,18 @@ stage alone, with none of the debug panel in it (decision record 0079).
   sites: 43424 of their buildings raised, 0 sites passed over for a seat, in 82.7 s` on a fresh world, measured on
   2026-10-21, and a restart over a world kept in MongoDB raises none twice. The page is sent each settlement itself - its middle, its
   radius, its kind and level - as a record of the `settlements` layer of the stands, through the fog as the ruins are,
-  and reads its name from the master's `sprites/settlements/map.json`; the Scenery section counts the records held. From zoom 7.5 in the page lays each out in its buildings by `settlementIn`,
-  once the ground about it has come, and draws them from `public/art/settlements.webp`, all of them one thing among
-  the trees on its square; further out, and until its ground has come, it is its one mark. A click on any of its
-  buildings opens its window. The log's `settlements` line says how many are laid out and in how many buildings, and
-  the probe's `villagesSprites()` how many of a settlement's pieces are drawn. Each is seen only through the fog, so
-  *see everything* shows them all.
+  and reads its name from the master's `sprites/settlements/map.json`; the Scenery section counts the records held.
+  From zoom 7.5 in the page lays each out by `settlementIn`, once the ground about it has come - its square, its
+  streets and green, and by the water its jetties, net racks and boats, the dress no structure is, from
+  `public/art/settlements.webp` - and every structure whose place its radius holds, the nearest middle's where two
+  do, stands among the trees together with it as one thing on its square: its houses, its mill and its market, drawn
+  as structures are, and a castle founded inside it too. A structure inside one is worn into the settlement's own
+  ground rather than given a yard and paths of its own. A click on any building opens that structure's window. The
+  log's `settlements` line says how many are held, how many laid out and how many structures stand in them, and the
+  probe's `villagesSprites()` names each settlement `settlement:<number>`. Each is seen only through the fog, so *see
+  everything* shows them all; further out than 7.5 a settlement, like its houses, has no mark.
   `--villages.settlements=false` leaves them out, as the tests that start a server and the end-to-end test do. See
-  decision record 0114 and `docs/plans/settlements-and-roads.md`.
+  decision records 0114 and 0117 and `docs/plans/houses-bridges-and-road-render.md`.
 - Every type standing at once: **Antarctica**. While the instruments are open the game server raises one structure of
   every type when it starts, held by nobody, at its first level, four to a row about six kilometres apart on the
   island, off the tip of the Antarctic Peninsula, about 63.25 south and 56.03 west - the Antarctic castle at the

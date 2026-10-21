@@ -9,7 +9,7 @@ import { sessionStore } from '../net/gateway';
 import { focusOn } from '../map/focus';
 import { CrowdCard } from './CrowdCard';
 import { revealedBy } from './ground/growing';
-import { useSettlementLayouts } from './settlements/useSettlementLayouts';
+import { useSettlements } from './settlements/useSettlements';
 import { useWorkedGround } from './ground/useWorkedGround';
 import { cameraOf } from './mapCamera';
 import { createPixiSpriteRenderer } from './PixiSpriteRenderer';
@@ -64,7 +64,7 @@ export function SpriteOverlay({
   started,
 }: SpriteOverlayProps) {
   // Every settlement laid out in its buildings once the ground about it is known, before anything reads them.
-  const sprites = useSettlementLayouts(given, worldRoot);
+  const sprites = useSettlements(given, worldRoot);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const uncolouringRef = useRef<HTMLCanvasElement | null>(null);
   // Held in state, so that a renderer made after a switch was thrown is handed it the moment it exists.

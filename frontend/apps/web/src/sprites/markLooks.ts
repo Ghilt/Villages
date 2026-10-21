@@ -90,6 +90,19 @@ export function pennantOn(
 }
 
 export function lookOf(spec: MapSprite, textures: Textures): Look {
+  // A settlement has no picture of its own: it is drawn as its ground and its dress, and as the structures inside it.
+  if (spec.structure?.settlement !== undefined) {
+    return {
+      forms: { groundHeight: spec.structure.groundHeight ?? UNSAID_HEIGHT, marked: false },
+      ground: null,
+      groundAnchor: 0.5,
+      icon: null,
+      iconAnchor: 0.5,
+      flag: null,
+      iconFlag: null,
+      shadow: null,
+    };
+  }
   if (spec.kind === 'structure') {
     // Far out a structure your house controls is its type's pin, once the atlas has been read, and until then its own
     // picture at that size. Anyone else's has no mark: it shrinks with the map until it fades.

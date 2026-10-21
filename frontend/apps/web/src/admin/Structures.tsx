@@ -105,7 +105,10 @@ export function Structures() {
         <TypesTable editor={editor} read={read} atlas={atlas === 'missing' ? null : atlas} level={level} />
       )}
       <SettlementPieces />
-      <SettlementLayouts />
+      <SettlementLayouts
+        structures={atlas === 'missing' ? null : atlas}
+        heightOf={(type) => read?.types.find((one) => one.type === type)?.groundHeight[0] ?? null}
+      />
       <WholeFile editor={editor} />
     </InspectPage>
   );

@@ -1,4 +1,4 @@
-import { along, box, gable, hip, round } from './blockOut.ts';
+import { along, box, gable } from './blockOut.ts';
 import type { Face } from './blockOut.ts';
 import { BRIDGE_LENGTH, BRIDGE_WAYS } from './bridgeModel.ts';
 import type { BridgeWay } from './bridgeModel.ts';
@@ -15,27 +15,17 @@ import type { Culture } from './structures.ts';
  * (`bridgeModel.ts`); its files and keys are named here, beside the pieces'.
  */
 
-/** The pieces a settlement is laid out in, each in every culture; the jetty is one for all, along each axis. */
-export const SETTLEMENT_PIECES = [
-  'cottage',
-  'house',
-  'barn',
-  'chapel',
-  'fishingHut',
-  'netRack',
-  'boat',
-] as const;
+/**
+ * The pieces a fishing village is dressed in that are no structures, each in every culture; the jetty is one for all,
+ * along each axis. Its houses, mill and market are structures, drawn with the structures' pictures.
+ */
+export const SETTLEMENT_PIECES = ['netRack', 'boat'] as const;
 export type SettlementPiece = (typeof SETTLEMENT_PIECES)[number];
 /**
  * How many diamonds along a side each piece's base covers: what its yard is worn round and what the trees stand in
  * front of or behind; a boat's is the water it lies on.
  */
 export const PIECE_SIDES: Readonly<Record<SettlementPiece, number>> = {
-  cottage: 2,
-  house: 3,
-  barn: 3,
-  chapel: 3,
-  fishingHut: 2,
   netRack: 1,
   boat: 2,
 };
@@ -51,56 +41,10 @@ const COLOURS: Readonly<Record<Culture, { wall: string; roof: string; wood: stri
   african: { wall: '#b98a5a', roof: '#c9a65a', wood: '#6e4a2c', stone: '#a88c6a' },
 };
 
-/** A building of a culture: a box of walls and the culture's roof, or a round hut where it builds round. */
-function building(culture: Culture, side: number, walls: number, rise: number, roof?: string): Face[] {
-  const { wall, roof: tile } = COLOURS[culture];
-  const top = roof ?? tile;
-  switch (culture) {
-    case 'african':
-      return round(side / 2, side / 2, 0, side * 0.45, walls * 0.8, wall, rise * 1.3, top);
-    case 'islamic':
-      return [
-        ...box(0, 0, 0, side, side, walls, wall, top),
-        ...box(-0.05, -0.05, walls, side + 0.1, side + 0.1, 0.15, wall, top),
-      ];
-    case 'eastAsian':
-      return [...box(0, 0, 0, side, side, walls, wall), ...hip(0, 0, walls, side, side, rise, top)];
-    default:
-      return [...box(0, 0, 0, side, side, walls, wall), ...gable(0, 0, walls, side, side, rise, top, wall)];
-  }
-}
-
 /** A piece's faces, in its culture, in world units. */
 export function settlementPieceFaces(piece: SettlementPiece, culture: Culture): Face[] {
   const c = COLOURS[culture];
   switch (piece) {
-    case 'cottage':
-      return building(culture, 2, 1.3, 1.1);
-    case 'house':
-      return building(culture, 3, 1.9, 1.4);
-    case 'barn':
-      return building(culture, 3, 1.6, 1.6, c.wood);
-    case 'fishingHut':
-      return building(culture, 2, 1.1, 1.0, c.wood);
-    case 'chapel': {
-      const nave = building(culture, 3, 2.1, 1.4);
-      const tower =
-        culture === 'islamic'
-          ? [
-              ...round(1.5, 1.5, 2.25, 1.0, 0.25, c.wall, 1.0, c.roof),
-              ...box(2.35, 2.35, 0, 0.5, 0.5, 4.4, c.wall),
-              ...round(2.6, 2.6, 4.4, 0.3, 0.2, c.wall, 0.5, c.roof),
-            ]
-          : culture === 'african'
-            ? round(0.8, 0.8, 2.4, 0.5, 0.6, c.wall, 1.4, c.roof)
-            : culture === 'eastAsian'
-              ? hip(0.4, 0.4, 3.2, 2.2, 2.2, 0.8, c.roof)
-              : [
-                  ...box(2.0, 1.05, 0, 0.9, 0.9, 3.6, c.stone),
-                  ...round(2.45, 1.5, 3.6, 0.35, 0.1, c.stone, 1.6, c.roof),
-                ];
-      return [...nave, ...tower];
-    }
     case 'netRack':
       return [
         ...box(0, 0, 0, 0.12, 0.12, 1.4, c.wood),

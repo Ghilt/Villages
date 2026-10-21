@@ -18,7 +18,7 @@ import type { CameraSource, DrawnSprite, MapSprite } from './SpriteRenderer';
 import { ringUnder } from './ringPlace';
 import type { RingPlace } from './ringPlace';
 import type { StandingLayer } from './standing/StandingLayer';
-import { standingOf } from './standing/standingOf';
+import { standTogether } from './settlements/standTogether';
 import { dressSettlement, placeSettlement } from './settlements/settlementDress';
 import { PRESENCE_MS, alphasFor, easeTowards, midTrade, sizesAt, wantedForm } from './twoForms';
 
@@ -275,7 +275,7 @@ export function createMarksLayer(
         }
         entries.delete(id);
       }
-      amongTheTrees.stand([...entries.values()].flatMap((entry) => standingOf(entry) ?? []));
+      amongTheTrees.stand(standTogether(entries.values()));
 
       // A trade still running wants the next frame: the map is not moving, so nothing else will ask.
       return trading ? 0 : null;
