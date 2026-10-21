@@ -1,10 +1,10 @@
 import type { CSSProperties, ReactNode, RefObject } from 'react';
-import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import '../ui/ui.css';
 
-import { note } from '../log/log';
 import { Container } from '../ui/container/Container';
+import { DialogRoom } from '../ui/dialog/Dialog';
 import { dressOf } from './dress';
 import { Seam } from './Seam';
 import { type BayName, type Box, isTabbed, type Rect, TAB_BAR, TILES } from './bayBox';
@@ -26,6 +26,7 @@ import {
 } from './panes';
 import { PhoneBar } from './PhoneBar';
 import { stageLayout } from './stageLayout';
+import { useShapeSaid } from './shapeSaid';
 import { outOfRoom } from './rail';
 import { useGlideOnTheRail } from './railGlide';
 import { openingOut } from './strip';
@@ -101,22 +102,9 @@ export function Stage({ stage, panes, overlays, corner }: StageProps) {
   // say "top" rather than "the first bay" in the log. Before any effect of the game's asks it.
   useLayoutEffect(() => stageIs(box.form, box.along), [box.form, box.along]);
 
-  // One line when the stage crosses the fold or turns on its side, and none while it is merely being
-  // resized: a drag that changes nothing is not news. See decision record 0023.
-  const said = useRef('');
-  useEffect(() => {
-    const now = `${box.form}/${box.along}`;
-    if (said.current !== now) {
-      said.current = now;
-      const cut = box.along === 'rows' ? 'a top and a bottom' : 'a left and a right';
-      note(
-        'shape',
-        box.form === 'bays'
-          ? `two bays, ${cut}, stage ${stage.w} by ${stage.h}`
-          : `the spread, stage ${stage.w} by ${stage.h}`,
-      );
-    }
-  }, [box.form, box.along, stage.w, stage.h]);
+  useShapeSaid(box.form, box.along, stage);
+  // Every dialog opened on the stage stands over the stage alone, a phone's size on a phone, the debug panel in reach.
+  const [room, setRoom] = useState<HTMLDivElement | null>(null);
 
   /**
    * Which bay a pane is in.
@@ -233,79 +221,82 @@ export function Stage({ stage, panes, overlays, corner }: StageProps) {
 
   return (
     <div
+      ref={setRoom}
       className="stage"
       data-form={box.form}
       data-along={box.along}
       data-easing={easing ? 'yes' : undefined}
       style={{ '--bay-first': seam } as CSSProperties}
     >
-      {panes.filter((pane) => !isWindow(pane)).map((pane) => bayFor(pane.id))}
+      <DialogRoom room={room}>
+        {panes.filter((pane) => !isWindow(pane)).map((pane) => bayFor(pane.id))}
 
-      {/*
-       * The rail: where inspect windows stack in the spread, up to three, newest at the top.
-       *
-       * In the spread it *is* the column's upper tile, and the windows inside it are flow items sharing
-       * that one rectangle - which is why three of them can never push past the house in the corner. In
-       * the bays it is `display: contents`, so each window is a box in its own right and nothing is
-       * remounted crossing the fold: the same trick that keeps the map alive, for the same reason.
-       */}
-      <div
-        className="rail"
-        ref={railRef}
-        hidden={box.form === 'spread' && rail === null}
-        style={rail === null ? undefined : place(rail)}
-      >
-        {panes.filter(isWindow).map((pane) => bayFor(pane.id))}
-      </div>
-
-      {tabbedTiles.map((name) => {
-        const sharing = panesIn(panes, name);
-        const tile = box.bays[name]!;
-        const up = showingIn(name, sharing);
-        // The tile's own size, which every pane in it answers with; asking through whichever is up asks
-        // the tile, because that is where `askFor` sends a pane that takes turns.
-        const asked = sizeAsked(up, bays);
-        const room: Room = {
-          size: sizeOf(asked),
-          asked,
-          ask: (size) => askFor(up.id, size),
-          sizes: up.spreadSizes ?? SIZES,
-          ownControl: true,
-          showMap,
-          openBeside,
-        };
-        return (
-          <TabBar
-            key={name}
-            dressed={dressOf(name) !== undefined}
-            sharing={sharing}
-            showing={up.id}
-            onShow={(id) => show(name, id)}
-            label={name === 'right' ? 'What is in this column' : 'What is in this corner'}
-            room={room}
-            style={place({ ...tile, h: TAB_BAR })}
-          />
-        );
-      })}
-
-      {/* Always there in the spread, so that it fades out as well as in; it takes no press while it is down. */}
-      {box.form === 'spread' && (
+        {/*
+         * The rail: where inspect windows stack in the spread, up to three, newest at the top.
+         *
+         * In the spread it *is* the column's upper tile, and the windows inside it are flow items sharing
+         * that one rectangle - which is why three of them can never push past the house in the corner. In
+         * the bays it is `display: contents`, so each window is a box in its own right and nothing is
+         * remounted crossing the fold: the same trick that keeps the map alive, for the same reason.
+         */}
         <div
-          className="veil"
-          aria-hidden="true"
-          data-up={over === undefined ? undefined : 'yes'}
-          onClick={over === undefined ? undefined : () => askFor(over.id, 'strip')}
-        />
-      )}
+          className="rail"
+          ref={railRef}
+          hidden={box.form === 'spread' && rail === null}
+          style={rail === null ? undefined : place(rail)}
+        >
+          {panes.filter(isWindow).map((pane) => bayFor(pane.id))}
+        </div>
 
-      {/* The moulding over the join, only where there is one: below 64 pixels the stage is one box and
+        {tabbedTiles.map((name) => {
+          const sharing = panesIn(panes, name);
+          const tile = box.bays[name]!;
+          const up = showingIn(name, sharing);
+          // The tile's own size, which every pane in it answers with; asking through whichever is up asks
+          // the tile, because that is where `askFor` sends a pane that takes turns.
+          const asked = sizeAsked(up, bays);
+          const room: Room = {
+            size: sizeOf(asked),
+            asked,
+            ask: (size) => askFor(up.id, size),
+            sizes: up.spreadSizes ?? SIZES,
+            ownControl: true,
+            showMap,
+            openBeside,
+          };
+          return (
+            <TabBar
+              key={name}
+              dressed={dressOf(name) !== undefined}
+              sharing={sharing}
+              showing={up.id}
+              onShow={(id) => show(name, id)}
+              label={name === 'right' ? 'What is in this column' : 'What is in this corner'}
+              room={room}
+              style={place({ ...tile, h: TAB_BAR })}
+            />
+          );
+        })}
+
+        {/* Always there in the spread, so that it fades out as well as in; it takes no press while it is down. */}
+        {box.form === 'spread' && (
+          <div
+            className="veil"
+            aria-hidden="true"
+            data-up={over === undefined ? undefined : 'yes'}
+            onClick={over === undefined ? undefined : () => askFor(over.id, 'strip')}
+          />
+        )}
+
+        {/* The moulding over the join, only where there is one: below 64 pixels the stage is one box and
           `--bay-first` is the whole of it. And the bottom bar along the phone's edge. See 0048 and 0109. */}
-      {box.form === 'bays' && box.bays.second !== null && <Seam along={box.along} />}
-      {box.bar !== null && <PhoneBar panes={panes} rect={box.bar} />}
-      <Corner stage={stage} box={box}>
-        {corner}
-      </Corner>
-      {overlays}
+        {box.form === 'bays' && box.bays.second !== null && <Seam along={box.along} />}
+        {box.bar !== null && <PhoneBar panes={panes} rect={box.bar} />}
+        <Corner stage={stage} box={box}>
+          {corner}
+        </Corner>
+        {overlays}
+      </DialogRoom>
     </div>
   );
 }

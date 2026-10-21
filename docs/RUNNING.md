@@ -1097,7 +1097,8 @@ and `-- --drop` takes them off; by hand only.
   the **outbox**: every mail the game server sent, the newest last, with its link to press, because in development
   nothing could deliver one. *ask again* asks the game server afresh, as coming back to the window does. Its one lever,
   **let this sign-in run out**, stands in for time: the sign-in ends now, as one left unused past its time does, the
-  window dims under a **Signed out** box that nothing puts away but *Play as a guest*, and the log says
+  stage dims under a **Signed out** box that nothing puts away but *Play as a guest* - over the stage alone, so a
+  phone's size when the stage is confined to one, and the debug panel beside it still in reach - and the log says
   `accounts: this browser's sign-in has ended; this window is no longer playing`. Every window of that sign-in is
   stood down so, and one of another sign-in plays on. The section, the outbox and the lever are Adam's instruments,
   refused while they are closed, because the mail holds live links. With `--villages.instruments.for=<email>` the
