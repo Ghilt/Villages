@@ -1071,6 +1071,21 @@ and `-- --drop` takes them off; by hand only.
   MongoDB through the stack's own container and RabbitMQ through its management page, so it needs the stack up and
   nothing installed.
 
+## Who a browser is signed in as
+
+- **The game server answers who a browser is at `/auth/me`**, on its own port: open
+  `http://localhost:<this tree's game port>/auth/me` in the browser the game is played in and it says the player,
+  their house, and the sign-in - how it is kept, `guest`, `remembered` or `forNow`, the browser as a person would name
+  it, and when it ends in milliseconds - or `"player": null` for a browser signed in to nothing. A browser is made a
+  guest by `POST /auth/guest`, which only a page of ours may send. See `docs/plans/accounts.md` and decision record 0109.
+- **The sign-in is a cookie no script can read**, named for the tree, `villages-<tree>-signin` in a worktree and
+  `villages-signin` in the main checkout, so trees on the same machine never sign each other out. The browser's
+  developer tools show it under Application, Cookies, `http://localhost`: HttpOnly, SameSite Lax, and four hundred
+  days for a guest.
+- **It is kept where the world is**: in the tree's own database, in the collections `signIns` and `players` beside
+  `events`, when the world is kept in MongoDB, so a restart of the game server forgets no sign-in; in memory, and gone
+  with the server, when the world is.
+
 ## The bot swarm
 
 - **One bot**, a simulated player, against the game server already running: `cd backend` then

@@ -21,6 +21,7 @@ domain  <-  application  <-  infrastructure-occurrent
                           <- infrastructure-rabbit
                           <- projections
                           <- gateway            <-  app
+                          <- accounts           <-  app
         <-  gateway (values in, HouseError out; see decision 0013)
         <-  protocol      <- gateway
 ```
@@ -113,19 +114,20 @@ violation when the rule was introduced.
 | Module | Holds |
 |---|---|
 | `domain` | The house, character and structure aggregates: commands, events, state, the decide and evolve functions, value types, domain errors |
-| `application` | Use cases and the ports they need: command execution, read model queries, the clock, player tokens |
+| `application` | Use cases and the ports they need: command execution, read model queries, the clock, who a browser's sign-in plays as (`SignedInPlayers`) |
 | `protocol` | The client and server message types, shared with the frontend through checked-in JSON fixtures, and the version of the wire, whose shape is recorded in `contracts/protocol-v<n>.txt` (0037) |
 | `infrastructure-occurrent` | CloudEvent conversion and type mapping, the MongoDB event store, the application service, durable subscriptions |
 | `infrastructure-rabbit` | The tree's virtual host and the exchange, the bridge that publishes stored events, the routing key, and the broker feed the read models follow (0094) |
 | `projections` | Read models: the structures and people by cell, which the map is drawn from, the houses, the choices, the dialogues; the sight is what every house can see, which the fog of war is drawn from |
 | `gateway` | Player connections, cell subscriptions, snapshots, coalesced deltas, command intake through one registry, `Commands`, each mechanic a part of its own made from the `GatewayMechanic` its configuration hands over (0075), and Adam's instruments, whose levers are each mechanic's and whose looks are a part of their own, `Instruments`, all closed by `villages.instruments` (0076) |
-| `app` | The Spring Boot bootstrap and the wiring. The only module that knows every other one |
+| `accounts` | Who a browser is signed in as: the sign-ins, kept by the hash of their secret and how long each is kept, and every player's record, in memory or beside the events in the tree's own database, never among them. Nothing of the game reaches it (0109) |
+| `app` | The Spring Boot bootstrap and the wiring, and the web server's side of the accounts: the sign-in's cookie and the endpoints under `/auth`, behind Spring Security. The only module that knows every other one |
 | `arch-tests` | The layer rules, as tests |
 | `load-bots` | The swarm that proves the scale numbers |
 
 Packages are shorter than module names: `villages.domain`, `villages.application`, `villages.protocol`,
-`villages.occurrent`, `villages.rabbit`, `villages.projections`, `villages.gateway`, `villages.app`,
-`villages.bots`. The two infrastructure modules take the name of the thing they wrap, which is also their
+`villages.occurrent`, `villages.rabbit`, `villages.projections`, `villages.gateway`, `villages.accounts`,
+`villages.app`, `villages.bots`. The two infrastructure modules take the name of the thing they wrap, which is also their
 commit scope.
 
 **A mechanic has one place in each layer**, and a file that serves every mechanic routes to those places

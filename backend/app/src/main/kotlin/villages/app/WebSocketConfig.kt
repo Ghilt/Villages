@@ -27,7 +27,7 @@ import kotlin.concurrent.withLock
 @EnableWebSocket
 class WebSocketConfig(private val gateway: Gateway) : WebSocketConfigurer {
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
-        registry.addHandler(GatewaySocket(gateway), "/ws").setAllowedOriginPatterns("http://localhost:[*]")
+        registry.addHandler(GatewaySocket(gateway), "/ws").setAllowedOriginPatterns(OUR_PAGES)
     }
 }
 

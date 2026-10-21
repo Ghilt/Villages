@@ -17,6 +17,7 @@ include(
     "infrastructure-rabbit",
     "projections",
     "gateway",
+    "accounts",
     "app",
     "arch-tests",
     "load-bots",

@@ -18,7 +18,7 @@ main. Everything about commits is the agent's, and he does not want to be asked 
   the only time a commit lands before he has looked at it.
 - **How the work is cut into commits is the agent's**, done by best practice and never put to Adam: one
   coherent change per commit, Conventional Commits with these scopes: `domain`, `application`, `occurrent`,
-  `rabbit`, `projections`, `gateway`, `protocol`, `web`, `client-core`, `docs`, `infra`, `build`, and the
+  `rabbit`, `projections`, `gateway`, `accounts`, `protocol`, `web`, `client-core`, `docs`, `infra`, `build`, and the
   `Co-Authored-By` trailer on every message. Steps that pile up before a "continue" still land as one
   commit each.
 - **Main is Adam's.** Never rebase onto main or move main without his word in that turn ("bring it to
@@ -241,7 +241,7 @@ scripts/    Adam's terminal tools, node <tool>.ts; nothing of the program import
 contracts/  fixtures/*.json shared by the Kotlin and TypeScript protocol tests
 infra/      docker-compose.yml (MongoDB replica set, RabbitMQ)
 backend/    Gradle multi-module: domain, application, protocol, infrastructure-occurrent, infrastructure-rabbit,
-            projections, gateway, app, arch-tests, load-bots
+            projections, gateway, accounts, app, arch-tests, load-bots
 frontend/   npm workspaces: packages/protocol, packages/client-core, apps/web; tools/ the repository's own checks
 ```
 
@@ -251,7 +251,7 @@ Enforced by Gradle module edges plus ArchUnit on the backend, and by npm workspa
 and ESLint restricted imports on the frontend.
 
 - Backend: `domain` <- `application` <- {`infrastructure-occurrent`, `infrastructure-rabbit`, `projections`,
-  `gateway`} <- `app`. `domain` depends on nothing but the Kotlin stdlib. `application` depends only on `domain` and
+  `gateway`, `accounts`} <- `app`. `domain` depends on nothing but the Kotlin stdlib. `application` depends only on `domain` and
   owns the ports. Only `app` has `@SpringBootApplication`.
 - Frontend: `packages/protocol` <- `packages/client-core` <- `apps/web`. `client-core` never imports React, the DOM,
   MapLibre or Pixi; the socket is an injected interface. The page takes from the world package only

@@ -60,6 +60,7 @@ private val SOURCES = listOf(
     "../../backend/infrastructure-rabbit/src",
     "../../backend/projections/src",
     "../../backend/gateway/src",
+    "../../backend/accounts/src",
     "../../backend/app/src",
     "../../backend/arch-tests/src",
     "../../backend/load-bots/src",

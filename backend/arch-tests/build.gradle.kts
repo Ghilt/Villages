@@ -13,6 +13,7 @@ dependencies {
     testImplementation(project(":infrastructure-rabbit"))
     testImplementation(project(":projections"))
     testImplementation(project(":gateway"))
+    testImplementation(project(":accounts"))
     testImplementation(project(":app"))
     // The swarm is held to the rules too: it speaks the protocol and nothing else. Leaving it out made
     // its layer empty, which the layered rule rightly refused.
@@ -31,6 +32,7 @@ testsRead(
     "backend/infrastructure-rabbit/src",
     "backend/projections/src",
     "backend/gateway/src",
+    "backend/accounts/src",
     "backend/app/src",
     "backend/arch-tests/src",
     "backend/load-bots/src",

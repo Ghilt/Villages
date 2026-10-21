@@ -47,7 +47,7 @@ me* is the part that has to work properly and has to be seen in the debug panel.
 ## Where things live
 
 - **Accounts are not the world's history, so there are no events.** They are plain collections in the tree's own
-  MongoDB database, `accounts`, `signIns` and `mailLinks`, and in memory when there is no Docker, as the events are.
+  MongoDB database, `players`, `signIns` and `mailLinks`, and in memory when there is no Docker, as the events are.
   An email is personal and must be deletable; the event store is never wiped once the world is persistent; and
   nothing in the world replays an account. The world keeps only the `PlayerId`, which stops being a secret.
 - **A new Gradle module, `accounts`**, commit scope `accounts`: the `/auth/*` endpoints on Spring MVC, Spring
@@ -186,7 +186,7 @@ What happens is said with `note('accounts', …)`.
 
 | Rule | Held by | When |
 |---|---|---|
-| One account to an email, whatever its letters' case | a unique index on `accounts` | at once |
+| One account to an email, whatever its letters' case | a unique index on `players` | at once |
 | One account to a player | a unique index | at once |
 | One account to a Google or a Discord identity | a unique index | at once |
 | A player's id never changes, so their house never moves | an account keeps the `PlayerId` it was made with, and nothing writes it again | at once, by construction |

@@ -58,18 +58,22 @@ class LayerRulesSpec : StringSpec({
             .layer("Rabbit").definedBy("villages.rabbit..")
             .layer("Projections").definedBy("villages.projections..")
             .layer("Gateway").definedBy("villages.gateway..")
+            .layer("Accounts").definedBy("villages.accounts..")
             .layer("App").definedBy("villages.app..")
             .layer("Bots").definedBy("villages.bots..")
             // The gateway sees the domain: it turns the wire's values into domain values and a DomainError into a
             // rejection code, which decision 0013 places there.
-            .whereLayer("Domain").mayOnlyBeAccessedByLayers("Application", "Occurrent", "Rabbit", "Projections", "Gateway", "App")
-            .whereLayer("Application").mayOnlyBeAccessedByLayers("Occurrent", "Rabbit", "Projections", "Gateway", "App")
+            .whereLayer("Domain").mayOnlyBeAccessedByLayers("Application", "Occurrent", "Rabbit", "Projections", "Gateway", "Accounts", "App")
+            .whereLayer("Application").mayOnlyBeAccessedByLayers("Occurrent", "Rabbit", "Projections", "Gateway", "Accounts", "App")
             // Projections reach the protocol for the cell grid, which both ends must compute alike; see 0026.
             .whereLayer("Protocol").mayOnlyBeAccessedByLayers("Projections", "Gateway", "App", "Bots")
             .whereLayer("Occurrent").mayOnlyBeAccessedByLayers("Rabbit", "Projections", "App")
             .whereLayer("Rabbit").mayOnlyBeAccessedByLayers("Gateway", "App")
             .whereLayer("Projections").mayOnlyBeAccessedByLayers("App")
             .whereLayer("Gateway").mayOnlyBeAccessedByLayers("App")
+            // The accounts are kept beside the world, and nothing of the game reaches them: the gateway knows a player
+            // only by the id the application's SignedInPlayers hands it. See docs/plans/accounts.md.
+            .whereLayer("Accounts").mayOnlyBeAccessedByLayers("App")
             .whereLayer("App").mayNotBeAccessedByAnyLayer()
             .whereLayer("Bots").mayNotBeAccessedByAnyLayer()
             .check(world)

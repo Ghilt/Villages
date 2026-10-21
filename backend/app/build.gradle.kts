@@ -10,6 +10,10 @@ dependencies {
     implementation(platform(libs.spring.boot.dependencies))
     implementation(libs.spring.boot.starter)
     implementation(libs.spring.boot.starter.websocket)
+    // The web server's half of the accounts: the sign-in's endpoints under /auth, behind Spring Security. See
+    // docs/plans/accounts.md.
+    implementation(libs.spring.boot.starter.security)
+    implementation(libs.jackson.module.kotlin)
     implementation(project(":domain"))
     implementation(project(":application"))
     implementation(project(":protocol"))
@@ -17,6 +21,7 @@ dependencies {
     implementation(project(":infrastructure-rabbit"))
     implementation(project(":projections"))
     implementation(project(":gateway"))
+    implementation(project(":accounts"))
     testImplementation(libs.spring.boot.starter.test)
 }
 
