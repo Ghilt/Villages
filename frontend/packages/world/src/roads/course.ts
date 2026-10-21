@@ -56,11 +56,23 @@ export interface CourseBridge {
   readonly span: number;
 }
 
-/** A course: the points it runs through from end to end, its bridges, and the units it steps on, by `unitKey`. */
+/** A bridge as a course lands it: the place of the unit it lands in among the course's units, and its far end. */
+export interface Landing {
+  readonly at: number;
+  readonly axis: BridgeAxis;
+  readonly span: number;
+  readonly end: Point;
+}
+
+/**
+ * A course: the points it runs through from end to end, its bridges, the units it steps on, by `unitKey`, from end
+ * to end, and which of them a bridge lands in.
+ */
 export interface Course {
   readonly points: readonly Point[];
   readonly bridges: readonly CourseBridge[];
   readonly units: readonly number[];
+  readonly landings: readonly Landing[];
 }
 
 /** A unit of the world by one number, the whole world's units apart. */
@@ -273,7 +285,10 @@ export function courseBetween(
       const next = nodeOf(crossing.x, crossing.y);
       if (done[next] === 1 || costAt(crossing.x, crossing.y, next) < 1) continue;
       const climb = rules.climb * Math.abs(heightAt(crossing.x, crossing.y, next) - rise);
-      relax(next, crossing.x, crossing.y, rules.bridgeAt + rules.bridge * crossing.span + climb, crossing);
+      // A bridge another road has built already is crossed for less, as its road is followed for less.
+      const built = ground.road(x, y) && ground.road(crossing.x, crossing.y) ? rules.trunk : 1;
+      const cost = (rules.bridgeAt + rules.bridge * crossing.span) * built + climb;
+      relax(next, crossing.x, crossing.y, cost, crossing);
     }
   }
   if (reached < 0) return null;
@@ -303,5 +318,11 @@ export function courseBetween(
   });
   push(goals.get(reached)!);
   const units = nodes.map((node) => unitKey(minX + (node % width), minY + Math.floor(node / width)));
-  return { points, bridges, units };
+  const landings = nodes.flatMap((node, at) => {
+    const crossing = bridged.get(node);
+    return at > 0 && crossing !== undefined
+      ? [{ at, axis: crossing.axis, span: crossing.span, end: crossing.end }]
+      : [];
+  });
+  return { points, bridges, units, landings };
 }

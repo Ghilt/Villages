@@ -118,7 +118,9 @@ settlements, the ruins, the flow and the height, its numbers in `world/roads.jso
 - **Its ends**: into a settlement by one of its streets; at a ruin, at its gate where it is walled and at the outline
   of its built ground where it is not, the ruin's pieces laid out by `ruinsIn` and kept off.
 - **Its shape**: simplified and smoothed, checked against the water again, the bridges and their approaches left
-  straight.
+  straight. Every course is joined into one network of the units they stepped on and cut into chains between a
+  junction, a place's end and a bridge, each shaped once and graded by how many roads use it, so a trunk many roads
+  share is drawn as one road (`src/roads/network.ts`).
 
 **The `roads` stand layer.** A road is cut into straight pieces that fit the eight-byte record the stands already
 use: a middle in eighths of a unit, a reach of half its length and width, the half-vector to one end in the two bytes

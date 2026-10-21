@@ -30,8 +30,12 @@ export function settlementEnds(square: SettlementSquare): Point[] {
   }));
 }
 
-/** The world's units a settlement's square covers, by `unitKey`: every one whose middle lies inside it. */
+/**
+ * The world's units a settlement's square covers, by `unitKey`: every one whose middle lies inside it, but the ones its
+ * streets' ends are in, which its roads come in by.
+ */
 export function settlementUnits(square: SettlementSquare): number[] {
+  const open = new Set(settlementEnds(square).map((end) => unitKey(Math.floor(end.x), Math.floor(end.y))));
   const corners = [
     [square.fromU, square.fromV],
     [square.fromU + square.side, square.fromV],
@@ -51,7 +55,7 @@ export function settlementUnits(square: SettlementSquare): number[] {
     ) {
       const u = Math.floor((x + 0.5) * FRAME.cos + (y + 0.5) * FRAME.sin);
       const v = Math.floor((y + 0.5) * FRAME.cos - (x + 0.5) * FRAME.sin);
-      if (inSquare(square, u, v)) out.push(unitKey(x, y));
+      if (inSquare(square, u, v) && !open.has(unitKey(x, y))) out.push(unitKey(x, y));
     }
   }
   return out;
