@@ -272,19 +272,19 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
         marks.setSprites(scene.sprites);
         drawSoon();
       });
-      const ring = createRingLayer(textures, marks);
+      const ring = createRingLayer(marks, drawSoon);
       // The land moving in the wind and the light, on the ground under everything that stands on it.
       const land = createLandLayer(app.renderer, () => scene.scenery.tilesRoot, drawSoon);
       // The ground worn bare under the buildings, over the land's motion and under all that stands on it.
       ground = createGroundLayer(app.renderer, drawSoon);
       // The critters' shadows under the scenery and the critters over it, only where the house sees now, and the
-      // structures among its trees (0110); the world outside vision over them, all losing their colour on ground only
-      // revealed; then the fog over them, and everything the fog must not cover above that.
+      // selection ring on the ground under the structures among its trees (0110); the world outside vision over them,
+      // all losing their colour on ground only revealed; then the fog over them, and everything it must not cover.
       const critters = createCritterLayer(drawSoon, () => ({ scenery: scene.scenery, sight: groundField }));
-      world.addChild(land.sprite, ground.sprite, marks.shadows, critters.ground);
-      world.addChild(scenery.container, scenery.standing.view, critters.flying, marks.underTheFog);
+      world.addChild(land.sprite, ground.sprite, marks.shadows, critters.ground, scenery.container);
+      world.addChild(ring.onTheGround, scenery.standing.view, critters.flying, marks.underTheFog);
       stage.addChild(world);
-      // The clouds over the fog, and under the ring and every sign. See decision record 0098.
+      // The clouds over the fog, and under every sign, the ring round one among them. See decision record 0098.
       const clouds = createCloudLayer(app.renderer, drawSoon, () => marks.iconsDrawn());
       stage.addChild(fog.mesh, clouds.sprite);
       if (uncolourCanvas !== undefined) {
@@ -295,7 +295,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       // The dev server cuts the art again whenever a picture in world/sprites/ is saved, and says so
       // here, so the new picture is on the map without a reload. See decision record 0059.
       import.meta.hot?.on(ART_CUT, artCut);
-      stage.addChild(ring.ring);
+      stage.addChild(ring.withTheSigns);
       stage.addChild(marks.overIt);
       app.stage.addChild(stage);
       container.appendChild(app.canvas);

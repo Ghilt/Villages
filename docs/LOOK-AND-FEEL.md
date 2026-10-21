@@ -169,6 +169,13 @@ little towards the eye, and its walls hide what falls behind them. Whether a spr
 disappears into the painted forest is a question for the eye. How to hand one over is `AUTHORING-THE-ART.md`; why it works this way is
 decision record 0059.
 
+**What is selected stands in a ring of light.** Close in, a line of warm light lies on the ground round what was
+picked - a building's footprint, a person's patch of ground - a circle on the ground squashed as the ground is, under the
+building and under the trees standing in front of it, with a thin edge of ink so it still reads on gold ground. Round
+it a gold radiance breathes, slow, a wave of light runs out from it every few seconds and fades, and three beads of
+light go round it. Far out it rings the mark's pin the same way, over the fog and the clouds with it. It comes up over a
+moment rather than appearing, and is still for anyone who has asked for less motion and while the Shaders switch is
+off. `ringShader.ts`; decision record 0110.
 
 **Every building stands in worn ground.** Under it and round it the ground is worn bare, a yard of earth laid on the
 same diamonds the ground is painted on: its footprint, the square its base covers, worn whole, and a ragged ring round

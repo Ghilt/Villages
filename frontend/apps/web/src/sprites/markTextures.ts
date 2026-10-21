@@ -5,9 +5,10 @@ import { buildStructurePictures, drawPennant } from './structurePictures';
 import type { StructurePictures } from './structurePictures';
 
 /*
- * The pictures every mark is drawn with: the offered seat's pennant, the figure and its sign, and the selection
- * ring, each drawn once in white so that a tint colours it, and rasterised once. The marks layer's. A
- * structure's pictures are drawn in their own colours, in `structurePictures.ts`, and its holder's pennant in white.
+ * The pictures every mark is drawn with: the offered seat's pennant, and the figure and its sign, each drawn once in
+ * white so that a tint colours it, and rasterised once. The marks layer's. A structure's pictures are drawn in their
+ * own colours, in `structurePictures.ts`, and its holder's pennant in white. The selection ring is a shader of its
+ * own, `ringShader.ts`.
  */
 
 /**
@@ -24,14 +25,12 @@ export const TEXTURE = {
   figureWidth: 80,
   bustHeight: 64,
   bustWidth: 60,
-  ringDiameter: 128,
 } as const;
 
 export interface Textures {
   candidate: Texture;
   figure: Texture;
   bust: Texture;
-  ring: Texture;
   /** Every type of structure's picture, and a plain house for a type with none. */
   structures: StructurePictures;
   /** The pennant a held structure flies, tinted its holder's field. */
@@ -93,24 +92,15 @@ export function buildMarkTextures(rasterise: Rasterise): Textures {
     .fill(0xffffff)
     .stroke({ width: 5, color: 0x4a4034, alpha: 0.9 });
 
-  // What marks the selected structure or person: a ring on the ground under it rather than a change to the mark
-  // itself, so that what is selected is still drawn as what it is.
-  const r = TEXTURE.ringDiameter;
-  const ringOf = new Graphics()
-    .ellipse(r / 2, r / 2, r / 2 - 4, r / 4 - 4)
-    .stroke({ width: 6, color: 0xffffff, alpha: 1 });
-
   const built = {
     candidate: rasterise(candidate),
     figure: rasterise(figure),
     bust: rasterise(bust),
-    ring: rasterise(ringOf),
     structures: buildStructurePictures(rasterise),
     pennant: drawPennant(rasterise),
   };
   candidate.destroy();
   figure.destroy();
   bust.destroy();
-  ringOf.destroy();
   return built;
 }

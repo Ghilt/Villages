@@ -14,6 +14,8 @@ import type { Groups, Placed } from './markGroups';
 import { lookOf } from './markLooks';
 import type { Textures } from './markTextures';
 import type { CameraSource, DrawnSprite, MapSprite } from './SpriteRenderer';
+import { ringUnder } from './ringPlace';
+import type { RingPlace } from './ringPlace';
 import type { StandingLayer } from './standing/StandingLayer';
 import { standingOf } from './standing/standingOf';
 import { PRESENCE_MS, alphasFor, easeTowards, formForHit, midTrade, sizesAt, wantedForm } from './twoForms';
@@ -44,11 +46,8 @@ export interface MarksLayer extends Layer {
   readonly overIt: Container;
   /** Replace what is on the map. The layer works out what appeared, changed and went away. */
   setSprites(sprites: readonly MapSprite[]): void;
-  /**
-   * Where a mark stands on the screen as last drawn, and how tall it is between its two forms, or null for one
-   * not drawn: what the ring is put under.
-   */
-  standing(id: string, zoom: number): { x: number; y: number; tall: number } | null;
+  /** Where the ring lies under a mark as last drawn, round the ground it stands on, or null for one not drawn. */
+  ringUnder(id: string, view: CameraView): RingPlace | null;
   /** What the house has in vision, for which side of the fog a mark's ground form is on; null without fog. */
   setVision(vision: Coverage | null): void;
   /**
@@ -277,17 +276,9 @@ export function createMarksLayer(
       return trading ? 0 : null;
     },
 
-    standing(id: string, zoom: number): { x: number; y: number; tall: number } | null {
+    ringUnder(id: string, view: CameraView): RingPlace | null {
       const on = entries.get(id);
-      const above = on?.ground?.visible === true ? on.ground : on?.icon;
-      if (on === undefined || above === null || above === undefined || !above.visible) {
-        return null;
-      }
-      // Sized off the blend rather than off one form, because during the trade neither answers on its
-      // own. At the crossover the two heights are equal, so this is a no-op exactly where it matters.
-      const sizes = sizesAt(zoom, on.look.forms);
-      const alphas = alphasFor(on.blend);
-      return { x: above.x, y: above.y, tall: sizes.ground * alphas.ground + sizes.icon * alphas.icon };
+      return on === undefined ? null : ringUnder(on, view);
     },
 
     setSprites(sprites: readonly MapSprite[]): void {

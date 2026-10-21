@@ -48,6 +48,13 @@ behind it. No one height of the building says both.
   (`groundSideOf` in `sprites/fogLayering.ts`). In vision the fog is clear over it and the trees alike; the clouds are
   drawn only from zoom 7 out, where no ground form is. Its pennant flies with the form it is over: among the trees
   with the building close in, over the fog with the pin far out. A person keeps to 0063.
+- **The ring under what is selected lies on the ground with it**, round its footprint, a circle on the ground squashed
+  as the ground is - round a person's patch of ground for a person - between the trees' shadows and the trees, so the
+  building and the trees in front of it stand over it. It was a picture over every tree, centred on the building's foot
+  and as wide as its picture was tall, so it ringed the trees in front of a castle rather than the castle. Far out it
+  rings the pin, over the fog and the clouds with it, and eases from one to the other with the trade between the two
+  forms (`ringPlace.ts`). It is a light drawn by a shader of its own, breathing, a wave running out and beads going
+  round, which asks for twenty-four frames a second while it shows (`RingLayer.ts`, `ringShader.ts`).
 
 ## Consequences
 
@@ -56,7 +63,9 @@ ring is ragged, so a tree can stand close to a wall now and then, and covers as 
 would.
 
 At the soft edge of a house's vision a structure takes as much of the haze as the trees beside it, where it used to
-be drawn over it.
+be drawn over it, and so does its ring.
+
+While something is selected the sprite canvas is drawn twenty-four times a second for its ring, whatever else is still.
 
 The order follows the footprint the catalogue gives, not the picture: a picture painted bigger or smaller than its
 footprint sorts by the footprint, as its yard is worn by it. Tuning one is tuning both, on `/admin/inspect-structures`.

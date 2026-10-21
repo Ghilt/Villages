@@ -602,7 +602,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   crowds there are when that changes. A click on the "+N" opens the crowd's card over it (`sprites/CrowdCard.tsx`,
   the library's `PinGroup`), every mark of it with its name, most significant first; a press on one opens its
   window, and the card shuts on Escape, a press elsewhere or the camera moving. **Ctrl-click**, or Cmd-click on a
-  Mac, on a mark on the map or in the card takes the camera to it at zoom 9 instead. A click on one opens its **inspect window**,
+  Mac, on a mark on the map or in the card takes the camera to it at zoom 9 instead. What is picked stands in a ring of
+  light on the ground round its footprint, under it and under the trees in front of it, breathing, twenty-four frames a
+  second while it shows; round its pin far out. A click on one opens its **inspect window**,
   marked with a tower: its name, *a mill* or *an abbey* in the catalogue's word for the culture it stands in - a
   castle on Islamic ground is *a kasbah*, on African *a stockade* - who holds it with a way
   to that house, its level of the type's highest, what it yields whoever holds it a month and how far they see

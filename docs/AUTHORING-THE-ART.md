@@ -14,7 +14,8 @@
   oak, beech, palm, jungle, acacia, mangrove, snag, scrub, heather, grass, reed, boulder, cactus, fern.
 - `world/sprites/marks/<name>.png`, one for every mark the map places: castle, castle-icon, candidate,
   figure, figure-icon, selection-ring. These are placeholders only for now: the map still draws the marks
-  in code, because they take a house's colours. See 0059.
+  in code, because they take a house's colours. See 0059. The selection ring is a shader of its own now, a light
+  on the ground (decision record 0110), so `selection-ring.png` is read by nothing.
 - `world/sprites/marks/structures/<type>.png`, the mark of every type of structure and `ruin.png`: what the map
   draws far out, where a structure stops shrinking. Cut with the structures, and drawn from the files: see below.
 - `world/sprites/structures/<type>-<culture>.png`, one for every type of structure in every culture, and a

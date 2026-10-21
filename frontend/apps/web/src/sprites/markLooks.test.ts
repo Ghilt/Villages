@@ -17,7 +17,6 @@ const TEXTURES = {
   candidate: picture(44, 64),
   figure: picture(80, 160),
   bust: picture(60, 64),
-  ring: picture(128, 64),
   pennant: picture(49, 64),
   structures: {
     of: (type: string) => ({
