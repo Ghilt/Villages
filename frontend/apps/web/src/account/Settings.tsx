@@ -13,6 +13,7 @@ import { Dialog } from '../ui/dialog/Dialog';
 import { Dropdown } from '../ui/field/Dropdown';
 import { AccountPart } from './AccountPart';
 import { CreateAccountForm, SignInForm } from './Forms';
+import { DeletePart } from './DeletePart';
 import { ChangePasswordForm } from './PasswordForms';
 import { SignInsPart } from './SignInsPart';
 
@@ -117,6 +118,7 @@ export function Settings() {
                 hint="The only one for now: the game's words are not translated yet."
               />
             </section>
+            {signedIn && !me.guest && <DeletePart onDeleting={close} />}
           </>
         )}
       </Dialog>

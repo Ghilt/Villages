@@ -140,6 +140,15 @@ class AccountEndpoints(private val accounts: Accounts, private val cookie: SignI
         return ResponseEntity.ok(mapOf("ended" to true))
     }
 
+    /** This browser's account deleted, every sign-in of it ended, and the cookie cleared; the house stays in the world. */
+    @PostMapping("/delete")
+    fun delete(request: HttpServletRequest, response: HttpServletResponse): ResponseEntity<Any> {
+        val current = currentOf(request) ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(refused("notSignedIn"))
+        if (!accounts.delete(current)) return ResponseEntity.badRequest().body(refused("aGuest"))
+        cookie.clear(response, request)
+        return ResponseEntity.ok(Me.NOBODY)
+    }
+
     /** What making a sign-in came to, answered: the new cookie and who it is, or the refusal. */
     private fun signedInBy(request: HttpServletRequest, response: HttpServletResponse, made: Making): ResponseEntity<Any> =
         when (made) {

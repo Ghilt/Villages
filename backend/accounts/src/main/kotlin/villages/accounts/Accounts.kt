@@ -205,6 +205,20 @@ class Accounts(
         return signIns.swap(current?.id, record.player, Keeping.REMEMBERED, asking.browser)
     }
 
+    /**
+     * [current]'s account deleted: its email, its password's hash, its Google and Discord identities, its settings, its
+     * mailed links and every sign-in of it, whose windows are stood down. The house stays in the world with nobody to
+     * play it, and its events keep only the player's id, which then points at nobody. False for a guest, who has no
+     * account to delete.
+     */
+    fun delete(current: SignIn): Boolean {
+        val record = stores.players.of(current.player)?.takeIf { !it.guest } ?: return false
+        LinkKind.entries.forEach { stores.links.forget(record.player, it) }
+        stores.players.remove(record.player)
+        signIns.endEveryOther(record.player, kept = null)
+        return true
+    }
+
     /** Who [secret] is signed in as, used now, or null when it is no sign-in or one that has ended. */
     fun who(secret: String, cookie: Boolean = false): Who? {
         val signIn = signIns.find(secret) ?: return null

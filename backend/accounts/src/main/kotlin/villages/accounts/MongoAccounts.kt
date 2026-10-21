@@ -86,6 +86,10 @@ class MongoAccounts(connection: String, val database: String) : AccountStores {
 
         override fun byLogin(login: Login): PlayerRecord? = playerRows.find(eq("logins", login.key)).first()?.player()
 
+        override fun remove(player: PlayerId) {
+            playerRows.deleteOne(eq("_id", player.value.toString()))
+        }
+
         override fun claim(record: PlayerRecord): Boolean =
             try {
                 put(record)

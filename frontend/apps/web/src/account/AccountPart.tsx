@@ -38,7 +38,7 @@ export function AccountPart({
       <h3 className="ui-caps settings__title">Account</h3>
       <p className="ui-body">{whoSaid(me)}</p>
       {me !== null && !me.guest && !me.verified && <NotVerified email={me.email ?? ''} />}
-      {me !== null && me.player !== null && !me.guest && (
+      {me !== null && me.player !== null && !me.guest && me.password && (
         <div className="settings__row">
           <TextButton face="secondary" size="small" onClick={onPassword}>
             Change password

@@ -18,6 +18,8 @@ export interface Me {
   verified: boolean;
   /** The places this account signs in through besides its email. */
   through: ('google' | 'discord')[];
+  /** Whether the account has a password, which one made through Google or Discord need not. */
+  password: boolean;
   signIn: SignInView | null;
   settings: Settings;
 }
@@ -43,6 +45,7 @@ const NOBODY: Me = {
   email: null,
   verified: false,
   through: [],
+  password: false,
   signIn: null,
   settings: { motion: 'device', language: 'en' },
 };
@@ -224,6 +227,11 @@ export function providers(): Promise<{ providers: ('google' | 'discord')[]; pret
 /** Sends this browser to sign in through [provider], which sends it back to the game signed in. */
 export function signInThrough(provider: 'google' | 'discord'): void {
   window.location.assign(`/oauth2/authorization/${provider}`);
+}
+
+/** This browser's account deleted, and every sign-in of it ended: the house stays in the world with nobody to play it. */
+export async function deleteAccount(): Promise<void> {
+  await ask('POST', 'delete');
 }
 
 /** This browser signed out: its sign-in ended on the server, and its windows stood down. */

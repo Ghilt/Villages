@@ -28,7 +28,15 @@ function server(answers: Record<string, unknown>) {
 }
 
 const settings = { motion: 'device', language: 'en' };
-const nobody = { player: null, house: null, guest: false, signIn: null, settings };
+const nobody = {
+  player: null,
+  house: null,
+  guest: false,
+  through: [],
+  password: false,
+  signIn: null,
+  settings,
+};
 const guest = (player: string) => ({
   player,
   house: 'h',

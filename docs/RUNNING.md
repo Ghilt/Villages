@@ -1126,7 +1126,11 @@ and `-- --drop` takes them off; by hand only.
   beside the shared `.git` holds `google.client-id`, `google.client-secret`, `discord.client-id` and
   `discord.client-secret`, for applications registered with each for
   `http://localhost:5173/login/oauth2/code/google` and `.../discord`. Account then says what the account signs in
-  through. A sign-in with a window open counts as used however long ago it opened: every five
+  through, and *Change password* is offered only to an account that has one. **Delete my account**, at the foot of the
+  settings once signed in, is held to confirm: the email, the password, the Google and Discord identities, the
+  settings and every sign-in go for good, every window of the account dims under **Signed out**, the email is free to
+  make an account with again, and the house stays in the world with nobody to play it; the log says so under
+  `accounts`. A sign-in with a window open counts as used however long ago it opened: every five
   minutes the game server uses those, and ends any other past its end. Signed in, Account says the email, and **Log out** at the
   foot ends the sign-in on the server and dims the window under **Signed out**, whose *Sign in* signs in again there.
   **The world moving** is

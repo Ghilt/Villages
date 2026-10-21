@@ -18,6 +18,8 @@ data class Me(
     val verified: Boolean,
     /** The places this account signs in through besides its email: google, discord. */
     val through: List<String>,
+    /** Whether the account has a password, which one made through Google or Discord need not. */
+    val password: Boolean,
     val signIn: SignInView?,
     val settings: SettingsView,
 ) {
@@ -29,6 +31,7 @@ data class Me(
             email = null,
             verified = false,
             through = emptyList(),
+            password = false,
             signIn = null,
             settings = SettingsView.of(Settings()),
         )
@@ -40,6 +43,7 @@ data class Me(
             email = record?.email,
             verified = record?.verified ?: false,
             through = record?.logins.orEmpty().map { it.provider },
+            password = record?.password != null,
             signIn = SignInView(
                 id = signIn.id.value.toString(),
                 keeping = signIn.keeping.said,

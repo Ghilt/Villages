@@ -238,3 +238,32 @@ class AccountsThroughProvidersSpec : StringSpec({
         accounts.who(unverified.secret)?.guest shouldBe false
     }
 })
+
+/** An account deleted, and what stays. */
+class AccountsDeletedSpec : StringSpec({
+    val here = Asking("Chrome", "here", "http://localhost:5548")
+
+    "a deleted account is gone with every way in and every sign-in, and its email is free again" {
+        val told = mutableListOf<villages.application.SignInId>()
+        val accounts = Accounts(InMemoryAccounts(), HandClock(), ended = { told += it })
+        val made = accounts.makeAccount("ada@example.com", "a long and quiet river", Keeping.REMEMBERED, null, here)
+            .shouldBeInstanceOf<Making.Made>()
+        val elsewhere = accounts.signInWith("ada@example.com", "a long and quiet river", Keeping.REMEMBERED, null, here)
+            .shouldBeInstanceOf<Entering.In>()
+
+        accounts.delete(made.begun.signIn) shouldBe true
+
+        told.toSet() shouldBe setOf(made.begun.signIn.id, elsewhere.begun.signIn.id)
+        accounts.recordOf(made.begun.signIn.player).shouldBeNull()
+        accounts.signInWith("ada@example.com", "a long and quiet river", Keeping.REMEMBERED, null, here) shouldBe Entering.NotThatPassword
+        accounts.makeAccount("ada@example.com", "another quiet river", Keeping.REMEMBERED, null, here).shouldBeInstanceOf<Making.Made>()
+    }
+
+    "a guest has no account to delete" {
+        val accounts = Accounts(InMemoryAccounts(), HandClock())
+        val guest = accounts.newcomer("Chrome")
+
+        accounts.delete(guest.signIn) shouldBe false
+        accounts.who(guest.secret).shouldNotBeNull()
+    }
+})

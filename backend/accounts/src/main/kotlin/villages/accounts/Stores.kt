@@ -87,6 +87,9 @@ interface PlayerStore {
      * instant of writing, so two who ask at once cannot both have it.
      */
     fun claim(record: PlayerRecord): Boolean
+
+    /** [player]'s record gone: their account, their way in and their settings. */
+    fun remove(player: PlayerId)
 }
 
 /** What a mailed link is for: verifying an email, or choosing a new password. */
@@ -164,6 +167,10 @@ class InMemoryAccounts : AccountStores {
             if (others.any { other -> other.logins.any { it in record.logins } }) return false
             records[record.player] = record
             return true
+        }
+
+        override fun remove(player: PlayerId) {
+            records.remove(player)
         }
     }
 

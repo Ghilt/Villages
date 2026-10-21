@@ -119,6 +119,17 @@ class AccountEndpointsTest {
     }
 
     @Test
+    fun `a deleted account signs in nowhere, and its cookie names nobody`() {
+        val email = anEmail()
+        val cookie = setCookie(post("/auth/signup", asked(email))).substringBefore(';')
+
+        assertEquals(200, post("/auth/delete", cookie = cookie).statusCode())
+
+        assertTrue(me(cookie)["player"].isNull)
+        assertEquals(401, post("/auth/signin", asked(email)).statusCode())
+    }
+
+    @Test
     fun `signing out ends the sign-in on the server, so the cookie names nobody`() {
         val email = anEmail()
         val cookie = setCookie(post("/auth/signup", asked(email))).substringBefore(';')

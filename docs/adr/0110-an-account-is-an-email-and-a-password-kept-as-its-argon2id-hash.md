@@ -54,6 +54,11 @@ clears the cookie.
   this browser a new secret. A password that will not do is refused before the link is used.
 - Somebody can make an account with an address that is not theirs until it is verified. The address's owner gets it
   back by resetting the password, which ends every other sign-in.
+- **An account is deleted whole**, held to confirm: its record - the email, the password's hash, its Google and
+  Discord identities, its settings - its mailed links and every sign-in of it go, its windows are stood down, and its
+  email is free again. The house stays in the world with nobody to play it, and the events keep only the player's id,
+  which then points at nobody: nothing personal is left in a store that is never wiped. What the world does with a
+  house nobody plays is a mechanic for later.
 - The commonest-password list is short and the module's own; Adam can lengthen it without touching code.
 
 ## Alternatives considered
