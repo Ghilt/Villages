@@ -5,13 +5,16 @@ import { useMemo, useState } from 'react';
 import type { SliceView } from '@villages/protocol';
 import type { Challenges } from '@villages/world';
 
+import { MarkButton } from '../ui/button/Button';
 import { Diorama } from '../ui/diorama/Diorama';
+import { Drawer } from '../ui/drawer/Drawer';
 import { ReplayBar } from '../ui/replay/Replay';
 import type { Band, Tick } from '../ui/replay/Replay';
 import { useReplayClock } from '../ui/replay/useReplayClock';
 import { SliceChip, SliceTray } from '../ui/slice/Slice';
 import { HappeningPlate, TugBar } from '../ui/tug/Tug';
 import { towardSaid } from '../ui/tug/tugShare';
+import { History } from './History';
 import { openedOf, stateSaid } from './opened';
 import { replayOf, startsOf } from './replay';
 import type { Field, Run, SideKey } from './replay';
@@ -69,6 +72,7 @@ export function Spectacle({
   const sheets = useSheets();
   const [open, setOpen] = useState<Record<SideKey, boolean>>({ a: true, b: true });
   const [opened, setOpened] = useState<string | null>(null);
+  const [history, setHistory] = useState(false);
   const arrangement = held === 'wide' ? SQUARE.wide : SQUARE.deep;
   const boost = boostSaid(content);
   const starts = startsOf(run.progression);
@@ -122,6 +126,14 @@ export function Spectacle({
           said={lightsSaid(field, houses, boost)}
         />
       </div>
+      <div className="spectacle__history">
+        <MarkButton
+          label="The history"
+          mark="history"
+          pressed={history}
+          onClick={() => setHistory(!history)}
+        />
+      </div>
       <div className="spectacle__trays">
         {SIDES.map((side) => (
           <SliceTray
@@ -163,6 +175,14 @@ export function Spectacle({
           ticks={ticks}
         />
       </div>
+      <Drawer
+        title="History"
+        open={history}
+        onClose={() => setHistory(false)}
+        from={held === 'wide' ? 'right' : 'bottom'}
+      >
+        <History run={run} tug={replay.tug} field={field} sides={sides} content={content} houses={houses} />
+      </Drawer>
     </div>
   );
 }

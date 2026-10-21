@@ -1289,7 +1289,9 @@ it, the tug drawn, and what it came to; a seed fights the same challenge again, 
 thousand says how often each side wins; a grid of matchups weighs every aspect against every other. Decision record 0107 is the shape and
 `docs/plans/challenges.md` the rules as settled and the steps, one commit each. Its second part, matching aspect with
 buffs and debuffs, is built too, in `docs/plans/challenge-matching.md`. The spectacle, the square watched on the same
-page, is planned on 2026-10-21 in `docs/plans/challenge-spectacle.md`, and none of it is built.
+page, was planned on 2026-10-21 in `docs/plans/challenge-spectacle.md` and is built: a single run on the page is
+played out in the square, held wide or deep, with the replay, each side's slices and the history, from parts of the
+component library. The square is the only venue so far.
 
 ---
 

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { Challenges } from '@villages/world';
 import type { ChallengeSimulatedFrame } from '@villages/protocol';
 
-import { WHAT_SAID, effectSaid, lastingSaid, numberSaid, summonNames, whoSaid } from './setup';
+import { WHAT_SAID, effectSaid, lastingSaid, numberSaid, summonNames, whoSaid } from '../../spectacle/said';
 import type { Draft } from './setup';
 
 /**

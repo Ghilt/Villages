@@ -2,7 +2,8 @@ import { useState } from 'react';
 
 import type { ProgressionView } from '@villages/protocol';
 
-import { numberSaid, startsOf } from './setup';
+import { numberSaid } from '../../spectacle/said';
+import { startsOf } from './setup';
 
 /** How the runs of a batch spread, as the server sums them: a count per band for every second, and where each ended. */
 export interface Spread {

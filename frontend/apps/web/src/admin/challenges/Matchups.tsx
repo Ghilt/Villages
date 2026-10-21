@@ -3,7 +3,8 @@ import { useState } from 'react';
 import type { Challenges } from '@villages/world';
 import type { MatchupView, MatchupsSimulatedFrame } from '@villages/protocol';
 
-import { numberSaid, said } from './setup';
+import { numberSaid } from '../../spectacle/said';
+import { said } from './setup';
 import { useSimulator } from './useSimulator';
 import type { Weighed } from './useSimulator';
 

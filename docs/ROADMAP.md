@@ -35,9 +35,9 @@ character dialogue; the UI component library is built and waiting on Adam's eye,
 and so is the origin map, the first of real names on the edited world. Structures are planned and not
 started; the world cache is built and waiting on Adam's eye; quests are built and on main, waiting on Adam's
 eye for their experiment; catalogues are built and waiting on Adam's eye; ruined cities are planned and not
-started; worked ground is planned and not started; challenges are built on their admin page and on main, and their
-spectacle is planned and not started; settlements and roads are built and on main; and houses, bridges and the road
-render, the newest, are built and on main, the Roads renderer waiting on Adam's eye.
+started; worked ground is planned and not started; challenges are built on their admin page and on main; settlements
+and roads are built and on main; houses, bridges and the road render are built and on main, the Roads renderer waiting
+on Adam's eye; and the challenge spectacle, the newest, is built and on main.
 
 - **Characters and key figures**: the people of the world, each with a history of their own, and the
   house's tie to the few it acts through, shown in a pane in the corner beside the house status. The shape
@@ -197,7 +197,7 @@ render, the newest, are built and on main, the Roads renderer waiting on Adam's 
   record 0107; the rules and the steps are in `docs/plans/challenges.md` and `docs/plans/challenge-matching.md`, all
   built and on main. The spectacle - the challenge played out in a diorama seen as the map is, the square first, the
   townsfolk walking to whoever is winning them - is decision record 0116 and twelve steps in
-  `docs/plans/challenge-spectacle.md`; none is built. Adam's own mechanic, planned with him on 2026-10-20, its
+  `docs/plans/challenge-spectacle.md`, all built and waiting on Adam's eye. Adam's own mechanic, planned with him on 2026-10-20, its
   spectacle on 2026-10-21.
 - **House bots**: the world begins populated, with a few hundred houses whose player is the world itself, each
   standing outside the ruin of a town of 1790 and named after it, made at every opening - as the server starts,

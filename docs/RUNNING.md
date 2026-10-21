@@ -1052,8 +1052,10 @@ and `-- --drop` takes them off; by hand only.
   whom it lights; along the bottom each side's slices in its tray, lit while matching, a chip pressed to open the
   slice and say what each effect needs and whether it works now, a side's name to fold its tray; and the replay -
   play and pause, three paces, to the end, the happenings as bands with the tug drawn over them, a tick where
-  something arrived or fell, and a scrub the arrow keys step a second at a time - held wide, held deep, or as a phone of
-  390 by 844, by the words over it; the tug drawn second by second, side A up, each happening marked; and
+  something arrived or fell, and a scrub the arrow keys step a second at a time; and the history behind its mark in
+  the top corner, sliding in from the right held wide and the bottom held deep, the tug second by second with the
+  second shown marked, what happened in that second in the words the table below says, and every slice's numbers -
+  held wide, held deep, or as a phone of 390 by 844, by the words over it; the tug drawn second by second, side A up, each happening marked; and
   every moment as a table, a side or a kind of moment kept alone, a boosted amount marked ×. **run 100** and **run
   10000** fight the same sides that many times and say how often each side won, how many ended even, how many each
   pulled to the end, the mean end tug and how long the batch took; the first run is the seed's, and its moments are the
