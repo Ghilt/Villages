@@ -117,9 +117,46 @@ export const simulationRefusedSchema = z.object({
   reason: z.string(),
 });
 
+/**
+ * Weigh every aspect against every other: for each pair, a slice of the one against a slice of the other, fought `runs`
+ * times on progressions drawn from the challenge kind, from the seed or one the server draws.
+ */
+export const simulateMatchupsSchema = z.object({
+  type: z.literal('simulateMatchups'),
+  id: z.string(),
+  kind: z.string(),
+  runs: z.number().int().min(1).max(1000),
+  seed: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER).optional(),
+});
+
+/** One pairing's runs: each side's wins, the even ends, how many were pulled to an end, the mean end tug toward A. */
+export const matchupViewSchema = z.object({
+  wonByA: z.number().int(),
+  wonByB: z.number().int(),
+  even: z.number().int(),
+  pulled: z.number().int(),
+  meanTug: z.number(),
+});
+
+/** Every aspect weighed against every other: the aspects in order, and the cells by side A's aspect, then side B's. */
+export const matchupsSimulatedSchema = z.object({
+  type: z.literal('matchupsSimulated'),
+  id: z.string(),
+  kind: z.string(),
+  runs: z.number().int(),
+  seed: z.number().int(),
+  catalogue: z.string(),
+  aspects: z.array(z.string()),
+  cells: z.array(z.array(matchupViewSchema)),
+});
+
 /** The client's and the server's frames of the challenges, as `frames.ts` lists them in its unions. */
-export const challengeClientFrames = [simulateChallengeSchema] as const;
-export const challengeServerFrames = [challengeSimulatedSchema, simulationRefusedSchema] as const;
+export const challengeClientFrames = [simulateChallengeSchema, simulateMatchupsSchema] as const;
+export const challengeServerFrames = [
+  challengeSimulatedSchema,
+  simulationRefusedSchema,
+  matchupsSimulatedSchema,
+] as const;
 
 export type SimulateChallengeFrame = z.infer<typeof simulateChallengeSchema>;
 export type SliceView = z.infer<typeof sliceViewSchema>;
@@ -128,3 +165,5 @@ export type MomentView = z.infer<typeof momentViewSchema>;
 export type OutcomeView = z.infer<typeof outcomeViewSchema>;
 export type ChallengeSimulatedFrame = z.infer<typeof challengeSimulatedSchema>;
 export type SimulationRefusedFrame = z.infer<typeof simulationRefusedSchema>;
+export type MatchupsSimulatedFrame = z.infer<typeof matchupsSimulatedSchema>;
+export type MatchupView = z.infer<typeof matchupViewSchema>;

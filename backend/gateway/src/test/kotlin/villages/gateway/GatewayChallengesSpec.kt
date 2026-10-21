@@ -4,6 +4,7 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import villages.protocol.ChallengeSimulated
+import villages.protocol.MatchupsSimulated
 import villages.protocol.ServerFrame
 import villages.protocol.SimulationRefused
 
@@ -84,6 +85,18 @@ class GatewayChallengesSpec : StringSpec({
         fought.batch!!.ends.sum() shouldBe 20
         fought.seed shouldBe 42L
         fought.moments.isNotEmpty() shouldBe true
+    }
+
+    "every aspect is weighed against every other, and sent as a grid" {
+        val (page, sent) = Rig().page()
+
+        page.receive("""{"type":"simulateMatchups","id":"grid-1","kind":"skirmish","runs":4,"seed":3}""")
+
+        val grid = sent.single() as MatchupsSimulated
+        grid.aspects.size shouldBe 10
+        grid.cells.size shouldBe 10
+        grid.cells.all { row -> row.size == 10 && row.all { it.wonByA + it.wonByB + it.even == 4 } } shouldBe true
+        grid.seed shouldBe 3L
     }
 
     "a server with its instruments closed refuses it" {

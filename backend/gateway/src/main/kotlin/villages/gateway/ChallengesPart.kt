@@ -1,9 +1,11 @@
 package villages.gateway
 
+import villages.application.ChallengeMatchups
 import villages.application.ChallengeSimulator
 import villages.application.SetupRefused
 import villages.protocol.ServerFrame
 import villages.protocol.SimulateChallenge
+import villages.protocol.SimulateMatchups
 import villages.protocol.SimulationRefused
 
 /**
@@ -14,10 +16,21 @@ import villages.protocol.SimulationRefused
 internal class ChallengesPart(
     private val open: Boolean,
     private val simulator: ChallengeSimulator,
+    private val matchups: ChallengeMatchups,
     private val fingerprint: () -> String,
 ) : Part {
     override fun register(commands: Commands, frames: Frames) {
         frames.on<SimulateChallenge> { connection, frame -> connection.out.send(fought(frame)) }
+        frames.on<SimulateMatchups> { connection, frame -> connection.out.send(weighed(frame)) }
+    }
+
+    private fun weighed(frame: SimulateMatchups): ServerFrame {
+        if (!open) return SimulationRefused(frame.id, "instrumentsClosed", "simulateMatchups is one of the instruments, and they are closed here")
+        return try {
+            matchups.weigh(frame.kind, frame.runs, frame.seed).toFrame(frame.id, fingerprint())
+        } catch (refused: SetupRefused) {
+            SimulationRefused(frame.id, "invalidSetup", refused.message ?: "the matchups cannot be weighed")
+        }
     }
 
     private fun fought(frame: SimulateChallenge): ServerFrame {
@@ -40,6 +53,10 @@ internal class ChallengesPart(
 }
 
 /** The challenge's place in the gateway: an instrument only, greeting nobody, after the inspect pages' own. */
-class ChallengesMechanic(private val simulator: ChallengeSimulator, private val fingerprint: () -> String) : GatewayMechanic(greeting = 1700) {
-    override fun part(made: Made): Part = ChallengesPart(made.open, simulator, fingerprint)
+class ChallengesMechanic(
+    private val simulator: ChallengeSimulator,
+    private val matchups: ChallengeMatchups,
+    private val fingerprint: () -> String,
+) : GatewayMechanic(greeting = 1700) {
+    override fun part(made: Made): Part = ChallengesPart(made.open, simulator, matchups, fingerprint)
 }

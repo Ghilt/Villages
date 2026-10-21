@@ -936,7 +936,13 @@ and `-- --drop` takes them off; by hand only.
   bands of the tug between the ends and a row of its own for each end, set apart, every cell as dark as the share of the
   runs standing then that stood in that band, in seven steps of one blue named under it; bars beside it say where the
   runs ended, and the seed's run is drawn over it as a line. A run pulled to an end stays in that end's row until its
-  seconds are up. Pointing at a cell or a bar says what it holds. It asks with
+  seconds are up. Pointing at a cell or a bar says what it holds. Under the simulator, **matchups** weigh every aspect
+  against every other: the game server fights a slice of each aspect - the balance's first numbers, every way of choosing
+  two of its effects taking its turn, a middling key figure or building of level two in each slot - against a slice of
+  each other, 90 or 900 runs a pairing, on progressions drawn from a challenge kind, Even unless another is picked, and
+  the page draws who won how often as a grid: side A down the side and side B across, each cell side A's share of the
+  runs either side won, the even ends left out, blue where A wins most, red where B does, grey about even, with each aspect's mean as A and as B at the ends.
+  Pointing at a cell says the whole of it. A grid of 900 is 90,000 challenges. It asks with
   `simulateChallenge`, one of Adam's instruments, on a connection that says no hello, and a server with its instruments
   closed refuses it; nothing is stored. The plan is `docs/plans/challenges.md`.
 - **`/admin/inspect-story`** is the world's history as a timeline, `docs/STORY.md` drawn, and needs nothing else

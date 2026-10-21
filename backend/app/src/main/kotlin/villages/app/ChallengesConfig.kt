@@ -3,6 +3,7 @@ package villages.app
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import villages.application.Catalogues
+import villages.application.ChallengeMatchups
 import villages.application.ChallengeSimulator
 import villages.application.Seeds
 import villages.application.Shelf
@@ -21,8 +22,13 @@ class ChallengesConfig {
     fun challengeSimulator(shelf: Shelf): ChallengeSimulator =
         ChallengeSimulator({ shelf.challenges }, { shelf.balance.challenge }) { ThreadLocalRandom.current().nextLong(0, Seeds.MOST + 1) }
 
+    /** Every aspect weighed against every other, for the simulator's grid of matchups. See 0107. */
+    @Bean
+    fun challengeMatchups(shelf: Shelf): ChallengeMatchups =
+        ChallengeMatchups({ shelf.challenges }, { shelf.balance.challenge }) { ThreadLocalRandom.current().nextLong(0, Seeds.MOST + 1) }
+
     /** The challenge's place in the gateway: the simulator's page has the engine fight a challenge out. See 0107. */
     @Bean
-    fun challengesInTheGateway(simulator: ChallengeSimulator, shelf: Shelf): GatewayMechanic =
-        ChallengesMechanic(simulator) { shelf.fingerprints()[Catalogues.CHALLENGES].orEmpty() }
+    fun challengesInTheGateway(simulator: ChallengeSimulator, matchups: ChallengeMatchups, shelf: Shelf): GatewayMechanic =
+        ChallengesMechanic(simulator, matchups) { shelf.fingerprints()[Catalogues.CHALLENGES].orEmpty() }
 }

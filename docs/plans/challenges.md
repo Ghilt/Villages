@@ -286,12 +286,13 @@ Every new check is seen to fail once.
 | 11 | **The challenge kinds drawing progressions**, protocol 59 | 👀 Battle drawn, the same progression for the same seed; 👀 a kind's weights changed, and seen |
 | 12 | **Batches**, protocol 60 | 👀 A thousand runs: who wins how often, how many pulled to 100; how long it takes |
 
-Steps 7 to 10 do not lean on each other, and 11 could come straight after 6. Step 13 was asked for by Adam on
-2026-10-21, once he had run batches:
+Steps 7 to 10 do not lean on each other, and 11 could come straight after 6. Steps 13 and 14 were asked for by
+Adam on 2026-10-21, once he had run batches:
 
 | # | Step | Verification requests |
 |---|---|---|
 | 13 | **A batch drawn whole**, protocol 61: where every run stood each second as a heatmap, the two ends rows of their own, where the runs ended beside it, the seed's run over it | 👀 run 10000, and the heatmap reads; 👀 a cell and a bar say what they hold |
+| 14 | **A matchup grid**, protocol 63: every aspect's slice against every other's, a batch a pairing on an even kind, drawn as a grid of who wins how often | 👀 weigh 900 a pairing, and the grid reads; 👀 a cell says the whole of it |
 
 ## Not in this plan
 

@@ -1,6 +1,7 @@
 package villages.gateway
 
 import villages.application.Fought
+import villages.application.Matchups
 import villages.domain.challenge.Actor
 import villages.domain.challenge.Aspect
 import villages.domain.challenge.ChallengeSetup
@@ -14,6 +15,8 @@ import villages.protocol.BatchView
 import villages.protocol.ChallengeSimulated
 import villages.protocol.GainView
 import villages.protocol.LossView
+import villages.protocol.MatchupView
+import villages.protocol.MatchupsSimulated
 import villages.protocol.MomentView
 import villages.protocol.OutcomeView
 import villages.protocol.ProgressionView
@@ -101,3 +104,13 @@ private fun Actor.toWire(): String = when (this) {
 /** `HAPPENING_BEGAN` as the wire says it, `happeningBegan`. */
 private fun String.lowerCamel(): String =
     lowercase().split('_').mapIndexed { at, word -> if (at == 0) word else word.replaceFirstChar(Char::uppercase) }.joinToString("")
+
+internal fun Matchups.toFrame(id: String, catalogue: String): MatchupsSimulated = MatchupsSimulated(
+    id = id,
+    kind = kind,
+    runs = runs,
+    seed = seed,
+    catalogue = catalogue,
+    aspects = aspects.map { it.name.lowercase() },
+    cells = cells.map { row -> row.map { MatchupView(it.wonByA, it.wonByB, it.even, it.pulled, it.meanTug) } },
+)

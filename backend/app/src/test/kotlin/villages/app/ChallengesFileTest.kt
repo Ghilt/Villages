@@ -39,7 +39,7 @@ class ChallengesFileTest {
         val challenges = ChallengesFile.parse(real)
 
         assertEquals(Aspect.entries.associateWith { 3 }, Aspect.entries.associateWith { challenges.effectsOf(it).size })
-        assertEquals(setOf("battle", "debate", "tradeWar", "sermon"), challenges.kinds.keys)
+        assertEquals(setOf("battle", "debate", "tradeWar", "sermon", "even"), challenges.kinds.keys)
         assertEquals(real, CatalogueText.format(real))
     }
 

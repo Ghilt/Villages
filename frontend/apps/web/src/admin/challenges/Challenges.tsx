@@ -15,6 +15,7 @@ import { SaveBar, WholeFile } from '../frame/SaveBar';
 import { useCatalogueEditor } from '../frame/useCatalogueEditor';
 import type { CatalogueEditor, Path } from '../frame/useCatalogueEditor';
 import { said } from './setup';
+import { Matchups } from './Matchups';
 import { Simulator } from './Simulator';
 
 type Editor = CatalogueEditor<Content>;
@@ -58,6 +59,7 @@ export function Challenges() {
         </>
       )}
       <Simulator content={content} />
+      <Matchups content={content} />
       <WholeFile editor={editor} />
     </InspectPage>
   );

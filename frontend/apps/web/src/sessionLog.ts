@@ -224,6 +224,7 @@ export const sessionLog: GatewayListener = {
       // Nor fights a challenge out: the challenges' inspect page does, with no session (0107).
       case 'challengeSimulated':
       case 'simulationRefused':
+      case 'matchupsSimulated':
         return;
       case 'playersListed': // The panel's to show, in the World section's dropdown. See 0101.
         return;

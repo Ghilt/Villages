@@ -220,6 +220,7 @@ export function createSession(ports: SessionPorts): Session {
     // A player's window never fights a challenge out; the challenges' inspect page does, with no session. See 0107.
     challengeSimulated: () => undefined,
     simulationRefused: () => undefined,
+    matchupsSimulated: () => undefined,
     // What saves there are: the panel's to say and show. See 0101.
     savesListed: () => undefined,
     playersListed: () => undefined,

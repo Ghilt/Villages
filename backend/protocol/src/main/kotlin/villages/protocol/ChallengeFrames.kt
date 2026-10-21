@@ -126,3 +126,27 @@ data class SummonSeenView(val serial: Int, val kind: String, val called: String?
 
 /** A challenge not fought: `invalidSetup`, saying why, or `instrumentsClosed`. */
 data class SimulationRefused(val id: String, val code: String, val reason: String) : ServerFrame
+
+/**
+ * Weigh every aspect against every other: for each pair, a slice of the one against a slice of the other, fought [runs]
+ * times on progressions drawn from the challenge [kind], from the [seed] or one the server draws.
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class SimulateMatchups(val id: String, val kind: String, val runs: Int, val seed: Long? = null) : ClientFrame
+
+/**
+ * Every aspect weighed against every other: the [aspects] in their order, and [cells] by side A's aspect, then side
+ * B's, each pairing's runs summed.
+ */
+data class MatchupsSimulated(
+    val id: String,
+    val kind: String,
+    val runs: Int,
+    val seed: Long,
+    val catalogue: String,
+    val aspects: List<String>,
+    val cells: List<List<MatchupView>>,
+) : ServerFrame
+
+/** One pairing's runs: each side's wins, the even ends, how many were pulled to an end, and the mean end tug toward A. */
+data class MatchupView(val wonByA: Int, val wonByB: Int, val even: Int, val pulled: Int, val meanTug: Double)

@@ -190,3 +190,55 @@
   height: 2px;
   background: var(--ink);
 }
+
+/* Every aspect weighed against every other (Matchups.tsx): a grid of side A's share of the wins, each pair of aspects
+   set apart by a rule, each aspect's mean at the ends. */
+
+.challenges-grid {
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.challenges-grid th {
+  padding: 0.2rem 0.4rem;
+  font-weight: normal;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.challenges-grid thead th {
+  text-align: center;
+}
+
+.challenges-grid__corner {
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+}
+
+.challenges-grid__cell {
+  min-width: 3rem;
+  padding: 0.35rem 0.4rem;
+  color: var(--ink);
+  text-align: center;
+  border: 2px solid #fbf7ec;
+}
+
+.challenges-grid__cell.is-dark {
+  color: #fbf7ec;
+}
+
+.challenges-grid tr.challenges-grid__pair-end td,
+.challenges-grid tr.challenges-grid__pair-end th {
+  border-bottom: 3px solid #fbf7ec;
+}
+
+.challenges-grid__cell.challenges-grid__pair-end {
+  border-right-width: 5px;
+}
+
+.challenges-grid__mean {
+  padding: 0.35rem 0.5rem;
+  color: var(--ink-soft);
+  text-align: center;
+}

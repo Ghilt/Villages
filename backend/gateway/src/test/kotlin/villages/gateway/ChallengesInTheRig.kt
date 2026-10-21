@@ -1,5 +1,6 @@
 package villages.gateway
 
+import villages.application.ChallengeMatchups
 import villages.application.ChallengeSimulator
 import villages.domain.Stat
 import villages.domain.challenge.Aspect
@@ -23,4 +24,7 @@ internal val RIG_CHALLENGES = ChallengeCatalogue(
 
 /** The rig's challenge in the gateway: the engine on the rig's content, a seed of seven when none is given. */
 internal fun challengesInTheRig(): ChallengesMechanic =
-    ChallengesMechanic(ChallengeSimulator({ RIG_CHALLENGES }, { RIG_BALANCE.challenge }) { 7L }) { "rig-fingerprint" }
+    ChallengesMechanic(
+        ChallengeSimulator({ RIG_CHALLENGES }, { RIG_BALANCE.challenge }) { 7L },
+        ChallengeMatchups({ RIG_CHALLENGES }, { RIG_BALANCE.challenge }) { 7L },
+    ) { "rig-fingerprint" }

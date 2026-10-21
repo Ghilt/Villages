@@ -251,6 +251,14 @@
       "happenings": [2, 4],
       "twoAspects": 10,
       "weights": { "violence": 0, "diplomacy": 1, "holy": 8, "reason": 3, "authority": 2, "freedom": 2, "greed": 1, "generosity": 4, "nature": 1, "industry": 0 }
+    },
+    "even": {
+      "name": "Even",
+      "words": "Every aspect alike: the ground the simulator weighs aspects against each other on.",
+      "seconds": [30, 90],
+      "happenings": [3, 6],
+      "twoAspects": 20,
+      "weights": { "violence": 1, "diplomacy": 1, "holy": 1, "reason": 1, "authority": 1, "freedom": 1, "greed": 1, "generosity": 1, "nature": 1, "industry": 1 }
     }
   }
 }

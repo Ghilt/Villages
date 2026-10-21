@@ -162,3 +162,6 @@ recorded over. See decision record 0037. What each one changed:
   bands are cut between. See decision record 0107.
 - **62** - `playersListed` says of each player whether the world plays it itself, `bot`: a house bot (decision record
   0108).
+- **63** - `simulateMatchups`, answered by `matchupsSimulated`: every aspect's slice weighed against every other's, a
+  batch of runs a pairing on progressions drawn from a challenge kind, or by `simulationRefused`. Instruments, refused
+  while they are closed. See decision record 0107.

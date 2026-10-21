@@ -1,0 +1,46 @@
+{
+  "type": "matchupsSimulated",
+  "id": "grid-1",
+  "kind": "even",
+  "runs": 900,
+  "seed": 20261021,
+  "catalogue": "60410b0ff25e88bec6f2e90dbd2f40773741438745cda4ae61123354e97442c4",
+  "aspects": [
+    "violence",
+    "diplomacy"
+  ],
+  "cells": [
+    [
+      {
+        "wonByA": 450,
+        "wonByB": 440,
+        "even": 10,
+        "pulled": 700,
+        "meanTug": 1.5
+      },
+      {
+        "wonByA": 820,
+        "wonByB": 75,
+        "even": 5,
+        "pulled": 760,
+        "meanTug": 70.25
+      }
+    ],
+    [
+      {
+        "wonByA": 90,
+        "wonByB": 805,
+        "even": 5,
+        "pulled": 750,
+        "meanTug": -68.5
+      },
+      {
+        "wonByA": 446,
+        "wonByB": 448,
+        "even": 6,
+        "pulled": 690,
+        "meanTug": -0.5
+      }
+    ]
+  ]
+}
