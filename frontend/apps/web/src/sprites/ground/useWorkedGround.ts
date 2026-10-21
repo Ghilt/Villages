@@ -5,6 +5,7 @@ import { useStore } from '../../store/useStore';
 import type { MapSprite } from '../SpriteRenderer';
 import { createGroundTiles } from './groundTiles';
 import { rememberingPaths, wearPaths } from './paths';
+import { rememberingSettlementGround, rememberingWornTogether } from './settlementGround';
 import type { Path } from './paths';
 import { workedGroundStore } from './settings';
 import type { Worked } from './worked';
@@ -15,9 +16,9 @@ const NOTHING_WORN: ReadonlyMap<number, Worked> = new Map();
 const NO_PATHS: readonly Path[] = [];
 
 /**
- * The ground worn bare by the buildings on the map: each one's yard, and the paths between those nearer each other
- * than the reach, walked over the ground the flat tiles under `tilesRoot` say and worn only where `revealed` says the
- * house has seen. Worked out again only when the buildings, the reach, the switch, the ground known or the sight
+ * The ground worn bare by the buildings on the map: each one's yard, each settlement's ground, streets and lanes, and
+ * the paths between those nearer each other than the reach, walked over the ground the flat tiles under `tilesRoot`
+ * say and worn only where `revealed` says the house has seen. Worked out again only when the buildings, the reach, the switch, the ground known or the sight
  * change, so it keeps its identity while a person on the map walks; said in the log when how much there is changes.
  * See docs/plans/worked-ground.md.
  */
@@ -28,6 +29,8 @@ export function useWorkedGround(
 ): ReadonlyMap<number, Worked> {
   const [work] = useState(rememberingWorkedGround);
   const [walk] = useState(rememberingPaths);
+  const [settle] = useState(rememberingSettlementGround);
+  const [together] = useState(rememberingWornTogether);
   const [known, setKnown] = useState(0);
   const ground = useMemo(() => createGroundTiles(tilesRoot, () => setKnown((was) => was + 1)), [tilesRoot]);
   const wearing = useStore(workedGroundStore, (state) => state.on);
@@ -35,7 +38,14 @@ export function useWorkedGround(
 
   const yards = useMemo(() => sprites.flatMap((sprite) => yardOf(sprite) ?? []), [sprites]);
   // With the switch off there is no worked ground at all: nothing drawn, and the trees grow back.
-  const worn = useMemo(() => (wearing ? work(yards) : NOTHING_WORN), [wearing, work, yards]);
+  const settled = useMemo(
+    () => (wearing ? settle(sprites, ground) : null),
+    [wearing, settle, sprites, ground],
+  );
+  const worn = useMemo(
+    () => (wearing ? together(work(yards), settled?.worked ?? NOTHING_WORN) : NOTHING_WORN),
+    [wearing, work, together, yards, settled],
+  );
   const paths = useMemo(
     () => (wearing && reach > 0 ? walk(yards, reach, ground, known) : NO_PATHS),
     [wearing, reach, walk, yards, ground, known],
@@ -44,11 +54,14 @@ export function useWorkedGround(
 
   const said = useRef('');
   useEffect(() => {
-    const now = `${worked.size} diamonds of worked ground under ${yards.length} buildings, ${paths.length} paths`;
+    const settlements = yards.filter((yard) => yard.settlement).length;
+    const now =
+      `${worked.size} diamonds of worked ground under ${yards.length - settlements} buildings and ${settlements} ` +
+      `settlements, ${paths.length} paths and ${settled?.lanes ?? 0} lanes`;
     if (now !== said.current) {
       said.current = now;
       note('ground', now);
     }
-  }, [worked, yards, paths]);
+  }, [worked, yards, paths, settled]);
   return worked;
 }

@@ -29,6 +29,8 @@ uniform vec2 uWindowSize;
 uniform vec3 uEarth;
 uniform float uStrength;
 uniform float uFade;
+// How much of a settlement's ground is grass rather than earth.
+uniform float uGrass;
 out vec4 fragColor;
 
 ${GROUND_GLSL}
@@ -38,8 +40,10 @@ const float WANDER = 0.45;
 const float WANDER_FINE = 1.7;
 // How far into a worn diamond its edge softens, where it meets one that is not.
 const float SOFT = 0.18;
-// The grass a ruin's yard is going back to.
+// The grass a ruin's yard is going back to, and a settlement's ground is trodden into.
 const vec3 GRASS = vec3(0.45, 0.5, 0.35);
+// The dust a road is packed to.
+const vec3 PALE = vec3(0.78, 0.7, 0.56);
 
 int wornAt(ivec2 cell) {
   ivec2 at = cell - ivec2(uWindowOrigin);
@@ -67,13 +71,25 @@ void main() {
   if (wornAt(cell + ivec2(0, 1)) == 0) edge = min(edge, 1.0 - into.y);
   float soft = smoothstep(0.0, SOFT, edge);
 
-  // 1 a path, 2 a ruin's ring, 3 a ring, 4 a ruin's footprint, 5 a footprint.
-  float how = worn == 5 ? 1.0 : worn == 4 ? 0.7 : worn == 3 ? 0.85 : worn == 2 ? 0.5 : 0.8;
+  // 1 a settlement's ground, 2 a path, 3 a ruin's ring, 4 a ring, 5 a road, 6 a ruin's footprint, 7 a footprint.
+  float how = worn == 7 ? 1.0
+    : worn == 6 ? 0.7
+    : worn == 5 ? 0.9
+    : worn == 4 ? 0.85
+    : worn == 3 ? 0.5
+    : worn == 2 ? 0.8
+    : 0.75;
   float tint = hash(cell, 7) - 0.5;
   float grain = noise(world * 6.0) - 0.5;
   vec3 colour = uEarth * (1.0 + tint * 0.12 + grain * 0.2);
-  if (worn == 2 || worn == 4) {
+  if (worn == 3 || worn == 6) {
     colour = mix(colour, GRASS, 0.35);
+  } else if (worn == 1) {
+    // Trodden grass between the houses, not the bare earth of a yard.
+    colour = mix(colour, GRASS * (1.0 + grain * 0.3), uGrass);
+  } else if (worn == 5) {
+    // A road is packed and dusty, paler than the earth of a path.
+    colour = mix(colour, PALE, 0.35);
   }
   float alpha = how * soft * uStrength * uFade;
   fragColor = vec4(colour * alpha, alpha);

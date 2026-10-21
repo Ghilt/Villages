@@ -16,6 +16,8 @@ export interface WorkedGroundSettings {
   earth: string;
   /** How near two buildings stand, foot to foot in world units, for a path to join them: nought for none. */
   reach: number;
+  /** How much of a settlement's ground is trodden grass rather than earth, nought to one. */
+  grass: number;
 }
 
 export const WORKED_GROUND_START: WorkedGroundSettings = {
@@ -23,6 +25,7 @@ export const WORKED_GROUND_START: WorkedGroundSettings = {
   strength: 0.85,
   earth: '#806040',
   reach: 12,
+  grass: 0.45,
 };
 
 const ground = createStore<WorkedGroundSettings>({ ...WORKED_GROUND_START });
@@ -36,7 +39,8 @@ export function setWorkedGround(change: Partial<WorkedGroundSettings>): void {
     next.on === was.on &&
     next.strength === was.strength &&
     next.earth === was.earth &&
-    next.reach === was.reach
+    next.reach === was.reach &&
+    next.grass === was.grass
   ) {
     return;
   }

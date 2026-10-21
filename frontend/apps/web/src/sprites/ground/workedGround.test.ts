@@ -9,10 +9,10 @@ import { WORKED } from './worked';
 import { RING, diamondKey, diamondOf, rememberingWorkedGround, workedGround, yardOf } from './workedGround';
 import type { Yard } from './workedGround';
 
-const castle: Yard = { id: 'structure:castle', u: 1000, v: 400, side: 6, ruin: false };
+const castle: Yard = { id: 'structure:castle', u: 1000, v: 400, side: 6, ruin: false, settlement: false };
 // Close enough that each one's ring runs over the other's footprint.
-const mill: Yard = { id: 'structure:mill', u: 1003, v: 402, side: 2, ruin: false };
-const far: Yard = { id: 'structure:far', u: 5000, v: -300, side: 4, ruin: false };
+const mill: Yard = { id: 'structure:mill', u: 1003, v: 402, side: 2, ruin: false, settlement: false };
+const far: Yard = { id: 'structure:far', u: 5000, v: -300, side: 4, ruin: false, settlement: false };
 
 /** The worked ground as a sorted list, so two can be compared whatever order they were built in. */
 const listed = (worked: Map<number, number>) => [...worked.entries()].sort(([a], [b]) => a - b);

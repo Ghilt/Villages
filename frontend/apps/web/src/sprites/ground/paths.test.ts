@@ -7,7 +7,14 @@ import { WORKED } from './worked';
 import { diamondKey, diamondOf, workedGround } from './workedGround';
 import type { Yard } from './workedGround';
 
-const yard = (id: string, u: number, v: number, side = 3): Yard => ({ id, u, v, side, ruin: false });
+const yard = (id: string, u: number, v: number, side = 3): Yard => ({
+  id,
+  u,
+  v,
+  side,
+  ruin: false,
+  settlement: false,
+});
 const mill = yard('structure:mill', 100, 100);
 const manor = yard('structure:manor', 112, 104);
 const far = yard('structure:far', 160, 100);

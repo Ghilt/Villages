@@ -5,7 +5,7 @@ import { whereSceneryGrows } from './growing';
 import { workedGround } from './workedGround';
 
 const FRAME = frameOf(GROUND_LATTICE);
-const castle = { id: 'structure:castle', u: 1000, v: 400, side: 6, ruin: false };
+const castle = { id: 'structure:castle', u: 1000, v: 400, side: 6, ruin: false, settlement: false };
 const worked = workedGround([castle]);
 
 /** The middle of a diamond, in world space. */

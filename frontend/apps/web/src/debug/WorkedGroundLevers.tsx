@@ -3,9 +3,9 @@ import { useStore } from '../store/useStore';
 
 /**
  * The worked ground's levers, in the Structures section: whether the buildings stand in worn ground or on the painted
- * ground as before, how much of the earth covers the paint, how near two buildings stand for a path to join them, and
- * the earth's colour. Matters of taste, settled by eye with the
- * map at zoom 9 or 10 over a few buildings. See docs/plans/worked-ground.md.
+ * ground as before, how much of the earth covers the paint, how near two buildings stand for a path to join them, how
+ * much of a settlement's ground is grass, and the earth's colour. Matters of taste, settled by eye with the map at
+ * zoom 9 or 10 over a few buildings. See docs/plans/worked-ground.md.
  */
 export function WorkedGroundLevers() {
   const how = useStore(workedGroundStore);
@@ -47,6 +47,19 @@ export function WorkedGroundLevers() {
         step={1}
         value={how.reach}
         onChange={(event) => setWorkedGround({ reach: Number(event.target.value) })}
+      />
+      <label className="debug-map__label" htmlFor="worked-ground-grass">
+        How much of a settlement's ground is grass
+      </label>
+      <input
+        id="worked-ground-grass"
+        className="debug__slider"
+        type="range"
+        min={0}
+        max={1}
+        step={0.05}
+        value={how.grass}
+        onChange={(event) => setWorkedGround({ grass: Number(event.target.value) })}
       />
       <label className="debug-map__label" htmlFor="worked-ground-earth">
         The earth
