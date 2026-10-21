@@ -10,6 +10,7 @@ import villages.accounts.InMemoryAccounts
 import villages.accounts.MongoAccounts
 import villages.accounts.Outbox
 import villages.gateway.Gateway
+import villages.gateway.signInEnded
 import java.nio.file.Path
 import java.time.Clock
 import java.util.concurrent.Executors

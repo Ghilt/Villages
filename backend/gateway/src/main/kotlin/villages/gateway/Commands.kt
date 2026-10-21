@@ -12,7 +12,7 @@ import java.util.UUID
 import kotlin.reflect.KClass
 
 /** Who asked for a command and under which id: what every handler is handed beside its payload. */
-internal class Asking(val who: PlayerId, val commandId: UUID) {
+internal class Asking(val who: PlayerId, val commandId: UUID, val instruments: Boolean = true) {
     /** The provenance of a command that begins a story of its own, which most do. See decision record 0035. */
     val startingAStory: Provenance get() = Provenance.startedBy(commandId)
 }
@@ -50,7 +50,7 @@ internal inline fun <reified P : CommandPayload> Commands.on(noinline handler: (
  * Answers a command a connection sent: refused unless it has said who it is and the id is an identity, then handed
  * to its one handler, and whatever that throws turned into the refusal the protocol carries.
  */
-internal fun Commands.answer(frame: Command, who: PlayerId?, out: Outbound) {
+internal fun Commands.answer(frame: Command, who: PlayerId?, out: Outbound, instruments: Boolean = true) {
     if (who == null) {
         out.send(CommandRejected(frame.commandId, "notIntroduced"))
         return
@@ -64,7 +64,7 @@ internal fun Commands.answer(frame: Command, who: PlayerId?, out: Outbound) {
     }
 
     try {
-        handle(Asking(who, commandId), frame.command)
+        handle(Asking(who, commandId, instruments), frame.command)
         out.send(CommandAccepted(frame.commandId))
     } catch (@Suppress("SwallowedException") closed: InstrumentsClosed) {
         out.send(CommandRejected(frame.commandId, "instrumentsClosed"))

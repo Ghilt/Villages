@@ -1,10 +1,51 @@
 package villages.gateway
 
+import villages.application.SignInId
 import villages.application.SignedIn
 import villages.domain.PlayerId
+import villages.protocol.ClientFrame
 import villages.protocol.ErrorFrame
+import villages.protocol.FogOfWar
+import villages.protocol.ListPlayers
+import villages.protocol.ListSaves
+import villages.protocol.LoadSave
+import villages.protocol.ReviseCatalogue
+import villages.protocol.SaveWorld
+import villages.protocol.SeeAll
+import villages.protocol.SignedOut
+import villages.protocol.SimulateChallenge
+import villages.protocol.WatchCatalogues
+import villages.protocol.WatchEvents
+import villages.protocol.WipeWorld
 import villages.protocol.Hello
 import java.util.UUID
+
+/**
+ * Whether a window's instruments are open: open on this server, [open], and, where they are open only to some, to
+ * the sign-in it was opened with, [signedIn], as [only] says. A window opened with no sign-in is one of the pages
+ * that only watch, and is open to them only where they are open to every window. See decision record 0076.
+ */
+internal fun instrumentsOf(open: Boolean, only: ((SignedIn?) -> Boolean)?, signedIn: SignedIn?): Boolean =
+    open && (only == null || only(signedIn))
+
+/** Whether [frame] is one of Adam's instruments' looks, which a window whose instruments are closed is refused. */
+internal fun isAnInstrument(frame: ClientFrame): Boolean = when (frame) {
+    is WatchEvents, is SeeAll, is FogOfWar, is WipeWorld, is WatchCatalogues, is ReviseCatalogue, is SaveWorld, is ListSaves,
+    is LoadSave, is ListPlayers, is SimulateChallenge -> true
+    else -> false
+}
+
+/** What a window whose instruments are closed is told of one of their looks. */
+internal fun closedTo(frame: ClientFrame) =
+    ErrorFrame("instrumentsClosed", "${frame::class.simpleName} is one of the instruments, and they are closed to this window")
+
+/**
+ * Stands down every window of [signIn], which has ended - signed out, run out, or ended from another browser - with
+ * `signedOut`, as a takeover stands one down: a window belongs to a live sign-in. See decision record 0109.
+ */
+fun Gateway.signInEnded(signIn: SignInId) {
+    live.filter { it.isOf(signIn) }.forEach { it.finish(SignedOut("this browser's sign-in has ended")) }
+}
 
 /** Who a hello arrives as, or why it arrives as nobody. */
 internal sealed interface Arriving {

@@ -108,4 +108,31 @@ class GatewayInstrumentsSpec : StringSpec({
 
         sent.filterIsInstance<CommandAccepted>().map { it.commandId } shouldBe listOf(COMMAND_ONE, COMMAND_TWO)
     }
+
+    "open to some windows only, the levers and the looks are refused to every other, and open to those" {
+        val adams = UUID.randomUUID().toString()
+        val rig = Rig(instrumentsFor = { it?.player == signedInAs(adams).player })
+        val (adam, toAdam) = rig.introduced(adams)
+        val (other, toOther) = rig.introduced()
+
+        other.receive(founding())
+        other.receive(granting())
+        other.receive("""{"type":"watchEvents","on":true}""")
+        adam.receive(founding(commandId = commandNumber(7)))
+        adam.receive("""{"type":"watchEvents","on":true}""")
+
+        toOther.filterIsInstance<CommandRejected>().map { it.reason } shouldBe listOf("instrumentsClosed", "instrumentsClosed")
+        toOther.filterIsInstance<ErrorFrame>().single().code shouldBe "instrumentsClosed"
+        toAdam.filterIsInstance<CommandAccepted>().map { it.commandId } shouldBe listOf(commandNumber(7))
+        toAdam.filterIsInstance<ErrorFrame>().shouldBeEmpty()
+    }
+
+    "open to some windows only, playing as somebody else is refused to every other" {
+        val rig = Rig(instrumentsFor = { false })
+        val sent = mutableListOf<ServerFrame>()
+
+        rig.connect { sent += it }.receive(helloAs(UUID.randomUUID()))
+
+        sent.filterIsInstance<ErrorFrame>().map { it.code } shouldBe listOf("instrumentsClosed")
+    }
 })

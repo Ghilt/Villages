@@ -18,13 +18,14 @@ import villages.protocol.TakeControlPayload
 import java.util.UUID
 
 /**
- * One of Adam's levers: a command like any other, refused `instrumentsClosed` while the instruments are closed. Shared
+ * One of Adam's levers: a command like any other, refused `instrumentsClosed` while the instruments are closed, here or
+ * to the window that pulled it. Shared
  * by the instruments and each mechanic's own file of levers, so that a mechanic's levers do not grow the instruments
  * with them. See decision record 0076.
  */
 internal inline fun <reified P : CommandPayload> Commands.lever(open: Boolean, noinline pull: (Asking, P) -> Unit) {
     on<P> { asking, payload ->
-        if (!open) {
+        if (!open || !asking.instruments) {
             throw InstrumentsClosed()
         }
         pull(asking, payload)

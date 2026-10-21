@@ -22,6 +22,10 @@ parchment, takes one, and the house is founded from the same decision that recor
 ground about it, selectable, with an inspector on the left. Every event carries its two times, its place and
 significance, and its provenance. Two browsers see each other's houses live. The world is kept in MongoDB, in a
 database of each tree's own, and outlives a restart of the game server; RabbitMQ carries every event stored.
+A newcomer plays at once as a guest, signed in by a cookie the server keeps, and makes an account later - an email
+and a password, or Google or Discord - keeping the house: the email verified, remember me that outlasts the
+browser, the places one is signed in listed, a settings mark of what is not the game's, and the instruments open to
+Adam's account alone on a server others play on (`docs/plans/accounts.md`, 0109 to 0111).
 
 ## Now
 
@@ -226,12 +230,6 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
   credited. The map used to do it and did it on one renderer of six, so it does not any more (0050); the
   credit is in `AUTHORING-THE-WORLD.md` and there is nowhere in the game a player could find it. An about
   or credits surface, before anything is released.
-- **Opening the instruments to Adam alone.** They can be closed: `villages.instruments=false` refuses every
-  lever and the four looks - the events log, seeing everything, the fog's switch and the wipe - to every
-  socket, and the player's own commands go on (0076). What is not built is keeping them open for Adam on a
-  server others play on, which wants an identity of his own; until then a shared server runs them closed.
-  That has to stand before any dialogue carries the setting's secret, which the server otherwise holds back
-  (0071).
 - **The inspect window**, beyond a house and an area: what it says about a subject once there is more than
   a name and a treasury to say, where its links come from, and whether it is a card or a paper on the desk.
   See `MECHANICS.md`.
@@ -247,10 +245,6 @@ Wanted, not started, and each needs a hypothesis in `docs/experiments/` before a
 - **Neighbours**: awareness of nearby houses, and the first thing two houses can do to each other.
 - **The workbench**: the desk the map lies on becomes a place, with the house's papers on it and the map a
   quarter of it, hovered and scrolled into. The same camera; see experiment 0003.
-- **Accounts** behind the identity port: a newcomer plays at once as a guest behind a sign-in the server keeps,
-  and creates an account later with an email and a password, or Google or Discord, keeping the house; the email
-  verified, a remember me that outlasts the browser, a settings mark and its menu, and the instruments opened to
-  Adam alone at the end. Thirteen steps in `docs/plans/accounts.md`, planned 2026-10-21.
 - **World persistence**, after which the event store is never wiped and event changes need upcasters.
 - **The biome sprite map**: the first half of the world-generator, and the half that needs nothing said
   about people. A program that reads the master, decides what kind of place every part of the world is,

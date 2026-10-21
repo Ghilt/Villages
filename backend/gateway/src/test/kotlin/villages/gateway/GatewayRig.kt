@@ -93,6 +93,8 @@ internal class Rig(
     worldKept: WorldKept = WorldKept.IN_MEMORY,
     catalogues: Shelf? = null,
     saves: WorldSaves = WorldSaves.NOWHERE,
+    /** Which windows the open instruments are open to, by sign-in: every one unless told. */
+    instrumentsFor: ((villages.application.SignedIn?) -> Boolean)? = null,
 ) {
     val world = TinyWorld()
     val later = ManualLater()
@@ -205,6 +207,7 @@ internal class Rig(
             waters = WaterAt({ grounds[it] }, { names[it] }),
             antarctica = antarctica,
             instrumentsOpen = instrumentsOpen,
+            instrumentsFor = instrumentsFor,
             worldKept = worldKept,
             catalogues = catalogues,
             saves = saves,

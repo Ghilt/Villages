@@ -8,6 +8,7 @@ import villages.application.EveryHouse
 import villages.application.HouseById
 import villages.application.HousesByCell
 import villages.application.RecentEvents
+import villages.application.SignedIn
 import villages.application.Stands
 import villages.application.StructuresByCell
 import villages.application.WorldKept
@@ -33,6 +34,11 @@ class Mechanics(
     val waters: WaterAt = WaterAt.NOWHERE,
     val antarctica: Antarctica,
     val instrumentsOpen: Boolean = true,
+    /**
+     * Which windows the open instruments are open to, by the sign-in each was opened with, when only some: the accounts
+     * of the emails `villages.instruments.for` names. None, and they are open to every window. See [instrumentsOf].
+     */
+    val instrumentsFor: ((SignedIn?) -> Boolean)? = null,
     /** Where the world is kept and what of it cannot be read, which hello and the instruments say. */
     val worldKept: WorldKept = WorldKept.IN_MEMORY,
 

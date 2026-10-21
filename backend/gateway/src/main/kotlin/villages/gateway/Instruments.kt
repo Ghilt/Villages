@@ -58,7 +58,7 @@ internal class Instruments(
      */
     override fun greet(connection: Gateway.Connection, who: PlayerId) {
         val unreadable = kept.unreadable()
-        if (open && !unreadable.none) connection.out.send(ErrorFrame("unreadableEvents", told(unreadable)))
+        if (open && connection.instruments && !unreadable.none) connection.out.send(ErrorFrame("unreadableEvents", told(unreadable)))
     }
 
     /** The four looks, each a frame, every one refused while the instruments are closed. */

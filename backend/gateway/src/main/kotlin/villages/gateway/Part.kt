@@ -82,7 +82,15 @@ internal class Frames {
     /** The kinds a part answers. */
     val kinds: Set<KClass<out ClientFrame>> get() = handlers.keys
 
+    /**
+     * [frame] to its one part; one of Adam's instruments is refused first to a window they are closed to where they are
+     * open to others. Closed to every window, each part refuses its own in its own words, as it always did.
+     */
     fun handle(connection: Gateway.Connection, frame: ClientFrame) {
+        if (connection.shutOut && isAnInstrument(frame)) {
+            connection.out.send(closedTo(frame))
+            return
+        }
         val handler = checkNotNull(handlers[frame::class]) { "no part of the gateway answers ${frame::class.simpleName}" }
         handler(connection, frame)
     }

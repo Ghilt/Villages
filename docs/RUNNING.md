@@ -1097,7 +1097,10 @@ and `-- --drop` takes them off; by hand only.
   window dims under a **Signed out** box that nothing puts away but *Play as a guest*, and the log says
   `accounts: this browser's sign-in has ended; this window is no longer playing`. Every window of that sign-in is
   stood down so, and one of another sign-in plays on. The section, the outbox and the lever are Adam's instruments,
-  refused while they are closed, because the mail holds live links.
+  refused while they are closed, because the mail holds live links. With `--villages.instruments.for=<email>` the
+  game server opens the instruments only to a browser signed in to that email's verified account: anybody else's
+  levers and looks are refused `instrumentsClosed`, their panel says so line by line, the outbox, the lever and
+  becoming another player are refused under `/auth`, and the pretend Google and Discord are not offered to them.
 - **The settings**, the player's own: the gear in the stage's top right corner opens a dialog of what is not the game's.
   **Account** says who this browser plays as. A guest is offered **Create an account** - an email, a password of
   twelve letters or more, and *Remember me on this browser*, ticked - which makes the guest that account, house and

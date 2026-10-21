@@ -12,7 +12,6 @@ import villages.application.SignedIn
 import villages.application.StructuresByCell
 import villages.application.WorldClock
 import villages.domain.PlayerId
-import villages.domain.StructureId
 import villages.protocol.Batch
 import villages.protocol.ClientFrame
 import villages.protocol.Command
@@ -25,7 +24,6 @@ import villages.protocol.PROTOCOL_VERSION
 import villages.protocol.ProtocolJson
 import villages.protocol.Resync
 import villages.protocol.ServerFrame
-import villages.protocol.SignedOut
 import villages.protocol.SubscribeCells
 import villages.protocol.TakenOver
 import villages.protocol.UnsubscribeCells
@@ -66,8 +64,9 @@ class Gateway(
     private val sendOn: Executor = Executor { it.run() },
     /** The mechanics that bring their own part, each from its configuration: [GatewayMechanic]. */ own: List<GatewayMechanic> = emptyList(),
 ) : AutoCloseable {
-    /** Whether Adam's instruments are open, which says whether hello says where the world is kept. */
+    /** Whether Adam's instruments are open here, and to which windows: every one, or those [instrumentsOf] says. */
     private val instrumentsOpen = mechanics.instrumentsOpen
+    private val instrumentsFor = mechanics.instrumentsFor
 
     /** Where the world is kept and what of it cannot be read: said at hello, while the instruments are open. */
     private val worldKept = mechanics.worldKept
@@ -80,7 +79,7 @@ class Gateway(
      * type in the catalogue in force, which a retune can grow while the server runs (0097).
      */
     private val antarctica = mechanics.antarctica
-    private val seenThroughTheFog: Set<StructureId> get() = if (instrumentsOpen) antarctica.standing else emptySet()
+    private fun seenThroughTheFog(instruments: Boolean) = if (instruments) antarctica.standing else emptySet()
 
     /** Which connections hold each cell: the whole of the fan-out index. */
     private val holding = CellIndex<Connection>()
@@ -89,7 +88,7 @@ class Gateway(
     private val sessions = ConcurrentHashMap<PlayerId, Connection>()
 
     /** Every live connection, so that a wipe can tell all of them and not only the introduced ones. */
-    private val live = ConcurrentHashMap.newKeySet<Connection>()
+    internal val live: MutableSet<Connection> = ConcurrentHashMap.newKeySet()
 
     /** What the parts may ask of the core. */
     private val core = object : Core {
@@ -118,14 +117,6 @@ class Gateway(
 
     /** A fault, told to every window: see [toldEveryWindow]. */
     private val faulted: AutoCloseable = toldEveryWindow(faults) { live.map { it.out } }
-
-    /**
-     * Stands down every window of [signIn], which has ended - signed out, run out, or ended from another browser -
-     * with `signedOut`, as a takeover stands one down: a window belongs to a live sign-in. See decision record 0109.
-     */
-    fun signInEnded(signIn: SignInId) {
-        live.filter { it.isOf(signIn) }.forEach { it.finish(SignedOut("this browser's sign-in has ended")) }
-    }
 
     /** A connection, signed in as [signedIn] when the browser that opened it is signed in: see [arrivingAs]. */
     fun connect(signedIn: SignedIn? = null, out: Outbound): Connection = Connection(out, signedIn).also { live += it }
@@ -160,9 +151,13 @@ class Gateway(
         private val waiting = ArrayDeque<Delta>()
         private var flushPlanned = false
 
+        /** Whether this window's instruments are open: see [instrumentsOf]. */
+        internal val instruments = instrumentsOf(instrumentsOpen, instrumentsFor, signedIn)
+        internal val shutOut = instrumentsOpen && !instruments
+
         /** How this connection is looking at the world, replaced whole: see [Looking]. Read by the fan-outs too. */
         @Volatile
-        internal var looking: Looking = Looking(slots = slotsSeen, seenThroughTheFog = seenThroughTheFog)
+        internal var looking: Looking = Looking(slots = slotsSeen, seenThroughTheFog = seenThroughTheFog(instruments))
             private set
 
         /** Set when this session is over, by a takeover or by the socket going away. It then does nothing. */
@@ -230,7 +225,7 @@ class Gateway(
             when (frame) {
                 is Hello -> hello(frame)
                 is Ping -> out.send(Pong(frame.t0, clock.millis()))
-                is Command -> commands.answer(frame, player, out)
+                is Command -> commands.answer(frame, player, out, instruments)
                 is SubscribeCells -> subscribe(frame.cells)
                 is UnsubscribeCells -> unsubscribe(frame.cells)
                 // The core answers the kinds in CORE_FRAMES above, and a part every other.
@@ -247,7 +242,7 @@ class Gateway(
                 out.send(ErrorFrame("protocolVersion", "this gateway speaks version $PROTOCOL_VERSION"))
                 return
             }
-            val who = when (val arriving = arrivingAs(frame, signedIn, instrumentsOpen)) {
+            val who = when (val arriving = arrivingAs(frame, signedIn, instruments)) {
                 is Arriving.Refused -> return out.send(arriving.why)
                 is Arriving.As -> arriving.player
             }
@@ -263,7 +258,7 @@ class Gateway(
                     serverTime = clock.millis(),
                     playerId = who.value.toString(),
                     world = WorldNow(today = today.day, earliest = (houses.earliest() ?: today).day),
-                    keptIn = worldKept.keptIn.takeIf { instrumentsOpen },
+                    keptIn = worldKept.keptIn.takeIf { instruments },
                 ),
             )
             parts.forEach { it.greet(this, who) }

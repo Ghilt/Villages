@@ -2,6 +2,13 @@
 
 - Status: accepted
 - Date: 2026-10-02
+- Amended 2026-10-21: open to some. With `villages.instruments.for` naming emails, the instruments open only to a
+  window or a request signed in to the verified account of one of them, which is the identity of Adam's own this
+  record waited for. Each window is told at its arrival whether its instruments are open; its levers are refused
+  `instrumentsClosed` otherwise, its looks refused before they reach a part, and what the instruments add - a roll's
+  workings, Antarctica through the fog, where the world is kept, `playAs` - is sent to it alone. The events log, which
+  carries a dialogue's every line, is one of the looks, so a setting's secret stays with the windows it is open to. See
+  `docs/plans/accounts.md`.
 
 ## Context
 

@@ -58,6 +58,7 @@ class GatewayConfig {
         saves: WorldSaves,
         own: List<GatewayMechanic>,
         @Value("\${villages.instruments:true}") instruments: Boolean,
+        gate: InstrumentsGate,
     ): Gateway = Gateway(
         faults = faults,
         houses = houses,
@@ -74,6 +75,7 @@ class GatewayConfig {
             waters = WaterAt(ground, placeNames),
             antarctica = antarctica,
             instrumentsOpen = instruments,
+            instrumentsFor = gate.takeIf { it.forSome }?.let { it::openTo },
             worldKept = world,
 
             structureCatalogue = { shelf.structures },

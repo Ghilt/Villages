@@ -379,6 +379,8 @@ Commands are added here as the increments land:
   Signing in through Google and Discord is the real ones in the main checkout once `.secrets/oauth.properties`
   beside the shared `.git` holds their applications' ids and secrets, and a pretend Google and Discord of the game
   server's own on every worktree; `--villages.oauth=real|pretend|off` says otherwise (decision record 0111).
+  `--villages.instruments.for=<email>,<email>` opens them to the verified accounts of those emails alone, the way to
+  keep them for Adam on a server others play on (decision record 0076, amended).
   `--villages.instruments=false` closes Adam's instruments: every lever
   of the debug panel and the events log, seeing everything, the fog's switch and the wipe are refused
   `instrumentsClosed`, and the player's own commands go on. See decision record 0076.

@@ -2,7 +2,6 @@ package villages.app
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -14,6 +13,7 @@ import villages.accounts.Accounts
 import villages.accounts.Outbox
 import villages.accounts.Settings
 import villages.accounts.browserOf
+import villages.application.SignedIn
 import villages.domain.PlayerId
 import java.util.UUID
 
@@ -30,7 +30,7 @@ class AuthEndpoints(
     private val cookie: SignInCookie,
     private val outbox: Outbox,
     private val elsewhere: SigningInElsewhere,
-    @Value("\${villages.instruments:true}") private val instrumentsOpen: Boolean,
+    private val gate: InstrumentsGate,
 ) {
     /**
      * Who this browser is signed in as, or nobody. Asked at every load, which is what keeps a remembered sign-in's
@@ -66,7 +66,11 @@ class AuthEndpoints(
 
     /** Which of Google and Discord a browser can sign in through here, and whether they are the pretend ones. */
     @GetMapping("/providers")
-    fun providers(): Map<String, Any> = mapOf("providers" to elsewhere.providers, "pretend" to elsewhere.pretend)
+    fun providers(request: HttpServletRequest): Map<String, Any> = mapOf(
+        // The pretend ones are an instrument, offered only to whom the instruments are open.
+        "providers" to if (elsewhere.pretend && !instrumentsOpenTo(request)) emptyList() else elsewhere.providers,
+        "pretend" to elsewhere.pretend,
+    )
 
     /**
      * A newcomer: a player of their own and a guest's sign-in for this browser. A page that kept a player's id in local
@@ -93,7 +97,7 @@ class AuthEndpoints(
      */
     @PostMapping("/become")
     fun become(request: HttpServletRequest, response: HttpServletResponse, @RequestBody asked: BecomeAsked): ResponseEntity<Any> {
-        if (!instrumentsOpen) {
+        if (!instrumentsOpenTo(request)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(mapOf("refused" to "instrumentsClosed"))
         }
         val player = runCatching { PlayerId(UUID.fromString(asked.player)) }.getOrNull()
@@ -110,7 +114,7 @@ class AuthEndpoints(
      */
     @PostMapping("/runout")
     fun runOut(request: HttpServletRequest): ResponseEntity<Any> {
-        if (!instrumentsOpen) {
+        if (!instrumentsOpenTo(request)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(mapOf("refused" to "instrumentsClosed"))
         }
         endThisBrowsers(request)
@@ -119,12 +123,16 @@ class AuthEndpoints(
 
     /** Every mail sent, the newest last: Adam's instrument, since it holds live links. */
     @GetMapping("/outbox")
-    fun outbox(): ResponseEntity<Any> =
-        if (instrumentsOpen) {
+    fun outbox(request: HttpServletRequest): ResponseEntity<Any> =
+        if (instrumentsOpenTo(request)) {
             ResponseEntity.ok(outbox.mail().map { MailView(it.to, it.subject, it.text, it.link, it.sent.toEpochMilli()) })
         } else {
             ResponseEntity.status(HttpStatus.FORBIDDEN).body(mapOf("refused" to "instrumentsClosed"))
         }
+
+    /** Whether Adam's instruments are open to the browser that asked, by the sign-in its cookie names. */
+    private fun instrumentsOpenTo(request: HttpServletRequest): Boolean =
+        gate.openTo(cookie.read(request)?.let(accounts.signIns::find)?.let { SignedIn(it.player, it.id) })
 
     /** Ends the sign-in this browser's cookie names, if it names one: a browser has one sign-in at a time. */
     private fun endThisBrowsers(request: HttpServletRequest) {

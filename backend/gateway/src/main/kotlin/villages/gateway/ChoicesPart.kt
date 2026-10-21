@@ -43,7 +43,7 @@ internal class ChoicesPart(
     // only while the instruments are open.
     private val drawn: AutoCloseable = rolls.watch { player, rolled, forced ->
         if (open) {
-            core.sessionOf(player)?.out?.send(
+            core.sessionOf(player)?.takeIf { it.instruments }?.out?.send(
                 RollDrawn(
                     opened = rolled.opened,
                     considered = rolled.considered.map { ConsideredView(it.action, it.weight) },
