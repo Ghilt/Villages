@@ -1,6 +1,6 @@
 import './spectacle.css';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import type { SliceView } from '@villages/protocol';
 import { ASPECTS } from '@villages/world';
@@ -9,7 +9,11 @@ import type { Aspect, Challenges } from '@villages/world';
 import { MarkButton } from '../ui/button/Button';
 import { Channels } from '../ui/diorama/Channels';
 import { Diorama } from '../ui/diorama/Diorama';
+import { fitOf } from '../ui/diorama/dioramaFit';
 import { Drawer } from '../ui/drawer/Drawer';
+import { Lightning } from '../ui/lightning/Lightning';
+import type { Glow, Look, Strike } from '../ui/lightning/Lightning';
+import { REACHES } from '../ui/lightning/strike';
 import { ReplayBar } from '../ui/replay/Replay';
 import type { Band, Tick } from '../ui/replay/Replay';
 import { useReplayClock } from '../ui/replay/useReplayClock';
@@ -17,7 +21,7 @@ import { SliceChip, SliceTray } from '../ui/slice/Slice';
 import { TugBar } from '../ui/tug/Tug';
 import { towardSaid } from '../ui/tug/tugShare';
 import { History } from './History';
-import { joltAt, joltColour } from './jolt';
+import { joltAt } from './jolt';
 import { openedOf, stateSaid } from './opened';
 import { replayOf, startsOf } from './replay';
 import type { Field, Run, SideKey, SliceNow } from './replay';
@@ -32,6 +36,12 @@ export type { HouseShown } from './said';
 
 /** Which way a stage is held: wide, its banks side by side, or deep, its ranks one behind another. */
 export type Held = 'wide' | 'deep';
+
+/** How a happening strikes the slices it lights from the receptacle: the lightning's look, and how it is drawn. */
+export interface Striking {
+  readonly look: Look;
+  readonly glow: Glow;
+}
 
 const SIDES: readonly SideKey[] = ['a', 'b'];
 
@@ -61,7 +71,7 @@ function beforeItBegins(first: Field): Field {
 /**
  * A challenge's spectacle: a run played out in a venue - the square - seen as the map sees it, the two houses on their
  * banks, the townsfolk walking to whoever is winning them, the summons arriving, acting and falling, and each happening
- * a seal coming out of the mist along the channels to the font, jolting the slices it lights as it arrives; over it the
+ * a seal coming out of the mist along its channel to the font, from which lightning strikes the slices it lights; over it the
  * tug, along the bottom each house's slices in its tray and the replay. Everything shown is the run
  * folded to the second shown, so a second scrubbed back to is the same as one played to. Built of the library's
  * parts. Decision record 0116.
@@ -72,6 +82,7 @@ export function Spectacle({
   content,
   houses,
   held = 'wide',
+  striking = { look: 'leader', glow: 'shader' },
 }: {
   run: Run;
   /** The slices each side brought, as the page sent them. */
@@ -79,6 +90,7 @@ export function Spectacle({
   content: Challenges;
   houses: Readonly<Record<SideKey, HouseShown>>;
   held?: Held;
+  striking?: Striking;
 }) {
   const replay = useMemo(() => replayOf(run, sides, content), [run, sides, content]);
   const clock = useReplayClock(replay.last, { start: APPROACH, first: APPROACH, autoplay: 900 });
@@ -112,12 +124,39 @@ export function Spectacle({
       : standingOf(field, arrangement, sheets, sides, houses, content);
   const happenings = run.progression.happenings.map((aspects) => aspects.filter(isAspect));
   const jolt = joltAt(clock.second, starts, field);
+  const root = useRef<HTMLDivElement>(null);
+  const chips = useRef(new Map<string, HTMLButtonElement>());
+  const [strikes, setStrikes] = useState<readonly Strike[]>([]);
+  const struck = useRef(0);
+  const joltKey = jolt === undefined ? null : `${jolt.key}`;
+  useEffect(() => {
+    const box = root.current?.getBoundingClientRect();
+    const rest = arrangement.path[arrangement.path.length - 1];
+    if (jolt === undefined || box === undefined || rest === undefined) return;
+    struck.current += 1;
+    const fit = fitOf(arrangement.scene, box, 'cover');
+    const from = {
+      x: fit.left + rest.x * fit.scale,
+      y: fit.top + (rest.y - arrangement.seal * 0.45) * fit.scale,
+    };
+    setStrikes(
+      jolt.to.flatMap((one) => {
+        const chip = chips.current.get(one.actor)?.getBoundingClientRect();
+        if (chip === undefined || chip.width === 0) return [];
+        const to = { x: chip.left - box.left, y: chip.top - box.top, width: chip.width, height: chip.height };
+        return [{ key: `${struck.current}-${one.actor}`, from, to, colour: one.colour }];
+      }),
+    );
+    // A strike is measured as its jolt begins, and runs its course from there.
+  }, [joltKey]);
   const chipJolt = (slice: SliceNow) => {
-    const colour = joltColour(slice);
-    return jolt === undefined || colour === null ? {} : { jolt: { key: jolt.key, colour } };
+    const lit = jolt?.to.find((one) => one.actor === slice.actor);
+    return jolt === undefined || lit === undefined
+      ? {}
+      : { jolt: { key: jolt.key, colour: lit.colour, delay: REACHES[striking.look] } };
   };
   return (
-    <div className={`ui-root spectacle spectacle--${held}`}>
+    <div ref={root} className={`ui-root spectacle spectacle--${held}`}>
       <div className="spectacle__stage">
         <Diorama
           scene={arrangement.scene}
@@ -168,6 +207,10 @@ export function Spectacle({
             {field.slices[side].map((slice) => (
               <SliceChip
                 key={slice.actor}
+                ref={(chip) => {
+                  if (chip === null) chips.current.delete(slice.actor);
+                  else chips.current.set(slice.actor, chip);
+                }}
                 aspect={aspectShown(slice.aspect)}
                 state={slice.state}
                 said={stateSaid(slice, boost)}
@@ -196,6 +239,9 @@ export function Spectacle({
           tug={replay.tug}
           ticks={ticks}
         />
+      </div>
+      <div className="spectacle__lightning">
+        <Lightning strikes={strikes} look={striking.look} glow={striking.glow} />
       </div>
       <Drawer
         title="History"

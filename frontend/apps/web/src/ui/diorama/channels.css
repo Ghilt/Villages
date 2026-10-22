@@ -28,29 +28,4 @@
     stroke: color-mix(in srgb, var(--ui-gilt) 85%, transparent);
     stroke-width: 3;
   }
-
-  .ui-channels__jolt {
-    fill: none;
-    stroke-width: 9;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-dasharray: 18 120;
-    stroke-dashoffset: 18;
-    filter: drop-shadow(0 0 5px currentColor);
-    animation: ui-channels-jolt 0.75s ease-in forwards;
-  }
-
-  @keyframes ui-channels-jolt {
-    0% {
-      stroke-dashoffset: 18;
-      opacity: 1;
-    }
-    85% {
-      opacity: 1;
-    }
-    100% {
-      stroke-dashoffset: -100;
-      opacity: 0;
-    }
-  }
 }

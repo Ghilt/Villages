@@ -1259,8 +1259,8 @@ Held wide the stage is wide; held deep, on a tall screen, the same banks are dee
 
 **A happening travels through the venue.** Each comes as a glowing seal bearing its aspect's mark, forming in a patch
 of mist a few seconds before it begins - in the square, at the palace doors - and drifting along a gilt channel in the
-cobbles' joints to a font near the front, which it reaches on the very second it begins, and the slices it lights
-flash. **It is watched for the first time**: a run plays
+cobbles' joints to a font near the front, which it reaches on the very second it begins. Then lightning arches through
+the air from the font to each slice it lights, which crackles and flashes. **It is watched for the first time**: a run plays
 by itself from a moment before its first second, and nothing past the furthest second played is shown.
 
 **Round it, everything folds away.** Each house's slices are chips in its tray along the bottom, lit while their

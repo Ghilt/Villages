@@ -76,11 +76,11 @@ path, as the seal's look and nothing else. The happening box over the stage goes
 the replay and the history stop at the furthest second reached, the rest under haze, and to the end shows it all.
 Where a seal stands is a pure function of the second shown, as the field is, so scrubbing back shows it where it was.
 
-## Amended 2026-10-22: the venue is laid on the map's lattice
+## Amended 2026-10-22: the venue is laid on the map's lattice, and a happening strikes the slices
 
 Adam's word after seeing the seals cross the square: the ground is drawn as the map's own grid, so the map's pictures fit
 it, and the scene is laid out by that grid; the seals are a little smaller; and the grooves from the receptacle to the
-platforms go, what strikes the slices instead to come.
+platforms go, a happening striking the slices instead with lightning through the air.
 
 **A venue is laid on the map's lattice, a world unit to a cell.** Its ground is the lattice the map's ground is painted
 on, turned twenty-six degrees and squashed as the camera sees it closest in, so its cells are the skewed diamonds of
@@ -90,3 +90,11 @@ a receptacle are blocks of whole cells; the happenings' path runs along the cell
 square. The second house's places are the first's mirrored and moved into the cell each falls in, since the turned
 lattice has no mirror of its own. `ui/diorama/lattice.ts` is the arithmetic, `LatticeGround` the ground, and a test holds
 the square to it: no two figures in a cell, none on a platform or the font, every leg along one axis.
+
+**A happening strikes the slices it lights.** As its seal comes to rest in the receptacle, lightning arches through the
+air from it to the chip of every slice it lights, gold where one matches and the aspect's colour where one answers,
+and the chip crackles round its edge and flashes. The bolt is guided: midpoint displacement along an arc from the
+receptacle to the chip, so it goes wherever the chip is, held wide or deep. It is drawn over everything, the trays
+included, and lets the pointer through. Its look is still Adam's to choose, three looks drawn two ways on
+`/admin/inspect-ui-components` and on the challenges page; until he chooses, a leader feeling its way and striking back,
+drawn by a shader. The channels to each platform and their jolt go; the path's channel stays.

@@ -4,7 +4,8 @@ import { parseBalance } from '@villages/world';
 import type { Challenges } from '@villages/world';
 
 import { Spectacle } from '../../spectacle/Spectacle';
-import type { HouseShown } from '../../spectacle/Spectacle';
+import type { HouseShown, Striking } from '../../spectacle/Spectacle';
+import { LOOKS } from '../../ui/lightning/strike';
 import { useCatalogue } from '../frame/useCatalogue';
 import { MomentsTable } from './MomentsTable';
 import { ProgressionEditor } from './ProgressionEditor';
@@ -137,6 +138,9 @@ const HOLDS: readonly { readonly held: Holding; readonly said: string }[] = [
   { held: 'phone', said: 'as a phone' },
 ];
 
+/** How a happening's lightning is drawn, to be chosen between by watching: as strokes, or by a shader. */
+const GLOWS: readonly Striking['glow'][] = ['strokes', 'shader'];
+
 function Fought({
   answer,
   draft,
@@ -153,6 +157,7 @@ function Fought({
   onAgain: (seed: number) => void;
 }) {
   const [held, setHeld] = useState<Holding>('wide');
+  const [striking, setStriking] = useState<Striking>({ look: 'leader', glow: 'shader' });
   if (!answer.fought) {
     return (
       <p className="inspect-problem">
@@ -187,6 +192,32 @@ function Fought({
               </button>
             ))}
           </p>
+          <p className="challenges-held">
+            <span className="inspect-note">lightning</span>
+            {LOOKS.map((look) => (
+              <button
+                key={look}
+                type="button"
+                className="inspect-button"
+                aria-pressed={striking.look === look}
+                onClick={() => setStriking({ ...striking, look })}
+              >
+                {look}
+              </button>
+            ))}
+            <span className="inspect-note">drawn as</span>
+            {GLOWS.map((glow) => (
+              <button
+                key={glow}
+                type="button"
+                className="inspect-button"
+                aria-pressed={striking.glow === glow}
+                onClick={() => setStriking({ ...striking, glow })}
+              >
+                {glow}
+              </button>
+            ))}
+          </p>
           <div className={`challenges-spectacle challenges-spectacle--${held}`}>
             <Spectacle
               key={`${seed}-${moments.length}`}
@@ -195,6 +226,7 @@ function Fought({
               content={content}
               houses={SIDES_SHOWN}
               held={held === 'wide' ? 'wide' : 'deep'}
+              striking={striking}
             />
           </div>
         </>

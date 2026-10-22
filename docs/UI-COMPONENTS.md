@@ -482,16 +482,22 @@ A line each: what it is for, its variants, and where on the page it is.
   where it was. *Challenges*.
 - **`Mist`** and **`Channels`**, `ui/diorama/`: what a venue's happenings travel through. **Mist** is a patch of soft
   cream puffs drifting and breathing over the spot the seals come out of; **channels** are grooves inlaid in the
-  ground with a line of gilt in each, along the path the seals travel and the ways from the receptacle to each house's
-  platform, drawn with the ground under everything standing on it. Given a `jolt`, a burst of light runs once along
-  each path it lights, in that path's colour - gold for a slice matching, the aspect's for one answering its
-  anti-aspect - and again whenever its key changes; a `SliceChip` given the same jolt flashes in its colour a moment
-  after, as the light reaches it. Drawn. *Challenges*.
+  ground with a line of gilt in each, along the path the seals travel, drawn with the ground under everything standing
+  on it. Drawn. *Challenges*.
 - **`LatticeGround`**, `ui/diorama/LatticeGround.tsx`: a diorama's ground in the map's own lattice - a fill, whatever
   the venue lays on it, and the joints between the cells over both, turned twenty-six degrees and squashed as the camera
   sees the ground closest in, so the map's pictures stand square on it (decision record 0116, amended).
   `ui/diorama/lattice.ts` is its arithmetic: `latticeOf` a lattice in a scene, a world unit to so many of its units,
   `latticeAt` and `latticeFrom` there and back, `onCell` the middle of the cell a place is in. Drawn. *Challenges*.
+- **`Lightning`**, `ui/lightning/`: lightning laid over a box, each strike arching through the air from its source to a
+  box - a receptacle to a slice's chip - and crackling round the box's edge, for a second, again whenever its key
+  changes; nothing ticks while none runs. Three looks: `forked` leaps the whole way and forks, `leader` feels its way
+  in jerks and strikes back along the same channel, `tendrils` writhes as from a coil; each drawn as `strokes` on a
+  canvas or by a `shader`, WebGL 2 lighting every pixel by how near it is to the bolt. `at` holds every strike at a
+  moment, for this page. `bolt.ts` is the shapes, from a seed - the arc, midpoint displacement along it, forks, the
+  crackle, a stepped leader's growth - `strike.ts` what a moment of each look is, and `paintStrokes.ts` and
+  `paintShader.ts` the two ways of drawing one. A `SliceChip` given a `jolt` with a `delay` flashes as a strike reaches
+  it; give it a `ref` to measure where it is. Drawn. *Challenges*.
 - **`Drawer`**, `ui/drawer/Drawer.tsx`: what a mark opens over a stage without leaving it - a challenge's history,
   behind the `history` mark - sliding in `from` the stage's right edge when it is held wide and from its bottom when
   it is held deep, so it takes the longer side and leaves the rest to be watched (decision record 0116). Its title

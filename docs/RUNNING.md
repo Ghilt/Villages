@@ -1052,9 +1052,11 @@ and `-- --drop` takes them off; by hand only.
   they come, turning and falling, a thing on the line standing as the map's own picture of it, and twenty townsfolk
   between who walk to whoever is winning them, the share of them the tug's; each happening a glowing seal with its
   aspect's mark, forming in mist at the palace doors, coming down the square along a gilt channel in the cobbles'
-  joints, turning square, to a font at the front and reaching it on its second, when the chips of the slices it
-  lights flash - gold where it matches, the aspect's colour where it answers; the whole square laid on the map's own
-  lattice, a world unit to a cobble, the buildings as tall as the map draws them;
+  joints, turning square, to a font at the front and reaching it on its second, when lightning arches from the font to
+  the chip of every slice it lights, which crackles and flashes - gold where it matches, the aspect's colour where it
+  answers; the whole square laid on the map's own lattice, a world unit to a cobble, the buildings as tall as the map
+  draws them; `lightning` above the stage chooses the strike's look, `forked`, `leader` or `tendrils`, and `drawn as`
+  whether strokes or a shader draw it, Adam's to compare until he picks one;
   over it the tug bar; along the bottom each side's slices in its tray, lit while matching, a chip pressed to open the
   slice and say what each effect needs and whether it works now, a side's name to fold its tray; and the replay -
   play and pause, three paces, to the end, the happenings as bands with the tug drawn over them, a tick where

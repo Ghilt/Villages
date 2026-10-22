@@ -195,7 +195,7 @@ const DEEP: Arrangement = {
  * The square: a sermon, a debate or a trade war in a town square, each house's speaker on a platform at the back of its
  * bank, its summons beside it, and the townsfolk between them walking to whoever is winning them; each happening forms
  * in mist at the palace doors and comes down the square along a gilt channel in the cobbles' joints to a font at the
- * front, where the slices it lights flash as it arrives. All of it on the map's lattice, so the map's pictures stand on it as
+ * front, from which it strikes the slices it lights. All of it on the map's lattice, so the map's pictures stand on it as
  * they do on the map. The first venue, because the game is not to be battle focused. Decision record 0116.
  */
 export const SQUARE: Venue = { name: 'the square', wide: WIDE, deep: DEEP };

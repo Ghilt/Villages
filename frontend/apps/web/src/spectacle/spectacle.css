@@ -75,6 +75,14 @@
   z-index: 33;
 }
 
+/* The lightning from the receptacle to the slices, over everything and in the way of nothing. */
+.spectacle__lightning {
+  position: absolute;
+  inset: 0;
+  z-index: 34;
+  pointer-events: none;
+}
+
 /* The history in its drawer: the tug second by second, the second's moments, every slice. */
 .spectacle-history {
   display: flex;

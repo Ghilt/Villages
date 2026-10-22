@@ -28,12 +28,12 @@ describe('a happening’s jolt', () => {
     [slice('b1', 'reason', 'answering')],
   );
 
-  it('runs to each house whose slices it lights, gold where one matches, the aspect’s colour where one answers', () => {
+  it('strikes each slice it lights, gold where one matches, the aspect’s colour where one answers', () => {
     expect(joltAt(15, [0, 15, 30], lit)).toEqual({
       key: 1,
       to: [
-        { side: 'a', colour: MATCHED },
-        { side: 'b', colour: 'var(--ui-aspect-reason)' },
+        { actor: 'a1', side: 'a', colour: MATCHED },
+        { actor: 'b1', side: 'b', colour: 'var(--ui-aspect-reason)' },
       ],
     });
   });

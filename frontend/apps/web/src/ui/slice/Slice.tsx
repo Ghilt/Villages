@@ -1,6 +1,6 @@
 import './slice.css';
 
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, ReactNode, Ref } from 'react';
 
 import { MarkButton } from '../button/Button';
 import type { Showing } from '../button/Button';
@@ -65,6 +65,7 @@ export function SliceChip({
   onPress,
   disabled = false,
   showing,
+  ref,
 }: {
   aspect: AspectShown;
   state: SliceState;
@@ -72,12 +73,17 @@ export function SliceChip({
   said?: string;
   borne?: readonly Borne[];
   chosen?: boolean;
-  /** A jolt arriving from a happening: it flashes in the jolt's colour, once each time the key changes. */
-  jolt?: { readonly key: string | number; readonly colour: string };
+  /**
+   * A jolt arriving from a happening: it flashes in the jolt's colour, once each time the key changes, `delay`
+   * milliseconds after it comes - when whatever brings it reaches the chip.
+   */
+  jolt?: { readonly key: string | number; readonly colour: string; readonly delay?: number };
   onPress?: () => void;
   disabled?: boolean;
   /** Draw it as if hovered, pressed or focused: for the page, never for the game. */
   showing?: Showing;
+  /** The chip's button, for whoever has to know where on the screen it is: what strikes it. */
+  ref?: Ref<HTMLButtonElement>;
 }) {
   const classes = [
     'ui-slice-chip',
@@ -89,6 +95,7 @@ export function SliceChip({
     .join(' ');
   return (
     <button
+      ref={ref}
       type="button"
       className={`${classes} ui-on-night`}
       style={{ '--ui-slice-aspect': aspect.colour } as CSSProperties}
@@ -106,7 +113,12 @@ export function SliceChip({
         <span
           key={jolt.key}
           className="ui-slice-chip__jolt"
-          style={{ '--ui-slice-jolt': jolt.colour } as CSSProperties}
+          style={
+            {
+              '--ui-slice-jolt': jolt.colour,
+              animationDelay: `${jolt.delay ?? 0}ms`,
+            } as CSSProperties
+          }
           aria-hidden="true"
         />
       )}

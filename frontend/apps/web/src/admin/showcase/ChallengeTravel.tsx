@@ -1,7 +1,6 @@
 import type { CSSProperties } from 'react';
 
 import { Channels } from '../../ui/diorama/Channels';
-import type { Jolt } from '../../ui/diorama/Channels';
 import { Diorama } from '../../ui/diorama/Diorama';
 import type { Placed, Standing } from '../../ui/diorama/Diorama';
 import { Mist } from '../../ui/diorama/Mist';
@@ -11,7 +10,6 @@ import type { Band } from '../../ui/replay/Replay';
 import { useReplayClock } from '../../ui/replay/useReplayClock';
 import { HappeningSeal } from '../../ui/seal/HappeningSeal';
 import { sealsAt, spotAlong } from '../../ui/seal/sealPath';
-import { SliceChip } from '../../ui/slice/Slice';
 import type { AspectShown } from '../../ui/slice/Slice';
 import { useAtlas } from '../frame/Atlas';
 import type { Atlas } from '../frame/Atlas';
@@ -22,30 +20,10 @@ const SCENE = { width: 900, height: 520 };
 const MIST = { x: 450, y: 205 };
 const RECEPTACLE = { x: 450, y: 440 };
 const PATH = [MIST, { x: 430, y: 270 }, { x: 470, y: 340 }, { x: 445, y: 400 }, RECEPTACLE];
-const TO_A = [RECEPTACLE, { x: 330, y: 455 }, { x: 170, y: 380 }];
-const TO_B = [RECEPTACLE, { x: 570, y: 455 }, { x: 730, y: 380 }];
 const LAST = 30;
 const TIMING = { form: 1.5, lead: 4 };
 const HAPPENINGS: readonly (readonly AspectShown[])[] = [[HOLY], [REASON], [DIPLOMACY, VIOLENCE], [HOLY]];
 const ARRIVALS = [2, 9, 16, 23];
-const GOLD = 'var(--ui-gilt-light)';
-/** Whom each happening lights: side A's Holy slice by the first channel, side B's Reason slice by the second. */
-const LIGHTS: readonly (readonly { readonly path: 1 | 2; readonly colour: string }[])[] = [
-  [{ path: 1, colour: GOLD }],
-  [{ path: 2, colour: GOLD }],
-  [
-    { path: 1, colour: GOLD },
-    { path: 2, colour: REASON.colour },
-  ],
-  [{ path: 1, colour: GOLD }],
-];
-
-/** The jolt of a happening arriving, alive for the second it arrives and the one after, so it runs its course once. */
-function joltAt(second: number): Jolt | undefined {
-  const index = ARRIVALS.findIndex((at) => second >= at && second <= at + 1);
-  const lit = LIGHTS[index];
-  return lit === undefined ? undefined : { key: index, lit };
-}
 
 const BOX: CSSProperties = { border: '1px solid #3d3427', borderRadius: 4, overflow: 'hidden' };
 
@@ -113,11 +91,6 @@ function Travelling() {
     },
     ...seals,
   ];
-  const jolt = joltAt(clock.second);
-  const chipJolt = (path: 1 | 2) => {
-    const lit = jolt?.lit.find((one) => one.path === path);
-    return lit === undefined || jolt === undefined ? undefined : { key: jolt.key, colour: lit.colour };
-  };
   const bands: Band[] = ARRIVALS.map((at, index) => ({
     from: at,
     to: ARRIVALS[index + 1] ?? LAST,
@@ -138,24 +111,12 @@ function Travelling() {
               >
                 <rect width={SCENE.width} height={SCENE.height} fill="#cbbd9c" />
               </svg>
-              <Channels scene={SCENE} paths={[PATH, TO_A, TO_B]} jolt={jolt} />
+              <Channels scene={SCENE} paths={[PATH]} />
             </>
           }
           pictures={pictures}
           placed={placed}
           label="Happenings travelling to a font"
-        />
-      </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-        <SliceChip
-          aspect={HOLY}
-          state="working"
-          {...(chipJolt(1) === undefined ? {} : { jolt: chipJolt(1) })}
-        />
-        <SliceChip
-          aspect={REASON}
-          state="working"
-          {...(chipJolt(2) === undefined ? {} : { jolt: chipJolt(2) })}
         />
       </div>
       <ReplayBar
@@ -182,12 +143,11 @@ export function ChallengeTravel() {
     <Part title="A happening travelling">
       <p className="ui-label showcase__lead">
         Each happening’s seal forms in a patch of mist, <code>Mist</code>, a second and a half before it sets
-        out, comes along the venue’s path for four seconds, laid in the ground as gilt channels,{' '}
+        out, comes along the venue’s path for four seconds, laid in the ground as a gilt channel,{' '}
         <code>Channels</code>, and reaches the receptacle on its second, staying until the next arrives. Where
         each stands is worked out from the second alone, <code>sealsAt</code> and <code>spotAlong</code>, so
         scrubbing back puts it where it was. The font is a stand-in a venue draws its own of. As a seal
-        arrives, light runs along the channels to the platforms whose slices it lights, and on into those
-        slices’ chips, which flash: <code>Channels jolt</code> and <code>SliceChip jolt</code>.
+        arrives it strikes the slices it lights: see Lightning, below.
       </p>
       <Specimens>
         <Specimen name="Mist, Channels, HappeningSeal on its path" note="plays by itself; scrub it" wide>

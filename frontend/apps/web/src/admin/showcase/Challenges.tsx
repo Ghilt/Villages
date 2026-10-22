@@ -1,6 +1,7 @@
 import { ChallengeDiorama } from './ChallengeDiorama';
 import { ChallengeDrawer } from './ChallengeDrawer';
 import { ChallengeFigures } from './ChallengeFigures';
+import { ChallengeLightning } from './ChallengeLightning';
 import { ChallengeReadouts } from './ChallengeReadouts';
 import { ChallengeSeals } from './ChallengeSeals';
 import { ChallengeSlices } from './ChallengeSlices';
@@ -14,6 +15,7 @@ export function Challenges() {
       <ChallengeReadouts />
       <ChallengeSeals />
       <ChallengeTravel />
+      <ChallengeLightning />
       <ChallengeFigures />
       <ChallengeDiorama />
       <ChallengeDrawer />

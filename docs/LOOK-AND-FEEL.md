@@ -173,7 +173,8 @@ three-quarters toward us, and never one above the other, where the near one woul
 banks are wide; held deep they are deep, the ranks one behind another up the screen. **A building is never mirrored**,
 because its light would move to the upper left. **What moves through a diorama that is not of the world is half in it**: a
 challenge's happening is a glowing seal with its aspect's mark, forming in mist and drifting along a channel in the
-ground, a thing of the venue that is plainly also a sign. **A diorama stands on the map's own lattice**: its ground is the map's
+ground, a thing of the venue that is plainly also a sign, and striking the slices it lights with lightning that arches
+through the air from where it comes to rest. **A diorama stands on the map's own lattice**: its ground is the map's
 diamonds, turned and tipped as the map's are, a world unit to a cell, its buildings as tall as the map draws them on
 their footprints, its figures in the middles of cells and its paths along the cells' sides, so the map's pictures stand
 on it as they stand on the map. Decision record 0116.

@@ -86,7 +86,7 @@
       transparent 80%
     );
     box-shadow: 0 0 0 2px var(--ui-slice-jolt);
-    animation: ui-slice-jolt 0.9s ease-out 0.55s forwards;
+    animation: ui-slice-jolt 0.9s ease-out forwards;
   }
 
   @keyframes ui-slice-jolt {
