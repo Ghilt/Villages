@@ -1,0 +1,118 @@
+/*
+ * A happening's seal: a gilt-rimmed medallion floating over its foot, its face its aspect's colour - halved for two -
+ * with the marks in cream, and a halo of its colour round it. Forming it is soft and dim; coming it bobs; arrived it
+ * swells and its halo pulses; spent it fades. Changes of state take a third of a second.
+ */
+
+@layer ui {
+  .ui-seal {
+    position: relative;
+    display: inline-block;
+    flex: none;
+    pointer-events: none;
+  }
+
+  .ui-seal__body {
+    position: absolute;
+    left: 0;
+    bottom: 22%;
+    width: var(--ui-seal-size);
+    height: var(--ui-seal-size);
+    transition:
+      transform 0.35s ease,
+      opacity 0.35s ease,
+      filter 0.35s ease;
+  }
+
+  .ui-seal__halo {
+    position: absolute;
+    inset: -28%;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--ui-seal-first) 55%, transparent) 0%,
+      color-mix(in srgb, var(--ui-seal-second) 30%, transparent) 45%,
+      transparent 70%
+    );
+  }
+
+  .ui-seal__face {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6%;
+    border-radius: 50%;
+    color: var(--ui-cream);
+    background: linear-gradient(135deg, var(--ui-seal-first) 0% 50%, var(--ui-seal-second) 50% 100%);
+    box-shadow:
+      0 0 0 3px var(--ui-gilt),
+      0 0 0 4.5px var(--ui-gilt-deep),
+      inset 0 2px 6px color-mix(in srgb, var(--ui-cream) 35%, transparent),
+      inset 0 -3px 6px color-mix(in srgb, var(--ui-night) 45%, transparent),
+      0 6px 10px color-mix(in srgb, var(--ui-night) 40%, transparent);
+  }
+
+  .ui-seal--forming .ui-seal__body {
+    opacity: 0.45;
+    filter: blur(1.5px) saturate(0.6);
+    transform: scale(0.78);
+  }
+
+  .ui-seal--coming .ui-seal__body {
+    animation: ui-seal-bob 1.6s ease-in-out infinite;
+  }
+
+  .ui-seal--arrived .ui-seal__body {
+    transform: scale(1.18);
+  }
+
+  .ui-seal--arrived .ui-seal__halo {
+    animation: ui-seal-pulse 1.4s ease-in-out infinite;
+  }
+
+  .ui-seal--spent .ui-seal__body {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  .ui-seal__name {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    padding: 0 0.45em;
+    border-radius: 0.6em;
+    font-family: var(--ui-font-text);
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.35;
+    white-space: nowrap;
+    color: var(--ui-cream);
+    background: color-mix(in srgb, var(--ui-night) 85%, transparent);
+    box-shadow: 0 0 0 1px var(--ui-gilt-deep);
+  }
+
+  @keyframes ui-seal-bob {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6%);
+    }
+  }
+
+  @keyframes ui-seal-pulse {
+    0%,
+    100% {
+      opacity: 0.75;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.18);
+    }
+  }
+}

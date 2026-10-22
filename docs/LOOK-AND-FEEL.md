@@ -171,7 +171,9 @@ front of what is behind them. **A figure is turned toward us or across, never aw
 south-east, and turned the other way by mirroring, so two sides facing off stand on the left and the right, each turned
 three-quarters toward us, and never one above the other, where the near one would show its back. Held wide the two
 banks are wide; held deep they are deep, the ranks one behind another up the screen. **A building is never mirrored**,
-because its light would move to the upper left. Decision record 0116.
+because its light would move to the upper left. **What moves through a diorama that is not of the world is half in it**: a
+challenge's happening is a glowing seal with its aspect's mark, forming in mist and drifting along channels in the
+ground, a thing of the venue that is plainly also a sign. Decision record 0116.
 
 **What is selected stands in a ring of light.** Close in, a line of warm light lies on the ground round what was
 picked - a building's footprint, a person's patch of ground - a circle on the ground squashed as the ground is, under the

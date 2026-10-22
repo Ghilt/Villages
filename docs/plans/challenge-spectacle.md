@@ -138,3 +138,36 @@ Every one is held at the instant, in a pure view; none is put right a moment lat
 | 12 | **The history in the drawer**: the tug second by second with the second shown marked, that second's moments in words (`spectacle/said.ts`, which the moments table reads too), and every slice's numbers | 1. 👀 Open the history at a busy second: what it says agrees with the field. 2. 👀 The moments table reads as before. |
 
 Bringing it to main follows the last step. It adds no running part, so the architecture page is not asked about.
+
+## Part two: the happening travels, and the run is watched for the first time
+
+Adam's notes on 2026-10-22, after seeing the square: the happenings should stand out, larger, with the mark of their
+aspect inside; the spectacle should not feel worked out beforehand, but be watched as it plays out for the first time;
+and the slices should be tied to a point in time, the happenings coming out of a haze toward it and, reaching it,
+sending a jolt into the slices. Of the ways offered he chose the happening **half in the world**: a thing in the venue
+that is plainly also a sign.
+
+- **The happening's seal**: a glowing medallion the size of a figure's head, the mark of its aspect large on its face,
+  or both marks for a happening of two. It forms in a patch of **mist** at a spot every venue has, a few seconds before
+  its happening, drifts along the venue's **path**, gilt channels inlaid in the ground, and reaches the venue's
+  **receptacle** - a font in the square - at the very second its happening begins. There it sits, named, while the
+  happening lasts, and fades as the next arrives.
+- **The jolt**: as it arrives, light runs along channels in the ground from the receptacle to each house's platform,
+  and on into the chips of the slices it lights, which flash: gold to the ones it matches, in their aspect's colour to
+  the ones answering their anti-aspect.
+- **Each venue says where**: the mist, the path, the receptacle and the channels to each platform, as it says where the
+  platforms stand. A seal's place is worked out from the second shown alone, so a second scrubbed back to shows it
+  where it was.
+- **Watched for the first time**: a run starts playing by itself, from a moment before its first second so the first
+  seal is seen coming. Nothing past the furthest second played is shown: the replay's tug, its happenings and its marks
+  of what arrived and fell, and the history's chart, stop there, the rest under haze; the scrub reaches back over what
+  has been seen, and to the end shows the rest. On the page the spectacle stands above what the run came to.
+- **The happening box at the top goes** from the spectacle; the seal at the receptacle says the happening's name.
+
+| # | Step | Verification requests |
+|---|---|---|
+| 13 | **The happening's seal**, in the library, one aspect or two, forming, coming, arrived and spent; these documents | 1. 👀 On the components page, the seals of one aspect and of two in their four states, the marks readable on their faces. |
+| 14 | **The seal on its path, out of the mist**: the mist, and a seal's place along a path worked out from the second, tested; shown travelling in the diorama | 1. 👀 The seal forms in the mist, drifts along the path and reaches the receptacle on its second, played and scrubbed. |
+| 15 | **The channels in the ground and the jolt**: channels drawn into the ground, light running along the ones a happening lights, and a slice's chip flashing as it lands | 1. 👀 On a sample, the light runs only to the platforms whose slices the happening lights, and those chips flash. |
+| 16 | **Watched for the first time**: playing by itself from before the first second, nothing shown past the furthest played, the scrub over what has been seen, to the end shows the rest; the spectacle above the run's outcome | 1. 👀 Run the sample: it starts by itself and nothing ahead of the second played gives it away. |
+| 17 | **The seal, its path and the jolt in the square**, held wide and deep, in place of the happening box | 1. 👀 Watch a run: each happening's seal comes out of the mist, crosses the square to the font and jolts the slices it lights. |

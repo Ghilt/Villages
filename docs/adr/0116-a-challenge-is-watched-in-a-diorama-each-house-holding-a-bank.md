@@ -59,3 +59,19 @@ challenge kind names its venue. One venue's worth of numbers does not yet pay fo
   way. That is the price of never showing a back.
 - When challenges reach the game, the event of decision record 0107 carries what the replay needs; the slices it
   records stand in for the page's draft.
+
+## Amended 2026-10-22: the happening travels through the venue, and the run is watched for the first time
+
+Adam's word after seeing the square: the happenings stand out and are tied to the slices, and the run is watched as it
+plays out, never shown as worked out beforehand. Of three ways - a figure carrying each happening, a sign drawn over
+the scene, or a thing of the venue that is plainly also a sign - he chose the last.
+
+**A happening is a seal that travels through the venue.** It forms in a patch of mist a few seconds before its
+happening, drifts along a path laid in the ground to a receptacle, reaching it on the second its happening begins, and
+sends a jolt along channels in the ground to each house's platform and into the chips of the slices it lights. Every
+venue says where its mist, path, receptacle and channels are. A carrier could be given to one venue later on the same
+path, as the seal's look and nothing else. The happening box over the stage goes.
+
+**Nothing past the furthest second played is shown.** A run plays by itself from a moment before its first second;
+the replay and the history stop at the furthest second reached, the rest under haze, and to the end shows it all.
+Where a seal stands is a pure function of the second shown, as the field is, so scrubbing back shows it where it was.

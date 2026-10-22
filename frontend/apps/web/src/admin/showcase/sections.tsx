@@ -130,7 +130,7 @@ export const SECTIONS: readonly Section[] = [
   {
     id: 'challenges',
     title: 'Challenges',
-    says: 'What a challenge is watched with: a slice’s chip, a house’s tray, a slice opened, the tug, the happening, the replay, a figure on the field, the diorama and the drawer.',
+    says: 'What a challenge is watched with: a slice’s chip, a house’s tray, a slice opened, the tug, the happening and its seal, the replay, a figure on the field, the diorama and the drawer.',
     Body: Challenges,
   },
   {

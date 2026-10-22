@@ -469,6 +469,11 @@ A line each: what it is for, its variants, and where on the page it is.
   and what is placed walks to where it is next put. A picture has no way to be turned round: a building is never
   mirrored. Reads no picture of its own: the sheets are whoever shows it's to give. `ui/diorama/dioramaFit.ts` is its
   arithmetic. *Challenges*.
+- **`HappeningSeal`**, `ui/seal/HappeningSeal.tsx`: a challenge's happening as it travels through a venue, half in the
+  world (decision record 0116, amended): a glowing medallion with its aspect's mark large on its face, or both marks
+  for a happening of two, the face its aspect's colour or halved between two, ringed in gilt with a halo of its colour.
+  **Forming** in the mist it is dim and soft; **coming** along its path it bobs; **arrived** it swells, its halo pulses
+  and its name stands under it; **spent** it fades. Its box's bottom middle is its foot. Drawn. *Challenges*.
 - **`Drawer`**, `ui/drawer/Drawer.tsx`: what a mark opens over a stage without leaving it - a challenge's history,
   behind the `history` mark - sliding in `from` the stage's right edge when it is held wide and from its bottom when
   it is held deep, so it takes the longer side and leaves the rest to be watched (decision record 0116). Its title

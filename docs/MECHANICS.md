@@ -1257,10 +1257,16 @@ swing is people crossing the square.
 **Each house holds a bank**, left or right, turned three-quarters toward us, so no figure is ever seen from behind.
 Held wide the stage is wide; held deep, on a tall screen, the same banks are deep, the ranks one behind another.
 
+**A happening travels through the venue.** Each comes as a glowing seal bearing its aspect's mark, forming in a patch
+of mist a few seconds before it begins - in the square, at the palace doors - and drifting along gilt channels in the
+cobbles to a font near the front, which it reaches on the very second it begins. Then light runs along the channels to
+each house's platform and on into the slices it lights, which flash. **It is watched for the first time**: a run plays
+by itself from a moment before its first second, and nothing past the furthest second played is shown.
+
 **Round it, everything folds away.** Each house's slices are chips in its tray along the bottom, lit while their
 aspect matches, dim while nothing they carry can work, with the pips of what they bear; tap one and it opens to say
 what each of its effects needs and whether it works now, tap the house's name and the tray folds to it. The tug is a
-bar at the top in the two houses' colours, and under it the happening of the moment and whom it lights. Along the
+bar at the top in the two houses' colours. Along the
 bottom the replay: play and pause, its pace, to the end, the happenings as bands with the tug drawn over them, and a
 scrub to any second. The history, the tug second by second and what happened in the second shown, opens behind a
 mark. Every control is a mark. Decision record 0116 is the shape; the steps are in `docs/plans/challenge-spectacle.md`.
