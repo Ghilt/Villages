@@ -172,8 +172,9 @@ south-east, and turned the other way by mirroring, so two sides facing off stand
 three-quarters toward us, and never one above the other, where the near one would show its back. Held wide the two
 banks are wide; held deep they are deep, the ranks one behind another up the screen. **A building is never mirrored**,
 because its light would move to the upper left. **What moves through a diorama that is not of the world is half in it**: a
-challenge's happening is a glowing seal with its aspect's mark, forming in mist and drifting along a channel in the
-ground, a thing of the venue that is plainly also a sign, and striking the slices it lights with lightning that arches
+challenge's happening is a seal, a gilt diamond tile with its aspect's mark laid in the world's own perspective and
+hovering over its shadow, waiting faded in mist to be next, sliding smoothly along a channel in the ground, a thing of
+the venue that is plainly also a sign, and striking the slices it lights with lightning that arches
 through the air from where it comes to rest. **A diorama stands on the map's own lattice**: its ground is the map's
 diamonds, turned and tipped as the map's are, a world unit to a cell, its buildings as tall as the map draws them on
 their footprints, its figures in the middles of cells and its paths along the cells' sides, so the map's pictures stand

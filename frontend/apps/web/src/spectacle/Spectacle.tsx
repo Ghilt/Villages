@@ -27,7 +27,7 @@ import { replayOf, startsOf } from './replay';
 import type { Field, Run, SideKey, SliceNow } from './replay';
 import { aspectName, aspectShown, boostSaid, borneOf } from './said';
 import type { HouseShown } from './said';
-import { sealsPlaced } from './seals';
+import { receptaclePlaced, SEAL_LIFT, SealsOver } from './seals';
 import { useSheets } from './sheets';
 import { standingOf } from './standing';
 import { SQUARE } from './venues/square';
@@ -107,6 +107,7 @@ export function Spectacle({
     to: starts[at + 1] ?? run.progression.seconds,
     name: aspects.map(aspectName).join(' and '),
     colours: aspects.map((aspect) => `var(--ui-aspect-${aspect})`),
+    marks: aspects.filter(isAspect).map((aspect) => aspectShown(aspect).mark),
   }));
   const ticks: Tick[] = run.moments
     .filter((moment) => moment.what === 'summoned' || moment.what === 'arrived' || moment.what === 'killed')
@@ -137,7 +138,7 @@ export function Spectacle({
     const fit = fitOf(arrangement.scene, box, 'cover');
     const from = {
       x: fit.left + rest.x * fit.scale,
-      y: fit.top + (rest.y - arrangement.seal * 0.45) * fit.scale,
+      y: fit.top + (rest.y - SEAL_LIFT * arrangement.cell) * fit.scale,
     };
     setStrikes(
       jolt.to.flatMap((one) => {
@@ -167,7 +168,10 @@ export function Spectacle({
             </>
           }
           pictures={drawn.pictures}
-          placed={[...drawn.placed, ...sealsPlaced(clock.second, starts, happenings, arrangement)]}
+          placed={[...drawn.placed, ...receptaclePlaced(arrangement)]}
+          over={
+            <SealsOver clock={clock} arrivals={starts} happenings={happenings} arrangement={arrangement} />
+          }
           label={`${SQUARE.name}, second ${field.second}`}
         />
       </div>

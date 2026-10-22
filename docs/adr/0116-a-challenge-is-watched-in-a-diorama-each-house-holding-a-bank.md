@@ -98,3 +98,13 @@ receptacle to the chip, so it goes wherever the chip is, held wide or deep. It i
 included, and lets the pointer through. Its look is still Adam's to choose, three looks drawn two ways on
 `/admin/inspect-ui-components` and on the challenges page; until he chooses, a leader feeling its way and striking back,
 drawn by a shader. The channels to each platform and their jolt go; the path's channel stays.
+
+**The seal is a diamond in the world, sliding, and the next is always in sight.** On Adam's word after seeing the square
+on its lattice: the seal is a diamond like the markers on the timeline, laid in the world's perspective - a square a cell and a half
+across turned half a right angle to the lattice, so it is a diamond on the grid as the timeline's is on the screen, its
+corners pointing along the grid's lines and its mark lined up with them, hovering over its shadow - and a little
+smaller; it slides along its
+path with the replay to the moment rather than stepping a second at a time; and the next is seen waiting, faded, in
+the mist from the moment the one before sets out, so the player waits for it. The timeline begins each happening's
+band with a diamond bearing its marks; what arrived is marked there by a gilt peak, so the only diamonds on it are
+happenings.

@@ -444,13 +444,16 @@ A line each: what it is for, its variants, and where on the page it is.
 - **`ReplayBar`** and **`useReplayClock`**, `ui/replay/`: a challenge's replay along the bottom of its stage
   (decision record 0116). Play and pause, the pace - one, two or three chevrons, each a second of the challenge in
   700, 350 or 140 milliseconds - and to the end, every one a `MarkButton` on Adam's word of 2026-10-21; the
-  happenings as bands of their aspects' colours with their names, the tug drawn over them as a line with the first
-  side's end at the top, a gilt tick where something arrived and a velvet one where it fell; and the scrub, a range
+  happenings as bands of their aspects' colours with their names, each begun by a diamond bearing its aspects' marks
+  as its seal does in the venue, the tug drawn over them as a line with the first side's end at the top, a gilt peak
+  where something arrived and a velvet dot where it fell; and the scrub, a range
   the arrow keys step a second at a time. Watched for the first time it shows nothing past the furthest second
   `seen` - the line, the bands and the ticks stop there under a haze - the scrub reaches back over what has been
   seen, and to the end shows the rest. Held by whoever shows it; `useReplayClock` is the clock, counted from when
   it began rather than ticked, remembering the furthest second played to, playing by itself after a moment if asked,
-  from a second before the first for a moment of approach, stopping at the last and starting again from there. In the `bar.replay`
+  from a second before the first for a moment of approach, stopping at the last and starting again from there; its
+  `exact` second runs between the whole ones while it plays, and `useExactSecond` reads it every frame for whatever
+  moves smoothly, in the smallest part that moves. In the `bar.replay`
   recipe. **`TugChart`**, beside it, is the tug second by second larger, the first side's end at the top and the other's
   at the bottom, each named in its colour, a hairline at the second shown: what a challenge's history opens with.
   `ui/replay/replayClock.ts` is their arithmetic. *Challenges*.
@@ -469,17 +472,24 @@ A line each: what it is for, its variants, and where on the page it is.
   `ground` lies under everything; the map's own `pictures`, each cut from its sheet as the map's atlases are, stand
   on their feet, a share of the frame across and down, and whatever else is `placed` - a `FieldFigure`, a drawn
   piece - hangs from its foot; each stands in front of whatever stands behind it, its foot further down the scene,
-  and what is placed walks to where it is next put. A picture has no way to be turned round: a building is never
+  and what is placed walks to where it is next put. Over everything, `over` is drawn in the scene's units, what
+  moves through it and is not of it, on its own so it can move every frame without the rest being drawn again;
+  **`OnFoot`** stands a thing there on its foot. A picture has no way to be turned round: a building is never
   mirrored. Reads no picture of its own: the sheets are whoever shows it's to give. `ui/diorama/dioramaFit.ts` is its
   arithmetic. *Challenges*.
 - **`HappeningSeal`**, `ui/seal/HappeningSeal.tsx`: a challenge's happening as it travels through a venue, half in the
-  world (decision record 0116, amended): a glowing medallion with its aspect's mark large on its face, or both marks
-  for a happening of two, the face its aspect's colour or halved between two, ringed in gilt with a halo of its colour.
-  **Forming** in the mist it is dim and soft; **coming** along its path it bobs; **arrived** it swells, its halo pulses
-  and its name stands under it; **spent** it fades. Its box's bottom middle is its foot. Drawn.
-  `ui/seal/sealPath.ts` keeps its time: `sealsAt` says every seal there is at a second, forming, coming, arrived or
-  spent, and how far along its path, and `spotAlong` where that is - pure, so a second scrubbed back to shows each
-  where it was. *Challenges*.
+  world (decision record 0116, amended): a gilt-rimmed diamond tile laid in the world as the map's ground is, a square
+  `cells` across turned half a right angle to the lattice so it is a diamond on the grid too, its corners pointing along
+  the grid's lines, tipped as the ground is, hovering over its shadow - its aspect's mark on its face, lined up with
+  the grid, or both
+  marks for a happening of two, the face its aspect's colour or halved between two, a glow of its colour round it.
+  **Waiting** in the mist it is faded and still, the next to come; **forming** it breathes; **coming** along its path
+  it bobs; **arrived** its glow pulses and its name stands under it; **spent** it fades. Its foot is the ground under
+  its middle, its box's bottom middle; `cell` says how many units it stands in a world unit is. Drawn.
+  `ui/seal/sealPath.ts` keeps its time: `sealsAt` says every seal there is at a second, whole or not - the next waiting
+  from the moment the one before sets out - forming, coming, arrived or spent, and how far along its path, and
+  `spotAlong` where that is - pure, so a second scrubbed back to shows each where it was and a second read to the
+  moment slides each smoothly. *Challenges*.
 - **`Mist`** and **`Channels`**, `ui/diorama/`: what a venue's happenings travel through. **Mist** is a patch of soft
   cream puffs drifting and breathing over the spot the seals come out of; **channels** are grooves inlaid in the
   ground with a line of gilt in each, along the path the seals travel, drawn with the ground under everything standing

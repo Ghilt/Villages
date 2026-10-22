@@ -82,10 +82,22 @@ export const TUG: readonly number[] = [
 ];
 
 export const BANDS: readonly Band[] = [
-  { from: 0, to: 15, name: 'Violence and Industry', colours: [VIOLENCE.colour, INDUSTRY.colour] },
-  { from: 15, to: 30, name: 'Holy', colours: [HOLY.colour] },
-  { from: 30, to: 45, name: 'Reason', colours: [REASON.colour] },
-  { from: 45, to: 60, name: 'Violence and Industry', colours: [VIOLENCE.colour, INDUSTRY.colour] },
+  {
+    from: 0,
+    to: 15,
+    name: 'Violence and Industry',
+    colours: [VIOLENCE.colour, INDUSTRY.colour],
+    marks: [VIOLENCE.mark, INDUSTRY.mark],
+  },
+  { from: 15, to: 30, name: 'Holy', colours: [HOLY.colour], marks: [HOLY.mark] },
+  { from: 30, to: 45, name: 'Reason', colours: [REASON.colour], marks: [REASON.mark] },
+  {
+    from: 45,
+    to: 60,
+    name: 'Violence and Industry',
+    colours: [VIOLENCE.colour, INDUSTRY.colour],
+    marks: [VIOLENCE.mark, INDUSTRY.mark],
+  },
 ];
 
 export const TICKS: readonly Tick[] = [

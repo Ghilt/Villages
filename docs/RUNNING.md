@@ -1050,17 +1050,18 @@ and `-- --drop` takes them off; by hand only.
   0116): the map's palace, market and manor at the back, each side's speaker on a
   platform at the back of its bank - A on the left in lapis, B on the right in vermilion - its summons beside it as
   they come, turning and falling, a thing on the line standing as the map's own picture of it, and twenty townsfolk
-  between who walk to whoever is winning them, the share of them the tug's; each happening a glowing seal with its
-  aspect's mark, forming in mist at the palace doors, coming down the square along a gilt channel in the cobbles'
-  joints, turning square, to a font at the front and reaching it on its second, when lightning arches from the font to
+  between who walk to whoever is winning them, the share of them the tug's; each happening a seal, a gilt diamond tile
+  with its aspect's mark laid in the world's perspective, waiting faded in mist at the palace doors from the moment the
+  one before sets out, then forming and sliding smoothly down the square along a gilt channel in the cobbles' joints,
+  turning square, to a font at the front and reaching it on its second, when lightning arches from the font to
   the chip of every slice it lights, which crackles and flashes - gold where it matches, the aspect's colour where it
   answers; the whole square laid on the map's own lattice, a world unit to a cobble, the buildings as tall as the map
   draws them; `lightning` above the stage chooses the strike's look, `forked`, `leader` or `tendrils`, and `drawn as`
   whether strokes or a shader draw it, Adam's to compare until he picks one;
   over it the tug bar; along the bottom each side's slices in its tray, lit while matching, a chip pressed to open the
   slice and say what each effect needs and whether it works now, a side's name to fold its tray; and the replay -
-  play and pause, three paces, to the end, the happenings as bands with the tug drawn over them, a tick where
-  something arrived or fell, and a scrub the arrow keys step a second at a time; and the history behind its mark in
+  play and pause, three paces, to the end, the happenings as bands each begun by a diamond with its marks, the tug
+  drawn over them, a gilt peak where something arrived and a velvet dot where it fell, and a scrub the arrow keys step a second at a time; and the history behind its mark in
   the top corner, sliding in from the right held wide and the bottom held deep, the tug second by second with the
   second shown marked, what happened in that second in the words the table below says, and every slice's numbers -
   held wide, held deep, or as a phone of 390 by 844, by the words over it; the tug drawn second by second, side A up, each happening marked; and

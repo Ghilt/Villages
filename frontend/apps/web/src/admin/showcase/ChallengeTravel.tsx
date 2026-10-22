@@ -1,13 +1,16 @@
 import type { CSSProperties } from 'react';
 
 import { Channels } from '../../ui/diorama/Channels';
-import { Diorama } from '../../ui/diorama/Diorama';
+import { Diorama, OnFoot } from '../../ui/diorama/Diorama';
 import type { Placed, Standing } from '../../ui/diorama/Diorama';
+import { latticeAt, latticeOf } from '../../ui/diorama/lattice';
+import { LatticeGround } from '../../ui/diorama/LatticeGround';
 import { Mist } from '../../ui/diorama/Mist';
 import { FieldFigure } from '../../ui/fieldFigure/FieldFigure';
 import { ReplayBar } from '../../ui/replay/Replay';
 import type { Band } from '../../ui/replay/Replay';
-import { useReplayClock } from '../../ui/replay/useReplayClock';
+import { useExactSecond, useReplayClock } from '../../ui/replay/useReplayClock';
+import type { ReplayClock } from '../../ui/replay/useReplayClock';
 import { HappeningSeal } from '../../ui/seal/HappeningSeal';
 import { sealsAt, spotAlong } from '../../ui/seal/sealPath';
 import type { AspectShown } from '../../ui/slice/Slice';
@@ -17,9 +20,12 @@ import { BRANNOCK, DIPLOMACY, HOLY, REASON, VARGA, VIOLENCE } from './challengeS
 import { Part, Specimen, Specimens } from './Specimen';
 
 const SCENE = { width: 900, height: 520 };
-const MIST = { x: 450, y: 205 };
-const RECEPTACLE = { x: 450, y: 440 };
-const PATH = [MIST, { x: 430, y: 270 }, { x: 470, y: 340 }, { x: 445, y: 400 }, RECEPTACLE];
+const CELL = 20;
+const LATTICE = latticeOf({ x: 440, y: 190 }, CELL);
+const corner = (u: number, v: number) => latticeAt(LATTICE, u, v);
+const MIST = corner(1, 1);
+const RECEPTACLE = corner(6, 12);
+const PATH = [MIST, corner(1, 7), corner(6, 7), RECEPTACLE];
 const LAST = 30;
 const TIMING = { form: 1.5, lead: 4 };
 const HAPPENINGS: readonly (readonly AspectShown[])[] = [[HOLY], [REASON], [DIPLOMACY, VIOLENCE], [HOLY]];
@@ -36,6 +42,23 @@ function Font() {
       <ellipse cx="45" cy="30" rx="37" ry="10" fill="#c4b9a3" stroke="#2b1d10" strokeWidth="1.5" />
       <ellipse cx="45" cy="30" rx="27" ry="6.5" fill="#6f7f86" stroke="#2b1d10" strokeWidth="1" />
     </svg>
+  );
+}
+
+/** The seals over the scene, each where the second to the moment puts it: drawn again every frame while it plays. */
+function Seals({ clock }: { clock: ReplayClock }) {
+  const now = useExactSecond(clock);
+  return (
+    <>
+      {sealsAt(now, ARRIVALS, TIMING).map((seal) => {
+        const spot = spotAlong(PATH, seal.along);
+        return (
+          <OnFoot key={seal.index} x={spot.x} y={spot.y}>
+            <HappeningSeal aspects={HAPPENINGS[seal.index] ?? [HOLY]} state={seal.state} cell={CELL} />
+          </OnFoot>
+        );
+      })}
+    </>
   );
 }
 
@@ -58,44 +81,33 @@ function Travelling() {
             },
             frame: palace,
             foot: { x: palace.footX ?? 0.5, y: 1 },
-            x: 450,
+            x: 440,
             y: 190,
-            height: 170,
+            height: 10 * CELL,
           },
         ];
-  const seals: Placed[] = sealsAt(clock.second, ARRIVALS, TIMING).map((seal) => {
-    const spot = spotAlong(PATH, seal.along);
-    return {
-      id: `seal-${seal.index}`,
-      x: spot.x,
-      y: spot.y,
-      depth: 2000,
-      walk: 0.7,
-      node: <HappeningSeal aspects={HAPPENINGS[seal.index] ?? [HOLY]} state={seal.state} size={56} />,
-    };
-  });
   const placed: Placed[] = [
     { id: 'mist', x: MIST.x, y: MIST.y + 14, depth: MIST.y, node: <Mist width={150} /> },
     { id: 'font', x: RECEPTACLE.x, y: RECEPTACLE.y + 18, depth: RECEPTACLE.y - 1, node: <Font /> },
     {
       id: 'a',
-      x: 170,
-      y: 380,
-      node: <FieldFigure kind="keyFigure" facing="east" colour={VARGA} name="Lady Ilse" />,
+      ...latticeAt(LATTICE, -9.5, 13.5),
+      node: <FieldFigure kind="keyFigure" facing="east" colour={VARGA} name="Lady Ilse" height={3 * CELL} />,
     },
     {
       id: 'b',
-      x: 730,
-      y: 380,
-      node: <FieldFigure kind="keyFigure" facing="west" colour={BRANNOCK} name="Master Oswin" />,
+      ...latticeAt(LATTICE, 15.5, 1.5),
+      node: (
+        <FieldFigure kind="keyFigure" facing="west" colour={BRANNOCK} name="Master Oswin" height={3 * CELL} />
+      ),
     },
-    ...seals,
   ];
   const bands: Band[] = ARRIVALS.map((at, index) => ({
     from: at,
     to: ARRIVALS[index + 1] ?? LAST,
     name: (HAPPENINGS[index] ?? []).map((aspect) => aspect.name).join(' and '),
     colours: (HAPPENINGS[index] ?? []).map((aspect) => aspect.colour),
+    marks: (HAPPENINGS[index] ?? []).map((aspect) => aspect.mark),
   }));
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: 'min(620px, 100%)' }}>
@@ -104,18 +116,19 @@ function Travelling() {
           scene={SCENE}
           ground={
             <>
-              <svg
-                viewBox={`0 0 ${SCENE.width} ${SCENE.height}`}
-                preserveAspectRatio="none"
-                aria-hidden="true"
-              >
-                <rect width={SCENE.width} height={SCENE.height} fill="#cbbd9c" />
-              </svg>
+              <LatticeGround
+                scene={SCENE}
+                lattice={LATTICE}
+                id="showcase-travel"
+                fill="#cbbd9c"
+                joint="rgba(60,48,30,0.3)"
+              />
               <Channels scene={SCENE} paths={[PATH]} />
             </>
           }
           pictures={pictures}
           placed={placed}
+          over={<Seals clock={clock} />}
           label="Happenings travelling to a font"
         />
       </div>
@@ -142,12 +155,15 @@ export function ChallengeTravel() {
   return (
     <Part title="A happening travelling">
       <p className="ui-label showcase__lead">
-        Each happening’s seal forms in a patch of mist, <code>Mist</code>, a second and a half before it sets
-        out, comes along the venue’s path for four seconds, laid in the ground as a gilt channel,{' '}
+        Each happening’s seal waits faded in a patch of mist, <code>Mist</code>, from the moment the one
+        before it sets out, forms there a second and a half before it sets out itself, slides along the
+        venue’s path for four seconds, laid in the ground as a gilt channel along the cells’ sides,{' '}
         <code>Channels</code>, and reaches the receptacle on its second, staying until the next arrives. Where
         each stands is worked out from the second alone, <code>sealsAt</code> and <code>spotAlong</code>, so
-        scrubbing back puts it where it was. The font is a stand-in a venue draws its own of. As a seal
-        arrives it strikes the slices it lights: see Lightning, below.
+        scrubbing back puts it where it was; while it plays the second is read to the moment,{' '}
+        <code>useExactSecond</code>, and the seals slide, drawn over the diorama, <code>Diorama over</code>,
+        so nothing else is drawn again. The font is a stand-in a venue draws its own of. As a seal arrives it
+        strikes the slices it lights: see Lightning, below.
       </p>
       <Specimens>
         <Specimen name="Mist, Channels, HappeningSeal on its path" note="plays by itself; scrub it" wide>

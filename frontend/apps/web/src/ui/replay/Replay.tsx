@@ -4,15 +4,21 @@ import type { CSSProperties } from 'react';
 
 import { MarkButton } from '../button/Button';
 import { Container } from '../container/Container';
+import { Mark } from '../mark/Mark';
+import type { MarkName } from '../mark/Mark';
 import { linePoints, scrubbedTo, seenBands, shareAlong } from './replayClock';
 import type { Pace } from './replayClock';
 
-/** A stretch of the replay a happening runs, from its first second to the next's, and the colours of its aspects. */
+/**
+ * A stretch of the replay a happening runs, from its first second to the next's, and the colours of its aspects; with
+ * their marks, a diamond bearing them stands where it begins, as its seal does in the venue.
+ */
 export interface Band {
   readonly from: number;
   readonly to: number;
   readonly name: string;
   readonly colours: readonly string[];
+  readonly marks?: readonly MarkName[];
 }
 
 /** A second worth marking along the replay: something arrived, or fell. */
@@ -26,15 +32,16 @@ const PACE_MARKS = { 1: 'pace-1', 2: 'pace-2', 3: 'pace-3' } as const;
 const LINE_WIDTH = 600;
 const LINE_HEIGHT = 24;
 
-/** A band's fill: its aspects' colours, half seen, run across it. */
-function bandFill(colours: readonly string[]): string {
-  const mixed = colours.map((colour) => `color-mix(in srgb, ${colour} 55%, transparent)`);
+/** A band's fill: its aspects' colours, half seen unless told otherwise, run across it. */
+function bandFill(colours: readonly string[], seen = 55): string {
+  const mixed = colours.map((colour) => `color-mix(in srgb, ${colour} ${seen}%, transparent)`);
   return `linear-gradient(90deg, ${(mixed.length === 1 ? [mixed[0], mixed[0]] : mixed).join(', ')})`;
 }
 
 /**
- * A challenge's replay: play and pause, its pace and to the end, every one a mark; the happenings as bands along it
- * with the tug drawn over them, the first side's end at the top; a tick where something arrived or fell; and the scrub,
+ * A challenge's replay: play and pause, its pace and to the end, every one a mark; the happenings as bands along it,
+ * each begun by a diamond bearing its marks, with the tug drawn over them, the first side's end at the top; a tick where
+ * something arrived - a gilt peak - or fell - a velvet dot; and the scrub,
  * which the arrow keys step a second at a time. Watched for the first time, nothing past the furthest second `seen` is
  * shown - the line, the bands and the ticks stop there and a haze lies over the rest - and the scrub reaches back over
  * what has been seen; to the end shows it all. A second before the first, a moment of approach, shows as the first.
@@ -131,6 +138,22 @@ export function ReplayBar({
               </span>
             ))}
           </div>
+          {seenBands(bands, seen)
+            .filter((band) => band.marks !== undefined && band.marks.length > 0)
+            .map((band) => (
+              <span
+                key={`diamond-${band.from}-${band.name}`}
+                className="ui-replay__happening"
+                style={{ left: `${shareAlong(band.from, last)}%`, background: bandFill(band.colours, 100) }}
+                title={`${band.from} s: ${band.name}`}
+              >
+                <span className="ui-replay__happening-marks">
+                  {band.marks?.map((mark) => (
+                    <Mark key={mark} name={mark} size={band.marks!.length > 1 ? 10 : 15} />
+                  ))}
+                </span>
+              </span>
+            ))}
           {reached < 100 && (
             <span className="ui-replay__haze" style={{ left: `${reached}%` }} aria-hidden="true" />
           )}

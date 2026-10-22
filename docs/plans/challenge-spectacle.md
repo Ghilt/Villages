@@ -198,3 +198,4 @@ done and how it is guided to what it strikes.
 |---|---|---|
 | 18 | **The square on the map's lattice**: the lattice, its ground, the square laid on it held wide and deep, the seals smaller, a test of the layout | 1. 👀 The grid is the map's, the pictures stand on it, the path comes along the cells' sides. |
 | 19 | **Lightning from the font to the slices**, in the library in three looks drawn two ways, in place of the channels to the platforms | 1. 👀 Pick a look and a way of drawing it. 2. 👀 Watch it strike the slices a happening lights. |
+| 20 | **The seal a diamond in the world, sliding**: the seal a diamond tile laid on the lattice and a little smaller, sliding with the replay to the moment, the next waiting faded in the mist, the timeline's happenings begun by diamonds with their marks | 1. 👀 Watch the seals slide, the next waiting faded; the timeline's diamonds bear the marks. |

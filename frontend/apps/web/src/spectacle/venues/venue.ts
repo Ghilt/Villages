@@ -49,7 +49,7 @@ export interface Arrangement {
   readonly path: readonly Point[];
   /** Where the receptacle a seal comes to rest in on its second stands: the font, or whatever the venue has. */
   readonly receptacle: Point;
-  /** How wide a seal is drawn, in the scene's units. */
+  /** How many cells of the lattice across a seal is drawn. */
   readonly seal: number;
 }
 

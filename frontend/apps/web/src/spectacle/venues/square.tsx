@@ -126,7 +126,7 @@ const WIDE: Arrangement = {
   mist: wide.corner(1, 1),
   path: [wide.corner(1, 1), wide.corner(1, 8), wide.corner(8, 8), WIDE_FONT, restsOn(WIDE_FONT)],
   receptacle: WIDE_FONT,
-  seal: 58,
+  seal: 1.5,
 };
 
 const DEEP_W = 900;
@@ -188,7 +188,7 @@ const DEEP: Arrangement = {
     restsOn(DEEP_FONT),
   ],
   receptacle: DEEP_FONT,
-  seal: 60,
+  seal: 1.5,
 };
 
 /**

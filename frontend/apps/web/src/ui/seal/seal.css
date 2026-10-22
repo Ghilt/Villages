@@ -1,7 +1,8 @@
 /*
- * A happening's seal: a gilt-rimmed medallion floating over its foot, its face its aspect's colour - halved for two -
- * with the marks in cream, and a halo of its colour round it. Forming it is soft and dim; coming it bobs; arrived it
- * swells and its halo pulses; spent it fades. Changes of state take a third of a second.
+ * A happening's seal: a gilt-rimmed diamond tile laid on the lattice by --ui-seal-lay, hovering --ui-seal-lift over a
+ * soft shadow on the ground, its face its aspect's colour - halved for two - with the marks in cream, and a glow of its
+ * colour round it. Waiting it is faded and still; forming it breathes; coming it bobs; arrived its glow pulses; spent it
+ * fades. Changes of state take a third of a second.
  */
 
 @layer ui {
@@ -12,75 +13,118 @@
     pointer-events: none;
   }
 
-  .ui-seal__body {
+  .ui-seal__shadow,
+  .ui-seal__glow,
+  .ui-seal__edge,
+  .ui-seal__face {
     position: absolute;
-    left: 0;
-    bottom: 22%;
-    width: var(--ui-seal-size);
-    height: var(--ui-seal-size);
-    transition:
-      transform 0.35s ease,
-      opacity 0.35s ease,
-      filter 0.35s ease;
+    width: var(--ui-seal-face);
+    height: var(--ui-seal-face);
   }
 
-  .ui-seal__halo {
-    position: absolute;
-    inset: -28%;
-    border-radius: 50%;
+  .ui-seal__shadow {
+    left: 50%;
+    bottom: 0;
+    transform: translate(-50%, 50%) var(--ui-seal-lay);
     background: radial-gradient(
       circle,
-      color-mix(in srgb, var(--ui-seal-first) 55%, transparent) 0%,
-      color-mix(in srgb, var(--ui-seal-second) 30%, transparent) 45%,
-      transparent 70%
+      color-mix(in srgb, var(--ui-night) 45%, transparent) 0%,
+      color-mix(in srgb, var(--ui-night) 20%, transparent) 50%,
+      transparent 72%
     );
+    transition: opacity 0.35s ease;
+  }
+
+  .ui-seal__body {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    transform: translateY(calc(-1 * var(--ui-seal-lift)));
+    filter: drop-shadow(0 0 3px var(--ui-seal-first));
+    transition: opacity 0.35s ease;
+  }
+
+  .ui-seal__glow,
+  .ui-seal__edge,
+  .ui-seal__face {
+    left: 0;
+    top: 0;
+  }
+
+  .ui-seal__glow {
+    transform: translate(-50%, -50%) var(--ui-seal-lay) scale(1.9);
+    background: radial-gradient(circle, var(--ui-seal-first) 0%, var(--ui-seal-second) 25%, transparent 62%);
+    opacity: 0.45;
+    transition: opacity 0.35s ease;
+  }
+
+  .ui-seal__edge {
+    transform: translate(-50%, -50%) translateY(var(--ui-seal-edge)) var(--ui-seal-lay);
+    background: var(--ui-gilt-deep);
+    box-shadow: 0 0 0 4px var(--ui-gilt-deep);
   }
 
   .ui-seal__face {
-    position: absolute;
-    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6%;
-    border-radius: 50%;
+    box-sizing: border-box;
+    border: 7px solid var(--ui-gilt);
     color: var(--ui-cream);
     background: linear-gradient(135deg, var(--ui-seal-first) 0% 50%, var(--ui-seal-second) 50% 100%);
     box-shadow:
-      0 0 0 3px var(--ui-gilt),
-      0 0 0 4.5px var(--ui-gilt-deep),
-      inset 0 2px 6px color-mix(in srgb, var(--ui-cream) 35%, transparent),
-      inset 0 -3px 6px color-mix(in srgb, var(--ui-night) 45%, transparent),
-      0 6px 10px color-mix(in srgb, var(--ui-night) 40%, transparent);
+      0 0 0 3px var(--ui-gilt-deep),
+      inset 6px 6px 12px color-mix(in srgb, var(--ui-cream) 35%, transparent),
+      inset -6px -6px 12px color-mix(in srgb, var(--ui-night) 40%, transparent);
+    transform: translate(-50%, -50%) var(--ui-seal-lay);
+  }
+
+  /* The marks turned back the half right angle the face is turned, so they stand lined up with the grid. */
+  .ui-seal__marks {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transform: rotate(-45deg);
+  }
+
+  .ui-seal--waiting .ui-seal__body {
+    opacity: 0.42;
+    filter: saturate(0.55);
+  }
+
+  .ui-seal--waiting .ui-seal__glow {
+    opacity: 0;
+  }
+
+  .ui-seal--waiting .ui-seal__shadow {
+    opacity: 0.4;
   }
 
   .ui-seal--forming .ui-seal__body {
-    opacity: 0.45;
-    filter: blur(1.5px) saturate(0.6);
-    transform: scale(0.78);
+    animation: ui-seal-breathe 1.2s ease-in-out infinite;
   }
 
   .ui-seal--coming .ui-seal__body {
     animation: ui-seal-bob 1.6s ease-in-out infinite;
   }
 
-  .ui-seal--arrived .ui-seal__body {
-    transform: translateY(16%) scale(1.18);
-  }
-
-  .ui-seal--arrived .ui-seal__halo {
+  .ui-seal--arrived .ui-seal__glow {
     animation: ui-seal-pulse 1.4s ease-in-out infinite;
   }
 
-  .ui-seal--spent .ui-seal__body {
+  .ui-seal--spent .ui-seal__body,
+  .ui-seal--spent .ui-seal__shadow {
     opacity: 0;
-    transform: scale(0.9);
   }
 
   .ui-seal__name {
     position: absolute;
     left: 50%;
-    bottom: 0;
+    top: calc(100% + var(--ui-seal-below));
     transform: translateX(-50%);
     padding: 0 0.45em;
     border-radius: 0.6em;
@@ -94,25 +138,33 @@
     box-shadow: 0 0 0 1px var(--ui-gilt-deep);
   }
 
+  @keyframes ui-seal-breathe {
+    0%,
+    100% {
+      opacity: 0.55;
+    }
+    50% {
+      opacity: 0.95;
+    }
+  }
+
   @keyframes ui-seal-bob {
     0%,
     100% {
-      transform: translateY(0);
+      transform: translateY(calc(-1 * var(--ui-seal-lift)));
     }
     50% {
-      transform: translateY(-6%);
+      transform: translateY(calc(-1 * var(--ui-seal-lift) - 4px));
     }
   }
 
   @keyframes ui-seal-pulse {
     0%,
     100% {
-      opacity: 0.75;
-      transform: scale(1);
+      opacity: 0.55;
     }
     50% {
       opacity: 1;
-      transform: scale(1.18);
     }
   }
 }

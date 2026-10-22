@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { nextPace, secondAt } from './replayClock';
+import { nextPace, PACE_MS, secondAt } from './replayClock';
 import type { Pace } from './replayClock';
 
 /**
@@ -21,6 +21,11 @@ export interface ReplayClock {
   show(second: number): void;
   /** Show the last second, and with it everything not yet seen. */
   toEnd(): void;
+  /**
+   * The second shown to the moment, between whole ones while it plays: what something moving smoothly is placed by.
+   * Read it each frame; `useExactSecond` does.
+   */
+  exact(): number;
 }
 
 /** Where a replay's clock starts, and whether it plays by itself. */
@@ -47,14 +52,16 @@ export function useReplayClock(
   const [seen, setSeen] = useState(Math.max(0, start));
   const [playing, setPlaying] = useState(false);
   const [pace, setPace] = useState<Pace>(1);
-  const began = useRef<{ at: number; from: number } | null>(null);
+  const began = useRef<{ at: number; from: number; pace: Pace } | null>(null);
+  const shown = useRef(second);
+  shown.current = second;
 
   useEffect(() => {
     if (!playing) {
       began.current = null;
       return undefined;
     }
-    began.current = { at: performance.now(), from: second };
+    began.current = { at: performance.now(), from: second, pace };
     let frame = 0;
     const step = () => {
       const from = began.current;
@@ -101,5 +108,34 @@ export function useReplayClock(
     setSeen(last);
     setSecond(last);
   }, [last]);
-  return { second, seen, playing, pace, play, pause, quicken, show, toEnd };
+  const exact = useCallback(() => {
+    const from = began.current;
+    if (from === null) return shown.current;
+    return Math.min(last, from.from + (performance.now() - from.at) / PACE_MS[from.pace]);
+  }, [last]);
+  return { second, seen, playing, pace, play, pause, quicken, show, toEnd, exact };
+}
+
+/**
+ * A replay clock's second to the moment, between whole ones, counted afresh each frame while it plays and the second
+ * shown while it does not. Whatever calls it is drawn again every frame while it plays, so it belongs in the smallest
+ * part that moves.
+ */
+export function useExactSecond(clock: ReplayClock): number {
+  const [now, setNow] = useState(clock.exact());
+  const { playing, second, exact } = clock;
+  useEffect(() => {
+    if (!playing) {
+      setNow(second);
+      return undefined;
+    }
+    let frame = 0;
+    const step = () => {
+      setNow(exact());
+      frame = requestAnimationFrame(step);
+    };
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
+  }, [playing, second, exact]);
+  return now;
 }

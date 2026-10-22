@@ -5,12 +5,30 @@ import { sealsAt, spotAlong } from './sealPath';
 const TIMING = { form: 2, lead: 4 };
 
 describe('a seal keeping time', () => {
-  it('is nowhere before it forms, then forms in the mist, comes, and arrives on its second', () => {
-    expect(sealsAt(3, [10], TIMING)).toEqual([]);
+  it('waits in the mist from the beginning, then forms, comes, and arrives on its second', () => {
+    expect(sealsAt(-50, [10], TIMING)).toEqual([{ index: 0, state: 'waiting', along: 0 }]);
+    expect(sealsAt(3, [10], TIMING)).toEqual([{ index: 0, state: 'waiting', along: 0 }]);
     expect(sealsAt(4, [10], TIMING)).toEqual([{ index: 0, state: 'forming', along: 0 }]);
     expect(sealsAt(6, [10], TIMING)).toEqual([{ index: 0, state: 'coming', along: 0 }]);
     expect(sealsAt(8, [10], TIMING)).toEqual([{ index: 0, state: 'coming', along: 0.5 }]);
     expect(sealsAt(10, [10], TIMING)).toEqual([{ index: 0, state: 'arrived', along: 1 }]);
+  });
+
+  it('shows the next waiting in the mist the moment the one before it sets out, and not before', () => {
+    const arrivals = [10, 20];
+    expect(sealsAt(5.9, arrivals, TIMING)).toEqual([{ index: 0, state: 'forming', along: 0 }]);
+    expect(sealsAt(6, arrivals, TIMING)).toEqual([
+      { index: 0, state: 'coming', along: 0 },
+      { index: 1, state: 'waiting', along: 0 },
+    ]);
+    expect(sealsAt(14, arrivals, TIMING)).toEqual([
+      { index: 0, state: 'arrived', along: 1 },
+      { index: 1, state: 'forming', along: 0 },
+    ]);
+  });
+
+  it('moves smoothly between whole seconds', () => {
+    expect(sealsAt(7.5, [10], TIMING)).toEqual([{ index: 0, state: 'coming', along: 0.375 }]);
   });
 
   it('stays arrived until the next arrives, and is spent for a second after', () => {

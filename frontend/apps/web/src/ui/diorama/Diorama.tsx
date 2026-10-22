@@ -42,12 +42,22 @@ export interface Placed {
   readonly walk?: number;
 }
 
+/** Something stood on its foot at (x, y) in a scene: its box's bottom middle there, as whatever is placed stands. */
+export function OnFoot({ x, y, children }: { x: number; y: number; children: ReactNode }) {
+  return (
+    <span className="ui-diorama__placed" style={{ left: x, top: y }}>
+      <span className="ui-diorama__foot">{children}</span>
+    </span>
+  );
+}
+
 /**
  * A diorama: a small piece of the world drawn as the map draws it, seen from the south and above, in a scene of its own
  * units scaled to its box - covering it, or standing whole inside it. The ground lies under everything; the map's own
  * pictures and whatever else is placed stand on their feet, each in front of whatever stands behind it, its foot
- * further down the scene. What is placed walks to where it is next put. See docs/UI-COMPONENTS.md and decision record
- * 0116.
+ * further down the scene. What is placed walks to where it is next put. Over everything, `over` is drawn in the scene's
+ * units: what moves through it and is not of it, on its own, so it can move every frame without the rest being drawn
+ * again. See docs/UI-COMPONENTS.md and decision record 0116.
  */
 export function Diorama({
   scene,
@@ -56,6 +66,7 @@ export function Diorama({
   placed,
   fit = 'cover',
   label,
+  over,
 }: {
   scene: Size;
   /** Drawn under everything, in the scene's units: the ground, a floor and its walls. */
@@ -64,6 +75,8 @@ export function Diorama({
   placed: readonly Placed[];
   fit?: 'cover' | 'contain';
   label?: string;
+  /** Drawn over everything standing, in the scene's units; `OnFoot` stands a thing in it. */
+  over?: ReactNode;
 }) {
   const box = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState<Size>({ width: 0, height: 0 });
@@ -128,6 +141,7 @@ export function Diorama({
             <span className="ui-diorama__foot">{one.node}</span>
           </span>
         ))}
+        {over !== undefined && <div className="ui-diorama__over">{over}</div>}
       </div>
     </div>
   );

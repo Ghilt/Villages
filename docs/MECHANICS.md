@@ -1257,8 +1257,10 @@ swing is people crossing the square.
 **Each house holds a bank**, left or right, turned three-quarters toward us, so no figure is ever seen from behind.
 Held wide the stage is wide; held deep, on a tall screen, the same banks are deep, the ranks one behind another.
 
-**A happening travels through the venue.** Each comes as a glowing seal bearing its aspect's mark, forming in a patch
-of mist a few seconds before it begins - in the square, at the palace doors - and drifting along a gilt channel in the
+**A happening travels through the venue.** Each comes as a seal, a diamond tile bearing its aspect's mark laid as the
+ground is, seen waiting faded in a patch of mist from the moment the one before it sets out - in the square, at the
+palace doors - so the next is always in sight; it forms there a few seconds before it begins and slides along a gilt
+channel in the
 cobbles' joints to a font near the front, which it reaches on the very second it begins. Then lightning arches through
 the air from the font to each slice it lights, which crackles and flashes. **It is watched for the first time**: a run plays
 by itself from a moment before its first second, and nothing past the furthest second played is shown.
