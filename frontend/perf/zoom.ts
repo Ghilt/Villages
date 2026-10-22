@@ -9,7 +9,6 @@ import type { Pacing, ZoomPoint, Zoomed } from '../apps/web/src/admin/performanc
 import { HERE, argsOf } from './args.ts';
 import { chromeOnTheCard } from './chrome.ts';
 import { besideSaid } from './compare.ts';
-import type { Beside } from './compare.ts';
 import { startServers } from './devServer.ts';
 import { METHOD, codeOf, keep, keptFile, lastLike, readKept } from './kept.ts';
 import { findSetters } from './levels.ts';
@@ -18,10 +17,12 @@ import { liftFog, readLevels } from './page.ts';
 import { placesNamed } from './places.ts';
 import type { Place } from './places.ts';
 import { percentile } from './stats.ts';
+import { LATE_MS, slowestFrames } from './slowFrames.ts';
+import type { TimedProfile } from './slowFrames.ts';
 import { compiledOf, spanOf, spentIn } from './startupStats.ts';
-import type { Profile } from './startupStats.ts';
 import { watchStartup } from './startupWatch.ts';
 import type { Watched } from './startupWatch.ts';
+import { middleCrossing, middleZoom, said, slowestSaid, zoomBeside } from './zoomReading.ts';
 
 /**
  * How smoothly the camera comes in from far out, and where the time goes while it does: over ground thick with
@@ -31,19 +32,40 @@ import type { Watched } from './startupWatch.ts';
  * 5 and then flown to 10 over four seconds, the way a few turns of the wheel take it, and watched three seconds more
  * while what came settles. See decision record 0106.
  *
- *   npm run perf:zoom --prefix frontend -- [--places forest,ice] [--rounds 3] [--tree <dir>] [--compare] [--record]
- *     [--why to-main|history|by-hand] [--headed] [--anyway]
+ * And the crossing into the real world at zoom 7.5, where the trees, the roads and everything standing arrive at once,
+ * over the busiest ground, `settled`: settled at zoom 7 and flown to 8.2 over a second and a half. Adam's word of
+ * 2026-10-22: with the fog lifted over a busy place the crossing stutters, and it should be smooth. Every zoom and
+ * crossing keeps its slowest frames and what ran in each (`slowFrames.ts`). See
+ * `docs/plans/smooth-crossing-into-the-real-world.md`.
  *
- * `--compare` puts the run beside the last point kept that was measured alike, and says what moved.
+ *   npm run perf:zoom --prefix frontend -- [--places forest,ice] [--crossing settled] [--only zoom|crossing]
+ *     [--rounds 3] [--tree <dir>] [--compare] [--record] [--why to-main|history|by-hand] [--headed] [--anyway]
+ *
+ * `--compare` puts the run beside the last point kept that was measured alike, and says what moved. `--only` measures
+ * the zooms or the crossing alone, for a hand-over's comparison; a point kept measures both.
  */
 
 const VIEWPORT = { width: 1920, height: 1080 };
-const FROM = 5;
-const TO = 10;
-const FLYING_MS = 4_000;
+/** A flight of the camera: settled at one zoom, then flown to another over so many milliseconds. */
+interface Flight {
+  from: number;
+  to: number;
+  ms: number;
+}
+const ZOOM: Flight = { from: 5, to: 10, ms: 4_000 };
+/** Across `BECOMES_A_MARK_AT` and its stickiness (`sprites/twoForms.ts`), stopping where the view is widest. */
+const CROSSING: Flight = { from: 7, to: 8.2, ms: 1_500 };
 const AFTER_MS = 3_000;
 const { option, flag, tree, why, stamp } = argsOf(process.argv.slice(2));
 const places = placesNamed((option('places') ?? 'forest,grassland,ice').split(',').filter(Boolean));
+const crossingPlace = placesNamed([option('crossing') ?? 'settled'])[0]!;
+const only = option('only');
+if (only !== undefined && only !== 'zoom' && only !== 'crossing') {
+  throw new Error(`--only is zoom or crossing, not ${only}`);
+}
+if (only !== undefined && flag('record')) {
+  throw new Error('a point kept measures the zooms and the crossing both, so --record takes no --only');
+}
 const rounds = Number(option('rounds') ?? 3);
 const logs = join(HERE, '.logs', 'perf');
 
@@ -54,7 +76,12 @@ type MapHandle = {
   jumpTo(options: { center: [number, number]; zoom: number }): void;
   easeTo(options: { zoom: number; duration: number }): void;
 };
-type Win = { villagesMap?: MapHandle; villagesScenery?: () => { particles: number }; __startup: Watched };
+type Win = {
+  villagesMap?: MapHandle;
+  villagesScenery?: () => { particles: number };
+  villagesRoads?: () => { strips: number; roadside: number };
+  __startup: Watched;
+};
 
 /** How the frames came between two moments: a span of the start's, with the frames a second and the 95th gap. */
 function pacing(watched: Watched, from: number, to: number): Pacing {
@@ -67,11 +94,12 @@ function pacing(watched: Watched, from: number, to: number): Pacing {
     ...spanOf(watched.longTasks, watched.frames, from, to),
     fps: Math.round((inside.length / ((to - from) / 1000)) * 10) / 10,
     p95Gap: Math.round((percentile(gaps, 0.95) || 0) * 10) / 10,
+    late: gaps.filter((gap) => gap >= LATE_MS).length,
   };
 }
 
-/** Opens the game on a fresh page, far out over a place, the panes put away and the fog lifted, and lets it settle. */
-async function settledFarOut(page: Page, url: string, place: Place): Promise<void> {
+/** Opens the game on a fresh page over a place at a zoom, the panes put away and the fog lifted, and lets it settle. */
+async function settledOver(page: Page, url: string, place: Place, zoom: number): Promise<void> {
   // A dev server's first page of an old tree can take more than the default half a minute (2026-10-07's did).
   await page.goto(url, { timeout: 120_000 });
   await page.waitForFunction(
@@ -99,7 +127,7 @@ async function settledFarOut(page: Page, url: string, place: Place): Promise<voi
   await liftFog(page);
   await page.evaluate(
     ({ lat, lon, zoom }) => (globalThis as unknown as Win).villagesMap!.jumpTo({ center: [lon, lat], zoom }),
-    { lat: place.lat, lon: place.lon, zoom: FROM },
+    { lat: place.lat, lon: place.lon, zoom },
   );
   // Settled once the map has had all its tiles for a second and a half running.
   await page.waitForFunction(
@@ -115,98 +143,63 @@ async function settledFarOut(page: Page, url: string, place: Place): Promise<voi
   );
 }
 
-/** One zoom in over a place, on a page of its own. */
-async function zoomOnce(browser: Browser, url: string, place: Place): Promise<Zoomed> {
+/** One flight of the camera over a place, on a page of its own. */
+async function flyOnce(browser: Browser, url: string, place: Place, flight: Flight): Promise<Zoomed> {
   const context = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: 1 });
   await context.addInitScript(watchStartup);
   const page = await context.newPage();
-  await settledFarOut(page, url, place);
+  await settledOver(page, url, place, flight.from);
   const cdp = await context.newCDPSession(page);
   await cdp.send('Profiler.enable');
   await cdp.send('Profiler.setSamplingInterval', { interval: 250 });
   await cdp.send('Profiler.start');
   const began = await page.evaluate(
     ({ zoom, duration }) => {
+      // Named as `LINE_UP` is, and busy long enough to be sampled: the profile is lined up by where it ends.
+      const lineUpTheProfile = () => {
+        const until = performance.now() + 5;
+        while (performance.now() < until) {
+          // Waiting is the point.
+        }
+        return performance.now();
+      };
+      const at = lineUpTheProfile();
       (globalThis as unknown as Win).villagesMap!.easeTo({ zoom, duration });
-      return performance.now();
+      return at;
     },
-    { zoom: TO, duration: FLYING_MS },
+    { zoom: flight.to, duration: flight.ms },
   );
-  await page.waitForTimeout(FLYING_MS + AFTER_MS);
-  const profile = ((await cdp.send('Profiler.stop')) as { profile: Profile }).profile;
-  const { watched, sprites } = await page.evaluate(() => {
+  await page.waitForTimeout(flight.ms + AFTER_MS);
+  const profile = ((await cdp.send('Profiler.stop')) as { profile: TimedProfile }).profile;
+  const { watched, sprites, roads } = await page.evaluate(() => {
     const win = globalThis as unknown as Win;
-    return { watched: win.__startup, sprites: win.villagesScenery?.().particles ?? null };
+    return {
+      watched: win.__startup,
+      sprites: win.villagesScenery?.().particles ?? null,
+      roads: win.villagesRoads?.() ?? null,
+    };
   });
   await context.close();
   const spent = spentIn(profile);
+  const until = began + flight.ms + AFTER_MS;
   return {
     place: place.name,
     lat: place.lat,
     lon: place.lon,
-    from: FROM,
-    to: TO,
-    ms: FLYING_MS,
-    during: pacing(watched, began, began + FLYING_MS),
-    after: pacing(watched, began + FLYING_MS, began + FLYING_MS + AFTER_MS),
+    from: flight.from,
+    to: flight.to,
+    ms: flight.ms,
+    during: pacing(watched, began, began + flight.ms),
+    after: pacing(watched, began + flight.ms, until),
     cpu: { busy: spent.busy, gc: spent.gc },
     modules: spent.modules,
     functions: spent.functions,
     sprites,
-    compiles: compiledOf(watched, began + FLYING_MS + AFTER_MS),
+    roads,
+    slowest: slowestFrames(profile, watched.frames, began, until),
+    compiles: compiledOf(watched, until),
   };
 }
-
-/** The numbers of a zoom a run is put beside the last point by: the first zoom's stall, each place's stalls, stutters and CPU. */
-function zoomBeside(then: ZoomPoint, now: ZoomPoint): Beside[] {
-  const stalled = (zoom: Zoomed | undefined | null) =>
-    zoom === undefined || zoom === null ? null : zoom.during.longTasks.total + zoom.after.longTasks.total;
-  const janky = (zoom: Zoomed | undefined) =>
-    zoom === undefined ? null : zoom.during.janky + zoom.after.janky;
-  const first: Beside = {
-    name: 'the first zoom: long tasks',
-    then: stalled(then.firstZoom),
-    now: stalled(now.firstZoom),
-    // Nothing the first zoom needs is compiled while it waits since the land's programs are compiled ahead, so a
-    // second more is a program waited on again; it swung from 23 to 31 seconds when the land's was (experiment 0025).
-    least: 1_000,
-    unit: 's',
-  };
-  return [
-    first,
-    ...now.zooms.flatMap((zoom) => {
-      const was = then.zooms.find((each) => each.place === zoom.place);
-      return [
-        { name: `${zoom.place}: long tasks`, then: stalled(was), now: stalled(zoom), least: 100, unit: 'ms' },
-        { name: `${zoom.place}: stutters`, then: janky(was), now: janky(zoom), least: 2, unit: '' },
-        {
-          name: `${zoom.place}: CPU`,
-          then: was?.cpu.busy ?? null,
-          now: zoom.cpu.busy,
-          least: 200,
-          unit: 'ms',
-        },
-      ];
-    }),
-  ];
-}
-
-/** Of a place's zooms, the middle by how long the page was stalled while the camera came in. */
-function middleZoom(zooms: readonly Zoomed[]): Zoomed {
-  const sorted = [...zooms].sort((a, b) => a.during.longTasks.total - b.during.longTasks.total);
-  return sorted[Math.floor((sorted.length - 1) / 2)]!;
-}
-
-const said = (zoom: Zoomed) =>
-  `${zoom.place.padEnd(10)} during: ${zoom.during.fps} frames a second, ${zoom.during.janky} stutters, worst gap ` +
-  `${Math.round(zoom.during.worstGap)} ms, 95th ${Math.round(zoom.during.p95Gap)} ms, ${zoom.during.longTasks.count} long tasks ` +
-  `${Math.round(zoom.during.longTasks.total)} ms; after: ${zoom.after.janky} stutters, ${zoom.after.longTasks.count} long tasks ` +
-  `${Math.round(zoom.after.longTasks.total)} ms; CPU ${Math.round(zoom.cpu.busy)} ms; ${zoom.sprites ?? '-'} sprites` +
-  `${zoom.compiles.length === 0 ? '' : `; waited on compiling ${zoom.compiles.map((compile) => `${compile.name} ${compile.ms} ms`).join(', ')}`}\n` +
-  `           ${zoom.modules
-    .slice(0, 6)
-    .map((module) => `${module.name} ${Math.round(module.ms)}`)
-    .join(', ')}`;
 
 const card = cardToMeasureOn(flag('anyway'));
 const servers = await startServers(tree, logs);
@@ -214,24 +207,53 @@ const { browser, renderer, headless } = await chromeOnTheCard(flag('headed'));
 try {
   // A first page, let go by: the dev server works out every file anew for it, which is the start's to measure.
   const warming = await browser.newContext({ viewport: VIEWPORT });
-  await settledFarOut(await warming.newPage(), servers.url, places[0]!);
+  const zoomFirst = only !== 'crossing';
+  await settledOver(
+    await warming.newPage(),
+    servers.url,
+    zoomFirst ? places[0]! : crossingPlace,
+    zoomFirst ? ZOOM.from : CROSSING.from,
+  );
   const levelsPage = warming.pages()[0]!;
   const levels = await readLevels(levelsPage, findSetters(tree));
   await warming.close();
 
-  // The run's first zoom, cold: the browser compiles the game's programs as the camera first needs them.
-  const firstZoom = await zoomOnce(browser, servers.url, places[0]!);
-  console.log(
-    `  the first zoom, ${firstZoom.place}: ${Math.round(firstZoom.during.longTasks.total)} ms of long tasks, compiling ` +
-      `${firstZoom.compiles.map((compile) => `${compile.name} ${compile.ms} ms`).join(', ') || 'nothing waited on'}`,
-  );
+  const compiling = (zoom: Zoomed) =>
+    zoom.compiles.map((compile) => `${compile.name} ${compile.ms} ms`).join(', ') || 'nothing waited on';
   const all = new Map<string, Zoomed[]>();
-  for (let round = 1; round <= rounds; round += 1) {
-    for (const place of places) {
-      const zoom = await zoomOnce(browser, servers.url, place);
-      all.set(place.name, [...(all.get(place.name) ?? []), zoom]);
+  let firstZoom: Zoomed | null = null;
+  if (zoomFirst) {
+    // The run's first zoom, cold: the browser compiles the game's programs as the camera first needs them.
+    firstZoom = await flyOnce(browser, servers.url, places[0]!, ZOOM);
+    console.log(
+      `  the first zoom, ${firstZoom.place}: ${Math.round(firstZoom.during.longTasks.total)} ms of long tasks, ` +
+        `compiling ${compiling(firstZoom)}`,
+    );
+    for (let round = 1; round <= rounds; round += 1) {
+      for (const place of places) {
+        const zoom = await flyOnce(browser, servers.url, place, ZOOM);
+        all.set(place.name, [...(all.get(place.name) ?? []), zoom]);
+        console.log(
+          `  round ${round}, ${place.name}: ${zoom.during.janky} stutters, ${Math.round(zoom.during.longTasks.total)} ms of long tasks`,
+        );
+      }
+    }
+  }
+  // The run's first crossing waits on whatever programs only the real world needs, which no zoom before it compiled.
+  let firstCrossing: Zoomed | null = null;
+  const crossings: Zoomed[] = [];
+  if (only !== 'zoom') {
+    firstCrossing = await flyOnce(browser, servers.url, crossingPlace, CROSSING);
+    console.log(
+      `  the first crossing, ${firstCrossing.place}: ${Math.round(firstCrossing.during.longTasks.total)} ms of long ` +
+        `tasks, compiling ${compiling(firstCrossing)}`,
+    );
+    for (let round = 1; round <= rounds; round += 1) {
+      const crossing = await flyOnce(browser, servers.url, crossingPlace, CROSSING);
+      crossings.push(crossing);
       console.log(
-        `  round ${round}, ${place.name}: ${zoom.during.janky} stutters, ${Math.round(zoom.during.longTasks.total)} ms of long tasks`,
+        `  round ${round}, the crossing: ${(crossing.during.late ?? 0) + (crossing.after.late ?? 0)} late frames, ` +
+          `${crossing.during.janky + crossing.after.janky} stutters`,
       );
     }
   }
@@ -248,18 +270,27 @@ try {
     },
     levels,
     firstZoom,
-    zooms: places.map((place) => middleZoom(all.get(place.name)!)),
+    zooms: zoomFirst ? places.map((place) => middleZoom(all.get(place.name)!)) : [],
     of: rounds,
+    firstCrossing,
+    crossing: crossings.length === 0 ? null : middleCrossing(crossings),
   };
   mkdirSync(logs, { recursive: true });
   const file = join(logs, `zoom-${stamp}.json`);
-  writeFileSync(file, `${JSON.stringify({ ...point, all: Object.fromEntries(all) }, null, 2)}\n`);
+  writeFileSync(file, `${JSON.stringify({ ...point, all: Object.fromEntries(all), crossings }, null, 2)}\n`);
 
-  console.log(
-    `\n${renderer}, ${headless ? 'headless' : 'in a window'}, zoom ${FROM} to ${TO} over ${FLYING_MS / 1000} s, the middle of ${rounds}`,
-  );
-  console.log(`the first zoom, cold: ${said(firstZoom)}\n`);
-  for (const zoom of point.zooms) console.log(said(zoom));
+  console.log(`\n${renderer}, ${headless ? 'headless' : 'in a window'}, the middle of ${rounds}`);
+  if (firstZoom !== null) {
+    console.log(`zoom ${ZOOM.from} to ${ZOOM.to} over ${ZOOM.ms / 1000} s`);
+    console.log(`the first zoom, cold: ${said(firstZoom)}\n`);
+    for (const zoom of point.zooms) console.log(said(zoom));
+  }
+  if (point.crossing != null && firstCrossing !== null) {
+    console.log(`\nthe crossing, zoom ${CROSSING.from} to ${CROSSING.to} over ${CROSSING.ms / 1000} s`);
+    console.log(`the first crossing, cold: ${said(firstCrossing)}\n`);
+    console.log(said(point.crossing));
+    console.log(`           its slowest frames, and what ran in each:\n${slowestSaid(point.crossing)}`);
+  }
   if (flag('compare')) {
     const then = lastLike(readZoomPoints(readKept('zoom')).points, point);
     if (then === null) console.log('\nnothing kept to compare with, measured alike');

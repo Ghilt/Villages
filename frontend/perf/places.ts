@@ -33,6 +33,15 @@ export const PLACES: readonly Place[] = [
     lon: 0.7031,
     zoom: 10,
   },
+  // The zoom 7 tile with the most roads and trees together, 77/39, by the bytes of its stands (2026-10-22): where the
+  // real world is busiest, and where the crossing into it is measured (`zoom.ts`).
+  {
+    name: 'settled',
+    what: 'woods and farmland dense with roads and settlements: the roads, the roadside and the worn ground',
+    lat: 56.56,
+    lon: 37.97,
+    zoom: 10,
+  },
   // Clouds are drawn only from zoom 7 out (sprites/clouds/look.ts, inFrom), and whole from 6.
   { name: 'sky', what: 'the clouds over the land, from far out', lat: 50, lon: 10, zoom: 6 },
 ];
