@@ -50,7 +50,7 @@ again. At each place every shader is at high, the wall clock is held so the clou
 time, the card is kept busy, and the fast frames are kept, with their spread.
 
 **The places**, at 1920 by 1080, the player's camera, zoom 10, the fog lifted: tundra, bog, ice, sand, grassland,
-forest, a coast with sea; a cloudy sky at zoom 6, because no cloud is drawn closer in than 7; and the fog once, with a
+forest, a coast with sea, and settled, the most roads and trees together (added 2026-10-22); a cloudy sky at zoom 6, because no cloud is drawn closer in than 7; and the fog once, with a
 house founded on a game server of the tool's own.
 
 **The start.** A fresh browser each time, a dev server and a game server of the tool's own: how long to the map's
@@ -63,7 +63,8 @@ player meets.
 with trees, and the same over bare ground, on a page of its own each time: how long each frame took to come, the
 worst gaps between frames and the long stalls while the sprites are worked out and drawn, the frames the scenery's
 work and the map's own each took, and where the CPU's time went, by module and by function. The forest against the
-bare ground is what the sprites cost the zoom.
+bare ground is what the sprites cost the zoom. And the crossing into the real world at 7.5 over the busiest ground,
+with its slowest frames and what ran in each (2026-10-22, `plans/smooth-crossing-into-the-real-world.md`).
 
 **The tests.** `check.ts --record`: every test made to run, each part and each of the frontend's typecheck, lint,
 format and unit tests timed apart, with how many tests each has.

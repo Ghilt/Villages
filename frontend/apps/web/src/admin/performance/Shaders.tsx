@@ -16,6 +16,7 @@ const PLACE_COLOURS = [
   '#1f9fb0',
   '#d17fb0',
   '#555555',
+  '#6250d6',
 ];
 
 type Reading =

@@ -50,6 +50,8 @@ describe('the shaders’ points', () => {
     expect(familyOf('sprites:clouds')).toBe('clouds');
     expect(familyOf('sprites:fog-of-war-uncolour')).toBe('fog');
     expect(familyOf('sprites:scenery-shadows')).toBe('scenery');
+    expect(familyOf('sprites:roads')).toBe('roads');
+    expect(familyOf('sprites:worked-ground')).toBe('roads');
     expect(familyOf('map:relief-ours')).toBe('relief');
     expect(familyOf('map:painterly')).toBe('map');
     expect(familyOf('sprites:clear')).toBe('clears');

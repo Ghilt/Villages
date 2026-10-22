@@ -116,3 +116,15 @@ point kept. So the start has a fourth load, a **first visit**: the built page in
 where nothing is compiled or cached, three times and the middle kept, as `visit` in `startup.jsonl`, compared with the
 last point and drawn on the performance page beside the other three. The graphics driver's own cache, which outlives
 a browser, is not cleared; what a first visit waits on in the browser, it does.
+
+## Amendment, 2026-10-22: the crossing, and the busiest ground
+
+None of the places had a road or a settlement, so the stutter Adam felt crossing into the real world with the fog
+lifted over a busy place showed nowhere on the page. A ninth place, `settled`, is the zoom 7 tile with the most roads
+and trees together, and the shaders gather `sprites:roads` and `sprites:worked-ground` into a family of their own,
+`roads`. The zoom's measure gains **the crossing**: settled at zoom 7 over `settled` and flown to 8.2 over a second
+and a half, its late frames (gaps of 25 ms or more) counted, and the trees, the stretches of road and the roadside held
+at the end. Every zoom and crossing keeps its **slowest frames and what ran in each**, the CPU profile lined up with
+the page's clock by a function of the tool's own run just before the camera moves, and each sample given to the
+game's own function nearest the top of its stack. The method is unchanged: these are new parts of a point, absent
+from the older ones. See `docs/plans/smooth-crossing-into-the-real-world.md`.

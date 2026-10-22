@@ -142,6 +142,11 @@ export const FAMILIES = [
   { name: 'fog', colour: '#555555', what: 'the fog of war and its taking the colour out' },
   { name: 'scenery', colour: '#8a7a1f', what: 'the trees, bushes and stones, and their shadows' },
   {
+    name: 'roads',
+    colour: '#9c6b3c',
+    what: "the roads drawn as shapes, and the ground worn bare under them, the buildings' yards and the paths",
+  },
+  {
     name: 'sprites',
     colour: '#eb6834',
     what: "Pixi's batch: the marks, the critters and the rest of the sprites",
@@ -161,6 +166,7 @@ export function familyOf(key: string): Family {
   if (key.startsWith('sprites:clouds')) return 'clouds';
   if (key.includes('fog-of-war')) return 'fog';
   if (key.startsWith('sprites:scenery')) return 'scenery';
+  if (key === 'sprites:roads' || key === 'sprites:worked-ground') return 'roads';
   if (key.startsWith('map:relief')) return 'relief';
   if (key.startsWith('map:')) return 'map';
   return 'sprites';

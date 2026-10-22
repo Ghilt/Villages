@@ -1389,9 +1389,10 @@ and `-- --drop` takes them off; by hand only.
   says are free, the game server's world in memory, so no tree's servers or world are touched; opens the game in this
   machine's own Chrome on the graphics card, without a window when Chrome will draw there with the card's timer and
   in one when it will not; sets every shader to high and lifts the fog, so the game server sends every stand; and
-  measures eight places at 1920 by 1080 in the player's camera, each a screen of one kind of ground found in the flat
-  tiles: tundra, bog, ice, sand, grassland, forest and a coast at zoom 10, and the clouds from zoom 6, where they are
-  drawn. Then the fog, last, so no place above had a house in the world: it founds a house from the first seat the
+  measures nine places at 1920 by 1080 in the player's camera, each a screen of one kind of ground found in the flat
+  tiles: tundra, bog, ice, sand, grassland, forest and a coast at zoom 10; `settled`, the zoom 7 tile with the most
+  roads and trees together, woods and farmland dense with roads and settlements, at zoom 10 too; and the clouds from
+  zoom 6, where they are drawn. Then the fog, last, so no place above had a house in the world: it founds a house from the first seat the
   parchment offers, as a player would, and measures the frame where the camera comes to rest over the seat with the
   fog on, `sprites:fog-of-war` and `sprites:fog-of-war-uncolour` its own parts. The seat is whichever is offered first,
   so the ground round it changes from run to run and only the fog's own parts compare; `--no-fog` leaves it out, and
@@ -1423,7 +1424,8 @@ and `-- --drop` takes them off; by hand only.
 - **On the performance page**, `/admin/inspect-performance`, the chapter "What the shaders cost", folded under its
   title as every chapter of the page is: the latest point's places in a table, each with its frame, how its frames
   spread, the CPU's part, what drew gathered into families (the land, the water, the clouds, the fog, the scenery,
-  the sprites, the relief, the painted map, the clears) and its draws a frame, a place's name a link that opens the game
+  the roads and the ground worn bare under them and the buildings, the sprites, the relief, the painted map, the
+  clears) and its draws a frame, a place's name a link that opens the game
   there; then each place's frame point by point, and one place, picked, by family point by point, the commit's subject
   under the pointer; and, folded, every thing the latest point timed by its own name. Only points measured as the
   latest was - one method, one card, one size - are drawn as a line; the others are counted beside the title. The
@@ -1460,7 +1462,7 @@ and `-- --drop` takes them off; by hand only.
   development runtime, the dev server's hundreds of files - are in the first two loads and not in the built page,
   which is what a player meets.
 
-## Zooming in, and what the sprites cost it
+## Zooming in, crossing into the real world, and what the sprites cost
 
 - **The zoom's measure**, `npm run perf:zoom --prefix frontend`: on the same Chrome and servers of its own, the game
   opened on a fresh page, the fog lifted and the shaders as a player has them, settled at zoom 5 over a place and
@@ -1474,13 +1476,27 @@ and `-- --drop` takes them off; by hand only.
   land's are compiled ahead once the loading screen lifts, so the first zoom waits on none of them: 0.1 s of long
   tasks, which was 22 to 40 s while the land was one program compiled at the first close zoom (experiment 0025).
   Then each place three times on fresh pages, the middle kept (`--rounds`); `--places forest,ice` measures some.
-  `--record` keeps it as a line of `docs/experiments/performance/zoom.jsonl`, and `--compare` puts the first zoom's
-  stall and each place's long tasks, stutters and CPU beside the last point kept and marks what moved by more than a
-  fifth; the first zoom's stall beyond a second, which is a program waited on again. About three minutes.
-- **On the performance page**, the chapter "Zooming in, and what the sprites cost it": the first zoom and each
-  place's in a table, each a link that opens the game there; each place's long tasks over its zoom point by point, and
-  the first zoom's stall point by point, which is how long compiling the game's programs takes; and each place's CPU
-  time by module side by side.
+- **The crossing**, in the same run: the crossing into the real world at zoom 7.5, where the trees, the roads, the
+  roadside and everything standing arrive at once, over the busiest ground, `settled` (`--crossing <place>` another):
+  the game opened on a fresh page settled at zoom 7, flown to 8.2 over a second and a half and watched three seconds
+  more, as a wheel takes a player in from the info layer. Its late frames (gaps of 25 ms or more, a frame lost at sixty
+  a second) beside the rest, how many trees, stretches of road and things of the roadside were held at the end, and
+  its slowest frames each with what ran in it: the game's own function nearest the top of the stack with whatever it
+  called in the libraries, or a library's name where none of the game's was running, the profile lined up with the
+  page by a function of its own run just before the camera moves (`frontend/perf/slowFrames.ts`). The run's first
+  crossing is kept apart, waiting on whatever programs only the real world needs; then three, the middle by late
+  frames. Every zoom keeps its slowest frames too. See `docs/plans/smooth-crossing-into-the-real-world.md`.
+- `--record` keeps the run as a line of `docs/experiments/performance/zoom.jsonl`, and `--compare` puts the first
+  zoom's stall, each place's long tasks, stutters and CPU, and the crossing's late frames, stutters, long tasks and
+  CPU beside the last point kept and marks what moved by more than a fifth; the first zoom's stall beyond a second,
+  which is a program waited on again. `--only zoom` or `--only crossing` measures one of the two, for a hand-over's
+  comparison, and keeps nothing. About four minutes; the crossing alone, one and a half.
+- **On the performance page**, the chapter "Zooming in, crossing into the real world, and what the sprites cost": the
+  first zoom and each place's in a table, each a link that opens the game there; each place's long tasks over its zoom
+  point by point, and the first zoom's stall point by point, which is how long compiling the game's programs takes;
+  each place's CPU time by module side by side; and the crossing: the first crossing and the crossing in a table, with
+  the trees, the stretches of road and the roadside held, a link that opens the game at zoom 7 over the place to cross
+  by hand; the crossing's slowest frames and what ran in each; and its late frames and stutters point by point.
 
 ## When the measures run
 
