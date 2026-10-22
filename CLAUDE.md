@@ -76,6 +76,15 @@ has to be learnt once and then costs nothing, and a word costs nothing to learn 
 fitting - in a 44-pixel strip, in a column squeezed to 18rem, in a language nobody has thought about yet.
 Guessing wrong is cheap to fix and it is still drawing it twice. The same question, once, is not.
 
+**A thing on the map is the real world or the info layer, and which one is Adam's call.** When a step adds
+something to the map, ask which before drawing it, with what each would mean for it. The **real world** is what the
+land holds - the scenery, the structures standing, the people, the roads and their roadside, the bridges, the worn
+ground - and it comes and goes with the scenery: it arrives at the one zoom the map changes over at, 7.5, and fades
+in time, never across a band of zoom. The **info layer** is what the player is told rather than shown - the marks
+and their crowds, the fog, the areas, the zones, the water's ripple - and keeps to zooms of its own. The roads were
+first drawn from zoom 6 as a line on a map, which made them info; they are the world. Adam's word of 2026-10-22, and
+decision record 0096.
+
 **What a step costs is measured, and every landing keeps a point.** A step that changes what is drawn, what the
 zoom loads or how the game starts is measured at its hand-over against the last point main kept, and says what moved;
 each time work reaches main, a point of the shaders, the start, the zoom and the tests is kept at its tip and charted at

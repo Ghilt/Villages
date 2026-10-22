@@ -48,7 +48,9 @@ Answer these before touching code, in a paragraph Adam can read back. The answer
    appears or changes, and a character is also `characterGone`, or the client goes on drawing them where
    they were. **And everything on the map passes the fog of war** before it reaches anyone (0061): what stands
    still is sent on ground the house has revealed, what moves only in its vision, and the gateway's `Fog` is
-   where a new kind of thing says which it is.
+   where a new kind of thing says which it is. **And it is the real world or the info layer**, which is Adam's
+   call, asked before it is drawn: the real world arrives with the scenery at 7.5 and fades in time, the info layer
+   keeps to zooms of its own (0096, amended 2026-10-22).
 4. **What can the player do about it?** A command, its payload, and its refusals. The payload never
    carries what the server can work out: not the house's id, not the player, not the instant, not the
    story a command continues. Each way it can be refused is a `DomainError` named for the rule, under

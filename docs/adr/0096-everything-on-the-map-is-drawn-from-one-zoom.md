@@ -59,3 +59,14 @@ mark trades its sprite for it. Every scenery kind arrives there too, whatever it
 it stood twenty pixels tall (0059). A mark keeps its size, 5.5 pixels a unit, so a castle's pin is 44 pixels where its
 sprite was 22: the trade changes the size as well as the drawing, which 0051 had avoided, because the two are never
 seen together. `see everything` no longer lifts a floor, since there is none: it only sends every zoom.
+
+## Amendment, 2026-10-22: the real world and the info layer
+
+The roads were drawn from zoom 6, a thin line widening into packed earth across 7 to 8, and the roadside, the bridges
+and the worn ground faded in across 7.5 to 8. Adam: the roads are part of the real world, so they fade in with the
+scenery sprites and the structure sprites and all the rest; and a thing added to the map is asked about first,
+whether it belongs to the info layer or the real world. So the map holds two kinds of thing. The **real world** -
+scenery, structures, people, roads, their roadside, bridges, worn ground - is drawn from `BECOMES_A_MARK_AT` in,
+switched there with the marks' `CROSSOVER_STICK` and faded over the trade's `CROSSFADE_MS`, never across a band of
+zoom (`sprites/arrival.ts`). The **info layer** - the marks and their crowds, the fog, the areas, the zones, the
+water's ripple - is what the player is told, and keeps to zooms of its own. Which one a new thing is, is asked.
