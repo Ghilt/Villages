@@ -155,7 +155,8 @@ export type Family = (typeof FAMILIES)[number]['name'];
 
 export function familyOf(key: string): Family {
   if (key.endsWith(':clear')) return 'clears';
-  if (/^sprites:(land|grass)$/.test(key)) return 'land';
+  // A program a motion of the land since 2026-10-20 (`land-${motion}`): `sprites:land-grass`, `sprites:land-wet`.
+  if (/^sprites:(land|grass)(-|$)/.test(key)) return 'land';
   if (key.startsWith('map:water')) return 'water';
   if (key.startsWith('sprites:clouds')) return 'clouds';
   if (key.includes('fog-of-war')) return 'fog';

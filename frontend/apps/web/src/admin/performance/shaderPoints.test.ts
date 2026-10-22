@@ -43,6 +43,8 @@ describe('the shaders’ points', () => {
   it('puts every thing that drew in a family, the grass of before the land’s', () => {
     expect(familyOf('sprites:land')).toBe('land');
     expect(familyOf('sprites:grass')).toBe('land');
+    expect(familyOf('sprites:land-grass')).toBe('land');
+    expect(familyOf('sprites:land-ice-salt-sand')).toBe('land');
     expect(familyOf('map:water')).toBe('water');
     expect(familyOf('map:water-ripple-core')).toBe('water');
     expect(familyOf('sprites:clouds')).toBe('clouds');
