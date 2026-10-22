@@ -41,9 +41,9 @@ export const READERS: readonly Reader[] = [
     id: 'renderers',
     program: 'page',
     piece: 'pictures',
-    name: 'Biome, Origin and Culture renderers',
+    name: 'Biome, Origin, Culture and Roads renderers',
     where: 'map/renderers.ts',
-    reads: ['sprite-map', 'origin', 'culture'],
+    reads: ['sprite-map', 'origin', 'culture', 'roads-picture'],
   },
   {
     id: 'relief',

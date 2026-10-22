@@ -292,6 +292,7 @@ export const WORLD_STEPS: readonly WorldStep[] = [
     makes: [
       { path: `${M}/sprites/roads`, is: 'roads-map', folder: true },
       { path: 'world/stands/<m>/roads', is: 'roads-stands', folder: true },
+      { path: 'world/ground/<m>/roads.png', is: 'roads-picture' },
     ],
     doing: 'laying the roads between the settlements',
     done: 'the roads are laid',

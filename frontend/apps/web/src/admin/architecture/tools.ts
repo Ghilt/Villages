@@ -150,7 +150,7 @@ export const TOOLS: readonly Tool[] = [
       'height',
       'settlements-server',
     ],
-    writes: ['roads-map', 'roads-stands', 'roads-pictures'],
+    writes: ['roads-map', 'roads-stands', 'roads-picture', 'roads-pictures'],
     seconds: 75,
     perMaster: true,
     ranBy: 'world:ready, when nobody has made its step',

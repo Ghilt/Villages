@@ -40,6 +40,7 @@ import { freshFolder, writtenAt } from './lib/outputs.ts';
 import { GROUND_DIR, OUTPUT_DIR, PALETTE, RENDER, REPO, STANDS_DIR, masterAt } from './lib/paths.ts';
 import { drawRoadPictures } from './lib/roadPictures.ts';
 import { roadRouter } from './lib/roadRouting.ts';
+import { writeRoadsPicture } from './lib/roadsPicture.ts';
 import { reportRoads } from './lib/roadsReport.ts';
 import { standsReader } from './lib/stills.ts';
 
@@ -360,12 +361,13 @@ const map = {
   chunks: byTile.size,
   bytes,
 };
+const pictureBytes = await writeRoadsPicture(master, chains, villages, towns, width);
 // Last of all, so that a manifest never claims a world that is not finished.
 await writeFile(resolve(mapDir, 'map.json'), `${JSON.stringify(map, null, 2)}\n`);
 
 reportRoads({
   chains,
-  settlements: places.filter((place) => place.kind === 'settlement'),
+  settlements: villages,
   reached,
   joined,
   longestKm: file.longestKm,
@@ -376,7 +378,7 @@ reportRoads({
 });
 say(`${entering} stretches of road over a building, a ruin's piece or water, which must be none`);
 say(
-  `${pieces.length.toLocaleString()} pieces in ${byTile.size.toLocaleString()} tiles, ${(bytes / 1e6).toFixed(1)} MB, into ${standsDir}`,
+  `${pieces.length.toLocaleString()} pieces in ${byTile.size.toLocaleString()} tiles, ${(bytes / 1e6).toFixed(1)} MB, into ${standsDir}; every road in one picture, ${(pictureBytes / 1e6).toFixed(1)} MB`,
 );
 
 if (args.includes('--picture')) {
@@ -387,7 +389,7 @@ if (args.includes('--picture')) {
     chains,
     towns,
     ruinPieces,
-    sites: places.filter((place) => place.kind === 'settlement'),
+    sites: villages,
     around: (flag('around') ?? 'Q90,Q85,Q1490,Q34404,Q1741,Q1792').split(','),
     unitsPerPixel: Number(flag('scale') ?? 1.5),
     say,

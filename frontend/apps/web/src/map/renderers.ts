@@ -34,6 +34,10 @@ import { painterlyTiles } from './painterlyTiles';
  *
  * `culture` is laid on the same way: the building tradition each place is drawn in, worked out by
  * `npm run world:culture` from the origin map and `world/cultures.json`. See `docs/plans/structures.md`.
+ *
+ * `roads` is every road in the world at once, a picture `npm run world:roads` draws of them, laid over the flat tiles
+ * quietened rather than in place of them, so the network shows at any zoom against the ground it crosses. It is the
+ * info layer's view of the roads; on the map itself a road is the real world, and arrives with the trees at 7.5 (0096).
  */
 
 export interface RendererChoice {
@@ -71,6 +75,11 @@ export const RENDERERS: readonly RendererChoice[] = [
     name: 'flow',
     title: 'Flow',
     note: 'Which way the rivers run, a colour for each way, arrows marching downstream from zoom 8, and black where a river has no way to the sea',
+  },
+  {
+    name: 'roads',
+    title: 'Roads',
+    note: 'Every road at once, at any zoom: a track brown, a road orange, a trunk red, a bridge black, a dark dot a settlement and a grey one a ruined town',
   },
 ];
 
@@ -119,11 +128,20 @@ const BIOME_LAYER = 'biome-raster';
 
 /**
  * The renderers drawn on the flat tiles with most of their colour taken out, so that what they draw over them
- * is the only colour there is: the rivers' ways for Flow, the names for the Info map.
+ * is the only colour there is: the rivers' ways for Flow, the names for the Info map, the roads for Roads.
  */
 const QUIET: Readonly<Record<string, { saturation: number; brightness: number }>> = {
   flow: { saturation: -0.9, brightness: 0.35 },
   'info-map': { saturation: -0.8, brightness: 0.45 },
+  roads: { saturation: -0.85, brightness: 0.6 },
+};
+
+/**
+ * The renderers that lay one picture of the whole world square over those quietened tiles, and where each is asked
+ * for: the roads from the dev server alone, since it says where every road is (`vite/roadsPictureApi.ts`).
+ */
+const OVER_THE_QUIET: Readonly<Record<string, (master: string) => string>> = {
+  roads: (master) => `/roads-picture/${encodeURIComponent(master)}`,
 };
 
 /** The renderers that are one picture of the whole world square rather than the terrain, and where each is. */
@@ -215,6 +233,21 @@ export function applyRenderer(map: maplibregl.Map, name: string, lattice: Lattic
     }
   }
   if (!painted) {
+    const over = OVER_THE_QUIET[name];
+    if (over !== undefined) {
+      map.addSource(BIOME_SOURCE, {
+        type: 'image',
+        url: over(chosenMaster()),
+        coordinates: WORLD_CORNERS,
+      });
+      // Linear, so a road drawn soft at its edges stays soft as the camera comes in on it.
+      map.addLayer({
+        id: BIOME_LAYER,
+        type: 'raster',
+        source: BIOME_SOURCE,
+        paint: { 'raster-opacity': 1, 'raster-resampling': 'linear' },
+      });
+    }
     return;
   }
 

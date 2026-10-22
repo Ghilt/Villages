@@ -81,6 +81,13 @@ stage alone, with none of the debug panel in it (decision record 0079).
   one at how far they reach, in the Culture renderer's colour for the culture they are built in - so only what the
   fog let through, every town under what the page follows with the fog lifted, and from zoom 6 in, as the
   scenery's stands are sent.
+  `Roads` is every road in the world at once, at any zoom, on the flat tiles quietened as for Flow: a track dark
+  brown, a road orange, a trunk red, a bridge near black, a settlement a small dark dot and a ruined town a grey one.
+  It is one picture of the whole world, `world/ground/<master>/roads.png`, which `world:roads` draws beside the
+  server's files, four thousand pixels a side, eight world units a pixel, so it is sharp out to about zoom 6 and soft
+  closer in. It says where every road is, which no player is served - a road reaches the page only through the fog -
+  so only the dev server hands it out, at `/roads-picture/<master>`, and only to this renderer. It is the info
+  layer's view of the roads; on the map itself a road is the real world and arrives with the trees at 7.5 (0096).
 - The water moves, from about zoom 8.5 in: depth, waves lit by a sun in the north-west, caustics on the bottom
   of the shallows, and surf along the shore, over every renderer. It is the **Water** part of the **Shaders**
   section, below Debug map, which holds a part for each shader that is a look and nothing more, with `off`,
@@ -866,7 +873,7 @@ and `-- --drop` takes them off; by hand only.
   the game server reads, with how to read them in the master's `sprites/roads/map.json`. It prints how much road of
   each grade, the bridges on each way, the share of villages with a road to another village and why the rest have
   none, the settlements no road reaches at all, and the stretches over a building, a ruin's piece or water, which
-  must be none; on the master of 2026-10-03, 463,000 km of road and 2,792 bridges between 10,838 places, 98.5% of the
+  must be none, and draws every road into one picture for the Roads renderer; on the master of 2026-10-03, 463,000 km of road and 2,792 bridges between 10,838 places, 98.5% of the
   villages joined to another - of the 113 that are not, 21 with no village within 400 km and 92 with no way through,
   most of them on islands - in three minutes. `world:ready` makes it again whenever the tiles, the flow, the height, the
   names, the ruins, the settlements or `world/roads.json` changed. `-- --picture` draws the roads over the ground

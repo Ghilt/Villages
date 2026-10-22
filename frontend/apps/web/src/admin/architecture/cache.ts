@@ -49,5 +49,6 @@ export const WORLD_CACHE = {
     'settlements-stands',
     'roads-map',
     'roads-stands',
+    'roads-picture',
   ],
 } as const;

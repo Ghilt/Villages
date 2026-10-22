@@ -155,6 +155,11 @@ The bridges look good. Then four notes, each fixed and handed over again before 
 - **Every kind of structure in a settlement**, about half houses and half the catalogue's others, at random (decision
   record 0117 amended).
 
+And once it had landed, Adam asked after the road render, which round 1 had read as roads drawn further out on the
+map: it is a **renderer**, picked like Origin or Culture, showing every road at once at any zoom. Built as the Roads
+renderer, from one picture of the world `world:roads` draws beside the server's files and only the dev server serves,
+since it says where every road is.
+
 ## Risks
 
 - **The opening's time**: some fifty thousand raises where there were 7,674 in 78 s. Raised side by side, each
@@ -169,5 +174,5 @@ The bridges look good. Then four notes, each fixed and handed over again before 
 
 ## Not in this plan
 
-Smoothing the settlement's own worn ground and its lanes; roads further out than zoom 7.5; ferries to islands; a house
+Smoothing the settlement's own worn ground and its lanes; roads further out than zoom 7.5 on the map itself; ferries to islands; a house
 taking a settlement, or what being part of one gives a structure.

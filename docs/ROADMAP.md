@@ -36,7 +36,8 @@ and so is the origin map, the first of real names on the edited world. Structure
 started; the world cache is built and waiting on Adam's eye; quests are built and on main, waiting on Adam's
 eye for their experiment; catalogues are built and waiting on Adam's eye; ruined cities are planned and not
 started; worked ground is planned and not started; challenges are planned and not started; settlements and roads are
-built and on main; and houses, bridges and the road render, the newest, are built and waiting on Adam's eye.
+built and on main; and houses, bridges and the road render, the newest, are built and on main, the Roads renderer
+waiting on Adam's eye.
 
 - **Characters and key figures**: the people of the world, each with a history of their own, and the
   house's tie to the few it acts through, shown in a pane in the corner beside the house status. The shape
@@ -210,10 +211,10 @@ built and on main; and houses, bridges and the road render, the newest, are buil
 - **Houses, bridges and the road render**: the second round, from Adam's notes on the first. A settlement becomes a
   cluster of ordinary structures with a name and a radius - houses, a mill, a market - each raised at the opening and
   each inspected on its own, linked to the settlement it stands in; one stone bridge modelled in 3D on eight axes,
-  painted by asseterizer; roads joining 95% of the villages, drawn smooth with the rest of the real world, with a roadside by biome. The
+  painted by asseterizer; roads joining 95% of the villages, drawn smooth with the rest of the real world, with a roadside by biome, and every road at once in a Roads renderer. The
   shape is decision record 0117 and an amendment to 0115; thirteen steps in
-  `docs/plans/houses-bridges-and-road-render.md`, all built and waiting on Adam's eye, the bridge's paintings waiting
-  for him to pick in asseterizer. Asked for by Adam on 2026-10-21.
+  `docs/plans/houses-bridges-and-road-render.md`, built and on main, the bridge painted, the house's paintings
+  waiting for him to pick in asseterizer, and the Roads renderer waiting on his eye. Asked for by Adam on 2026-10-21.
 
 MongoDB and RabbitMQ are on the machine, in Docker, from `infra/docker-compose.yml`. The game server keeps
 its world in MongoDB whenever Docker is running, and RabbitMQ carries every event it stores to the read models.

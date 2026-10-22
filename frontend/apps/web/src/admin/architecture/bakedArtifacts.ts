@@ -151,6 +151,14 @@ export const BAKED: readonly Artifact[] = [
     what: 'Every settlement site, beside the ground map, which the game server raises a settlement on at the opening.',
   },
   {
+    id: 'roads-picture',
+    form: 'file',
+    name: 'every road, one picture',
+    path: 'world/ground/<m>/roads.png',
+    origin: 'baked',
+    what: 'Every road in the world drawn on one square of it, for the Roads renderer, which only the dev server serves.',
+  },
+  {
     id: 'settlements-pictures',
     form: 'folder',
     name: 'settlements pictures',
