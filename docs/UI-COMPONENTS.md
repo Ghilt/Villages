@@ -480,7 +480,10 @@ A line each: what it is for, its variants, and where on the page it is.
 - **`Mist`** and **`Channels`**, `ui/diorama/`: what a venue's happenings travel through. **Mist** is a patch of soft
   cream puffs drifting and breathing over the spot the seals come out of; **channels** are grooves inlaid in the
   ground with a line of gilt in each, along the path the seals travel and the ways from the receptacle to each house's
-  platform, drawn with the ground under everything standing on it. Drawn. *Challenges*.
+  platform, drawn with the ground under everything standing on it. Given a `jolt`, a burst of light runs once along
+  each path it lights, in that path's colour - gold for a slice matching, the aspect's for one answering its
+  anti-aspect - and again whenever its key changes; a `SliceChip` given the same jolt flashes in its colour a moment
+  after, as the light reaches it. Drawn. *Challenges*.
 - **`Drawer`**, `ui/drawer/Drawer.tsx`: what a mark opens over a stage without leaving it - a challenge's history,
   behind the `history` mark - sliding in `from` the stage's right edge when it is held wide and from its bottom when
   it is held deep, so it takes the longer side and leaves the rest to be watched (decision record 0116). Its title

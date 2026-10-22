@@ -69,6 +69,41 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  .ui-slice-chip {
+    position: relative;
+  }
+
+  .ui-slice-chip__jolt {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(
+      ellipse at 18% 50%,
+      color-mix(in srgb, var(--ui-slice-jolt) 75%, transparent) 0%,
+      color-mix(in srgb, var(--ui-slice-jolt) 25%, transparent) 55%,
+      transparent 80%
+    );
+    box-shadow: 0 0 0 2px var(--ui-slice-jolt);
+    animation: ui-slice-jolt 0.9s ease-out 0.55s forwards;
+  }
+
+  @keyframes ui-slice-jolt {
+    0% {
+      opacity: 0;
+      box-shadow: 0 0 0 2px var(--ui-slice-jolt);
+    }
+    20% {
+      opacity: 1;
+      box-shadow: 0 0 18px 6px var(--ui-slice-jolt);
+    }
+    100% {
+      opacity: 0;
+      box-shadow: 0 0 6px 0 var(--ui-slice-jolt);
+    }
+  }
+
   .ui-slice-chip__words {
     display: flex;
     flex-direction: column;

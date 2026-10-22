@@ -52,7 +52,8 @@ export function AspectDisc({ aspect, size = 30 }: { aspect: AspectShown; size?: 
  * going on - lit gold while its aspect **matches** and it is Empowered, ringed in its aspect's colour while it
  * **answers its anti-aspect**, plain while something it carries **works** in any happening, and dim while it is
  * **idle** - with the pips of what it bears. Pressed, it opens the slice above the tray; `chosen` says it is the one
- * open. Drawn rather than painted. See docs/UI-COMPONENTS.md and decision record 0116.
+ * open. A `jolt` from a happening arriving flashes over it in the jolt's colour, a moment after the light leaves the
+ * receptacle so the two are seen as one. Drawn rather than painted. See docs/UI-COMPONENTS.md and decision record 0116.
  */
 export function SliceChip({
   aspect,
@@ -60,6 +61,7 @@ export function SliceChip({
   said,
   borne = [],
   chosen = false,
+  jolt,
   onPress,
   disabled = false,
   showing,
@@ -70,6 +72,8 @@ export function SliceChip({
   said?: string;
   borne?: readonly Borne[];
   chosen?: boolean;
+  /** A jolt arriving from a happening: it flashes in the jolt's colour, once each time the key changes. */
+  jolt?: { readonly key: string | number; readonly colour: string };
   onPress?: () => void;
   disabled?: boolean;
   /** Draw it as if hovered, pressed or focused: for the page, never for the game. */
@@ -98,6 +102,14 @@ export function SliceChip({
         <span className="ui-slice-chip__state">{said ?? STATE_WORDS[state]}</span>
       </span>
       <Pips borne={borne} />
+      {jolt !== undefined && (
+        <span
+          key={jolt.key}
+          className="ui-slice-chip__jolt"
+          style={{ '--ui-slice-jolt': jolt.colour } as CSSProperties}
+          aria-hidden="true"
+        />
+      )}
     </button>
   );
 }
