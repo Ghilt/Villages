@@ -1,5 +1,5 @@
 import { execSync, spawn, spawnSync } from 'node:child_process';
-import { mkdirSync, openSync } from 'node:fs';
+import { existsSync, mkdirSync, openSync, readFileSync } from 'node:fs';
 import { createConnection } from 'node:net';
 import { join, resolve } from 'node:path';
 
@@ -72,6 +72,17 @@ export interface Keeping {
   readonly broker: 'rabbit' | 'in-process';
   /** The database, and the virtual host the server names after it. */
   readonly database: string;
+  /**
+   * Whether the world opens with the settlements' buildings raised, as a player's does: the performance measures', so
+   * busy ground is as busy as a player finds it. Off unless asked, as the tests have it: seven thousand settlements'
+   * buildings raised in a fresh world would be most of the test's minute (0114). Asked, the start waits for the opening.
+   */
+  readonly settlements?: boolean;
+}
+
+/** How many times the world has been opened in a log, by the opening's own line. */
+function openingsIn(log: string): number {
+  return existsSync(log) ? readFileSync(log, 'utf8').split('the world is open').length - 1 : 0;
 }
 
 /**
@@ -81,14 +92,15 @@ export interface Keeping {
  */
 export async function startGame(
   port: number,
-  { store, broker, database }: Keeping,
+  { store, broker, database, settlements = false }: Keeping,
   root = ROOT,
   log = 'e2e-game.log',
 ): Promise<void> {
   mkdirSync(join(ROOT, '.logs'), { recursive: true });
-  const out = openSync(join(ROOT, '.logs', log), 'a');
-  // No settlements: seven thousand structures raised in a fresh database would be most of the test's minute (0114).
-  const args = `--server.port=${port} --villages.store=${store} --villages.broker=${broker} --villages.mongo.database=${database} --villages.settlements=false`;
+  const logged = join(ROOT, '.logs', log);
+  const opened = openingsIn(logged);
+  const out = openSync(logged, 'a');
+  const args = `--server.port=${port} --villages.store=${store} --villages.broker=${broker} --villages.mongo.database=${database} --villages.settlements=${settlements}`;
   // Named whole: a shell told not to look in its own folder for commands finds no gradlew.bat otherwise.
   const gradlew = windows ? `"${join(root, 'backend', 'gradlew.bat')}"` : './gradlew';
   spawn(`${gradlew} --console=plain :app:bootRun "--args=${args}"`, {
@@ -98,6 +110,10 @@ export async function startGame(
     detached: !windows,
   }).unref();
   await until(() => answers(port), 240_000, `the game server to answer on ${port}`);
+  // The opening runs once the server answers, and raising the settlements takes it a minute or so.
+  if (settlements) {
+    await until(async () => openingsIn(logged) > opened, 300_000, `the world on ${port} to open`);
+  }
 }
 
 /**

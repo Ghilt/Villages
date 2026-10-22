@@ -10,7 +10,8 @@ import { answers, startGame, stopGame, stopListening, until } from '../e2e/serve
  * that nothing of any session's tree is touched: never the tree's own ports, which its quick start may hold, nor 8080,
  * which the page of a tree from before the per-tree ports would otherwise connect to. The game server keeps its world
  * in memory and is gone with the run; it is what sends the page where the trees stand, so without it the woods are
- * bare.
+ * bare. Its world opens with the settlements' buildings raised, as a player's does, and is measured only once it has
+ * (method 2, 2026-10-22): without them the busiest ground stood empty of its villages.
  */
 export interface Servers {
   readonly url: string;
@@ -59,7 +60,7 @@ export async function startServers(tree: string, logs: string): Promise<Servers>
   mkdirSync(logs, { recursive: true });
   const game = startGame(
     gamePort,
-    { store: 'memory', broker: 'in-process', database: 'villages-perf' },
+    { store: 'memory', broker: 'in-process', database: 'villages-perf', settlements: true },
     tree,
     'perf-game.log',
   );

@@ -128,3 +128,13 @@ at the end. Every zoom and crossing keeps its **slowest frames and what ran in e
 the page's clock by a function of the tool's own run just before the camera moves, and each sample given to the
 game's own function nearest the top of its stack. The method is unchanged: these are new parts of a point, absent
 from the older ones. See `docs/plans/smooth-crossing-into-the-real-world.md`.
+
+## Amendment, 2026-10-22: the measures' world holds the settlements
+
+The measures' game server was started as the end-to-end test's is, with `--villages.settlements=false`, which the test
+needs to keep inside its minute. So every measure ran on a world with no settlements' buildings, where a player's world
+opens with 37,461 of them, and the busiest ground, `settled`, was measured empty of its villages. The measures' world now
+opens with the settlements raised (`startGame`'s `settlements`), and a measure waits for the opening's own line before
+it begins. That changes what every reading means, so `METHOD` is two: the points before it are kept and drawn apart,
+and a new first point of the crossing is kept on main's tip, the before of the plan
+`docs/plans/smooth-crossing-into-the-real-world.md`.

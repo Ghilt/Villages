@@ -1386,7 +1386,9 @@ and `-- --drop` takes them off; by hand only.
 
 - **The shader measure**, what the game's shaders cost the graphics card at fixed places on the map:
   `npm run perf:shaders --prefix frontend`. It starts a dev server and a game server of its own on ports the machine
-  says are free, the game server's world in memory, so no tree's servers or world are touched; opens the game in this
+  says are free, the game server's world in memory, so no tree's servers or world are touched, and opening with the
+  settlements' buildings raised as a player's does, which it waits a minute or so for (method 2, since 2026-10-22: the
+  points before it were measured on a world without them, and are not drawn beside the later ones); opens the game in this
   machine's own Chrome on the graphics card, without a window when Chrome will draw there with the card's timer and
   in one when it will not; sets every shader to high and lifts the fog, so the game server sends every stand; and
   measures nine places at 1920 by 1080 in the player's camera, each a screen of one kind of ground found in the flat

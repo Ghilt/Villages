@@ -16,8 +16,11 @@ export type { KeptPlace, Point, Why } from '../apps/web/src/admin/performance/sh
  * hand-over measures is never kept: it is compared against the last point and left in `.logs/perf/`.
  */
 
-/** The method a point was measured by. Raised whenever what a reading means changes, so points of two never mix. */
-export const METHOD = 1;
+/**
+ * The method a point was measured by. Raised whenever what a reading means changes, so points of two never mix. Two
+ * since 2026-10-22: the measures' world holds the settlements' buildings, as a player's does, where one held none.
+ */
+export const METHOD = 2;
 
 const rounded = (ms: number) => Math.round(ms * 1000) / 1000;
 

@@ -34,9 +34,12 @@ export function Crossing({ line }: { line: readonly ZoomPoint[] }) {
           <p className="inspect-said">
             The latest point, {pointName(latest)}: the camera settled at zoom {crossing.from} over{' '}
             {crossing.place} and flown to {crossing.to} over {crossing.ms / 1000} s, across 7.5, where the
-            real world arrives, the fog lifted; the middle of {latest.of} by its late frames, then watched
-            three seconds more. A late frame is a gap of 25 ms or more, a frame lost at sixty a second; a
-            stutter is one of 50 ms or more.
+            real world arrives, the fog lifted
+            {latest.method >= 2
+              ? ", the settlements' buildings standing as a player's world has them"
+              : ", on a world without the settlements' buildings"}
+            ; the middle of {latest.of} by its late frames, then watched three seconds more. A late frame is a
+            gap of 25 ms or more, a frame lost at sixty a second; a stutter is one of 50 ms or more.
           </p>
           <Table first={latest.firstCrossing ?? null} crossing={crossing} />
           <Slowest crossing={crossing} />
