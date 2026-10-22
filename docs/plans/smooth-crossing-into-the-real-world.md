@@ -13,7 +13,8 @@ already is with limited vision. The review first, then the measure on the perfor
 Re-planned the same day, after step 2, from Adam's notes: still stuttery, and woods that load on one side of a seam
 pop in on the other half a second later; a deeper fix asked for, and whether bigger, fewer sprites would help.
 After step 3 a step was added before the rest: the measures had run on a world without the settlements' buildings,
-37,461 of them in a world opened as a player's is.
+37,461 of them in a world opened as a player's is. And after step 5 the roads, the roadside and the settlements came before
+the worker, Adam's word: the stall when the camera stops was by then the largest thing left, and it is theirs.
 
 ---
 
@@ -86,7 +87,7 @@ roads and the buildings about them have come, and what those change later is onl
 arriving hides the trees on its diamonds, one going shows them again, and nothing is built for it. Step 2's cells
 touched say which trees to ask again. **It arrives whole** (step 5): the woods in view fade in
 together, and a wood that is ready later fades in on a clock of its own. **The scattering is off the page's thread**
-(step 6): a worker cuts the cells, fed the ground, the sprite map and the stands the page holds.
+(step 9): a worker cuts the cells, fed the ground, the sprite map and the stands the page holds.
 
 | Rule | What keeps it | When it holds |
 |---|---|---|
@@ -124,10 +125,10 @@ Every fix step's hand-over measures the crossing with `npm run perf:zoom --prefi
 | 3 | The woods built ahead: from zoom 7 the cells in view and a ring are cut and their trees made hidden, by a budget of milliseconds a frame rather than a count of cells, so that at 7.5 only the fade runs; a tree built once, a road or a house arriving later only hiding the trees it stands on; decision records 0096 and 0118 amended | 👀 At the busy place with the fog off, wheel in from 7: the woods are there all at once as the real world fades in, with no sweep of them down the screen. The crossing compared: late frames down, no making of trees among the slowest frames |
 | 4 | The measures' world holds the settlements' buildings, as a player's does, the measure waiting for its opening; a new before point on main's tip | The crossing over `settled` on the page with the settlements' buildings standing among its trees, measured again on main's tip as the before. The checks |
 | 5 | The view arrives whole: the woods in view fade in together, and a wood ready later fades in on its own clock rather than appearing at full | 👀 Zooming in at a seam and panning fast at 8: a wood that comes late fades in, nothing pops. The crossing compared: no worse than step 3 |
-| 6 | The scattering in a worker: the cells cut off the page's thread, fed the ground, the sprite map and the stands the page holds, the same woods as before | 👀 The woods at the busy place and in the forest as they were, tree for tree. A test cutting cells in the worker and on the page alike. The crossing compared: no cut among the slowest frames |
-| 7 | The roads read once: a version for each layer of stands, one list of the pieces held shared by the roads, the roadside, the bridges and the worn ground, and the roadside walked only near the screen | 👀 Roads, walls, growth and bridges as they were at a busy place, in and out of 7.5 and panning. The crossing compared: the roadside's cost a frame and its rebuilds down |
-| 8 | The roadside laid out a tile at a time: a tile come or gone, or its worn ground changed, lays out that tile and its neighbours | 👀 Panning along a road across tile edges: no wall or bush pops in or out at an edge, and the same roadside when the camera comes back. The crossing compared: no roadside among the slowest frames |
-| 9 | The settlements keep their identity: the list held and the map's sprites are the very same while nothing in them changed | 👀 Settlements and their buildings laid out as their ground comes, as before. The crossing compared: the stall when the camera stops gone, the settlements worked out a handful of times, not fifty |
+| 6 | The roads read once: a version for each layer of stands, one list of the pieces held shared by the roads, the roadside, the bridges and the worn ground, and the roadside walked only near the screen | 👀 Roads, walls, growth and bridges as they were at a busy place, in and out of 7.5 and panning. The crossing compared: the roadside's cost a frame and its rebuilds down |
+| 7 | The roadside laid out a tile at a time: a tile come or gone, or its worn ground changed, lays out that tile and its neighbours | 👀 Panning along a road across tile edges: no wall or bush pops in or out at an edge, and the same roadside when the camera comes back. The crossing compared: no roadside among the slowest frames |
+| 8 | The settlements keep their identity: the list held and the map's sprites are the very same while nothing in them changed | 👀 Settlements and their buildings laid out as their ground comes, as before. The crossing compared: the stall when the camera stops gone, the settlements worked out a handful of times, not fifty |
+| 9 | The scattering in a worker: the cells cut off the page's thread, fed the ground, the sprite map and the stands the page holds, the same woods as before | 👀 The woods at the busy place and in the forest as they were, tree for tree. A test cutting cells in the worker and on the page alike. The crossing compared: no cut among the slowest frames |
 | 10 | The roads', the worn ground's and the trees' programs compiled ahead, as the land's and the clouds' are | The first crossing's programs waited on, with none of these among them. The checks |
 
 Clumps of trees at the widest zooms, and the whole page drawn again at every cell's answer, are not in this plan: they
