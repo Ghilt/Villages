@@ -20,9 +20,10 @@ import { heldStandsOf, onStandsArrived, onStandsFollowed } from '../../net/stand
 import { piecesHeld, roadsMap } from '../ground/roads';
 import { workedGroundStore } from '../ground/settings';
 import type { Worked } from '../ground/worked';
+import { createArrival } from '../arrival';
 import type { Layer } from '../layer';
+import { soonest } from '../layer';
 import type { SettlementPictures } from '../settlements/settlementPictures';
-import { BECOMES_A_MARK_AT } from '../twoForms';
 import { createRoadsideLayer } from './RoadsideLayer';
 import { stripsOf } from './roadStrips';
 import type { RoadStrip } from './roadStrips';
@@ -32,9 +33,10 @@ import { ROAD_FRAGMENT, ROAD_VERTEX } from './roadShader';
  * The roads, drawn as shapes over the ground: every piece of the `roads` layer the page holds, cut to the ground the
  * house has revealed (`roadStrips.ts`), each stretch a soft band with round ends (`roadShader.ts`), all of them in one
  * draw into a picture the size of the screen, which stands over the worn ground and under everything standing on it, in
- * the container the fog takes the colour out of. From zoom 6, where the records first come, a thin line; from 7.5 in,
- * packed earth as wide as its grade. A bridge is a line only further out than its picture. No tree grows on a road:
- * the worked ground keeps its diamonds clear (`ground/roads.ts`). See docs/plans/houses-bridges-and-road-render.md.
+ * the container the fog takes the colour out of: packed earth as wide as its grade. A road is the real world, so it
+ * arrives with the scenery and the structures at 7.5 and fades in time (`arrival.ts`); where a bridge carries it,
+ * the bridge's picture is the road. No tree grows on a road: the worked ground keeps its diamonds clear
+ * (`ground/roads.ts`). See docs/plans/houses-bridges-and-road-render.md and decision record 0096.
  */
 
 export interface RoadsLayer extends Layer {
@@ -51,18 +53,8 @@ export interface RoadsLayer extends Layer {
   report(): { strips: number; roadside: number };
 }
 
-/** The zoom the roads first show at, where their records first come, and how far they take to come in. */
-const FROM_ZOOM = 6;
-const COMING_IN = 0.3;
-/** A bridge's stretch is drawn with this added to its grade, so the shader can let it go where its picture stands. */
-const BRIDGE = 10;
 /** How many floats each corner of a stretch's quad carries: its ends, its corner, its half-width and grade. */
 const FLOATS = 8;
-
-const smoothstep = (from: number, to: number, value: number): number => {
-  const t = Math.max(0, Math.min(1, (value - from) / (to - from)));
-  return t * t * (3 - 2 * t);
-};
 
 function channelsOf(hex: string): [number, number, number] {
   const value = Number.parseInt(hex.slice(1), 16);
@@ -90,7 +82,7 @@ function geometryOf(strips: readonly RoadStrip[], origin: { x: number; y: number
           along,
           across,
           strip.half,
-          strip.grade + (strip.bridge ? BRIDGE : 0),
+          strip.grade,
         ],
         (at * 4 + corner) * FLOATS,
       );
@@ -123,8 +115,6 @@ export function createRoadsLayer(
     uPixel: { value: 1, type: 'f32' },
     uOrigin: { value: new Float32Array(2), type: 'vec2<f32>' },
     uRoad: { value: new Float32Array(3), type: 'vec3<f32>' },
-    uNear: { value: 0, type: 'f32' },
-    uBridges: { value: 1, type: 'f32' },
   });
   const shader = new Shader({
     glProgram: GlProgram.from({
@@ -148,6 +138,7 @@ export function createRoadsLayer(
   let tilesRoot: string | null = null;
   let stale = true;
   let said = -1;
+  const arrival = createArrival();
   const dirty = () => {
     stale = true;
     repaint();
@@ -160,7 +151,10 @@ export function createRoadsLayer(
     const pieces = piecesHeld(
       [...heldStandsOf('roads')].flatMap((tile) => (tile.roads === undefined ? [] : [tile.roads])),
     );
-    strips = widths === null ? [] : stripsOf(pieces, widths, workedGroundStore.get().roadWidth, revealed);
+    strips =
+      widths === null
+        ? []
+        : stripsOf(pieces, widths, workedGroundStore.get().roadWidth, revealed).filter((one) => !one.bridge);
     const first = strips[0];
     origin = first === undefined ? { x: 0, y: 0 } : { x: Math.floor(first.ax), y: Math.floor(first.ay) };
     mesh?.geometry.destroy(true);
@@ -168,7 +162,7 @@ export function createRoadsLayer(
     mesh = strips.length === 0 ? null : new Mesh({ geometry: geometryOf(strips, origin), shader });
     if (strips.length !== said) {
       said = strips.length;
-      note('roads', `${strips.length} stretches of road drawn as shapes, from zoom ${FROM_ZOOM}`);
+      note('roads', `${strips.length} stretches of road drawn as shapes, with the real world from zoom 7.5`);
     }
   }
 
@@ -199,16 +193,16 @@ export function createRoadsLayer(
     report: () => ({ strips: strips.length, roadside: roadside.report().items }),
 
     draw(view: CameraView, now: number, elapsed: number): number | null {
-      roadside.draw(view, now, elapsed);
+      const besides = roadside.draw(view, now, elapsed);
       const { on, strength, road } = workedGroundStore.get();
-      const appear = smoothstep(FROM_ZOOM - 0.1, FROM_ZOOM + COMING_IN, view.zoom);
+      const appear = arrival.step(view.zoom, elapsed);
       if (stale) {
         rebuild();
         stale = false;
       }
       if (!on || appear === 0 || mesh === null) {
         sprite.visible = false;
-        return null;
+        return soonest(besides, arrival.wants());
       }
       const { scale, x, y, tilt } = standingLayer(view);
       const u = uniforms.uniforms;
@@ -227,9 +221,6 @@ export function createRoadsLayer(
       u.uRoad[0] = red;
       u.uRoad[1] = green;
       u.uRoad[2] = blue;
-      u.uNear = smoothstep(BECOMES_A_MARK_AT - 0.5, BECOMES_A_MARK_AT + 0.5, view.zoom);
-      // Where a bridge's picture comes in, its line goes.
-      u.uBridges = 1 - smoothstep(BECOMES_A_MARK_AT, BECOMES_A_MARK_AT + 0.5, view.zoom);
       uniforms.update();
 
       const resolution = renderer.resolution;
@@ -243,7 +234,7 @@ export function createRoadsLayer(
       sprite.alpha = appear * Math.min(1, strength + 0.1);
       sprite.width = view.width;
       sprite.height = view.height;
-      return null;
+      return soonest(besides, arrival.wants());
     },
 
     destroy(): void {

@@ -72,7 +72,14 @@ far as the records already come. So, in `docs/plans/houses-bridges-and-road-rend
   village in its network is joined to its nearest, out to a far limit; the bake reports the share, which is to be 95% or
   more, and why each of the rest is alone.
 - **A road is drawn as a shape**, not as coloured diamonds: every piece a band with round ends, so bends and joins are
-  smooth, from zoom 7.5 in as worn earth and from 6 as a thin line. The worked ground keeps its `road` kind only so that
+  smooth, from zoom 7.5 in as worn earth. The worked ground keeps its `road` kind only so that
   no tree grows on a road or its roadside.
 - **A roadside**, by the biome under it, along both sides of every road from 7.5 in, laid out by the page from the
   pieces it holds, drawn between the roads and the trees.
+
+## Amendment, 2026-10-22: a road is the real world
+
+Adam, seeing the roads drawn from zoom 6: they should fade with everything else; a road is part of the real world, so
+it fades in with the scenery sprites, the structure sprites and the rest. The thin line from zoom 6 is gone: a road is
+drawn from 7.5 in, as worn earth, arriving and going there in time, and its roadside, its bridges and the worn ground
+with it. Where a bridge stands, its picture is the road. See decision record 0096's amendment of the same day.

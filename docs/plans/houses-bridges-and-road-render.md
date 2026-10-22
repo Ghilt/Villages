@@ -155,5 +155,5 @@ Then it is brought to main.
 
 ## Not in this plan
 
-Smoothing the settlement's own worn ground and its lanes; roads further out than zoom 6; ferries to islands; a house
+Smoothing the settlement's own worn ground and its lanes; roads further out than zoom 7.5; ferries to islands; a house
 taking a settlement, or what being part of one gives a structure.

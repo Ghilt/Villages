@@ -10,7 +10,7 @@ import { piecesHeld } from '../ground/roads';
 import type { Layer } from '../layer';
 import type { SettlementPictures } from '../settlements/settlementPictures';
 import type { StandingLayer, StandingThing } from '../standing/StandingLayer';
-import { BECOMES_A_MARK_AT } from '../twoForms';
+import { createArrival } from '../arrival';
 import { bridgesAmong, deckOf } from './bridges';
 import type { Bridge } from './bridges';
 
@@ -27,12 +27,8 @@ export interface BridgesLayer extends Layer {
   report(): { bridges: number; drawn: number };
 }
 
-const smoothstep = (from: number, to: number, value: number): number => {
-  const t = Math.max(0, Math.min(1, (value - from) / (to - from)));
-  return t * t * (3 - 2 * t);
-};
-
 export function createBridgesLayer(pictures: SettlementPictures, standing: StandingLayer): BridgesLayer {
+  const arrival = createArrival();
   let stale = true;
   const stopArriving = onStandsArrived((_, __, layer) => {
     if (layer === 'roads') stale = true;
@@ -67,12 +63,12 @@ export function createBridgesLayer(pictures: SettlementPictures, standing: Stand
   }
 
   return {
-    draw(view: CameraView): number | null {
+    draw(view: CameraView, _now: number, elapsed: number): number | null {
       if (stale) {
         gather();
         stale = false;
       }
-      const fade = smoothstep(BECOMES_A_MARK_AT, BECOMES_A_MARK_AT + 0.5, view.zoom);
+      const fade = arrival.step(view.zoom, elapsed);
       const { scale, x: left, y: top, tilt } = standingLayer(view);
       const things: StandingThing[] = [];
       drawn = 0;
@@ -120,7 +116,7 @@ export function createBridgesLayer(pictures: SettlementPictures, standing: Stand
         });
       }
       standing.stand(things, 'bridges');
-      return null;
+      return arrival.wants();
     },
 
     report: () => ({ bridges: held.size, drawn }),

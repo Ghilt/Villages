@@ -17,7 +17,7 @@ import type { CameraView } from '../../geometry/cameraMath';
 import { WORLD_MASTER_WIDTH } from '../../geometry/world';
 import { groundAt } from '../land/landMask';
 import type { Layer } from '../layer';
-import { BECOMES_A_MARK_AT } from '../twoForms';
+import { createArrival } from '../arrival';
 
 import { GROUND_FRAGMENT, GROUND_VERTEX } from './groundShader';
 import { covers, fillWindow, windowFor } from './groundWindow';
@@ -38,11 +38,6 @@ import type { Worked } from './worked';
 const COVER = new Float32Array([-1, -1, 3, -1, -1, 3]);
 
 const FRAME = frameOf(GROUND_LATTICE);
-
-const smoothstep = (from: number, to: number, value: number): number => {
-  const t = Math.min(1, Math.max(0, (value - from) / (to - from)));
-  return t * t * (3 - 2 * t);
-};
 
 /** The stretch of the ground's lattice under the view's four corners. */
 function latticeUnder(view: CameraView): LatticeBounds {
@@ -71,6 +66,7 @@ export interface GroundLayer extends Layer {
 }
 
 export function createGroundLayer(renderer: Renderer, repaint: () => void): GroundLayer {
+  const arrival = createArrival();
   const uniforms = new UniformGroup({
     uSize: { value: new Float32Array(2), type: 'vec2<f32>' },
     uCentre: { value: new Float32Array(2), type: 'vec2<f32>' },
@@ -158,13 +154,13 @@ export function createGroundLayer(renderer: Renderer, repaint: () => void): Grou
       repaint();
     },
 
-    draw(view: CameraView): number | null {
+    draw(view: CameraView, _now: number, elapsed: number): number | null {
       const { strength, earth, grass, road } = workedGroundStore.get();
-      const fade = smoothstep(BECOMES_A_MARK_AT, BECOMES_A_MARK_AT + 0.5, view.zoom);
+      const fade = arrival.step(view.zoom, elapsed);
       const at = fade > 0 && worked.size > 0 ? windowOfView(view) : null;
       if (at === null) {
         sprite.visible = false;
-        return null;
+        return arrival.wants();
       }
       const centre = toMercatorExact(view.center);
       const tilt = groundTilt(view);
@@ -204,7 +200,7 @@ export function createGroundLayer(renderer: Renderer, repaint: () => void): Grou
       sprite.visible = true;
       sprite.width = view.width;
       sprite.height = view.height;
-      return null;
+      return arrival.wants();
     },
 
     destroy(): void {

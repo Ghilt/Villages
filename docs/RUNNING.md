@@ -578,8 +578,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   settlements, how many paths join them and how many lanes the settlements took, and how many pieces of road keep the
   ground clear. The roads are the pieces of the `roads` layer the game server sent, drawn as smooth bands with round
   ends over the ground (`sprites/roads/`), cut where the ground the house has revealed ends, so a road stops where the
-  revealed ground stops: from zoom 6, where their records first come, a thin line edged darker, every road the page
-  holds; from 7.5 in, packed earth as wide as its grade, its edge ragged and two ruts along it. Under a road and a
+  revealed ground stops: packed earth as wide as its grade, its edge ragged and two ruts along it. A road is the
+  **real world**, so it arrives with the scenery and the structures at 7.5 and fades in a fifth of a second, and so
+  do its roadside, its bridges and the worn ground (`sprites/arrival.ts`); further out there is no road. Under a road and a
   little either side of it, for its roadside, the ground is kept clear, a diamond at a time, as the wayside, which is
   not drawn: no tree grows on it, so a road through a forest is a clear way. Along both sides of a road, from 7.5 in,
   stands its **roadside**, chosen by the biome under it (`packages/world/src/roadsideLooks.ts`): stubs of dry-stone
@@ -866,7 +867,7 @@ and `-- --drop` takes them off; by hand only.
   names, the ruins, the settlements or `world/roads.json` changed. `-- --picture` draws the roads over the ground
   around Paris, Grand Cairo, Jeddo, New Orleans, Vienna and Dantzic into `world/painterly/roads/` - a track brown, a
   road pale, a trunk yellow, a bridge red, a settlement a pale square, a ruin's pieces grey; `--around` and `--scale`
-  as the ruins'. The page draws them from zoom 6 as smooth bands with a roadside, under the worked ground's entry
+  as the ruins'. The page draws them from zoom 7.5 as smooth bands with a roadside, under the worked ground's entry
   above; see `docs/plans/houses-bridges-and-road-render.md`.
 - How high the ground is, for the relief: `npm run world:height --prefix frontend` reads ETOPO 2022's whole world,
   a height every 60 arc-seconds, through the master's origin map, so every point of the master has the height of

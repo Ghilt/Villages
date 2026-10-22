@@ -27,7 +27,7 @@ import { diamondKey } from '../ground/workedGround';
 import type { Layer } from '../layer';
 import { spriteMap } from '../scenery/spriteMap';
 import type { SettlementPictures } from '../settlements/settlementPictures';
-import { BECOMES_A_MARK_AT } from '../twoForms';
+import { createArrival } from '../arrival';
 import { roadsideAlong } from './roadsideItems';
 import type { RoadsideItem } from './roadsideItems';
 
@@ -52,11 +52,6 @@ const FRAME = frameOf(GROUND_LATTICE);
 const SCENERY_ART = '/art/scenery';
 /** The grid the road's bands are found by, for keeping the roadside off them, in world units. */
 const CELL = 4;
-
-const smoothstep = (from: number, to: number, value: number): number => {
-  const t = Math.max(0, Math.min(1, (value - from) / (to - from)));
-  return t * t * (3 - 2 * t);
-};
 
 /** Whether a point is on any piece's band, by a grid of the pieces. */
 function bandsOf(
@@ -91,6 +86,7 @@ function bandsOf(
 }
 
 export function createRoadsideLayer(pictures: SettlementPictures, repaint: () => void): RoadsideLayer {
+  const arrival = createArrival();
   const container = new Container();
   container.visible = false;
   // Nearer the camera drawn later, whichever order the sprites first came on screen in.
@@ -192,11 +188,11 @@ export function createRoadsideLayer(pictures: SettlementPictures, repaint: () =>
 
     report: () => ({ items: items.length }),
 
-    draw(view: CameraView): number | null {
-      const fade = smoothstep(BECOMES_A_MARK_AT, BECOMES_A_MARK_AT + 0.5, view.zoom);
+    draw(view: CameraView, _now: number, elapsed: number): number | null {
+      const fade = arrival.step(view.zoom, elapsed);
       if (!workedGroundStore.get().on || fade === 0) {
         container.visible = false;
-        return null;
+        return arrival.wants();
       }
       if (stale) {
         rebuild();
@@ -229,7 +225,7 @@ export function createRoadsideLayer(pictures: SettlementPictures, repaint: () =>
         const tall = 'wall' in item ? (pictures.of(wallKey(item.wall, item.way))?.tall ?? 0.3) : sizeOf(item);
         sprite.scale.set((tall * perUnit) / sprite.texture.height);
       });
-      return null;
+      return arrival.wants();
     },
 
     destroy(): void {

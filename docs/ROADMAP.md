@@ -210,7 +210,7 @@ built and on main; and houses, bridges and the road render, the newest, are buil
 - **Houses, bridges and the road render**: the second round, from Adam's notes on the first. A settlement becomes a
   cluster of ordinary structures with a name and a radius - houses, a mill, a market - each raised at the opening and
   each inspected on its own, linked to the settlement it stands in; one stone bridge modelled in 3D on eight axes,
-  painted by asseterizer; roads joining 95% of the villages, drawn smooth from zoom 6, with a roadside by biome. The
+  painted by asseterizer; roads joining 95% of the villages, drawn smooth with the rest of the real world, with a roadside by biome. The
   shape is decision record 0117 and an amendment to 0115; thirteen steps in
   `docs/plans/houses-bridges-and-road-render.md`, all built and waiting on Adam's eye, the bridge's paintings waiting
   for him to pick in asseterizer. Asked for by Adam on 2026-10-21.
