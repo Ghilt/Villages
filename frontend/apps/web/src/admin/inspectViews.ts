@@ -129,6 +129,15 @@ export const INSPECT_VIEWS: readonly InspectView[] = [
     catalogue: 'fate',
   },
   {
+    path: '/admin/inspect-die',
+    title: 'Die',
+    section: 'look',
+    mark: 'die',
+    what: "The choice roll's die on the map: picked up from its podium, dropped or thrown, its feel on sliders. The spike of docs/plans/choice-roll-podium.md.",
+    needs: "nothing but this tree's world",
+    load: () => import('./die/InspectDie').then((page) => page.InspectDie),
+  },
+  {
     path: '/admin/inspect-character-names',
     title: 'Character names',
     section: 'content',

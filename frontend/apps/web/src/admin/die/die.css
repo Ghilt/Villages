@@ -1,0 +1,268 @@
+/*
+ * The die's spike page (InspectDie.tsx): the map in a box with the die's canvas over it and the podium standing at
+ * its foot, and the sliders beside it on a wide screen or under it on a phone.
+ */
+
+.die-spike {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  margin-top: 0.75rem;
+}
+
+@media (min-width: 1100px) {
+  .die-spike {
+    grid-template-columns: minmax(0, 1fr) 22rem;
+  }
+}
+
+.die-spike__map {
+  position: relative;
+  height: min(78vh, 860px);
+  min-height: 420px;
+  overflow: hidden;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 4px;
+  background: #93aebc;
+}
+
+@media (max-width: 600px) {
+  .die-spike__map {
+    height: 64vh;
+  }
+}
+
+.die-spike__map .map {
+  position: absolute;
+  inset: 0;
+}
+
+.die-spike__stage {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.die-stage__canvas {
+  display: block;
+}
+
+.die-spike__camera {
+  position: absolute;
+  top: 0.4rem;
+  left: 0.4rem;
+  margin: 0;
+  padding: 0.1rem 0.4rem;
+  background: rgb(250 246 236 / 85%);
+  border-radius: 2px;
+}
+
+/* The podium: a recess the die stands in, on a plinth, over the words. */
+.die-podium {
+  position: absolute;
+  bottom: 0.6rem;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%);
+}
+
+.die-podium__slot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, #7d705d, #4a4033 70%);
+  box-shadow: inset 0 3px 6px rgb(0 0 0 / 50%);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.die-podium__slot.is-empty {
+  cursor: default;
+  outline: 2px dashed rgb(246 215 122 / 60%);
+  outline-offset: -8px;
+}
+
+.die-podium__slot:focus-visible {
+  outline: 2px solid #f6d77a;
+  outline-offset: 2px;
+}
+
+.die-podium__fill {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.die-podium__fill circle {
+  fill: none;
+  stroke: #f6d77a;
+  stroke-width: 4;
+  stroke-dasharray: 183;
+  stroke-dashoffset: 183;
+}
+
+.die-podium__slot.is-pressing .die-podium__fill circle {
+  animation: die-podium-fill 380ms linear forwards;
+}
+
+@keyframes die-podium-fill {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.die-podium__die {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  background: #efe4c8;
+  box-shadow:
+    0 0 0 1.5px #2b1d12,
+    0 3px 0 1.5px #2b1d12;
+}
+
+.die-podium__slot.is-pressing .die-podium__die {
+  transform: translateY(-2px) scale(1.06);
+  transition: transform 380ms ease-out;
+}
+
+.die-podium__pip {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: #2a1d14;
+}
+
+.die-podium__pip--0 {
+  top: 25%;
+  left: 25%;
+}
+.die-podium__pip--1 {
+  top: 25%;
+  left: 75%;
+}
+.die-podium__pip--2 {
+  top: 50%;
+  left: 50%;
+}
+.die-podium__pip--3 {
+  top: 75%;
+  left: 25%;
+}
+.die-podium__pip--4 {
+  top: 75%;
+  left: 75%;
+}
+
+.die-podium__plinth {
+  width: 86px;
+  height: 14px;
+  margin-top: -6px;
+  background: linear-gradient(#8a7c66, #5e5242);
+  clip-path: polygon(10% 0, 90% 0, 100% 100%, 0 100%);
+}
+
+.die-podium__words {
+  padding: 0.1rem 0.5rem;
+  margin-top: 0.15rem;
+  background: rgb(250 246 236 / 90%);
+  border-radius: 2px;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* The sliders. */
+.die-controls fieldset {
+  margin: 0 0 0.8rem;
+  padding: 0.5rem 0.7rem 0.6rem;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 4px;
+}
+
+.die-controls legend {
+  padding: 0 0.3rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+}
+
+.die-controls__rested {
+  min-height: 2.6em;
+  margin: 0 0 0.6rem;
+}
+
+.die-controls__range {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 7rem 3.2rem;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.2rem 0;
+  font-size: 0.78rem;
+}
+
+.die-controls__range input {
+  width: 100%;
+}
+
+.die-controls__range output {
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  text-align: right;
+}
+
+.die-controls__choice {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 11rem;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.3rem 0;
+  font-size: 0.78rem;
+}
+
+.die-controls__choice select {
+  max-width: 100%;
+}
+
+.die-controls__check {
+  display: flex;
+  gap: 0.4rem;
+  align-items: baseline;
+  margin: 0.4rem 0;
+  font-size: 0.78rem;
+}
+
+.die-controls__button {
+  padding: 0.25rem 0.6rem;
+  margin: 0.2rem 0.4rem 0.2rem 0;
+  border: 1px solid var(--parchment-edge);
+  border-radius: 3px;
+  background: #fffaf0;
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .die-controls__range {
+    grid-template-columns: minmax(0, 1fr) 6rem 3rem;
+  }
+
+  .die-controls__choice {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
