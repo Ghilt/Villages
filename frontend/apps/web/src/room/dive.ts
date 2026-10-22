@@ -16,9 +16,9 @@ import { pixelsPerWorldUnit } from '../geometry/cameraMath';
  * frames and a snapshot would mean `preserveDrawingBuffer` on every frame the game ever draws for the
  * sake of two seconds of it.
  *
- * It runs on a rail. The wheel starts it and then has nothing more to say until it is over: a passage is
- * a thing that finishes, and half a passage is a place nobody should be able to stand. See experiment
- * 0009.
+ * It runs on a rail: a passage is a thing that finishes, and half a passage is a place nobody should be able
+ * to stand. The wheel can only turn it round. A dive started by accident is undone by scrolling back the way
+ * you came, from wherever it has got to, rather than sat through and then walked back. See experiment 0009.
  */
 
 export interface Point {
@@ -53,14 +53,14 @@ const HOUSE_GROUND_HEIGHT = 8;
 const ROOM_IN_THE_KEEP = 18;
 
 /**
- * How long the passage takes.
+ * How long the passage takes, the whole way in or out.
  *
- * Halved from the 1700 it was first tried at. A second and three quarters was long enough to be read as a
- * journey and long enough to be waited for, and a passage that has to be sat through twice is a passage
- * nobody takes twice. The wheel is taken away for the whole of it, which is the thing this number really
- * buys and the reason it wants to be as short as it can be while still being a going-somewhere.
+ * A third of the 1700 it was first tried at. A second and three quarters was long enough to be read as a
+ * journey and long enough to be waited for, and halving it to 850 still left a passage to sit through: a
+ * passage that has to be sat through twice is a passage nobody takes twice. Made half again as fast at
+ * Adam's word of 2026-10-22, in the same change that let the wheel turn it round.
  */
-export const DIVE_MS = 850;
+export const DIVE_MS = 567;
 
 /** How near the middle of the window the castle has to be for the way in to be there at all. */
 const NEAR_ENOUGH = 0.35;
@@ -101,6 +101,15 @@ export function keepAbove(foot: Point, zoom: number): Point {
 export function overTheHolding(foot: Point, viewport: Viewport): boolean {
   const reach = Math.min(viewport.width, viewport.height) * NEAR_ENOUGH;
   return Math.hypot(foot.x - viewport.width / 2, foot.y - viewport.height / 2) <= reach;
+}
+
+/**
+ * Where the rail has got to, a time after a leg of it began: one whole passage per `DIVE_MS`, up going in and
+ * down coming out, and never past either end. A dive turned round starts a new leg from where it was.
+ */
+export function railFrom(from: number, going: Going, elapsedMs: number): number {
+  const gone = Math.max(0, elapsedMs) / DIVE_MS;
+  return clamp(going === 'in' ? from + gone : from - gone, 0, 1);
 }
 
 /** How much larger everything gets: enough to take the room from inside the keep to the whole window. */

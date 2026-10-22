@@ -5,7 +5,16 @@ import { floorZoom } from '../map/sheet';
 import type { Viewport } from '../map/sheet';
 import { worldSize } from '../geometry/cameraMath';
 
-import { roomAtTurn, roomOnScreen, scaleFor, sheetAtFloor, spanOf, turnsAt, wheelZooms } from './roomBox';
+import {
+  atTheEnd,
+  roomAtTurn,
+  roomOnScreen,
+  scaleFor,
+  sheetAtFloor,
+  spanOf,
+  turnsAt,
+  wheelZooms,
+} from './roomBox';
 
 const STAGES: Viewport[] = [
   { width: 1600, height: 900 },
@@ -116,5 +125,18 @@ describe('a wheel', () => {
 
   it('never moves more than one zoom level at once', () => {
     expect(wheelZooms(100000, 0)).toBeLessThanOrEqual(1);
+  });
+});
+
+describe('the end of the zoom', () => {
+  it("is reached a hair short of it, where MapLibre's wheel leaves the zoom creeping while it keeps turning", () => {
+    expect(atTheEnd(10, 10)).toBe(true);
+    expect(atTheEnd(9.97, 10)).toBe(true);
+    expect(atTheEnd(-0.15, -0.186)).toBe(true);
+  });
+
+  it('is not reached a notch short of it, so a wheel there still zooms the map', () => {
+    expect(atTheEnd(9.85, 10)).toBe(false);
+    expect(atTheEnd(0, -0.186)).toBe(false);
   });
 });

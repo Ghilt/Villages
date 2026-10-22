@@ -80,11 +80,13 @@ right before deciding what the world should know about it.
 - **Whether the passage is the right length**, and whether taking the wheel away for it is tolerable or
   merely tolerated. It is `DIVE_MS`, and it has been halved once already: a second and three quarters was
   long enough to be read as a journey and long enough to be waited for, and a passage that has to be sat
-  through twice is a passage nobody takes twice. It is 850 milliseconds now.
+  through twice is a passage nobody takes twice. It is 850 milliseconds now. Answered in the second round: it was too
+  long, and taking the wheel away was not tolerable. It is 567 milliseconds now, and the wheel turns it round.
 - **Whether the hold on the way out still earns its place.** The rail waits at its far end for `idle` or
   900 milliseconds before it starts, so that the seat's ground is painted before it can be seen - and that
   cap is now longer than the passage it guards. Main has since given the map a coarse copy of the ground
-  so that somewhere new is never empty, which may have made the hold unnecessary rather than merely long.
+  so that somewhere new is never empty, which may have made the hold unnecessary rather than merely long. Answered in
+  the second round: it went, because it was felt as a stop before the passage rather than as a wait for anything.
 - **Whether the room is far enough.** It is a journey of 1.96 zoom levels on a 1088 by 900 pane, which is
   shorter than the map's own range by a lot. If it arrives too quickly the numbers are `ROOM_IN_DESKS` and
   `ROOM_FILLS`; if the map is an unreadable smudge before the room is in view, they are the other way.
@@ -146,6 +148,32 @@ loop ran and came out on the seat.
 **Frames could not be read here**, for the reason experiment 0003 gave: the pane pauses animation frames
 whenever it is hidden, which is between every action, so an eased pull only advances when a screenshot
 pumps a frame. Every number above is a geometry or a log line, and none of them is a timing.
+
+### Second round, 2026-10-22: quicker, with no stop, and the wheel can turn it round
+
+Adam, from his own browser: going into the castle "is not such a nice experience". The dive wanted to be half
+again as fast, there was "a little stop before the transition plays", and a dive started by accident could
+only be sat through and walked back. Three changes, each to what he named.
+
+**The stop was MapLibre's wheel, and it was there at both ends.** The dive started only when the zoom was within
+a millionth of zoom 10. MapLibre's wheel (`scroll_zoom.ts`, from line 313 in 6.6) restarts its 200 millisecond
+ease *from the zoom it is at now* on every wheel event, so while the wheel keeps turning the zoom creeps towards a
+clamped end and lands on it only once the wheel has been still for a fifth of a second. A player scrolling on saw
+the picture stop just short of zoom 10 and nothing happen until they paused and scrolled again. The pull at the
+floor had the same seam, which the first round called a tick of hesitation. Both ends now count as reached within
+a twentieth of a zoom level, a scale of three and a half per cent, and whatever MapLibre was still easing towards
+is stopped where it is so that it does not creep on under the picture. `atTheEnd` in `roomBox.ts`.
+
+**The rail takes a third of the time it was first tried at**: 567 milliseconds, from 850 and before that 1700. The
+hold on the way out went with it. The rail now starts at once in both directions, and the first fifth of the way
+out is the picture coming up under the room in any case.
+
+**The wheel can turn a passage round.** A wheel against the way it is going turns it round from wherever it has
+got to, and a wheel with it is still swallowed. Turned round on the way in, it comes back out to the map at the
+zoom it left, which is zoom 10 within a hair; turned round on the way out, it goes back into the room it left,
+on the camera it was seen from rather than on the world's centre, which is where a dive in from the castle lands.
+Each turn is a `room` note in the debug panel. A passage is still a thing that finishes, and nobody can stand
+half way: what changed is that the one who started it can take it back.
 
 ## Result
 

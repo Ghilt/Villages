@@ -419,9 +419,10 @@ less, so it reads as the world settling rather than as an animation. See decisio
 
 The one thing longer than that is the **dive**, which is not a thing on the map settling but a passage
 between two places: the camera holds still over your own castle and the whole picture is scaled up into
-the sprite's own pixels until the room inside them is the window. It takes a second and three quarters and
-it runs on a rail, so the wheel has nothing to say while it is happening. Whether an interface whose rule
-is that nothing pops is allowed one thing that takes over is part of what experiment 0009 is asking.
+the sprite's own pixels until the room inside them is the window. It takes a little over half a second and
+it runs on a rail, so nobody is left standing half way, but the wheel can turn it round: scrolling back the way
+you came takes you back from wherever it has got to. Whether an interface whose rule is that nothing pops is
+allowed one thing that takes over is part of what experiment 0009 is asking.
 
 **The marks.** Every pane declares the mark it is known by, drawn in one place so that the same thing on a
 tab, in a list and wherever a pane is named later cannot drift apart. A **link** out of an inspect

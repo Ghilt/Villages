@@ -3,10 +3,12 @@ import { describe, expect, it } from 'vitest';
 import type { Viewport } from '../map/sheet';
 
 import {
+  DIVE_MS,
   castleHeight,
   keepAbove,
   keepAt,
   overTheHolding,
+  railFrom,
   roomAt,
   scaleAt,
   sceneAt,
@@ -135,5 +137,26 @@ describe('the passage', () => {
     expect(solidAt(0.05)).toBeLessThan(0.3);
     expect(solidAt(0.25)).toBe(1);
     expect(solidAt(1)).toBe(1);
+  });
+});
+
+describe('the rail', () => {
+  it('runs the whole way in a little over half a second, half again as fast as it was', () => {
+    expect(DIVE_MS).toBeCloseTo(850 / 1.5, 0);
+    expect(railFrom(0, 'in', DIVE_MS)).toBe(1);
+    expect(railFrom(1, 'out', DIVE_MS)).toBe(0);
+    expect(railFrom(0, 'in', DIVE_MS / 2)).toBeCloseTo(0.5);
+  });
+
+  it('turns round from wherever it has got to, and goes back from there', () => {
+    const halfway = railFrom(0, 'in', DIVE_MS * 0.3);
+    expect(railFrom(halfway, 'out', DIVE_MS * 0.1)).toBeCloseTo(0.2);
+    expect(railFrom(halfway, 'out', DIVE_MS)).toBe(0);
+  });
+
+  it('never runs past either end, nor backwards in time', () => {
+    expect(railFrom(0.9, 'in', DIVE_MS)).toBe(1);
+    expect(railFrom(0.1, 'out', DIVE_MS)).toBe(0);
+    expect(railFrom(0.4, 'in', -50)).toBeCloseTo(0.4);
   });
 });

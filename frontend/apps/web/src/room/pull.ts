@@ -10,9 +10,9 @@ import { flatPoint, flatWindow, floorZoom, sheetOnScreen } from '../map/sheet';
 import type { Viewport } from '../map/sheet';
 import { easeTowards } from '../sprites/twoForms';
 
-import { DIVE_MS, keepAbove, overTheHolding, spanTo } from './dive';
+import { keepAbove, overTheHolding, railFrom, spanTo } from './dive';
 import type { Dive, Going } from './dive';
-import { roomAtTurn, roomOnScreen, sheetAtFloor, spanOf, turnsAt, wheelZooms } from './roomBox';
+import { atTheEnd, roomAtTurn, roomOnScreen, sheetAtFloor, spanOf, turnsAt, wheelZooms } from './roomBox';
 import { worldStill } from '../motion/motion';
 
 /**
@@ -25,7 +25,7 @@ import { worldStill } from '../motion/motion';
  *
  * The dive is how the loop turns over, and it turns over inside your own castle. See `dive.ts`. It runs on
  * a rail rather than on the wheel, because a passage is a thing that finishes and half a passage is a
- * place nobody should be able to stand.
+ * place nobody should be able to stand; the wheel can only turn it round.
  *
  * A store, the same shape as the eye and the debug log, read through `useStore`. See experiment 0009.
  */
@@ -37,17 +37,11 @@ export interface PullState {
   dive: Dive | null;
 }
 
-/** How close to the end of the zoom counts as being at it. MapLibre's ease lands by adding a delta. */
-const AT_THE_END = 1e-6;
-
 /** How long the drawn pull takes to catch what the wheel asked for. MapLibre's own wheel ease is 200. */
 const SETTLE_MS = 180;
 
 /** A frame longer than this is a tab that was not being drawn, not a slow machine. */
 const LONGEST_STEP_MS = 50;
-
-/** How long the way out waits, under a room that covers the window, for the ground to be painted. */
-const WAIT_MS = 900;
 
 const still: PullState = { amount: 0, dive: null };
 
@@ -115,11 +109,18 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
 
   // ---- the dive -------------------------------------------------------------------------------------
 
+  /**
+   * The camera the room is seen from, which a dive going in lands on. The world's centre at the floor, as the
+   * room coming in through the castle is drawn; but a dive that set out from the room and was turned round
+   * goes back to the camera it left, or the room would land somewhere other than where it was showing.
+   */
+  let roomCamera: { center: [number, number]; zoom: number } | null = null;
+
   /** Where the dive leaves you. Going in, that is the room; coming out, the map at your own seat. */
   const land = (going: Going): void => {
     if (going === 'in') {
       ours = true;
-      map.jumpTo({ center: [0, 0], zoom: floorZoom(viewport()) });
+      map.jumpTo(roomCamera ?? { center: [0, 0], zoom: floorZoom(viewport()) });
       ours = false;
       wanted = 1;
       settle({ amount: 1, dive: null });
@@ -127,45 +128,57 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
       wanted = 0;
       settle({ amount: 0, dive: null });
     }
+    roomCamera = null;
   };
 
   let railing: number | null = null;
+  /** Where the leg of the rail now running began, and when. Turning a dive round begins a new leg. */
+  let leg = { from: 0, at: 0 };
 
-  const rail = (going: Going, from: number, at: number): void => {
+  const rail = (): void => {
     railing = null;
-    const now = performance.now();
-    const gone = (now - at) / DIVE_MS;
-    const progress = going === 'in' ? Math.min(1, from + gone) : Math.max(0, from - gone);
     const dive = store.get().dive;
     if (dive === null) {
       return;
     }
+    const progress = railFrom(leg.from, dive.going, performance.now() - leg.at);
     settle({ ...store.get(), dive: { ...dive, progress } });
-    if (going === 'in' ? progress >= 1 : progress <= 0) {
-      land(going);
+    if (dive.going === 'in' ? progress >= 1 : progress <= 0) {
+      land(dive.going);
       return;
     }
-    railing = requestAnimationFrame(() => rail(going, from, at));
+    railing = requestAnimationFrame(rail);
+  };
+
+  const run = (from: number): void => {
+    leg = { from, at: performance.now() };
+    railing ??= requestAnimationFrame(rail);
   };
 
   /**
-   * Starts a passage. Going in, the picture is already on the screen and it begins at once; coming out,
-   * the camera has to be put on the seat first and the ground there has never been painted, so it holds
-   * under a room that covers the whole window until the tiles have arrived.
+   * Starts a passage, at once and both ways. Coming out it used to hold under the room until the ground
+   * at the seat was painted, for up to 900 milliseconds, which was felt as a stop before the passage rather
+   * than as a wait for anything; the map has a coarse copy of the ground everywhere now, and the first fifth
+   * of the way out is the picture coming up under the room in any case.
    */
   const dive = (going: Going, seat: { lat: number; lon: number }): void => {
     const view = viewport();
     const end = roomAtTurn(going === 'in' ? sheetAtFloor(view) : sheetOnScreen(seen(map)), view);
 
+    // Whatever MapLibre's wheel was still easing towards stops where it is, rather than creeping on under a
+    // picture of itself.
+    ours = true;
+    map.stop();
+    if (going === 'out') {
+      const centre = map.getCenter();
+      roomCamera = { center: [centre.lng, centre.lat], zoom: map.getZoom() };
+      map.jumpTo({ center: [seat.lon, seat.lat], zoom: CAMERA.maxZoom });
+    }
+    ours = false;
+
     if (calm()) {
       land(going);
       return;
-    }
-
-    if (going === 'out') {
-      ours = true;
-      map.jumpTo({ center: [seat.lon, seat.lat], zoom: CAMERA.maxZoom });
-      ours = false;
     }
 
     const foot = map.project([seat.lon, seat.lat]);
@@ -173,8 +186,9 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
       going,
       progress: going === 'in' ? 0 : 1,
       // Worked out on the real window, where the castle stands upright, and then carried into the flat
-      // one, where the dive's arithmetic is done.
-      keep: flatPoint(keepAbove({ x: foot.x, y: foot.y }, CAMERA.maxZoom), map.getPitch()),
+      // one, where the dive's arithmetic is done. At the zoom the wheel left the map at, which is within a
+      // hair of the closest, so that nothing moves on the first frame.
+      keep: flatPoint(keepAbove({ x: foot.x, y: foot.y }, map.getZoom()), map.getPitch()),
       span: spanTo(end),
       end,
     };
@@ -186,19 +200,18 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
         ? `in through your own castle at ${seat.lat.toFixed(3)}, ${seat.lon.toFixed(3)}: ${started.span.toFixed(0)} times into its pixels`
         : `out through your own castle at ${seat.lat.toFixed(3)}, ${seat.lon.toFixed(3)}`,
     );
+    run(started.progress);
+  };
 
-    const go = () => {
-      if (store.get().dive === null || railing !== null) {
-        return;
-      }
-      railing = requestAnimationFrame(() => rail(going, started.progress, performance.now()));
-    };
-    if (going === 'in') {
-      go();
-    } else {
-      map.once('idle', go);
-      globalThis.setTimeout(go, WAIT_MS);
+  /** Turns a passage round from wherever it has got to, which is the wheel's one say while one is running. */
+  const turn = (going: Going): void => {
+    const running = store.get().dive;
+    if (running === null || running.going === going) {
+      return;
     }
+    settle({ ...store.get(), dive: { ...running, going } });
+    run(running.progress);
+    note('room', going === 'in' ? 'turned back: into the room again' : 'turned back: out to the map again');
   };
 
   const stopRail = (): void => {
@@ -258,11 +271,15 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
       return;
     }
 
-    // On the rail the wheel has nothing to say. It is swallowed rather than handed back, because handing
-    // it back would zoom a map that is under a picture of itself.
+    // On the rail the wheel has one thing to say, which is which way: against the passage it turns it round,
+    // and with it there is nothing to add. It is swallowed rather than handed back either way, because
+    // handing it back would zoom a map that is under a picture of itself.
     if (store.get().dive !== null) {
       event.preventDefault();
       event.stopPropagation();
+      if (event.deltaY !== 0) {
+        turn(event.deltaY > 0 ? 'out' : 'in');
+      }
       return;
     }
 
@@ -271,12 +288,15 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
     const view = viewport();
 
     if (store.get().amount === 0 && wanted === 0) {
-      if (out && zoom <= floorZoom(view) + AT_THE_END) {
-        // One wheel is spent settling MapLibre's own ease on to the floor before the next one starts the
-        // pull, which is the one seam in this and is felt as a tick of hesitation rather than as a stop.
+      if (out && atTheEnd(zoom, floorZoom(view))) {
+        // The pull starts with this wheel, not the first one after the map has landed on its floor, and
+        // MapLibre's own ease is stopped a hair above the floor rather than left to creep on under the pull.
+        ours = true;
+        map.stop();
+        ours = false;
         said = false;
         note('room', `off the desk: ${span().toFixed(2)} zoom levels of pull to the turn`);
-      } else if (!out && zoom >= CAMERA.maxZoom - AT_THE_END) {
+      } else if (event.deltaY < 0 && atTheEnd(zoom, CAMERA.maxZoom)) {
         // The way in is through your own house, so it is only there when that is what you are looking at.
         const seat = seatNow();
         const foot = seat === null ? null : map.project([seat.lon, seat.lat]);

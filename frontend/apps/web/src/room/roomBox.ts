@@ -34,7 +34,22 @@ const WHEEL_ZOOM_RATE = 1 / 450;
 const WHEEL_ZOOM_DELTA = 4.000244140625;
 const MOST_SCALE_PER_EVENT = 2;
 
+/**
+ * How near the end of the map's zoom counts as at it, in zoom levels: a scale of three and a half per cent.
+ *
+ * MapLibre's wheel restarts its ease from wherever the zoom is on every wheel event, so while the wheel keeps
+ * turning the zoom creeps towards a clamped end and does not land on it until the wheel has been still for a
+ * fifth of a second. Asking for the end itself made the picture stop just short of it and the passage wait
+ * for a pause that a player scrolling on does not make. Experiment 0009, second round.
+ */
+const NEAR_THE_END = 0.05;
+
 const clamp = (value: number, least: number, most: number): number => Math.min(most, Math.max(least, value));
+
+/** Whether the map's zoom is at one end of its range for the wheel's purposes: the floor, or the closest. */
+export function atTheEnd(zoom: number, end: number): boolean {
+  return Math.abs(zoom - end) <= NEAR_THE_END;
+}
 
 /**
  * The sheet as it will be once the camera is at its floor with the world under the middle of the window.

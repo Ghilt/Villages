@@ -10,7 +10,7 @@ import { drawnAt, drawnPoint, flatWindow, floorZoom, sheetOnScreen } from '../ma
 import { lightAt, roomAt, sceneAt, solidAt } from './dive';
 import { pullStore, attachPull } from './pull';
 import { BEYOND, roomFloor } from './roomArt';
-import { roomOnScreen, scaleFor, turnsAt } from './roomBox';
+import { atTheEnd, roomOnScreen, scaleFor, turnsAt } from './roomBox';
 import { useStore } from '../store/useStore';
 
 interface RoomProps {
@@ -131,7 +131,7 @@ export function Room({ map, seat, strip, children }: RoomProps) {
     // Only while the pull is on and the camera is still pinned at its floor. A dive moves the camera, and
     // the move it fires runs this before React has heard, so without the second half of the guard leaving
     // the room would report itself as the desk closing over the view.
-    const pinned = map.getZoom() <= floorZoom(viewport) + 1e-6;
+    const pinned = atTheEnd(map.getZoom(), floorZoom(viewport));
     if (openWas.current !== undefined && openWas.current !== open && pulled && pinned) {
       note('room', open ? 'the desk has edges, and the room is around it' : 'the desk covers the view again');
     }
