@@ -337,6 +337,16 @@ const DRAWN = {
       <path d="M14.4 14.4 L19 19" className="ui-mark__line" />
     </>
   ),
+  // The choice roll's die, seen face on, showing three: corner to corner, so it is not read as a dot or a button. A
+  // drawn placeholder until a picture is painted for it; see docs/plans/choice-roll-podium.md.
+  die: (
+    <>
+      <rect x="4.5" y="4.5" width="15" height="15" rx="3.25" className="ui-mark__line" />
+      <circle cx="8.75" cy="8.75" r="1.35" className="ui-mark__fill" />
+      <circle cx="12" cy="12" r="1.35" className="ui-mark__fill" />
+      <circle cx="15.25" cy="15.25" r="1.35" className="ui-mark__fill" />
+    </>
+  ),
   ...CHALLENGE_MARKS,
 } satisfies Record<string, ReactNode>;
 
