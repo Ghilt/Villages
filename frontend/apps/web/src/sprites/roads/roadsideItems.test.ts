@@ -45,6 +45,17 @@ describe('the roadside', () => {
     expect(roadsideAlong([road], widths, 1, shut)).toEqual([]);
   });
 
+  it('grows in clumps: stretches bare, stretches full, and stretches of patches with gaps between', () => {
+    const long = { ...road, bx: 1600 };
+    const growth = roadsideAlong([long], widths, 1, everywhere('temperate')).filter((item) => 'kind' in item);
+    const windows = new Array<number>(100).fill(0);
+    for (const item of growth) windows[Math.min(99, Math.floor((item.x - 1000) / 6))]! += 1;
+    const share = (pick: (count: number) => boolean) => windows.filter(pick).length / windows.length;
+    expect(share((count) => count === 0)).toBeGreaterThan(0.15);
+    expect(share((count) => count >= 15)).toBeGreaterThan(0.1);
+    expect(share((count) => count > 0 && count < 12)).toBeGreaterThan(0.1);
+  });
+
   it('is the same every time, so every page lays the same roadside', () => {
     const one = roadsideAlong([road], widths, 1, everywhere('temperate'));
     const other = roadsideAlong([{ ...road }], widths, 1, everywhere('temperate'));

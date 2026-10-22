@@ -585,7 +585,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   not drawn: no tree grows on it, so a road through a forest is a clear way. Along both sides of a road, from 7.5 in,
   stands its **roadside**, chosen by the biome under it (`packages/world/src/roadsideLooks.ts`): stubs of dry-stone
   wall laid end to end in runs where the biome builds walls, mossy where it is green and wet and bare where it is dry,
-  and the scenery's own small growth - grass, ferns, heather, scrub, boulders, cacti - smaller than in the open, never
+  and the scenery's own small growth - grass, ferns, heather, scrub, boulders, cacti - smaller than in the open, in
+  clumps, a stretch bare, a stretch full of it and a stretch of it in patches with gaps between, never
   in a settlement, on water or on another road. The log says under `roads` how many stretches and how many things of
   the roadside are drawn, and the probe `villagesRoads()` too. Where a road crosses a river it does so on a bridge,
   its picture by the way it runs from `public/art/settlements.webp`, hung at its deck's middle and stretched along its

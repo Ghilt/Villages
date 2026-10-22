@@ -198,8 +198,8 @@ bogs, and coming into a village down its street. **A river is crossed only on a 
 of three arches everywhere, laid straight along one of eight ways - the ground's axes, its diagonals and the four
 between - so it meets its road head on, and as long as the river is wide; along its sides the roadside fits the country it
 crosses - low dry-stone walls green with moss in the wet west, bare and pale round the Mediterranean, in runs and
-never everywhere, and between them tufts of grass, ferns, heather or scrub, boulders, a cactus at the desert's edge; a road stops
-where the house's revealed ground stops,
+never everywhere, and between them tufts of grass, ferns, heather or scrub, boulders, a cactus at the desert's edge, in
+clumps - a stretch bare, a stretch full, a stretch in patches; a road stops where the house's revealed ground stops,
 and it is the real world, coming in with the trees and the buildings and never drawn further out than they are. Every picture of a village, a boat and a bridge is a placeholder until
 asseterizer paints it. See decision records 0114 and 0115 and `docs/plans/settlements-and-roads.md`.
 

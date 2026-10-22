@@ -13,7 +13,8 @@ import type { HeldPiece } from '../ground/roads';
 
 /*
  * Where the roadside stands: along both sides of every piece of road, just past its band, stubs of dry-stone wall laid
- * end to end in runs where the biome builds walls, and the biome's own small growth between them. Everything is worked
+ * end to end in runs where the biome builds walls, and the biome's own small growth between them, in clumps: a stretch
+ * bare, a stretch full of it, a stretch of it in patches with gaps between (`growthChance`). Everything is worked
  * out from the piece and the place, by a seed of where it falls, so every page lays the same roadside and the fog
  * lifting never moves it. Only on ground the road keeps clear for it - never in a settlement, on water or on another
  * road - and only where the house has revealed the ground. See docs/plans/houses-bridges-and-road-render.md.
@@ -26,9 +27,18 @@ export type RoadsideItem =
 
 /** How far past a road's band its roadside stands, in world units. */
 const GAP = 0.32;
-/** How far apart the growth stands along a road, and how likely each place is to have any. */
-const GROWTH_STEP = 0.7;
-const GROWTH_CHANCE = 0.6;
+/** How far apart the growth may stand along a road. */
+const GROWTH_STEP = 0.5;
+/**
+ * How long a stretch of the roadside's growth runs, in world units, and where the noise along it makes one bare, full
+ * or spotty: under `BARE` none, over `FULL` nearly every place, and between, patches about `PATCH` units across.
+ */
+const STRETCH = 9;
+const BARE = 0.42;
+const FULL = 0.6;
+const PATCH = 1.6;
+const FULL_CHANCE = 0.9;
+const PATCH_CHANCE = 0.8;
 /** How much of a stub's length the next starts at, so stubs laid end to end leave no gap. */
 const OVERLAP = 0.9;
 /** How far a run of wall reaches, in world units: the scale of the noise that says where a road is walled. */
@@ -63,17 +73,25 @@ export function seedAt(x: number, y: number, salt: number): number {
   return ((hash ^ (hash >>> 12)) >>> 0) / 4294967296;
 }
 
-/** A smooth noise over the ground, nought to one, varying over `RUN` units: where a road runs walled and where not. */
-function runAt(x: number, y: number): number {
-  const fx = x / RUN;
-  const fy = y / RUN;
+/** A smooth noise over the ground, nought to one, varying over `across` units, one of its own for each salt. */
+function smoothAt(x: number, y: number, across: number, salt: number): number {
+  const fx = x / across;
+  const fy = y / across;
   const [x0, y0] = [Math.floor(fx), Math.floor(fy)];
   const [tx, ty] = [fx - x0, fy - y0];
   const [sx, sy] = [tx * tx * (3 - 2 * tx), ty * ty * (3 - 2 * ty)];
-  const corner = (cx: number, cy: number) => seedAt(cx, cy, 77);
+  const corner = (cx: number, cy: number) => seedAt(cx, cy, salt);
   const top = corner(x0, y0) * (1 - sx) + corner(x0 + 1, y0) * sx;
   const bottom = corner(x0, y0 + 1) * (1 - sx) + corner(x0 + 1, y0 + 1) * sx;
   return top * (1 - sy) + bottom * sy;
+}
+
+/** How likely a place beside a road is to have growth: none on a bare stretch, most on a full one, in patches between. */
+export function growthChance(x: number, y: number): number {
+  const stretch = smoothAt(x, y, STRETCH, 91);
+  if (stretch < BARE) return 0;
+  if (stretch > FULL) return FULL_CHANCE;
+  return smoothAt(x, y, PATCH, 93) > 0.55 ? PATCH_CHANCE : 0;
 }
 
 /** The one of a biome's growth a roll picks, by its weights. */
@@ -123,7 +141,8 @@ export function roadsideAlong(
         const x = piece.ax + ux * along + nx * offset;
         const y = piece.ay + uy * along + ny * offset;
         const look = roadsideOf(ground.biome(x, y));
-        if (look.wall === null || runAt(x, y) >= look.walled) continue;
+        // Where a road runs walled: a noise over `RUN` units.
+        if (look.wall === null || smoothAt(x, y, RUN, 77) >= look.walled) continue;
         if (!ground.clear(x, y) || ground.onRoad(x, y)) continue;
         items.push({ x, y, wall: look.wall, way });
         walled.push(along);
@@ -132,7 +151,7 @@ export function roadsideAlong(
       for (let along = GROWTH_STEP / 2; along < long; along += GROWTH_STEP) {
         const at = piece.ax + ux * along;
         const atY = piece.ay + uy * along;
-        if (seedAt(at, atY, 11 + side) > GROWTH_CHANCE) continue;
+        if (seedAt(at, atY, 11 + side) >= growthChance(at, atY)) continue;
         const beside = walled.some((stub) => Math.abs(stub - along) < WALL_LENGTH / 2);
         const out = offset + (beside ? 0.28 : 0) + (seedAt(at, atY, 13 + side) - 0.5) * 0.3;
         const x = at + nx * out + ux * (seedAt(at, atY, 17) - 0.5) * 0.3;
