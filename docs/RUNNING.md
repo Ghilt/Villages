@@ -1025,10 +1025,13 @@ and `-- --drop` takes them off; by hand only.
 ## The inspect views
 
 - Every page beside the game is listed at **`/admin`** on this tree's dev server: what each is for, what it
-  needs running, and the game itself. Each of them has a way back to it at the top, and the debug panel's
-  World section links it. A new page beside the game is one entry in `apps/web/src/admin/inspectViews.ts`, its
-  `import()` with it, which is all `main.tsx` routes by, and it stands in the frame every page shares,
-  `admin/frame/InspectPage.tsx`: the bar with the page's name, what it keeps there, and the way back.
+  needs running, and the game itself, in four sections by what they are for - what the game is made of, the world
+  running, how it looks and feels, and how it is made - each card with its mark from the component library, and the
+  sections' names along the top going straight to one. Each page has a way back to it at the top, and the debug
+  panel's World section links it. A new page beside the game is one entry in `apps/web/src/admin/inspectViews.ts`,
+  its `import()`, its section and its mark with it, which is all `main.tsx` routes by, and it stands in the frame
+  every page shares, `admin/frame/InspectPage.tsx`: the bar with the page's name, what it keeps there, and the way
+  back.
 - **`/admin/inspect-events`** is every type of event the world can record, as `docs/EVENTS.md` lists them, and
   needs nothing else running: a group a stream, as the document groups them, side by side where they fit, each a
   list of the types by name alone, and a box that keeps only the types with a word in their name, their fields or

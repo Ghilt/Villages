@@ -1,4 +1,52 @@
-/* The index of the pages beside the game, at /admin: a card for each, in the frame every inspect page stands in. */
+/*
+ * The index of the pages beside the game, at /admin: the sections' names along the top, then each section with a card
+ * for each of its pages, in the frame every inspect page stands in.
+ */
+
+.inspect-index__sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.4rem;
+  max-width: 64rem;
+  margin: 0 0 1.6rem;
+}
+
+.inspect-index__sections a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid var(--parchment-edge);
+}
+
+.inspect-index__sections a:hover,
+.inspect-index__sections a:focus-visible {
+  border-bottom-color: var(--ink-soft);
+}
+
+.inspect-index__section {
+  max-width: 64rem;
+  margin-bottom: 2rem;
+  scroll-margin-top: 1rem;
+}
+
+.inspect-index__title {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: normal;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.inspect-index__about {
+  margin: 0.25rem 0 0.8rem;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.inspect-index__head {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
 
 .inspect-index__list {
   display: grid;
