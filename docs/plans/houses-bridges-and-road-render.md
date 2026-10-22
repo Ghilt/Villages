@@ -160,6 +160,11 @@ map: it is a **renderer**, picked like Origin or Culture, showing every road at 
 renderer, from one picture of the world `world:roads` draws beside the server's files and only the dev server serves,
 since it says where every road is.
 
+Then Adam, on a road running straight up the screen across the ground's grid: roads follow the grid, in long
+straight runs along its two axes with rounded turns, a diagonal only where they must (decision record 0115 amended);
+and then, as they were awfully straight, straying here and there along each run - a shift kept to, a jog out and
+back, a moment's wriggle - some turns rounded wider.
+
 ## Risks
 
 - **The opening's time**: some fifty thousand raises where there were 7,674 in 78 s. Raised side by side, each

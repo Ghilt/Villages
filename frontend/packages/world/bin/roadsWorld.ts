@@ -204,7 +204,7 @@ const ordered = joins
 say(`${joins.length.toLocaleString()} joins between ${places.length.toLocaleString()} places`);
 
 const road = new Set<number>();
-const withRoads: CourseGround = { ...ground, road: (x, y) => road.has(unitKey(x, y)) };
+const withRoads: CourseGround = { ...ground, road: (u, v) => road.has(unitKey(u, v)) };
 const route = roadRouter(tiles, withRoads, rules, road);
 const courses: Course[] = [];
 const routed: Join[] = [];

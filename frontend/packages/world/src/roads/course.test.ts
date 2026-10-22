@@ -2,11 +2,21 @@ import { describe, expect, it } from 'vitest';
 
 import { BRIDGE_WAYS, WAY_STEPS } from '../bridgeModel.ts';
 import { GROUND_LATTICE, frameOf } from '../lattice.ts';
-import { BRIDGEABLE, RIVER, WATER, courseBetween, unitKey } from './course.ts';
+import { BRIDGEABLE, RIVER, WATER, courseBetween, unitKey, unitOf } from './course.ts';
 import type { Course, CourseGround, CourseRules, Point } from './course.ts';
 import { unitsAlong } from './line.ts';
 
-const RULES: CourseRules = { climb: 0.01, bridge: 2, bridgeAt: 4, longestSpan: 4, trunk: 0.5, margin: 12 };
+const RULES: CourseRules = {
+  climb: 0.01,
+  bridge: 2,
+  bridgeAt: 4,
+  longestSpan: 4,
+  trunk: 0.5,
+  margin: 12,
+  turn: 4,
+  diagonal: 2.5,
+  corridor: 6,
+};
 
 /** Ground from a picture of it: `.` land, `~` open water, `r` a river small enough to bridge, `R` one too big. */
 function groundOf(
@@ -126,6 +136,26 @@ describe("a road's course", () => {
     const shared = (course: Course) => course.units.filter((unit) => road.has(unit)).length;
     expect(shared(merged)).toBeGreaterThan(shared(alone) + 10);
     expect(shared(merged)).toBeGreaterThan(merged.units.length / 2);
+  });
+
+  it("runs along the lattice's axes, not across them, and turns seldom", () => {
+    // West to east is across the lattice, which is turned 26 degrees from the world's own grid.
+    const course = courseBetween(
+      [west],
+      [east],
+      groundOf(() => '.'),
+      RULES,
+    )!;
+    const steps = course.units.slice(1).map((unit, at) => {
+      const here = unitOf(course.units[at]!);
+      const there = unitOf(unit);
+      return [there.x - here.x, there.y - here.y] as const;
+    });
+    expect(steps.filter(([du, dv]) => du !== 0 && dv !== 0)).toEqual([]);
+    const turns = steps.filter(
+      (step, at) => at > 0 && (step[0] !== steps[at - 1]![0] || step[1] !== steps[at - 1]![1]),
+    );
+    expect(turns.length).toBeLessThanOrEqual(2);
   });
 
   it('is the same course however often it is walked', () => {

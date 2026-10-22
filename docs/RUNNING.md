@@ -863,12 +863,14 @@ and `-- --drop` takes them off; by hand only.
 - The roads of 1790: `npm run world:roads --prefix frontend` joins every settlement site to its neighbours and to the
   ruined towns near it, by `world/roads.json`: two places are joined when no third stands nearer both, no further
   apart than the longest road and never one ruin to another, each road the cheapest way over the zoom-7 tiles by
-  their ground and their climb, the cheaper along a road already there so roads merge, a river crossed only by a
+  their ground and their climb, stepping along the ground lattice's two axes - the grid the map is drawn on - every
+  turn costing `turn` steps so it keeps to long straight runs, and a step across the lattice's diagonal costing
+  `diagonal` so it is taken only where it must be; the cheaper along a road already there so roads merge, a river crossed only by a
   bridge straight along one of eight ways - the lattice's axes, its diagonals and the four between - into a
   settlement by its streets and into a ruin by its gates or past its outline, never over a square or a ruin's piece.
   Then every village with no other village in its network - none, or only a ruin - is joined to the nearest village
   it can reach out to `lonely.farKm`, the nearest few tried in turn. The roads are joined into one network, cut
-  into stretches between junctions, ends and bridges, each shaped once and graded a track, a road or a trunk by how
+  into stretches between junctions, ends and bridges, each shaped once, each turn rounded to `shape.turning`, some to the wider `shape.widerTurning`, and each straight run straying here and there, every `shape.strayEvery` or so - shifting across and keeping on beside its line a while, jogging out and back, wriggling a moment, or keeping straight - never more than `shape.stray` off its line and back onto it at its ends, so a road keeps to the grid and goes across it only as it turns and strays, and graded a track, a road or a trunk by how
   many roads use it, and written as pieces of the stands' eight bytes into `world/stands/<master>/roads/`, which only
   the game server reads, with how to read them in the master's `sprites/roads/map.json`. It prints how much road of
   each grade, the bridges on each way, the share of villages with a road to another village and why the rest have

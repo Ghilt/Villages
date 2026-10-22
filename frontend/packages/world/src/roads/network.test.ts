@@ -15,8 +15,14 @@ const RULES: NetworkRules = {
   longestSpan: 4,
   trunk: 0.5,
   margin: 12,
-  straightest: 6,
-  smoothing: 2,
+  turn: 4,
+  diagonal: 2.5,
+  corridor: 6,
+  turning: 2.5,
+  widerTurning: 5,
+  widerShare: 0.3,
+  stray: 1.2,
+  strayEvery: 6,
   grades: [2, 3],
   approach: 1.5,
 };
@@ -134,7 +140,11 @@ describe('the roads as a network', () => {
     expect(bridges).toHaveLength(1);
     expect(bridges[0]!.grade).toBe('road');
     expect(shared.some((chain) => chain.bridge === null && chain.grade === 'road')).toBe(true);
-    expect(shared.some((chain) => chain.grade === 'track')).toBe(true);
+    // A road no other shares is a track.
+    const lone = routeJoins([{ a: 'nw', b: 'sw', km: 40 }], endsOf(corners), funnel, RULES);
+    const alone = networkOf(lone.courses, clearOver(funnel.cost, funnel.barred), RULES);
+    expect(alone.length).toBeGreaterThan(0);
+    for (const chain of alone) expect(chain.grade).toBe('track');
   });
 
   it('is the same network whatever order the places come in', () => {

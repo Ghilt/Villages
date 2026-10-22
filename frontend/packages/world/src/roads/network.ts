@@ -1,5 +1,5 @@
 import type { BridgeWay } from '../bridgeModel.ts';
-import { courseBetween, unitKey, unitOf } from './course.ts';
+import { courseBetween, diamondMiddle, unitKey, unitOf } from './course.ts';
 import type { Course, CourseGround, CourseRules, Point } from './course.ts';
 import type { Join } from './graph.ts';
 import { onQuarter, shapeOf } from './shape.ts';
@@ -45,7 +45,7 @@ export function routeJoins(
   rules: CourseRules,
 ): { courses: Course[]; unreached: Join[] } {
   const road = new Set<number>();
-  const withRoads: CourseGround = { ...ground, road: (x, y) => road.has(unitKey(x, y)) };
+  const withRoads: CourseGround = { ...ground, road: (u, v) => road.has(unitKey(u, v)) };
   const courses: Course[] = [];
   const unreached: Join[] = [];
   for (const join of joins) {
@@ -68,9 +68,10 @@ interface Edge {
 }
 
 const edgeKey = (a: number, b: number) => (a < b ? `${a}:${b}` : `${b}:${a}`);
+/** The middle of the lattice's diamond a course's unit is, in world units. */
 const centreOf = (unit: number): Point => {
   const { x, y } = unitOf(unit);
-  return { x: x + 0.5, y: y + 0.5 };
+  return diamondMiddle(x, y);
 };
 const ascending = (a: number, b: number) => a - b;
 
@@ -210,8 +211,14 @@ export function shapeChain(raw: RawChain, clear: Clear, rules: NetworkRules): Ch
   const fixed: boolean[] = [];
   const approach = (point: Point, out: Point | null, then: Point | undefined): Point | null => {
     if (out === null) return null;
-    const ahead = onQuarter({ x: point.x + out.x * rules.approach, y: point.y + out.y * rules.approach });
-    return clear(point, ahead) && (then === undefined || clear(ahead, then)) ? ahead : null;
+    // From the end as it will be drawn, on its quarter, to the nearest quarter ahead, so the run out is as near its way
+    // as a quarter allows; checked clear, since the nearest quarter may lie in the unit beside it.
+    const from = onQuarter(point);
+    const ahead = {
+      x: Math.round((from.x + out.x * rules.approach) * 4) / 4,
+      y: Math.round((from.y + out.y * rules.approach) * 4) / 4,
+    };
+    return clear(from, ahead) && (then === undefined || clear(ahead, onQuarter(then))) ? ahead : null;
   };
   raw.run.forEach((point, at) => {
     const last = at === raw.run.length - 1;

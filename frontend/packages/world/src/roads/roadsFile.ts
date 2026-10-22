@@ -14,13 +14,23 @@ export interface RoadsFile {
   readonly climb: number;
   readonly trunk: number;
   readonly margin: number;
+  readonly turn: number;
+  readonly diagonal: number;
+  readonly corridor: number;
   readonly bridges: {
     readonly perUnit: number;
     readonly building: number;
     readonly longestSpan: number;
     readonly biggestRiver: number;
   };
-  readonly shape: { readonly straightest: number; readonly smoothing: number; readonly approach: number };
+  readonly shape: {
+    readonly turning: number;
+    readonly widerTurning: number;
+    readonly widerShare: number;
+    readonly stray: number;
+    readonly strayEvery: number;
+    readonly approach: number;
+  };
   readonly grades: { readonly road: number; readonly trunk: number };
   readonly widths: {
     readonly track: number;
@@ -52,8 +62,14 @@ function numbers<K extends string>(
 
 export function parseRoads(text: string): RoadsFile {
   const file = JSON.parse(text) as Record<string, unknown>;
-  for (const key of ['longestKm', 'climb', 'margin'] as const) {
+  for (const key of ['longestKm', 'climb', 'margin', 'corridor'] as const) {
     if (!positive(file[key])) throw new Error(`world/roads.json: ${key} wants a number above nought`);
+  }
+  if (typeof file['turn'] !== 'number' || file['turn'] < 0) {
+    throw new Error('world/roads.json: turn wants a number of steps, nought or more');
+  }
+  if (typeof file['diagonal'] !== 'number' || file['diagonal'] < Math.SQRT2) {
+    throw new Error('world/roads.json: diagonal wants a number no less than a diagonal step is long, 1.414');
   }
   if (!share(file['trunk']) || file['trunk'] === 0) {
     throw new Error('world/roads.json: trunk wants a share above nought and at most one');
@@ -82,13 +98,20 @@ export function parseRoads(text: string): RoadsFile {
     'a number above nought',
   );
   numbers('bridges', file['bridges'], ['biggestRiver'], share, 'a share from nought to one');
-  numbers('shape', file['shape'], ['straightest', 'approach'], positive, 'a number above nought');
   numbers(
     'shape',
     file['shape'],
-    ['smoothing'],
-    (value) => Number.isInteger(value) && (value as number) >= 0,
-    'a whole number',
+    ['turning', 'widerTurning', 'strayEvery', 'approach'],
+    positive,
+    'a number above nought',
+  );
+  numbers('shape', file['shape'], ['widerShare'], share, 'a share from nought to one');
+  numbers(
+    'shape',
+    file['shape'],
+    ['stray'],
+    (value) => typeof value === 'number' && value >= 0,
+    'a number of world units, nought or more',
   );
   const grades = numbers(
     'grades',
@@ -112,8 +135,14 @@ export function networkRules(file: RoadsFile): NetworkRules {
     longestSpan: file.bridges.longestSpan,
     trunk: file.trunk,
     margin: file.margin,
-    straightest: file.shape.straightest,
-    smoothing: file.shape.smoothing,
+    turn: file.turn,
+    diagonal: file.diagonal,
+    corridor: file.corridor,
+    turning: file.shape.turning,
+    widerTurning: file.shape.widerTurning,
+    widerShare: file.shape.widerShare,
+    stray: file.shape.stray,
+    strayEvery: file.shape.strayEvery,
     approach: file.shape.approach,
     grades: [file.grades.road, file.grades.trunk],
   };

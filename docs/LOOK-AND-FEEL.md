@@ -210,8 +210,10 @@ of its own: trodden grass more than earth, a ragged rim, its two streets
 paler through the middle, a little yard at each door and a lane to the street. They read as small beside a castle and
 a ruined city, and further out than zoom 7.5 a village, like its houses, is not marked. **Roads join them**, and run on to the ruins'
 gates: worn earth a light brown, a smooth band with soft ragged edges and two faint ruts, wider and paler than a path, packed so no tree stands on it, a track for one road's
-worth of traffic and wider where several roads share the way, crossing open country and winding round hills, lakes and
-bogs, and coming into a village down its street. **A river is crossed only on a bridge**, the same humped stone bridge
+worth of traffic and wider where several roads share the way, running along the grid the map is drawn on, straying here and
+there along each run - shifting across and keeping on beside its line a while, jogging out and back, wriggling a moment,
+running straight - and turning in rounded bends, most of them tight and some wider, round hills, lakes and
+bogs - never across the grid in a long diagonal, which would undo the ground's isometric look - and coming into a village down its street. **A river is crossed only on a bridge**, the same humped stone bridge
 of three arches everywhere, laid straight along one of eight ways - the ground's axes, its diagonals and the four
 between - so it meets its road head on, and as long as the river is wide; along its sides the roadside fits the country it
 crosses - low dry-stone walls green with moss in the wet west, bare and pale round the Mediterranean, in runs and
