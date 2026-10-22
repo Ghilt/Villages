@@ -141,6 +141,20 @@ type `house`, `mill` or `market`.
 
 Then it is brought to main.
 
+### Adam's notes on the round, 2026-10-22
+
+The bridges look good. Then four notes, each fixed and handed over again before anything more is committed:
+
+- **The roads fade with everything else**: a road is the real world, so it arrives with the scenery and the structures
+  at 7.5, faded in time, and its roadside, bridges and worn ground with it; the thin line from zoom 6 is gone. And a
+  rule for how these things are built: a thing added to the map is asked about first, the real world or the info
+  layer (CLAUDE.md, decision record 0096 amended, 0115 amended).
+- **The roadside in clumps**: a stretch bare, a stretch full, a stretch in patches with gaps between, not the same
+  everywhere.
+- **The houses painted** in each culture by asseterizer, as the bridge was.
+- **Every kind of structure in a settlement**, about half houses and half the catalogue's others, at random (decision
+  record 0117 amended).
+
 ## Risks
 
 - **The opening's time**: some fifty thousand raises where there were 7,674 in 78 s. Raised side by side, each
