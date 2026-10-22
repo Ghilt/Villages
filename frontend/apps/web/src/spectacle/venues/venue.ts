@@ -12,8 +12,8 @@ export interface Point {
 /**
  * A venue held one way: wide, or deep. Where everything stands in its scene - the map's buildings and trees, each
  * house's platform and speaker, the places its summons take as they come and its things put on the line, the
- * townsfolk's places on either side - each house on its own bank, the first on the left, so no figure is seen from
- * behind (decision record 0116).
+ * townsfolk's places on either side, and the mist, path, receptacle and channels its happenings travel by - each house
+ * on its own bank, the first on the left, so no figure is seen from behind (decision record 0116).
  */
 export interface Arrangement {
   readonly scene: Size;
@@ -33,6 +33,16 @@ export interface Arrangement {
   readonly lineHeight: number;
   /** The townsfolk's places on each side, nearest the house's speaker first. */
   readonly townsfolk: Readonly<Record<SideKey, readonly Point[]>>;
+  /** The patch of mist the happenings' seals form in. */
+  readonly mist: Point;
+  /** The way a seal travels, from the mist to the receptacle, laid in the ground as channels. */
+  readonly path: readonly Point[];
+  /** Where a seal comes to rest on its second: the font, or whatever the venue has. */
+  readonly receptacle: Point;
+  /** The channels from the receptacle to each house's platform, which a jolt runs along. */
+  readonly channels: Readonly<Record<SideKey, readonly Point[]>>;
+  /** How wide a seal is drawn, in the scene's units. */
+  readonly seal: number;
 }
 
 /** A venue: what a kind of challenge is shown in, held wide and held deep. */

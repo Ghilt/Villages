@@ -3,23 +3,27 @@ import './spectacle.css';
 import { useMemo, useState } from 'react';
 
 import type { SliceView } from '@villages/protocol';
-import type { Challenges } from '@villages/world';
+import { ASPECTS } from '@villages/world';
+import type { Aspect, Challenges } from '@villages/world';
 
 import { MarkButton } from '../ui/button/Button';
+import { Channels } from '../ui/diorama/Channels';
 import { Diorama } from '../ui/diorama/Diorama';
 import { Drawer } from '../ui/drawer/Drawer';
 import { ReplayBar } from '../ui/replay/Replay';
 import type { Band, Tick } from '../ui/replay/Replay';
 import { useReplayClock } from '../ui/replay/useReplayClock';
 import { SliceChip, SliceTray } from '../ui/slice/Slice';
-import { HappeningPlate, TugBar } from '../ui/tug/Tug';
+import { TugBar } from '../ui/tug/Tug';
 import { towardSaid } from '../ui/tug/tugShare';
 import { History } from './History';
+import { joltAt, joltColour } from './jolt';
 import { openedOf, stateSaid } from './opened';
 import { replayOf, startsOf } from './replay';
-import type { Field, Run, SideKey } from './replay';
+import type { Field, Run, SideKey, SliceNow } from './replay';
 import { aspectName, aspectShown, boostSaid, borneOf } from './said';
 import type { HouseShown } from './said';
+import { sealsPlaced } from './seals';
 import { useSheets } from './sheets';
 import { standingOf } from './standing';
 import { SQUARE } from './venues/square';
@@ -30,6 +34,8 @@ export type { HouseShown } from './said';
 export type Held = 'wide' | 'deep';
 
 const SIDES: readonly SideKey[] = ['a', 'b'];
+
+const isAspect = (name: string): name is Aspect => (ASPECTS as readonly string[]).includes(name);
 
 /**
  * The seconds before the first that a run is watched from, so the first happening is seen coming: the time its seal
@@ -52,24 +58,11 @@ function beforeItBegins(first: Field): Field {
   };
 }
 
-/** Whom a happening lights: the slices that match it, and the ones that answer it, by house. */
-function lightsSaid(field: Field, houses: Readonly<Record<SideKey, HouseShown>>, boost: string): string {
-  const said: string[] = [];
-  for (const side of SIDES) {
-    for (const slice of field.slices[side]) {
-      if (slice.state === 'matching')
-        said.push(`${houses[side].name}’s ${aspectName(slice.aspect)} matches, ${boost}`);
-      if (slice.state === 'answering')
-        said.push(`${houses[side].name}’s ${aspectName(slice.aspect)} answers its anti-aspect`);
-    }
-  }
-  return said.length === 0 ? 'nothing matches' : said.join(' · ');
-}
-
 /**
  * A challenge's spectacle: a run played out in a venue - the square - seen as the map sees it, the two houses on their
- * banks, the townsfolk walking to whoever is winning them, the summons arriving, acting and falling; over it the tug
- * and the happening, along the bottom each house's slices in its tray and the replay. Everything shown is the run
+ * banks, the townsfolk walking to whoever is winning them, the summons arriving, acting and falling, and each happening
+ * a seal coming out of the mist along the channels to the font, jolting the slices it lights as it arrives; over it the
+ * tug, along the bottom each house's slices in its tray and the replay. Everything shown is the run
  * folded to the second shown, so a second scrubbed back to is the same as one played to. Built of the library's
  * parts. Decision record 0116.
  */
@@ -117,14 +110,36 @@ export function Spectacle({
     sheets === null || sheets === 'missing'
       ? { pictures: [], placed: [] }
       : standingOf(field, arrangement, sheets, sides, houses, content);
+  const happenings = run.progression.happenings.map((aspects) => aspects.filter(isAspect));
+  const jolt = joltAt(clock.second, starts, field);
+  const channelJolt =
+    jolt === undefined
+      ? undefined
+      : {
+          key: jolt.key,
+          lit: jolt.to.map((one) => ({ path: one.side === 'a' ? 1 : 2, colour: one.colour })),
+        };
+  const chipJolt = (slice: SliceNow) => {
+    const colour = joltColour(slice);
+    return jolt === undefined || colour === null ? {} : { jolt: { key: jolt.key, colour } };
+  };
   return (
     <div className={`ui-root spectacle spectacle--${held}`}>
       <div className="spectacle__stage">
         <Diorama
           scene={arrangement.scene}
-          ground={arrangement.ground}
+          ground={
+            <>
+              {arrangement.ground}
+              <Channels
+                scene={arrangement.scene}
+                paths={[arrangement.path, arrangement.channels.a, arrangement.channels.b]}
+                {...(channelJolt === undefined ? {} : { jolt: channelJolt })}
+              />
+            </>
+          }
           pictures={drawn.pictures}
-          placed={drawn.placed}
+          placed={[...drawn.placed, ...sealsPlaced(clock.second, starts, happenings, arrangement)]}
           label={`${SQUARE.name}, second ${field.second}`}
         />
       </div>
@@ -139,12 +154,6 @@ export function Spectacle({
           second={houses.b}
           tug={field.tug}
           said={towardSaid(field.tug, houses.a.name, houses.b.name)}
-        />
-        <HappeningPlate
-          aspects={field.happening.aspects.map(aspectShown)}
-          name={field.happening.aspects.map(aspectName).join(' and ')}
-          when={`second ${field.happening.from} to ${field.happening.to}`}
-          said={lightsSaid(field, houses, boost)}
         />
       </div>
       <div className="spectacle__history">
@@ -175,6 +184,7 @@ export function Spectacle({
                 said={stateSaid(slice, boost)}
                 borne={borneOf(slice.bearing, content, field.second)}
                 chosen={opened === slice.actor}
+                {...chipJolt(slice)}
                 onPress={() => setOpened(opened === slice.actor ? null : slice.actor)}
               />
             ))}

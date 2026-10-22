@@ -1050,8 +1050,11 @@ and `-- --drop` takes them off; by hand only.
   0116): the map's palace, market and manor at the back, each side's speaker on a
   platform at the back of its bank - A on the left in lapis, B on the right in vermilion - its summons beside it as
   they come, turning and falling, a thing on the line standing as the map's own picture of it, and twenty townsfolk
-  between who walk to whoever is winning them, the share of them the tug's; over it the tug bar and the happening and
-  whom it lights; along the bottom each side's slices in its tray, lit while matching, a chip pressed to open the
+  between who walk to whoever is winning them, the share of them the tug's; each happening a glowing seal with its
+  aspect's mark, forming in mist at the palace doors, coming down the square along gilt channels in the cobbles to a
+  font at the front and reaching it on its second, when light runs along the channels to the platforms of the sides
+  whose slices it lights and those slices' chips flash - gold where it matches, the aspect's colour where it answers;
+  over it the tug bar; along the bottom each side's slices in its tray, lit while matching, a chip pressed to open the
   slice and say what each effect needs and whether it works now, a side's name to fold its tray; and the replay -
   play and pause, three paces, to the end, the happenings as bands with the tug drawn over them, a tick where
   something arrived or fell, and a scrub the arrow keys step a second at a time; and the history behind its mark in
