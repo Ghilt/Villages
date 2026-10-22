@@ -473,7 +473,14 @@ A line each: what it is for, its variants, and where on the page it is.
   world (decision record 0116, amended): a glowing medallion with its aspect's mark large on its face, or both marks
   for a happening of two, the face its aspect's colour or halved between two, ringed in gilt with a halo of its colour.
   **Forming** in the mist it is dim and soft; **coming** along its path it bobs; **arrived** it swells, its halo pulses
-  and its name stands under it; **spent** it fades. Its box's bottom middle is its foot. Drawn. *Challenges*.
+  and its name stands under it; **spent** it fades. Its box's bottom middle is its foot. Drawn.
+  `ui/seal/sealPath.ts` keeps its time: `sealsAt` says every seal there is at a second, forming, coming, arrived or
+  spent, and how far along its path, and `spotAlong` where that is - pure, so a second scrubbed back to shows each
+  where it was. *Challenges*.
+- **`Mist`** and **`Channels`**, `ui/diorama/`: what a venue's happenings travel through. **Mist** is a patch of soft
+  cream puffs drifting and breathing over the spot the seals come out of; **channels** are grooves inlaid in the
+  ground with a line of gilt in each, along the path the seals travel and the ways from the receptacle to each house's
+  platform, drawn with the ground under everything standing on it. Drawn. *Challenges*.
 - **`Drawer`**, `ui/drawer/Drawer.tsx`: what a mark opens over a stage without leaving it - a challenge's history,
   behind the `history` mark - sliding in `from` the stage's right edge when it is held wide and from its bottom when
   it is held deep, so it takes the longer side and leaves the rest to be watched (decision record 0116). Its title

@@ -65,7 +65,7 @@
   }
 
   .ui-seal--arrived .ui-seal__body {
-    transform: scale(1.18);
+    transform: translateY(16%) scale(1.18);
   }
 
   .ui-seal--arrived .ui-seal__halo {

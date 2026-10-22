@@ -1,0 +1,31 @@
+/*
+ * Channels inlaid in a diorama's ground: a dark groove, and a thin line of gilt in it. Laid over the ground and under
+ * everything standing on it.
+ */
+
+@layer ui {
+  .ui-channels {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .ui-channels__groove,
+  .ui-channels__gilt {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .ui-channels__groove {
+    stroke: color-mix(in srgb, var(--ui-ink) 32%, transparent);
+    stroke-width: 9;
+  }
+
+  .ui-channels__gilt {
+    stroke: color-mix(in srgb, var(--ui-gilt) 85%, transparent);
+    stroke-width: 3;
+  }
+}

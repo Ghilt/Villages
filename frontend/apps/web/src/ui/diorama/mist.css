@@ -1,0 +1,81 @@
+/*
+ * A patch of mist: four soft cream puffs, each drifting and breathing on a clock of its own so the patch never settles
+ * into a shape. Blurred, so it has no edge.
+ */
+
+@layer ui {
+  .ui-mist {
+    position: relative;
+    display: inline-block;
+    flex: none;
+    pointer-events: none;
+    filter: blur(6px);
+  }
+
+  .ui-mist__puff {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(
+      ellipse at center,
+      color-mix(in srgb, var(--ui-cream) 85%, transparent) 0%,
+      color-mix(in srgb, var(--ui-cream) 35%, transparent) 50%,
+      transparent 72%
+    );
+  }
+
+  .ui-mist__puff--one {
+    left: 0;
+    bottom: 5%;
+    width: 60%;
+    height: 70%;
+    animation: ui-mist-drift 7s ease-in-out infinite;
+  }
+
+  .ui-mist__puff--two {
+    right: 0;
+    bottom: 0;
+    width: 62%;
+    height: 75%;
+    animation: ui-mist-drift 9s ease-in-out -3s infinite reverse;
+  }
+
+  .ui-mist__puff--three {
+    left: 22%;
+    bottom: 25%;
+    width: 56%;
+    height: 72%;
+    animation: ui-mist-breathe 6s ease-in-out -1s infinite;
+  }
+
+  .ui-mist__puff--four {
+    left: 30%;
+    bottom: 0;
+    width: 40%;
+    height: 45%;
+    animation: ui-mist-breathe 5s ease-in-out -2.5s infinite;
+  }
+
+  @keyframes ui-mist-drift {
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+      opacity: 0.75;
+    }
+    50% {
+      transform: translate(8%, -6%) scale(1.08);
+      opacity: 1;
+    }
+  }
+
+  @keyframes ui-mist-breathe {
+    0%,
+    100% {
+      transform: scale(0.92);
+      opacity: 0.6;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 0.95;
+    }
+  }
+}
