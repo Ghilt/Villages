@@ -48,9 +48,19 @@ export function cellsTouched(
       }
     }
   };
-  for (const key of now.keys()) if (!was.has(key)) mark(key);
-  for (const key of was.keys()) if (!now.has(key)) mark(key);
+  for (const key of changedDiamonds(was, now)) mark(key);
   return touched;
+}
+
+/** The diamonds, by `diamondKey`, that became worked or bare between two worked grounds: what a tree or a bush asks. */
+export function changedDiamonds(
+  was: ReadonlyMap<number, Worked>,
+  now: ReadonlyMap<number, Worked>,
+): number[] {
+  const changed: number[] = [];
+  for (const key of now.keys()) if (!was.has(key)) changed.push(key);
+  for (const key of was.keys()) if (!now.has(key)) changed.push(key);
+  return changed;
 }
 
 /**

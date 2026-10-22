@@ -79,3 +79,17 @@ a frame walks only the cells about the view.
 | Rule | What keeps it | When it holds |
 |---|---|---|
 | Every piece of road held is drawn, worn and lined once, and nothing of a tile let go stays drawn | The layer's version moves whenever a tile comes, changes or goes; every reader works again when it has moved, before it next draws | A moment after the tile arrives or goes: before the next frame, so never seen |
+
+## Amendment, 2026-10-22: the roadside a tile at a time
+
+The roadside was laid out whole, every piece of road held at once, at the frame the real world arrived: 40 to 70 ms
+in that one frame over the busiest ground, and again whenever anything under any road changed. It is laid out a tile
+of the stands at a time now (`sprites/roads/roadsideTiles.ts`). A piece belongs to the tile its middle stands in, so it
+is laid out by one tile only; a tile keeps off the bands of the pieces of the tiles about it too, so it is laid out
+again when their pieces change as well as its own, and when the wayside under it changes. The tiles are laid out as
+they arrive, a few milliseconds of a frame at a time and the nearest the view first, from zoom 6, where the stands are
+first sent, rather than at the crossing.
+
+| Rule | What keeps it | When it holds |
+|---|---|---|
+| The roadside is the same whatever order its tiles came in | A tile is laid out against the pieces of the tiles about it, and again whenever one of theirs changes; a test lays the same tiles in two orders and when one goes | A moment after the tiles arrive: within the frames the layout's budget takes, before the real world is shown |

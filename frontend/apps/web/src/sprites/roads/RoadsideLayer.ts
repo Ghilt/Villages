@@ -1,24 +1,26 @@
 import { Container, Rectangle, Sprite, Texture } from 'pixi.js';
 import type { ImageSource } from 'pixi.js';
 
+import { STAND_TILES } from '@villages/protocol';
 import {
   GROUND_LATTICE,
   ROADSIDE_GROWTH_SCALE,
   alongU,
   alongV,
-  cellOf,
   biomeAt,
+  cellOf,
   frameOf,
-  readRoadKind,
   wallKey,
 } from '@villages/world';
 import type { ArtAtlasFile, RoadsMapFile, SpriteMap } from '@villages/world';
 
 import { pixelsPerWorldUnit, standingLayer, tiltGround, toMercatorExact } from '../../geometry/cameraMath';
 import type { CameraView } from '../../geometry/cameraMath';
+import { TILE, WORLD_MASTER_WIDTH } from '../../geometry/world';
 import { note } from '../../log/log';
-import { onStandsArrived, onStandsFollowed, standsVersion } from '../../net/stands';
+import { onStandsArrived, onStandsFollowed, standsVersion, tileKey } from '../../net/stands';
 import { readAtlas } from '../atlas';
+import { sceneryCellKey } from '../ground/growing';
 import { roadsHeld, roadsMap } from '../ground/roads';
 import type { HeldPiece } from '../ground/roads';
 import { workedGroundStore } from '../ground/settings';
@@ -26,13 +28,13 @@ import { WORKED } from '../ground/worked';
 import type { Worked } from '../ground/worked';
 import { diamondKey } from '../ground/workedGround';
 import type { Layer } from '../layer';
-import { sceneryCellKey } from '../ground/growing';
+import { soonest } from '../layer';
 import { spriteMap } from '../scenery/spriteMap';
 import { viewCells } from '../scenery/viewCells';
 import type { SettlementPictures } from '../settlements/settlementPictures';
 import { createArrival } from '../arrival';
-import { roadsideAlong } from './roadsideItems';
 import type { RoadsideItem } from './roadsideItems';
+import { piecesByOwner, roadsideOfTile, signaturesOf, tilesChanged, tilesOfWayside } from './roadsideTiles';
 
 /*
  * The roadside, drawn: the walls and growth `roadsideItems.ts` lays along the roads the page holds, each a sprite stood
@@ -40,6 +42,11 @@ import type { RoadsideItem } from './roadsideItems';
  * ones over further ones. One layer between the roads and everything standing, from zoom 7.5 in: low enough that
  * drawing it under every tree is never wrong by more than its own height, and the trees are kept off the ground it
  * stands on. See docs/plans/houses-bridges-and-road-render.md.
+ *
+ * Laid out a tile of the stands at a time (`roadsideTiles.ts`): a tile is laid out again when its pieces, or those of
+ * a tile about it, come, change or go, or the wayside under it changes, and never otherwise; a few milliseconds of a
+ * frame at a time, the tiles nearest the view first, from the moment they arrive rather than at the crossing into the
+ * real world (decision record 0118).
  */
 
 export interface RoadsideLayer extends Layer {
@@ -53,39 +60,16 @@ export interface RoadsideLayer extends Layer {
 const FRAME = frameOf(GROUND_LATTICE);
 /** The scenery's atlas, which the growth is drawn from. */
 const SCENERY_ART = '/art/scenery';
-/** The grid the road's bands are found by, for keeping the roadside off them, in world units. */
-const CELL = 4;
+/** How many milliseconds of a frame the roadside may spend being laid out, a tile at a time, at least one a frame. */
+const LAY_OUT_MS = 3;
+/** How many of the scenery's cells a tile of the stands is across. */
+const CELLS_A_TILE = TILE / 32;
 
-/** Whether a point is on any piece's band, by a grid of the pieces. */
-function bandsOf(
-  pieces: readonly HeldPiece[],
-  widths: RoadsMapFile['widths'],
-  scale: number,
-): (x: number, y: number) => boolean {
-  const grid = new Map<number, { piece: HeldPiece; half: number }[]>();
-  const key = (cx: number, cy: number) => cy * 65536 + cx;
-  for (const piece of pieces) {
-    const kind = readRoadKind(piece.kind);
-    if (kind === null) continue;
-    const half = (('bridge' in kind ? widths.bridge : widths[kind.road]) / 2) * scale + 0.15;
-    const [x0, x1] = [Math.min(piece.ax, piece.bx) - half, Math.max(piece.ax, piece.bx) + half];
-    const [y0, y1] = [Math.min(piece.ay, piece.by) - half, Math.max(piece.ay, piece.by) + half];
-    for (let cy = Math.floor(y0 / CELL); cy <= Math.floor(y1 / CELL); cy += 1) {
-      for (let cx = Math.floor(x0 / CELL); cx <= Math.floor(x1 / CELL); cx += 1) {
-        const held = grid.get(key(cx, cy));
-        if (held === undefined) grid.set(key(cx, cy), [{ piece, half }]);
-        else held.push({ piece, half });
-      }
-    }
-  }
-  return (x, y) =>
-    (grid.get(key(Math.floor(x / CELL), Math.floor(y / CELL))) ?? []).some(({ piece, half }) => {
-      const dx = piece.bx - piece.ax;
-      const dy = piece.by - piece.ay;
-      const long = dx * dx + dy * dy;
-      const t = long === 0 ? 0 : Math.max(0, Math.min(1, ((x - piece.ax) * dx + (y - piece.ay) * dy) / long));
-      return Math.hypot(x - (piece.ax + t * dx), y - (piece.ay + t * dy)) < half;
-    });
+/** One tile's roadside: its things, the nearer later, their sprites once made, and each thing's index by its cell. */
+interface Laid {
+  items: RoadsideItem[];
+  sprites: (Sprite | null)[];
+  byCell: Map<string, number[]>;
 }
 
 export function createRoadsideLayer(pictures: SettlementPictures, repaint: () => void): RoadsideLayer {
@@ -100,23 +84,26 @@ export function createRoadsideLayer(pictures: SettlementPictures, repaint: () =>
   let map: SpriteMap | null = null;
   let growth: Map<string, { texture: Texture; footX: number; footY: number; tall: number }> | null = null;
   let atlas: ImageSource | null = null;
-  let items: RoadsideItem[] = [];
-  let sprites: (Sprite | null)[] = [];
-  /** Each item's index by the cell of the scenery it stands in, so a frame walks only the cells about the view. */
-  let byCell = new Map<string, number[]>();
-  /** The items drawn last frame, to put away the ones the view has left. */
-  let drawn = new Set<number>();
-  let stale = true;
-  /** The version of the `roads` layer the roadside was laid out from: laid out again only when it moves. */
+  /** Each tile laid out, by `tileKey`, and the tiles still to lay out again. */
+  const laid = new Map<number, Laid>();
+  const dirty = new Set<number>();
+  /** The pieces held by the tile each belongs to, and a number for each tile's pieces, as of `readVersion`. */
+  let owners = new Map<number, HeldPiece[]>();
+  let signatures = new Map<number, number>();
   let readVersion = -1;
+  /** The road width the tiles were laid out at, and whether every tile is to be laid out again. */
+  let laidScale = Number.NaN;
+  let everything = true;
+  /** The sprites drawn last frame, to put away the ones the view has left. */
+  let drawn = new Set<Sprite>();
   let said = -1;
-  const dirty = () => {
-    stale = true;
-    repaint();
-  };
   const stopArriving = onStandsArrived((_, __, layer) => layer === 'roads' && repaint());
   const stopFollowing = onStandsFollowed(repaint);
-  const stopWatching = workedGroundStore.watch(dirty);
+  const stopWatching = workedGroundStore.watch(repaint);
+  const again = () => {
+    everything = true;
+    repaint();
+  };
 
   /** The growth's pictures, from the scenery's atlas, each kind as tall as it grows by the sprite map. */
   async function readGrowth(of: SpriteMap): Promise<void> {
@@ -138,40 +125,78 @@ export function createRoadsideLayer(pictures: SettlementPictures, repaint: () =>
         tall: kind.groundHeight,
       });
     }
-    dirty();
+    repaint();
   }
 
-  function rebuild(): void {
-    for (const sprite of sprites) sprite?.destroy();
-    sprites = [];
-    items = [];
-    byCell = new Map();
-    drawn = new Set();
-    container.removeChildren();
-    if (widths === null || map === null) return;
-    const pieces = roadsHeld();
-    const scale = workedGroundStore.get().roadWidth;
-    const of = map;
-    items = roadsideAlong(pieces, widths, scale, {
+  /** The roads held now, and the tiles whose pieces changed since they were last read. */
+  function readRoads(): void {
+    const version = standsVersion('roads');
+    if (version === readVersion) return;
+    readVersion = version;
+    owners = piecesByOwner(roadsHeld());
+    const now = signaturesOf(owners);
+    for (const tile of tilesChanged(signatures, now)) dirty.add(tile);
+    signatures = now;
+  }
+
+  /** A tile's sprites taken away, and the tile laid out again from the pieces about it. */
+  function layOut(tile: number, scale: number, of: SpriteMap, drawnWidths: RoadsMapFile['widths']): void {
+    const was = laid.get(tile);
+    for (const sprite of was?.sprites ?? []) {
+      if (sprite === null) continue;
+      drawn.delete(sprite);
+      sprite.destroy();
+    }
+    const items = roadsideOfTile(tile, owners, drawnWidths, scale, {
       biome: (x, y) => of.names[biomeAt(of, x, y)] ?? 'none',
       clear: (x, y) =>
         worked.get(diamondKey(Math.floor(alongU(FRAME, x, y)), Math.floor(alongV(FRAME, x, y)))) ===
         WORKED.wayside,
-      onRoad: bandsOf(pieces, widths, scale),
     });
-    // Nearer the camera, further down the screen, drawn later.
-    items.sort((one, other) => one.y - other.y || one.x - other.x);
-    sprites = items.map(() => null);
+    if (items.length === 0) {
+      laid.delete(tile);
+      return;
+    }
+    const byCell = new Map<string, number[]>();
     items.forEach((item, at) => {
       const key = sceneryCellKey(cellOf(item.x), cellOf(item.y));
       const here = byCell.get(key);
       if (here === undefined) byCell.set(key, [at]);
       else here.push(at);
     });
-    if (items.length !== said) {
-      said = items.length;
-      note('roads', `${items.length} things along the roadside`);
+    laid.set(tile, { items, sprites: items.map(() => null), byCell });
+  }
+
+  /** As many tiles laid out as the frame's budget allows, the nearest the view first; whether any are left. */
+  function layOutSome(view: CameraView): boolean {
+    if (widths === null || map === null) return false;
+    const scale = workedGroundStore.get().roadWidth;
+    if (scale !== laidScale) {
+      laidScale = scale;
+      everything = true;
     }
+    if (everything) {
+      everything = false;
+      for (const tile of [...laid.keys(), ...owners.keys()]) dirty.add(tile);
+    }
+    if (dirty.size === 0) return false;
+    const centre = toMercatorExact(view.center);
+    const [atX, atY] = [(centre.x * WORLD_MASTER_WIDTH) / TILE, (centre.y * WORLD_MASTER_WIDTH) / TILE];
+    const away = (tile: number) =>
+      ((tile % STAND_TILES) - atX) ** 2 + (Math.floor(tile / STAND_TILES) - atY) ** 2;
+    const until = performance.now() + LAY_OUT_MS;
+    for (const tile of [...dirty].sort((one, other) => away(one) - away(other))) {
+      layOut(tile, scale, map, widths);
+      dirty.delete(tile);
+      if (performance.now() > until) break;
+    }
+    let items = 0;
+    for (const one of laid.values()) items += one.items.length;
+    if (dirty.size === 0 && items !== said) {
+      said = items;
+      note('roads', `${items} things along the roadside, laid out a tile at a time`);
+    }
+    return dirty.size > 0;
   }
 
   return {
@@ -179,8 +204,9 @@ export function createRoadsideLayer(pictures: SettlementPictures, repaint: () =>
 
     setWorked(next): void {
       if (next === worked) return;
+      for (const tile of tilesOfWayside(worked, next)) dirty.add(tile);
       worked = next;
-      dirty();
+      repaint();
     },
 
     setTilesRoot(next: string): void {
@@ -191,29 +217,25 @@ export function createRoadsideLayer(pictures: SettlementPictures, repaint: () =>
       void roadsMap(next).then((file) => {
         if (tilesRoot !== next) return;
         widths = file?.widths ?? null;
-        dirty();
+        again();
       });
       void spriteMap(next).then((read) => {
         if (tilesRoot !== next || read === null) return;
         map = read;
         if (growth === null) void readGrowth(read);
-        dirty();
+        again();
       });
     },
 
-    report: () => ({ items: items.length }),
+    report: () => ({ items: [...laid.values()].reduce((sum, one) => sum + one.items.length, 0) }),
 
     draw(view: CameraView, _now: number, elapsed: number): number | null {
+      readRoads();
+      const more = layOutSome(view) ? 0 : null;
       const fade = arrival.step(view.zoom, elapsed);
       if (!workedGroundStore.get().on || fade === 0) {
         container.visible = false;
-        return arrival.wants();
-      }
-      const version = standsVersion('roads');
-      if (stale || version !== readVersion) {
-        rebuild();
-        stale = false;
-        readVersion = version;
+        return soonest(more, arrival.wants());
       }
       const { scale, x: left, y: top, tilt } = standingLayer(view);
       const perUnit = pixelsPerWorldUnit(view.zoom);
@@ -221,22 +243,24 @@ export function createRoadsideLayer(pictures: SettlementPictures, repaint: () =>
       container.alpha = fade;
       // Only the cells about the view, two deep so a wall or a bush leaning in from beyond its edge is drawn.
       const { fromX, toX, fromY, toY } = viewCells(view, toMercatorExact(view.center), scale, tilt, 2);
-      const now = new Set<number>();
+      const now = new Set<Sprite>();
       for (let cellY = fromY; cellY <= toY; cellY += 1) {
         for (let cellX = fromX; cellX <= toX; cellX += 1) {
-          for (const at of byCell.get(sceneryCellKey(cellX, cellY)) ?? []) {
-            const item = items[at]!;
+          const tile = laid.get(tileKey(Math.floor(cellX / CELLS_A_TILE), Math.floor(cellY / CELLS_A_TILE)));
+          for (const at of tile?.byCell.get(sceneryCellKey(cellX, cellY)) ?? []) {
+            const item = tile!.items[at]!;
             const foot = tiltGround(item.x, item.y, tilt);
             const x = foot.x * scale + left;
             const y = foot.y * scale + top;
             if (!(x > -64 && x < view.width + 64 && y > -16 && y < view.height + 96)) continue;
-            let sprite = sprites[at] ?? null;
+            let sprite = tile!.sprites[at] ?? null;
             if (sprite === null) {
               const made = spriteOf(item);
               if (made === null) continue;
               sprite = made;
-              sprite.zIndex = at;
-              sprites[at] = sprite;
+              // Nearer the camera, further down the screen, drawn later, across every tile.
+              sprite.zIndex = item.y + item.x * 1e-6;
+              tile!.sprites[at] = sprite;
               container.addChild(sprite);
             }
             sprite.visible = true;
@@ -244,25 +268,20 @@ export function createRoadsideLayer(pictures: SettlementPictures, repaint: () =>
             const tall =
               'wall' in item ? (pictures.of(wallKey(item.wall, item.way))?.tall ?? 0.3) : sizeOf(item);
             sprite.scale.set((tall * perUnit) / sprite.texture.height);
-            now.add(at);
+            now.add(sprite);
           }
         }
       }
-      for (const at of drawn) {
-        if (!now.has(at)) {
-          const sprite = sprites[at];
-          if (sprite) sprite.visible = false;
-        }
-      }
+      for (const sprite of drawn) if (!now.has(sprite)) sprite.visible = false;
       drawn = now;
-      return arrival.wants();
+      return soonest(more, arrival.wants());
     },
 
     destroy(): void {
       stopArriving();
       stopFollowing();
       stopWatching();
-      for (const sprite of sprites) sprite?.destroy();
+      for (const one of laid.values()) for (const sprite of one.sprites) sprite?.destroy();
       container.destroy();
       atlas?.destroy();
     },
