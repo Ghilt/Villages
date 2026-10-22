@@ -220,10 +220,15 @@ const layerBytes = await writeSettlementsLayer(
   width,
 );
 const built = [...laid.values()].flatMap((one) => one.buildings);
-const ofType = (type: string) => built.filter((one) => one.type === type).length.toLocaleString();
+const byType = new Map<string, number>();
+for (const one of built) byType.set(one.type, (byType.get(one.type) ?? 0) + 1);
+const kinds = [...byType]
+  .sort((one, other) => other[1] - one[1])
+  .map(([type, count]) => `${count.toLocaleString()} ${type}`)
+  .join(', ');
 say(
-  `${built.length.toLocaleString()} buildings to raise: ${ofType('house')} houses, ${ofType('mill')} mills, ` +
-    `${ofType('market')} markets; the settlements layer ${(layerBytes / 1024).toFixed(0)} kB`,
+  `${built.length.toLocaleString()} buildings to raise: ${kinds}; the settlements layer ` +
+    `${(layerBytes / 1024).toFixed(0)} kB`,
 );
 
 const count = (pick: (one: Site) => string) =>

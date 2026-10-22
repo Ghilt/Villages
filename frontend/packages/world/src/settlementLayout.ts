@@ -15,10 +15,16 @@ import type { Culture } from './structures.ts';
  * into lots three diamonds a side, ring after ring: a hamlet stands in the ring next to the green, a village reaches a
  * ring further and a large village one more, so its square of ground is seven, thirteen or nineteen diamonds a side.
  * Each lot is kept or left by a roll of its own against its ring's share, and holds at most one building, standing
- * against the street: a house; in a village or larger, a mill on the best lot by a river or a lake; in a large village,
- * a market on the four lots of a quarter nearest the green. So a higher level holds every building of the lower, and
- * more about them. A building is never laid where its base would stand on water. A fishing village's lots by the water
- * hold its houses and net racks, with a jetty from the shore and a boat beside it.
+ * against the street: a house about half the time, else one of the catalogue's buildings small enough for a lot - a
+ * watchtower, a mine, a printing house; in a village or larger, a mill on the best lot by a river or a lake. In a village
+ * or larger, the four lots of each quarter nearest the green are now and then one block holding one of the catalogue's
+ * larger buildings - a manor, a fort, a prison, a cathedral, an abbey, a market, a manufactory, an academy, and by open
+ * water a harbour or a shipyard - against both streets. Every roll is of a lot's or a quarter's place about the middle,
+ * so a higher level holds every building of the lower, and more about them, but where a village's block takes the
+ * hamlet's lot for a larger building. A building is never laid where its base
+ * would stand on water. A fishing village's lots by the water hold its houses and net racks, with a jetty from the
+ * shore and a boat beside it. Never a castle, which is what a house raises for its seat, nor a palace, wider than two
+ * lots.
  */
 
 /** What a diamond of ground is to a settlement: land to build on, a river or open water, or not known yet. */
@@ -28,8 +34,41 @@ export type DiamondFooting = 'land' | 'river' | 'water' | null;
 export type FootingOf = (u: number, v: number) => DiamondFooting;
 
 /** The structures a settlement is built of, each of the catalogue, and the side of its base at its first level. */
-export const BUILDING_SIDES = { house: 3, mill: 2, market: 5 } as const;
+export const BUILDING_SIDES = {
+  house: 3,
+  mill: 2,
+  watchtower: 3,
+  mine: 3,
+  printingHouse: 3,
+  manor: 4,
+  fort: 5,
+  prison: 4,
+  cathedral: 6,
+  abbey: 5,
+  market: 5,
+  manufactory: 4,
+  academy: 5,
+  harbour: 6,
+  shipyard: 4,
+} as const;
 export type SettlementBuilding = keyof typeof BUILDING_SIDES;
+
+/** What stands on a lot that is not a house, and what on a block, anywhere and by open water. */
+const ON_A_LOT = ['watchtower', 'mine', 'printingHouse'] as const satisfies readonly SettlementBuilding[];
+const ON_A_BLOCK = [
+  'manor',
+  'fort',
+  'prison',
+  'cathedral',
+  'abbey',
+  'market',
+  'manufactory',
+  'academy',
+] as const satisfies readonly SettlementBuilding[];
+const BY_OPEN_WATER = ['harbour', 'shipyard'] as const satisfies readonly SettlementBuilding[];
+/** How often a lot holds a house, and a quarter's block one larger building. */
+const HOUSES = 0.6;
+const BLOCKS = 0.55;
 
 /** One building of a settlement, a structure of its own: its type, the lattice corner of its foot, its side, its rank. */
 export interface Building {
@@ -207,34 +246,41 @@ export function settlementIn(
             return dry(base.fromU, base.fromV, BUILDING_SIDES.mill);
           })
       : undefined;
-  // A large village's market on the four lots of a quarter nearest the green, never the mill's, which no house then
-  // takes: the one place a higher level does not hold what the lower did.
+  // A quarter's block, the four lots of it nearest the green, holding one of the larger buildings now and then: never
+  // the mill's, and a harbour or a shipyard only by open water.
   const quarterOf = (lot: Lot) => [1, -1].indexOf(lot.su) * 2 + [1, -1].indexOf(lot.sv);
-  const first = Math.floor(roll(seed, 0, 0, 3) * 4);
-  const quarter =
-    rings >= 3
-      ? ([0, 1, 2, 3]
-          .map((step) => (first + step) % 4)
-          .find((one) => mill === undefined || quarterOf(mill.lot) !== one) ?? -1)
-      : -1;
-  const inQuarter = (lot: Lot) => quarterOf(lot) === quarter && Math.abs(lot.k) <= 2 && Math.abs(lot.j) <= 2;
+  const inBlock = (lot: Lot) => Math.abs(lot.k) <= 2 && Math.abs(lot.j) <= 2;
   const buildings: Building[] = [];
   const dress: Dress[] = [];
   const jetties: Jetty[] = [];
-  const market = lots.find((lot) => inQuarter(lot) && Math.abs(lot.k) === 1 && Math.abs(lot.j) === 1);
-  if (market !== undefined) {
-    // Against both streets, across the inner lot and into the next one out.
-    const side = BUILDING_SIDES.market;
-    const fromU = market.su === 1 ? market.fromU : market.fromU + LOT - side;
-    const fromV = market.sv === 1 ? market.fromV : market.fromV + LOT - side;
-    if (dry(fromU, fromV, side)) {
-      buildings.push({ type: 'market', u: fromU + side, v: fromV + side, side, rank: 0 });
-    }
+  const blocked = new Set<number>();
+  for (const quarter of rings >= 2 ? [0, 1, 2, 3] : []) {
+    const chance = roll(seed, quarter, 0, 5);
+    if (chance >= BLOCKS) continue;
+    const block = lots.filter((lot) => quarterOf(lot) === quarter && inBlock(lot));
+    if (mill !== undefined && block.includes(mill.lot)) continue;
+    const inner = block.find((lot) => Math.abs(lot.k) === 1 && Math.abs(lot.j) === 1)!;
+    const pool: readonly SettlementBuilding[] = block.some(wetBy)
+      ? [...ON_A_BLOCK, ...BY_OPEN_WATER]
+      : ON_A_BLOCK;
+    const what = pool[Math.floor(roll(seed, quarter, 0, 6) * pool.length)]!;
+    // Against both streets, across the inner lot and into the next ones out.
+    const side = BUILDING_SIDES[what];
+    const fromU = inner.su === 1 ? inner.fromU : inner.fromU + LOT - side;
+    const fromV = inner.sv === 1 ? inner.fromV : inner.fromV + LOT - side;
+    if (!dry(fromU, fromV, side)) continue;
+    buildings.push({ type: what, u: fromU + side, v: fromV + side, side, rank: chance });
+    blocked.add(quarter);
   }
   for (const { lot, rank } of kept) {
-    if (inQuarter(lot) && buildings.some((one) => one.type === 'market')) continue;
+    if (blocked.has(quarterOf(lot)) && inBlock(lot)) continue;
     const shore = type === 'fishingVillage' && wetBy(lot);
-    const what: SettlementBuilding = mill !== undefined && lot === mill.lot && !shore ? 'mill' : 'house';
+    const what: SettlementBuilding =
+      mill !== undefined && lot === mill.lot && !shore
+        ? 'mill'
+        : shore || roll(seed, lot.k, lot.j, 7) < HOUSES
+          ? 'house'
+          : ON_A_LOT[Math.floor(roll(seed, lot.k, lot.j, 9) * ON_A_LOT.length)]!;
     const side = BUILDING_SIDES[what];
     const base = baseIn(lot, side);
     if (!dry(base.fromU, base.fromV, side)) continue;

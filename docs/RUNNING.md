@@ -508,7 +508,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   wiped, stands no castle on a village or across a road. `--villages.house-bots=false` leaves them
   out. See decision record 0108 and `docs/plans/house-bots.md`.
 - The world's own villages: **settlements**. The world opens with them too, after the house bots: every building of
-  every settlement site `world:settlements` laid out for the world's master - its houses, a mill, a market - a
+  every settlement site `world:settlements` laid out for the world's master - about half houses, half the catalogue's
+  other buildings - a
   structure each, held by nobody, named by its settlement - *house in the village by the ruins of Dantzic* - and none
   on a site nearer a bot's castle than the balance's `settlements.clearKm`. Nothing is raised for the settlement
   itself: it is its buildings, its name and its radius. Each building is a `villages.structure.raised.v1` in the
@@ -520,7 +521,7 @@ stage alone, with none of the debug panel in it (decision record 0079).
   From zoom 7.5 in the page lays each out by `settlementIn`, once the ground about it has come - its square, its
   streets and green, and by the water its jetties, net racks and boats, the dress no structure is, from
   `public/art/settlements.webp` - and every structure whose place its radius holds, the nearest middle's where two
-  do, stands among the trees together with it as one thing on its square: its houses, its mill and its market, drawn
+  do, stands among the trees together with it as one thing on its square: its houses and the rest, drawn
   as structures are, and a castle founded inside it too. A structure inside one is worn into the settlement's own
   ground rather than given a yard and paths of its own. A click on any building opens that structure's window, which
   says the settlement it is *part of* and links to it; a click on a settlement's own ground, its jetties, net racks or
@@ -836,8 +837,11 @@ and `-- --drop` takes them off; by hand only.
   unit, its height and its rivers - its towns of 1790 and `world/settlements.json`: so many beside every ruin by its
   tier, just past its overgrowth, and the rest in open country on good ground, each kept where nothing within the
   spacing scores better, fishing villages by the sea, a lake or a large river. Each stands on a corner of the ground's
-  lattice under an id that outlives a repaint, and is laid out as the page lays it out: a house on each lot kept, a
-  mill on the best lot by a river or a lake from a village up, a market by the green of a large village. Each site goes
+  lattice under an id that outlives a repaint, and is laid out as the page lays it out: on each lot kept a house six
+  times in ten, else a watchtower, a mine or a printing house; a mill on the best lot by the water from a village up;
+  and from a village up, about half the time, a quarter's four inner lots one block holding a larger building of the
+  catalogue, a harbour or a shipyard among them only by open water - never a castle or a palace. It prints how many
+  of each type it lays out. Each site goes
   into `world/ground/<master>/settlements.json`, which only the game server reads, with its radius and its buildings,
   each of which the opening raises as a structure of its own; and as a record of eight bytes into
   `world/stands/<master>/settlements/`, every tile its circle touches, which the game server sends through the fog,

@@ -76,7 +76,8 @@ stands. It is cropped and scaled to 160 tall and drawn about 44 pixels tall for 
 more and keep the shape bold. A pennant flies from the middle of its top.
 
 **A settlement is its structures, dressed by the water, and a road crosses a river by a bridge.** A settlement's
-houses, mill and market are structures, painted as structures are: the house is `world/sprites/structures/house-<culture>.png`.
+houses and every other building of it are structures of the catalogue, painted as structures are: the house is
+`world/sprites/structures/house-<culture>.png`.
 What dresses a fishing village and the bridges are cut by the same tool into an atlas of their own,
 `public/art/settlements.webp`. `world/sprites/settlements/` holds `<piece>-<culture>.png` for a net rack and a boat -
 a smack, a felucca, a sampan, a dugout - in each of the four cultures, and `jetty-u.png` and `jetty-v.png`, a jetty

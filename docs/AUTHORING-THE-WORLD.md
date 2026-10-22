@@ -122,7 +122,8 @@ lake or a large river over a share of its ground is a fishing village. Paint far
 a marsh over one and it goes, and the sites more than two spacings away stay where they were, under the same ids, so
 the settlement the world raised on one is never raised again somewhere else. `levels` is how many of them are
 villages and large villages rather than hamlets, `radius` how far from its middle a structure is part of one, a
-level at a time, and `words` what each kind is called in each culture, which its name begins with. Each is laid out in houses, with a mill by its water and a market in a large one, every building a
+level at a time, and `words` what each kind is called in each culture, which its name begins with. Each is laid out about half in houses and half in the catalogue's other buildings, a mill by its water, a larger one
+on a quarter's block from a village up, every building a
 structure the world raises. See `docs/plans/settlements-and-roads.md` and `docs/plans/houses-bridges-and-road-render.md`.
 
 **And the roads between them follow the ground you painted.** Nobody paints a road either: `world:roads` lays them

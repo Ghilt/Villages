@@ -187,8 +187,10 @@ buildings' pictures at zoom 7.5. The earth's colour and how much it covers are l
 settled by eye. See decision record 0105 and `docs/plans/worked-ground.md`.
 
 **The countryside the fall spared is lived in.** Villages and fishing villages stand about the ruins and across the
-good land between them, each a cluster of houses in its culture's form - a mill by the water in a village, a market in
-a large one, net racks and boats by the water in a fishing village, every building a structure of its own - on ground
+good land between them, each a cluster of buildings in its culture's form - about half of them houses, the rest any of
+the catalogue's: a watchtower, a mine, a printing house, a mill by the water, and from a village up now and then a
+manor, a fort, a prison, a cathedral, an abbey, a market, a manufactory, an academy, or by open water a harbour or a
+shipyard; net racks and boats by the water in a fishing village; every building a structure of its own - on ground
 of its own: trodden grass more than earth, a ragged rim, its two streets
 paler through the middle, a little yard at each door and a lane to the street. They read as small beside a castle and
 a ruined city, and further out than zoom 7.5 a village, like its houses, is not marked. **Roads join them**, and run on to the ruins'

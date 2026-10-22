@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import { BUILDING_SIDES, SETTLEMENT_SIDES, settlementIn } from './settlementLayout.ts';
 import { parseStructureCatalogue } from './structures.ts';
-import type { Building, DiamondFooting, FootingOf, LaidOut } from './settlementLayout.ts';
+import type { DiamondFooting, FootingOf, LaidOut } from './settlementLayout.ts';
 import { inSquare, onStreet, parseSettlements } from './settlements.ts';
 
 const land: FootingOf = () => 'land';
@@ -42,30 +42,41 @@ describe('a settlement laid out', () => {
     expect(settlementIn('structure-b', 'village', 3, 'european', 0, 0, land)).not.toEqual(one);
   });
 
-  it('holds every building of a lower level at a higher one, and more about them, but where the market stands', () => {
-    for (const id of ['a', 'b', 'c', 'd', 'e']) {
+  it('holds every building of a lower level at a higher one, and more, but where a block takes a larger one', () => {
+    for (const id of 'abcdefghijklmnop') {
       const hamlet = laid(settlementIn(id, 'village', 1, 'islamic', 10, -4, land)).buildings;
       const village = laid(settlementIn(id, 'village', 2, 'islamic', 10, -4, land)).buildings;
       const large = laid(settlementIn(id, 'village', 3, 'islamic', 10, -4, land)).buildings;
-      const market = large.find((one) => one.type === 'market');
-      const underMarket = (building: Building) =>
-        market !== undefined &&
-        baseOf(building).some(([u, v]) => baseOf(market).some(([mu, mv]) => mu === u && mv === v));
-      for (const building of hamlet) expect(village).toContainEqual(building);
-      for (const building of village) if (!underMarket(building)) expect(large).toContainEqual(building);
+      // A village's quarter may be one block holding a larger building, where the hamlet had a lot.
+      const larger = village.filter((one) => one.side > 3);
+      const underLarger = (building: { u: number; v: number; side: number }) =>
+        larger.some((one) =>
+          baseOf(building).some(([u, v]) => baseOf(one).some(([bu, bv]) => bu === u && bv === v)),
+        );
+      for (const building of hamlet) if (!underLarger(building)) expect(village).toContainEqual(building);
+      for (const building of village) expect(large).toContainEqual(building);
       expect(large.length).toBeGreaterThan(hamlet.length);
     }
   });
 
-  it('is built of houses, and the catalogue gives each building the side it is laid out at', () => {
+  it("is built about half of houses and half of the catalogue's other buildings, each at the catalogue's side", () => {
     const catalogue = parseStructureCatalogue(
       readFileSync(new URL('../../../../world/catalogues/structures.json', import.meta.url), 'utf8'),
     );
     for (const [type, side] of Object.entries(BUILDING_SIDES)) {
       expect(catalogue.types.find((one) => one.type === type)?.footprint[0], type).toBe(side);
     }
-    const buildings = laid(settlementIn('a', 'village', 2, 'european', 0, 0, land)).buildings;
-    expect(buildings.filter((one) => one.type === 'house').length).toBeGreaterThan(3);
+    const all = Array.from({ length: 80 }, (_, at) => at).flatMap(
+      (at) => laid(settlementIn(`site:${at}`, 'village', 1 + (at % 3), 'european', 0, 0, land)).buildings,
+    );
+    const houses = all.filter((one) => one.type === 'house').length / all.length;
+    expect(houses).toBeGreaterThan(0.4);
+    expect(houses).toBeLessThan(0.7);
+    expect(new Set(all.map((one) => one.type)).size).toBeGreaterThan(8);
+    // Never what a house raises for its seat, nor what is wider than two lots.
+    expect(all.some((one) => (one.type as string) === 'castle' || (one.type as string) === 'palace')).toBe(
+      false,
+    );
   });
 
   it('keeps its streets clear and every building inside its square', () => {
@@ -80,25 +91,25 @@ describe('a settlement laid out', () => {
     }
   });
 
-  it('stands a market only in a large village, and a mill only by the water from a village up, one of each at most', () => {
+  it('stands a larger building only on a block from a village up, a harbour or shipyard only by open water, and a mill only by the water', () => {
     const riverside: FootingOf = (u) => (u === 6 ? 'river' : u === 7 ? 'water' : 'land');
+    const larger = (one: { side: number }) => one.side > 3;
     let mills = 0;
-    let markets = 0;
-    for (const id of ['a', 'b', 'c', 'd', 'e', 'f']) {
+    let blocks = 0;
+    for (const id of 'abcdefghijklmnopqrst') {
       const hamlet = laid(settlementIn(id, 'village', 1, 'african', 0, 0, riverside)).buildings;
-      expect(hamlet.some((one) => one.type !== 'house')).toBe(false);
+      expect(hamlet.some(larger)).toBe(false);
       const dry = laid(settlementIn(id, 'village', 3, 'african', 0, 0, land)).buildings;
       expect(dry.some((one) => one.type === 'mill')).toBe(false);
+      expect(dry.some((one) => one.type === 'harbour' || one.type === 'shipyard')).toBe(false);
       const large = laid(settlementIn(id, 'village', 3, 'african', 0, 0, riverside)).buildings;
       expect(large.filter((one) => one.type === 'mill').length).toBeLessThanOrEqual(1);
-      expect(large.filter((one) => one.type === 'market').length).toBeLessThanOrEqual(1);
+      expect(large.filter(larger).length).toBeLessThanOrEqual(4);
       mills += large.filter((one) => one.type === 'mill').length;
-      markets += large.filter((one) => one.type === 'market').length;
-      const village = laid(settlementIn(id, 'village', 2, 'african', 0, 0, riverside)).buildings;
-      expect(village.some((one) => one.type === 'market')).toBe(false);
+      blocks += dry.filter(larger).length;
     }
     expect(mills).toBeGreaterThan(0);
-    expect(markets).toBeGreaterThan(0);
+    expect(blocks).toBeGreaterThan(0);
   });
 
   it('stands no building on water, and a fishing village its houses by the water with a jetty out into it', () => {

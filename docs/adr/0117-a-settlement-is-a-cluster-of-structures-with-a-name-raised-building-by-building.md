@@ -65,3 +65,15 @@ itself.**
   not in a cell's snapshot.
 - **A word and a pane for the settlement's window.** Adam: no vocabulary for what is only a way of looking at a thing;
   it is the inspect window, as for everything else.
+
+## Amendment, 2026-10-22: every kind of structure, about half of them houses
+
+Adam, seeing settlements of houses alone: they should have all kinds of structures from the catalogue, randomised,
+like half houses and half the others. So a lot kept holds a house six times in ten, and otherwise a building of the
+catalogue small enough for a lot - a watchtower, a mine, a printing house - and from a village up each quarter's four
+inner lots are, a little over half the time, one block holding one of the larger: a manor, a fort, a prison, a cathedral, an
+abbey, a market, a manufactory, an academy, and where the block is by open water a harbour or a shipyard too. The mill
+keeps its lot by the water. Never a castle, which is what a house raises for its seat, and never a palace, whose base
+is wider than two lots. Of the 37,461 buildings on the master of 2026-10-03, 54% come out houses. The block replaces the large village's market,
+and like it is the one place a higher level does not hold what the lower did: a village's block takes its hamlet's
+lot. Every roll is still of the place about the middle, so the bake and the page lay out the same.
