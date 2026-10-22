@@ -9,6 +9,7 @@ import { drawOrder, overlaps } from './drawOrder';
 import type { Building, Tree } from './drawOrder';
 import { tilted } from './footprint';
 import type { GroundFootprint, GroundPoint } from './footprint';
+import { removeAll } from './leaving';
 import { createVeil } from './veil';
 
 /*
@@ -41,7 +42,8 @@ export interface TreeParticles {
   readonly particleChildren: Particle[];
   texture: Texture | null;
   addParticle(...particles: Particle[]): void;
-  removeParticle(particle: Particle): void;
+  /** Every one of them taken out at once, in one pass over the trees (`leaving.ts`). */
+  removeParticles(gone: ReadonlySet<Particle>): void;
   /** The trees were sorted or moved, so the slices are cut again before the next frame is drawn. */
   update(): void;
   setFromMatrix(matrix: Matrix): void;
@@ -188,9 +190,8 @@ export function createStandingLayer(
       all.push(...particles);
       unsliced = true;
     },
-    removeParticle(particle: Particle): void {
-      const at = all.indexOf(particle);
-      if (at >= 0) all.splice(at, 1);
+    removeParticles(gone: ReadonlySet<Particle>): void {
+      removeAll(all, gone);
       unsliced = true;
     },
     update(): void {

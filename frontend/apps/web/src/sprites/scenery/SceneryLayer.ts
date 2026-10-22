@@ -6,9 +6,12 @@ import * as camera from '../../geometry/cameraMath';
 import { readAtlas } from '../atlas';
 import { LONGEST_STEP_MS, PRESENCE_MS, easeTowards, midTrade } from '../twoForms';
 import { biomeAt, cellOf, type ArtAtlasFile, type Kind, type ScatteredPoint } from '@villages/world';
+import { sceneryCellKey } from '../ground/growing';
+import { removeAll } from '../standing/leaving';
 import { createStandingLayer } from '../standing/StandingLayer';
 import type { SceneryShaders } from '../trees/TreesLayer';
 import { currentPointsOf, noteDrawn, pointsOf, sceneryMap, sceneryTally } from './sceneryCells';
+import { sceneryReport } from './sceneryReport';
 import { MOST_CUT_AT_ONCE, groupCount, splitByGroup, thresholdOf, wantedAt, worthDrawing } from './showing';
 
 /**
@@ -97,6 +100,12 @@ export function createSceneryLayer(sway: SceneryShaders) {
   const layers = new Container();
   layers.addChild(shadowLayer);
   const shown = new Map<string, Held>();
+  /**
+   * The trees and the shadows dropped since they were last let go: taken out of their layers together, in one pass
+   * over each (`leaving.ts`), before anything reads the layers again.
+   */
+  const goingTrees = new Set<Particle>();
+  const goingShades = new Set<Particle>();
   let frames: Texture[] = [];
   /** Where each kind stands in its own frame, as a fraction of it, and its tint: how it bends in the wind. */
   let feet: { x: number; y: number; tint: number }[] = [];
@@ -218,59 +227,22 @@ export function createSceneryLayer(sway: SceneryShaders) {
     }
   }
 
-  /**
-   * What the layer actually has, from a console. `window.villagesScenery()`.
-   *
-   * The counters in the panel say how many particles there are; this says whether they could possibly be
-   * drawn - the atlas they point at, which groups are in, and where the first one stands. The difference
-   * between "none were made" and "they were made and are invisible" is otherwise a guess.
-   */
-  function report() {
-    const first = [...shown.values()][0];
-    const firstMade = first === undefined ? undefined : [...first.made.values()][0]?.[0];
-    return {
-      atlas:
-        artFile === null ? null : { width: artFile.width, height: artFile.height, version: artFile.version },
+  const report = () =>
+    sceneryReport({
+      cells: shown.values(),
+      artFile,
       frames: frames.length,
-      groups: {
-        of: alphaOf.length,
-        in: [...alphaOf].filter((a) => a > 0).length,
-        // Part-way in or out. Nought means the screen has settled, which it always does: the fade is
-        // a function of the clock and not of the zoom, so there is nowhere to rest half-drawn.
-        moving: [...alphaOf].filter((a) => a > 0 && a < 1).length,
-        part: [...alphaOf].filter((a) => a > 0 && a < 1).map((a) => Number(a.toFixed(3))),
-      },
-      particles: [...shown.values()].reduce(
-        (sum, cell) => sum + [...cell.made.values()].reduce((n, made) => n + made.length, 0),
-        0,
-      ),
-      // Whether the layer is drawn farthest first, which is the thing an eye catches as a tree standing
-      // in front of one it should be behind, and cannot tell from a single wrong frame.
-      ordered: container.particleChildren.every(
-        (particle, index, all) => index === 0 || camera.fartherFirst(all[index - 1]!, particle) <= 0,
-      ),
-      tilt: tiltKey,
-      shadows: {
-        drawn: shadowsDrawn,
-        strength: shadowStrength,
-        frames: shadowFrames.length,
-        particles: shadowLayer.particleChildren.length,
-        blend: shadowLayer.blendMode,
-      },
-      first:
-        firstMade === undefined
-          ? null
-          : { x: firstMade.x, y: firstMade.y, alpha: firstMade.alpha, scaleY: firstMade.scaleY },
-      container: container.report(),
-    };
-  }
+      alphaOf,
+      standing: container,
+      shadowLayer,
+      tiltKey,
+      shadows: { drawn: shadowsDrawn, strength: shadowStrength, frames: shadowFrames.length },
+    });
   if (import.meta.env.DEV) {
     (window as unknown as { villagesScenery?: typeof report }).villagesScenery = report;
   }
 
-  function keyOf(cellX: number, cellY: number): string {
-    return `${cellX}/${cellY}`;
-  }
+  const keyOf = sceneryCellKey;
 
   function makeGroup(cell: Held, group: number, alpha: number): void {
     const points = cell.points.get(group);
@@ -334,10 +306,23 @@ export function createSceneryLayer(sway: SceneryShaders) {
       return;
     }
     for (const particle of shade) {
-      shadowLayer.removeParticle(particle);
+      goingShades.add(particle);
     }
     cell.shade.delete(group);
     unsorted = true;
+  }
+
+  /** Every tree and shadow dropped since the last time, out of the layers at once. */
+  function letGo(): void {
+    if (goingTrees.size > 0) {
+      container.removeParticles(goingTrees);
+      goingTrees.clear();
+    }
+    if (goingShades.size > 0) {
+      removeAll(shadowLayer.particleChildren, goingShades);
+      shadowLayer.update();
+      goingShades.clear();
+    }
   }
 
   /**
@@ -373,9 +358,21 @@ export function createSceneryLayer(sway: SceneryShaders) {
       return;
     }
     for (const particle of made) {
-      container.removeParticle(particle);
+      goingTrees.add(particle);
     }
     cell.made.delete(group);
+  }
+
+  /** A cell's groups dropped and split again by where the scenery grows now, and made again at the fade they were at. */
+  function recut(cell: Held): void {
+    for (const group of [...cell.made.keys()]) {
+      dropGroup(cell, group);
+    }
+    cell.points = splitByGroup(growing(cell.all));
+    for (const group of cell.points.keys()) {
+      const alpha = alphaOf[group] ?? 0;
+      if (alpha > 0) makeGroup(cell, group, alpha);
+    }
   }
 
   /**
@@ -397,6 +394,7 @@ export function createSceneryLayer(sway: SceneryShaders) {
           }
         }
       }
+      letGo();
     } else if (want) {
       for (const cell of shown.values()) {
         for (const [group, shade] of cell.shade) {
@@ -416,6 +414,7 @@ export function createSceneryLayer(sway: SceneryShaders) {
         dropGroup(cell, group);
       }
     }
+    letGo();
     shown.clear();
     alphaOf.fill(0);
   }
@@ -647,6 +646,7 @@ export function createSceneryLayer(sway: SceneryShaders) {
         }
       }
 
+      letGo();
       // Farthest first, over the whole layer rather than a cell at a time: a cell that arrives later is
       // not nearer. Sorted in place and handed back once, which is one upload and only on a frame that
       // added a particle or turned the camera.
@@ -679,19 +679,18 @@ export function createSceneryLayer(sway: SceneryShaders) {
     },
 
     /**
-     * Where the scenery may grow from now on: everywhere, with null, or only where this says. Every cell in
-     * view is sorted again at once and its groups are made afresh on the next frame at the fade they were
-     * at, so what stays does not flicker and what the house has newly seen stands as the haze over it lifts.
+     * Where the scenery may grow from now on: everywhere, with null, or only where this says. The cells `touched`
+     * names (`cellsTouched`), or every cell held when it names none, are cut again at once and made afresh in this
+     * same call at the fade they were at, so what stays does not flicker, no tree is left on ground a road or a yard
+     * has just worn, and what the house has newly seen stands as the haze over it lifts. A cell not touched keeps its
+     * trees: the ground under them is as it was. See decision record 0118.
      */
-    setGround(next: ((x: number, y: number) => boolean) | null): void {
+    setGround(next: ((x: number, y: number) => boolean) | null, touched?: ReadonlySet<string>): void {
       grows = next;
-      for (const cell of shown.values()) {
-        for (const group of [...cell.made.keys()]) {
-          dropGroup(cell, group);
-        }
-        cell.points = splitByGroup(growing(cell.all));
+      for (const [key, cell] of shown) {
+        if (touched === undefined || touched.has(key)) recut(cell);
       }
-      unsorted = true;
+      letGo();
     },
 
     /** Everything drawn is taken out, for a change that makes every cell wrong. */

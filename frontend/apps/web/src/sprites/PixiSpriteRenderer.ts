@@ -10,7 +10,7 @@ import { createCritterLayer } from './critters/CritterLayer';
 import { createFogLayer } from './FogLayer';
 import { createFrameClock } from './frameClock';
 import { createGroundLayer, type GroundLayer } from './ground/GroundLayer';
-import { revealedBy, whereSceneryGrows } from './ground/growing';
+import { cellsTouched, revealedBy, whereSceneryGrows } from './ground/growing';
 import { createHazeLayer } from './hazeLayer';
 import { createLandLayer } from './land/LandLayer';
 import { soonest, type Layer } from './layer';
@@ -211,7 +211,11 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     if (was === null || next.worked !== was.worked) {
       ground?.setWorked(next.worked);
       roads?.setWorked(next.worked);
-      scenery?.setGround(whereSceneryGrows(groundField, next.worked));
+      // Only the woods whose ground came or went are cut again: a road tile arriving touches a few (0118).
+      scenery?.setGround(
+        whereSceneryGrows(groundField, next.worked),
+        was === null ? undefined : cellsTouched(was.worked, next.worked),
+      );
     }
   }
 
