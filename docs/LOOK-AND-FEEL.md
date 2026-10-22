@@ -219,8 +219,8 @@ between - so it meets its road head on, and as long as the river is wide; along 
 crosses - low dry-stone walls green with moss in the wet west, bare and pale round the Mediterranean, in runs and
 never everywhere, and between them tufts of grass, ferns, heather or scrub, boulders, a cactus at the desert's edge, in
 clumps - a stretch bare, a stretch full, a stretch in patches; a road stops where the house's revealed ground stops,
-and it is the real world, coming in with the trees and the buildings and never drawn further out than they are. The bridge is painted; the house, the jetties, the net racks and the boats
-are placeholders until asseterizer paints them. See decision records 0114 and 0115 and `docs/plans/settlements-and-roads.md`.
+and it is the real world, coming in with the trees and the buildings and never drawn further out than they are. The bridge and the house are painted; the jetties, the net racks and the
+boats are placeholders until asseterizer paints them. See decision records 0114 and 0115 and `docs/plans/settlements-and-roads.md`.
 
 **The land moves.** Close in, from zoom 8.5, on the grassland - steppe, meadow, savanna and alpine meadow - gusts
 travel down the wind as soft bands, and where one blows the grass shows its paler side; closer still, tufts stand up
