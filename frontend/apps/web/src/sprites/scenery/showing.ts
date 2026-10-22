@@ -144,6 +144,20 @@ export function worthBuilding(
 }
 
 /**
+ * How long the woods' arrival waits, at most, for every cell in view to be built, so they come in together rather than
+ * a few cells at a time; a cell still not built when the wait is over fades in on its own once it is (`lateFades.ts`).
+ */
+export const HOLD_FOR_WHOLE_MS = 250;
+
+/**
+ * Whether the woods' arrival waits this frame: wanted and not begun, the view not all built yet, and not waited for
+ * `HOLD_FOR_WHOLE_MS`. Once begun it never waits again, so a fade is never stopped part-way.
+ */
+export function arrivalWaits(wanted: boolean, begun: boolean, viewBuilt: boolean, waitedMs: number): boolean {
+  return wanted && !begun && !viewBuilt && waitedMs < HOLD_FOR_WHOLE_MS;
+}
+
+/**
  * The cells of a view in the order they are built: the middle first, so whatever the camera comes in on is ready
  * before the edges it is leaving.
  */

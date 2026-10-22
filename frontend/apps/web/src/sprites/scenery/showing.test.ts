@@ -6,6 +6,8 @@ import { CELL } from '@villages/world';
 import { EXAMPLE_KINDS as KINDS } from '@villages/world/testing';
 import {
   BUILT_AHEAD,
+  HOLD_FOR_WHOLE_MS,
+  arrivalWaits,
   MOST_CELLS,
   STEPS,
   groupCount,
@@ -152,5 +154,15 @@ describe('the order the woods are built in', () => {
         { x: 4, y: 2 },
       ]),
     );
+  });
+});
+
+describe('the woods arriving whole', () => {
+  it('waits for the view to be built, but not long, and never once begun', () => {
+    expect(arrivalWaits(true, false, false, 0)).toBe(true);
+    expect(arrivalWaits(true, false, true, 0)).toBe(false);
+    expect(arrivalWaits(true, false, false, HOLD_FOR_WHOLE_MS)).toBe(false);
+    expect(arrivalWaits(true, true, false, 0)).toBe(false);
+    expect(arrivalWaits(false, false, false, 0)).toBe(false);
   });
 });

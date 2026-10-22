@@ -44,6 +44,8 @@ export interface TreeParticles {
   addParticle(...particles: Particle[]): void;
   /** Every one of them taken out at once, in one pass over the trees (`leaving.ts`). */
   removeParticles(gone: ReadonlySet<Particle>): void;
+  /** The woods' arrival, laid over every tree at once by the slices' own alpha: no tree's own fade is written. */
+  setAlpha(alpha: number): void;
   /** The trees were sorted or moved, so the slices are cut again before the next frame is drawn. */
   update(): void;
   setFromMatrix(matrix: Matrix): void;
@@ -77,6 +79,8 @@ export function createStandingLayer(
   const view = new Container();
   const slices: ParticleContainer[] = [];
   const all: Particle[] = [];
+  /** The woods' arrival over every tree, laid on the slices: nought to one. */
+  let alpha = 1;
   let texture: Texture | null = null;
   let matrix: Matrix | null = null;
   let things: readonly StandingThing[] = [];
@@ -103,6 +107,7 @@ export function createStandingLayer(
   function slice(at: number): ParticleContainer {
     while (slices.length <= at) {
       const made = new ParticleContainer(options);
+      made.alpha = alpha;
       if (texture !== null) made.texture = texture;
       if (matrix !== null) made.setFromMatrix(matrix);
       slices.push(made);
@@ -200,6 +205,11 @@ export function createStandingLayer(
     removeParticles(gone: ReadonlySet<Particle>): void {
       removeAll(all, gone);
       unsliced = true;
+    },
+    setAlpha(next: number): void {
+      if (next === alpha) return;
+      alpha = next;
+      for (const one of slices) one.alpha = next;
     },
     update(): void {
       unsliced = true;

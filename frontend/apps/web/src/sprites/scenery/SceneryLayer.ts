@@ -13,9 +13,12 @@ import type { SceneryShaders } from '../trees/TreesLayer';
 import { currentPointsOf, noteDrawn, pointsOf, sceneryMap, sceneryTally } from './sceneryCells';
 import { kindFrames } from './kindFrames';
 import { sceneryReport } from './sceneryReport';
+import { viewCells } from './viewCells';
+import { createLateFades } from './lateFades';
 import {
   BUILD_MS,
   MOST_CUT_AT_ONCE,
+  arrivalWaits,
   groupCount,
   nearestFirst,
   splitByGroup,
@@ -54,8 +57,11 @@ import {
  * - **A tree is built once while its cell is held.** The worn ground and the fog only say whether it shows:
  *   one on a road, a yard or ground the house has not revealed is held at a fade of nought, and a change of
  *   either asks again only the trees of the cells it touched (decision record 0118).
- * - **A fade touches only the groups that are moving.** Standing still costs nothing, and a fade costs
- *   one group's particles rather than every particle on the screen.
+ * - **The arrival is one fade over the whole wood**, the trees' slices' and the shadows' own alpha, since
+ *   every kind arrives at the one zoom (0096): no tree's own fade is written while the woods come in or go.
+ *   A tree carries a fade of its own only to be hidden on worn ground, or when its wood was built after the
+ *   woods had arrived, which then fades in by a clock of its own (`lateFades.ts`); and the arrival waits,
+ *   briefly, for every cell in view to be built, so the woods come in together (`HOLD_FOR_WHOLE_MS`).
  *
  * Cells come and go as the view moves over them, so panning across a boundary costs one cell and not a
  * screenful.
@@ -122,6 +128,13 @@ export function createSceneryLayer(sway: SceneryShaders) {
   const bare = new Set<Particle>();
   /** Whether the woods are built now: from `BUILT_AHEAD` before they arrive, a little sticky either way. */
   let built = false;
+  /** The woods built after the woods had arrived, each fading in on its own. */
+  const late = createLateFades<Held>();
+  /** How far the woods have arrived, nought to one: the one fade over every tree and shadow. */
+  let arrival = 0;
+  /** Whether every cell in view was built by the end of the last frame, and since when the arrival has waited. */
+  let viewBuilt = false;
+  let waitingSince: number | null = null;
   let frames: Texture[] = [];
   /** Where each kind stands in its own frame, as a fraction of it, and its tint: how it bends in the wind. */
   let feet: { x: number; y: number; tint: number }[] = [];
@@ -151,11 +164,14 @@ export function createSceneryLayer(sway: SceneryShaders) {
   let grows: ((x: number, y: number) => boolean) | null = null;
   const growsAt = (point: ScatteredPoint) => grows === null || grows(point.x, point.y);
 
-  /** A tree or a shadow at the fade it should be drawn at: its group's, or nought on ground it may not grow on. */
-  function lay(particle: Particle, hidden: boolean, alpha: number): void {
+  /**
+   * A tree or a shadow at its own fade: whole, or part-way in for a wood built late, and nought on ground it may not
+   * grow on. The arrival is laid over it by its layer.
+   */
+  function lay(particle: Particle, hidden: boolean, fade: number): void {
     if (hidden) bare.add(particle);
     else bare.delete(particle);
-    particle.alpha = hidden ? 0 : alpha;
+    particle.alpha = hidden ? 0 : fade;
   }
 
   /** How much of each group is on the screen, nought to one, moved by the clock and not by the zoom. */
@@ -230,11 +246,14 @@ export function createSceneryLayer(sway: SceneryShaders) {
 
   const keyOf = sceneryCellKey;
 
-  function makeGroup(cell: Held, group: number, alpha: number): void {
+  /** A cell's group built: fading in by a clock of its own when the woods are already showing and it is not `inPlace`. */
+  function makeGroup(cell: Held, group: number, inPlace = false): void {
     const points = cell.points.get(group);
     if (points === undefined || points.length === 0) {
       return;
     }
+    if (arrival > 0 && !inPlace) late.start(cell, group);
+    const fade = late.of(cell, group);
     const made = points.map((point) => {
       const texture = frames[point.kind] ?? frames[0]!;
       const foot = feet[point.kind] ?? { x: 0.5, y: 1, tint: sway.tintOf('') };
@@ -248,14 +267,14 @@ export function createSceneryLayer(sway: SceneryShaders) {
       // Sized in world units, so the container's one transform turns it into pixels.
       particle.scaleY = point.height / texture.height;
       particle.scaleX = particle.scaleY;
-      lay(particle, !growsAt(point), alpha);
+      lay(particle, !growsAt(point), fade);
       return particle;
     });
     cell.made.set(group, made);
     container.addParticle(...made);
     unsorted = true;
     if (shadowsDrawn) {
-      makeShadows(cell, group, alpha);
+      makeShadows(cell, group);
     }
   }
 
@@ -263,7 +282,7 @@ export function createSceneryLayer(sway: SceneryShaders) {
    * A group's shadows: one a sprite, on the same foot and at the same size, since the shadow was cut from
    * the sprite at the sprite's own pixels, and as dark as the lever says times as far in as the group is.
    */
-  function makeShadows(cell: Held, group: number, alpha: number): void {
+  function makeShadows(cell: Held, group: number): void {
     const points = cell.points.get(group);
     if (points === undefined || points.length === 0 || cell.shade.has(group)) {
       return;
@@ -278,7 +297,7 @@ export function createSceneryLayer(sway: SceneryShaders) {
       particle.anchorY = foot.y;
       particle.scaleY = point.height / standing.height;
       particle.scaleX = particle.scaleY;
-      lay(particle, !growsAt(point), alpha * shadowStrength);
+      lay(particle, !growsAt(point), late.of(cell, group));
       return particle;
     });
     cell.shade.set(group, shade);
@@ -349,18 +368,23 @@ export function createSceneryLayer(sway: SceneryShaders) {
       bare.delete(particle);
     }
     cell.made.delete(group);
+    late.forget(cell, group);
   }
 
-  /** Every tree and shadow of a cell shown or hidden by where the scenery grows now, at its group's fade. */
+  /** Every tree and shadow of a cell shown or hidden by where the scenery grows now, at its own fade. */
   function showWhereItGrows(cell: Held): void {
     for (const [group, made] of cell.made) {
       const points = cell.points.get(group)!;
-      const alpha = alphaOf[group] ?? 0;
-      made.forEach((particle, index) => lay(particle, !growsAt(points[index]!), alpha));
-      cell.shade
-        .get(group)
-        ?.forEach((particle, index) => lay(particle, !growsAt(points[index]!), alpha * shadowStrength));
+      const fade = late.of(cell, group);
+      made.forEach((particle, index) => lay(particle, !growsAt(points[index]!), fade));
+      cell.shade.get(group)?.forEach((particle, index) => lay(particle, !growsAt(points[index]!), fade));
     }
+  }
+
+  /** A late group's trees and shadows at the fade it has come to, the bare ones still hidden. */
+  function fadeTo(cell: Held, group: number, fade: number): void {
+    for (const particle of cell.made.get(group) ?? []) particle.alpha = bare.has(particle) ? 0 : fade;
+    for (const particle of cell.shade.get(group) ?? []) particle.alpha = bare.has(particle) ? 0 : fade;
   }
 
   /**
@@ -376,22 +400,13 @@ export function createSceneryLayer(sway: SceneryShaders) {
       for (const cell of shown.values()) {
         for (const group of [...cell.made.keys()]) {
           if (want) {
-            makeShadows(cell, group, alphaOf[group] ?? 0);
+            makeShadows(cell, group);
           } else {
             dropShadows(cell, group);
           }
         }
       }
       letGo();
-    } else if (want) {
-      for (const cell of shown.values()) {
-        for (const [group, shade] of cell.shade) {
-          const alpha = (alphaOf[group] ?? 0) * strength;
-          for (const particle of shade) {
-            particle.alpha = bare.has(particle) ? 0 : alpha;
-          }
-        }
-      }
     }
     shadowLayer.visible = shadowsDrawn;
   }
@@ -404,7 +419,9 @@ export function createSceneryLayer(sway: SceneryShaders) {
     }
     letGo();
     shown.clear();
+    late.clear();
     alphaOf.fill(0);
+    arrival = 0;
   }
 
   return {
@@ -505,25 +522,8 @@ export function createSceneryLayer(sway: SceneryShaders) {
         biome: map.names[biomeAt(map, centre.x * WORLD_MASTER_WIDTH, centre.y * WORLD_MASTER_WIDTH)] ?? '',
       });
 
-      // Which cells the view stands on, in world units, with a ring so a pan finds them cut.
-      //
-      // Tilted, the ground under the window is a turned rectangle stretched along the lean, so the
-      // window's four corners are carried back onto the ground through the same tilt that placed the feet,
-      // which is exact at any angle and the old arithmetic exactly when the camera is flat and north-up.
-      const halfWide = view.width / 2 / layer.scale;
-      const halfHigh = view.height / 2 / layer.scale;
-      const corners = [
-        [-halfWide, -halfHigh],
-        [halfWide, -halfHigh],
-        [-halfWide, halfHigh],
-        [halfWide, halfHigh],
-      ].map(([x = 0, y = 0]) => camera.untiltGround(x, y, tilt));
-      const eastUnits = corners.map(({ east }) => centre.x * WORLD_MASTER_WIDTH + east);
-      const southUnits = corners.map(({ south }) => centre.y * WORLD_MASTER_WIDTH + south);
-      const fromX = cellOf(Math.min(...eastUnits)) - RING;
-      const toX = cellOf(Math.max(...eastUnits)) + RING;
-      const fromY = cellOf(Math.min(...southUnits)) - RING;
-      const toY = cellOf(Math.max(...southUnits)) + RING;
+      // Which cells the view stands on, with a ring so a pan finds them cut (`viewCells.ts`).
+      const { fromX, toX, fromY, toY } = viewCells(view, centre, layer.scale, tilt, RING);
 
       // Nothing is built until the camera is close enough that something is about to show, and the view is
       // small enough to be worth walking. Pulled right back a cell is eight pixels across and the view
@@ -542,16 +542,21 @@ export function createSceneryLayer(sway: SceneryShaders) {
       const now = performance.now();
       const elapsed = Math.min(LONGEST_STEP_MS, lastAt === 0 ? LONGEST_STEP_MS : now - lastAt);
       lastAt = now;
-      const moved: number[] = [];
+      // The arrival waits a moment for the view's woods to be built, so they come in together.
+      const wantedOf = (group: number) =>
+        wantedAt(thresholdOf(map.kinds, group, laterBy), view.zoom, alphaOf[group]! > 0);
+      const wanting = Array.from(alphaOf, (_, group) => wantedOf(group)).some(Boolean);
+      const begun = arrival > 0;
+      waitingSince = wanting && !begun ? (waitingSince ?? now) : null;
+      const waits = arrivalWaits(wanting, begun, viewBuilt, now - (waitingSince ?? now));
+      if (waits) askForAFrame();
       let moving = 0;
+      arrival = 0;
       for (let group = 0; group < alphaOf.length; group += 1) {
-        const was = alphaOf[group]!;
-        const want = wantedAt(thresholdOf(map.kinds, group, laterBy), view.zoom, was > 0) ? 1 : 0;
-        const next = easeTowards(was, want, elapsed, PRESENCE_MS);
-        if (next !== was) {
-          alphaOf[group] = next;
-          moved.push(group);
-        }
+        const want = !waits && wantedOf(group) ? 1 : 0;
+        const next = easeTowards(alphaOf[group]!, want, elapsed, PRESENCE_MS);
+        alphaOf[group] = next;
+        arrival = Math.max(arrival, next);
         if (midTrade(next)) {
           moving += 1;
         }
@@ -564,11 +569,15 @@ export function createSceneryLayer(sway: SceneryShaders) {
       const wanted = new Set<string>();
       const until = performance.now() + BUILD_MS;
       let cutting = 0;
+      let unbuilt = 0;
       for (const { x: cellX, y: cellY } of nearestFirst(fromX, toX, fromY, toY)) {
         const key = keyOf(cellX, cellY);
         wanted.add(key);
         let cell = shown.get(key);
+        // The view itself, without the ring about it, is what the arrival waits for.
+        const inView = cellX > fromX && cellX < toX && cellY > fromY && cellY < toY;
         if (cell === undefined) {
+          if (inView) unbuilt += 1;
           // Only so many new cells a frame. Cutting one is finished after the frame's budget is reckoned, so
           // they are counted rather than timed.
           if (cutting >= MOST_CUT_AT_ONCE) {
@@ -593,19 +602,22 @@ export function createSceneryLayer(sway: SceneryShaders) {
             }
             cell.all = now;
             cell.points = splitByGroup(now);
-            for (const group of cell.points.keys()) makeGroup(cell, group, alphaOf[group]!);
+            for (const group of cell.points.keys()) makeGroup(cell, group, true);
           }
         }
-        // Built whether or not the group has arrived: hidden at its fade until it does.
+        // Built whether or not the group has arrived: hidden by the arrival until it does.
         for (const group of cell.points.keys()) {
           if (cell.made.has(group)) continue;
           if (performance.now() > until) {
             askForAFrame();
+            if (inView) unbuilt += 1;
             break;
           }
-          makeGroup(cell, group, alphaOf[group]!);
+          makeGroup(cell, group);
         }
       }
+      viewBuilt = unbuilt === 0;
+      if (late.step(elapsed, fadeTo)) askForAFrame();
 
       for (const [key, cell] of shown) {
         if (wanted.has(key)) {
@@ -614,25 +626,13 @@ export function createSceneryLayer(sway: SceneryShaders) {
         for (const group of [...cell.made.keys()]) {
           dropGroup(cell, group);
         }
+        late.forget(cell);
         shown.delete(key);
       }
 
-      // Pass three: the fade, over the groups that moved and nothing else.
-      for (const group of moved) {
-        const alpha = alphaOf[group]!;
-        for (const cell of shown.values()) {
-          const made = cell.made.get(group);
-          if (made === undefined) {
-            continue;
-          }
-          for (const particle of made) {
-            particle.alpha = bare.has(particle) ? 0 : alpha;
-          }
-          for (const particle of cell.shade.get(group) ?? []) {
-            particle.alpha = bare.has(particle) ? 0 : alpha * shadowStrength;
-          }
-        }
-      }
+      // Pass three: the arrival, laid over every tree and shadow by their layers.
+      container.setAlpha(arrival);
+      shadowLayer.alpha = arrival * shadowStrength;
 
       letGo();
       // Farthest first, over the whole layer rather than a cell at a time: a cell that arrives later is
@@ -646,8 +646,8 @@ export function createSceneryLayer(sway: SceneryShaders) {
         unsorted = false;
       }
 
-      // Built ahead and hidden until a kind has begun to arrive, and not drawn at all till then.
-      if (!alphaOf.some((alpha) => alpha > 0)) {
+      // Built ahead and hidden until the woods have begun to arrive, and not drawn at all till then.
+      if (arrival === 0) {
         layers.visible = false;
       }
 
