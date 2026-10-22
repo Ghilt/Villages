@@ -64,3 +64,18 @@ touched, and builds nothing.
 | Rule | What keeps it | When it holds |
 |---|---|---|
 | A tree is built once while its cell is held: the worn ground and the fog only say whether it shows | `setGround` shows or hides the trees of the cells touched, a change of the fog all of them; a cell is built again only when its stands change | At the instant the scene is applied |
+
+## Amendment, 2026-10-22: the roads read once
+
+Every step of the camera changes the cells the page follows, and the roads, their roadside, the bridges and the worn
+ground each answered it by gathering every piece of road held again, four times over, and laying them out anew, the
+roadside walking all ten thousand of its things every frame. Now each layer of stands has a **version**
+(`standsVersion` in `net/stands.ts`) that moves only when one of its tiles is kept new, changes or is let go, and the
+pieces held are worked out once a version and shared by the four (`roadsHeld` in `sprites/ground/roads.ts`). The
+roads are worn into the ground again only when they change, the width moves, the sight changes, or ground comes in
+under a road that waited on it (`rememberingWornRoads`). The roadside keeps its things by the cell they stand in and
+a frame walks only the cells about the view.
+
+| Rule | What keeps it | When it holds |
+|---|---|---|
+| Every piece of road held is drawn, worn and lined once, and nothing of a tile let go stays drawn | The layer's version moves whenever a tile comes, changes or goes; every reader works again when it has moved, before it next draws | A moment after the tile arrives or goes: before the next frame, so never seen |

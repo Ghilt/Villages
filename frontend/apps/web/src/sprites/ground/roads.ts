@@ -1,6 +1,7 @@
 import { GROUND_LATTICE, alongU, alongV, frameOf, readRoadKind, worldXOf, worldYOf } from '@villages/world';
 import type { RoadChunk, RoadsMapFile } from '@villages/world';
 
+import { heldStandsOf, standsVersion } from '../../net/stands';
 import type { GroundOf } from './paths';
 import { WORKED } from './worked';
 import type { Worked } from './worked';
@@ -55,6 +56,26 @@ export function piecesHeld(chunks: Iterable<RoadChunk>): HeldPiece[] {
   return pieces;
 }
 
+let held: { version: number; pieces: HeldPiece[] } | null = null;
+
+/**
+ * Every piece of road the page holds, worked out once a version of the `roads` layer and shared by everything that
+ * reads them: the roads drawn, their roadside, the bridges and the worn ground. Each worked it out again at every
+ * step of the camera, four times over (decision record 0118).
+ */
+export function roadsHeld(): readonly HeldPiece[] {
+  const version = standsVersion('roads');
+  if (held?.version !== version) {
+    held = {
+      version,
+      pieces: piecesHeld(
+        [...heldStandsOf('roads')].flatMap((tile) => (tile.roads === undefined ? [] : [tile.roads])),
+      ),
+    };
+  }
+  return held.pieces;
+}
+
 /** How far a point lies from a straight piece, both in world units. */
 function awayFrom(x: number, y: number, piece: HeldPiece): number {
   const dx = piece.bx - piece.ax;
@@ -97,6 +118,54 @@ export function wearRoads(
     }
   }
   return worn;
+}
+
+/**
+ * `wearRoads` that hands back the very map it handed back last while the pieces, the widths, the width lever, the
+ * ground and the sight are the ones they were, and the ground known (`known`) has grown only since a wear that left no
+ * diamond waiting on ground not known yet: then nothing more of the ground can change it. A tile of ground arriving
+ * wore every road again (decision record 0118).
+ */
+export function rememberingWornRoads(): (
+  pieces: readonly HeldPiece[],
+  widths: RoadsMapFile['widths'],
+  scale: number,
+  ground: GroundOf,
+  revealed: ((x: number, y: number) => boolean) | null,
+  known: number,
+) => Map<number, Worked> {
+  let last: {
+    pieces: readonly HeldPiece[];
+    widths: RoadsMapFile['widths'];
+    scale: number;
+    ground: GroundOf;
+    revealed: ((x: number, y: number) => boolean) | null;
+    known: number;
+    waiting: boolean;
+    worn: Map<number, Worked>;
+  } | null = null;
+  return (pieces, widths, scale, ground, revealed, known) => {
+    if (
+      last !== null &&
+      last.pieces === pieces &&
+      last.widths === widths &&
+      last.scale === scale &&
+      last.ground === ground &&
+      last.revealed === revealed &&
+      (last.known === known || !last.waiting)
+    ) {
+      return last.worn;
+    }
+    let waiting = false;
+    const asked: GroundOf = (u, v) => {
+      const footing = ground(u, v);
+      if (footing === null) waiting = true;
+      return footing;
+    };
+    const worn = wearRoads(pieces, widths, scale, asked, revealed);
+    last = { pieces, widths, scale, ground, revealed, known, waiting, worn };
+    return worn;
+  };
 }
 
 const files = new Map<string, Promise<RoadsMapFile | null>>();

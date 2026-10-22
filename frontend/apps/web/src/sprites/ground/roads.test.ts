@@ -5,7 +5,7 @@ import { bridgeKindByte, encodeRoads, roadKindByte } from '@villages/world/build
 import { decodeRoads } from '@villages/world';
 
 import type { GroundOf } from './paths';
-import { piecesHeld, wearRoads } from './roads';
+import { piecesHeld, rememberingWornRoads, wearRoads } from './roads';
 import { WORKED } from './worked';
 import { diamondKey, diamondOf } from './workedGround';
 
@@ -67,5 +67,26 @@ describe('the ground the roads keep clear', () => {
       256,
     );
     expect(piecesHeld([once, again])).toHaveLength(1);
+  });
+});
+
+describe('the roads worn, remembered', () => {
+  it('hands back the very map while the ground known grows and nothing of a road waited on it', () => {
+    const wear = rememberingWornRoads();
+    const pieces = [road];
+    const first = wear(pieces, WIDTHS, 1, land, null, 1);
+    expect(wear(pieces, WIDTHS, 1, land, null, 2)).toBe(first);
+    expect(wear(pieces, WIDTHS, 2, land, null, 2)).not.toBe(first);
+    expect(wear([road], WIDTHS, 2, land, null, 2)).not.toBe(first);
+  });
+
+  it('wears the roads again as the ground comes in under a road that waited on it', () => {
+    const wear = rememberingWornRoads();
+    let known = false;
+    const coming: GroundOf = () => (known ? 'land' : null);
+    const pieces = [road];
+    expect(wear(pieces, WIDTHS, 1, coming, null, 1).size).toBe(0);
+    known = true;
+    expect(wear(pieces, WIDTHS, 1, coming, null, 2).size).toBeGreaterThan(0);
   });
 });

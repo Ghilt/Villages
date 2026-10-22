@@ -43,6 +43,12 @@ const sent: Record<StandLayer, Map<number, SentStands>> = {
   roads: new Map(),
   settlements: new Map(),
 };
+/**
+ * Each layer's version: a number that moves whenever a tile of the layer is kept new, changes or is let go, and only
+ * then. A reader of a layer works it out again when the version has moved, rather than at every change of what is
+ * followed, which comes with every step of the camera (decision record 0118).
+ */
+const versions: Record<StandLayer, number> = { biome: 0, ruins: 0, roads: 0, settlements: 0 };
 /** The tiles under the cells being followed: the only ones the gateway sends, and so the only ones kept. */
 let coming = new Set<number>();
 const arrivals = new Set<(tile: number, stands: SentStands, layer: StandLayer) => void>();
@@ -86,6 +92,7 @@ export function standsArrived(
         ? { chunk: NO_STANDS, records, settlements: decodeSettlements(bytesOf(records), tileX, tileY, TILE) }
         : { chunk: decodeStands(bytesOf(records), tileX, tileY, TILE), records };
   held.set(tile, stands);
+  versions[layer] += 1;
   for (const told of arrivals) {
     told(tile, stands, layer);
   }
@@ -97,10 +104,11 @@ export function standsArrived(
  */
 export function followStandsUnder(cells: readonly string[]): void {
   coming = new Set(cells.flatMap(standTilesUnder));
-  for (const held of Object.values(sent)) {
+  for (const [layer, held] of Object.entries(sent) as [StandLayer, Map<number, SentStands>][]) {
     for (const tile of held.keys()) {
       if (!coming.has(tile)) {
         held.delete(tile);
+        versions[layer] += 1;
       }
     }
   }
@@ -141,6 +149,11 @@ export function onStandsFollowed(listener: () => void): () => void {
   return () => followings.delete(listener);
 }
 
+/** A layer's version, which moves whenever one of its tiles is kept new, changes or is let go. */
+export function standsVersion(layer: StandLayer): number {
+  return versions[layer];
+}
+
 /** Every tile of a layer held now, for whatever draws what was sent: the Info map's ruins. */
 export function heldStandsOf(layer: StandLayer): Iterable<SentStands> {
   return sent[layer].values();
@@ -161,5 +174,6 @@ export function forgetStands(): void {
   sent.ruins.clear();
   sent.roads.clear();
   sent.settlements.clear();
+  for (const layer of Object.keys(versions) as StandLayer[]) versions[layer] += 1;
   coming = new Set();
 }

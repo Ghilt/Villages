@@ -11,6 +11,7 @@ import {
   sentStandsOf,
   standsArrived,
   standsHeld,
+  standsVersion,
   tileKey,
 } from './stands';
 
@@ -164,5 +165,29 @@ describe('the stands the gateway sent', () => {
     standsArrived(70, 37, '');
     expect(after).toEqual([]);
     expect(told).toHaveLength(1);
+  });
+});
+
+describe('a layer of stands, by its version', () => {
+  afterEach(() => forgetStands());
+
+  it('moves when a tile of the layer comes, changes or goes, and not when what is followed moves over the same tiles', () => {
+    followStandsUnder([cellInside(70, 37)]);
+    const at = standsVersion('roads');
+    const biome = standsVersion('biome');
+
+    standsArrived(70, 37, recordsOf([oneStand(70 * 256 + 10, 37 * 256 + 20, 6)], 70, 37));
+    expect(standsVersion('biome')).toBe(biome + 1);
+    expect(standsVersion('roads')).toBe(at);
+
+    standsArrived(70, 37, recordsOf([oneStand(70 * 256 + 10, 37 * 256 + 20, 6)], 70, 37));
+    expect(standsVersion('biome')).toBe(biome + 1);
+
+    followStandsUnder([cellInside(70, 37), cellInside(70, 37)]);
+    expect(standsVersion('biome')).toBe(biome + 1);
+
+    followStandsUnder([]);
+    expect(standsVersion('biome')).toBe(biome + 2);
+    expect(standsVersion('roads')).toBe(at);
   });
 });

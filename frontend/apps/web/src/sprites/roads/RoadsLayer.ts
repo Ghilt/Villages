@@ -16,8 +16,8 @@ import type { RoadsMapFile } from '@villages/world';
 import { standingLayer } from '../../geometry/cameraMath';
 import type { CameraView } from '../../geometry/cameraMath';
 import { note } from '../../log/log';
-import { heldStandsOf, onStandsArrived, onStandsFollowed } from '../../net/stands';
-import { piecesHeld, roadsMap } from '../ground/roads';
+import { onStandsArrived, onStandsFollowed, standsVersion } from '../../net/stands';
+import { roadsHeld, roadsMap } from '../ground/roads';
 import { workedGroundStore } from '../ground/settings';
 import type { Worked } from '../ground/worked';
 import { createArrival } from '../arrival';
@@ -137,20 +137,20 @@ export function createRoadsLayer(
   let widths: RoadsMapFile['widths'] | null = null;
   let tilesRoot: string | null = null;
   let stale = true;
+  /** The version of the `roads` layer the stretches were worked out from: worked out again only when it moves. */
+  let readVersion = -1;
   let said = -1;
   const arrival = createArrival();
   const dirty = () => {
     stale = true;
     repaint();
   };
-  const stopArriving = onStandsArrived((_, __, layer) => layer === 'roads' && dirty());
-  const stopFollowing = onStandsFollowed(dirty);
+  const stopArriving = onStandsArrived((_, __, layer) => layer === 'roads' && repaint());
+  const stopFollowing = onStandsFollowed(repaint);
   const stopWatching = workedGroundStore.watch(dirty);
 
   function rebuild(): void {
-    const pieces = piecesHeld(
-      [...heldStandsOf('roads')].flatMap((tile) => (tile.roads === undefined ? [] : [tile.roads])),
-    );
+    const pieces = roadsHeld();
     strips =
       widths === null
         ? []
@@ -196,9 +196,11 @@ export function createRoadsLayer(
       const besides = roadside.draw(view, now, elapsed);
       const { on, strength, road } = workedGroundStore.get();
       const appear = arrival.step(view.zoom, elapsed);
-      if (stale) {
+      const version = standsVersion('roads');
+      if (stale || version !== readVersion) {
         rebuild();
         stale = false;
+        readVersion = version;
       }
       if (!on || appear === 0 || mesh === null) {
         sprite.visible = false;

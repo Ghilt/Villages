@@ -6,6 +6,7 @@ import {
   ROADSIDE_GROWTH_SCALE,
   alongU,
   alongV,
+  cellOf,
   biomeAt,
   frameOf,
   readRoadKind,
@@ -13,19 +14,21 @@ import {
 } from '@villages/world';
 import type { ArtAtlasFile, RoadsMapFile, SpriteMap } from '@villages/world';
 
-import { pixelsPerWorldUnit, standingLayer, tiltGround } from '../../geometry/cameraMath';
+import { pixelsPerWorldUnit, standingLayer, tiltGround, toMercatorExact } from '../../geometry/cameraMath';
 import type { CameraView } from '../../geometry/cameraMath';
 import { note } from '../../log/log';
-import { heldStandsOf, onStandsArrived, onStandsFollowed } from '../../net/stands';
+import { onStandsArrived, onStandsFollowed, standsVersion } from '../../net/stands';
 import { readAtlas } from '../atlas';
-import { piecesHeld, roadsMap } from '../ground/roads';
+import { roadsHeld, roadsMap } from '../ground/roads';
 import type { HeldPiece } from '../ground/roads';
 import { workedGroundStore } from '../ground/settings';
 import { WORKED } from '../ground/worked';
 import type { Worked } from '../ground/worked';
 import { diamondKey } from '../ground/workedGround';
 import type { Layer } from '../layer';
+import { sceneryCellKey } from '../ground/growing';
 import { spriteMap } from '../scenery/spriteMap';
+import { viewCells } from '../scenery/viewCells';
 import type { SettlementPictures } from '../settlements/settlementPictures';
 import { createArrival } from '../arrival';
 import { roadsideAlong } from './roadsideItems';
@@ -99,14 +102,20 @@ export function createRoadsideLayer(pictures: SettlementPictures, repaint: () =>
   let atlas: ImageSource | null = null;
   let items: RoadsideItem[] = [];
   let sprites: (Sprite | null)[] = [];
+  /** Each item's index by the cell of the scenery it stands in, so a frame walks only the cells about the view. */
+  let byCell = new Map<string, number[]>();
+  /** The items drawn last frame, to put away the ones the view has left. */
+  let drawn = new Set<number>();
   let stale = true;
+  /** The version of the `roads` layer the roadside was laid out from: laid out again only when it moves. */
+  let readVersion = -1;
   let said = -1;
   const dirty = () => {
     stale = true;
     repaint();
   };
-  const stopArriving = onStandsArrived((_, __, layer) => layer === 'roads' && dirty());
-  const stopFollowing = onStandsFollowed(dirty);
+  const stopArriving = onStandsArrived((_, __, layer) => layer === 'roads' && repaint());
+  const stopFollowing = onStandsFollowed(repaint);
   const stopWatching = workedGroundStore.watch(dirty);
 
   /** The growth's pictures, from the scenery's atlas, each kind as tall as it grows by the sprite map. */
@@ -136,11 +145,11 @@ export function createRoadsideLayer(pictures: SettlementPictures, repaint: () =>
     for (const sprite of sprites) sprite?.destroy();
     sprites = [];
     items = [];
+    byCell = new Map();
+    drawn = new Set();
     container.removeChildren();
     if (widths === null || map === null) return;
-    const pieces = piecesHeld(
-      [...heldStandsOf('roads')].flatMap((tile) => (tile.roads === undefined ? [] : [tile.roads])),
-    );
+    const pieces = roadsHeld();
     const scale = workedGroundStore.get().roadWidth;
     const of = map;
     items = roadsideAlong(pieces, widths, scale, {
@@ -153,6 +162,12 @@ export function createRoadsideLayer(pictures: SettlementPictures, repaint: () =>
     // Nearer the camera, further down the screen, drawn later.
     items.sort((one, other) => one.y - other.y || one.x - other.x);
     sprites = items.map(() => null);
+    items.forEach((item, at) => {
+      const key = sceneryCellKey(cellOf(item.x), cellOf(item.y));
+      const here = byCell.get(key);
+      if (here === undefined) byCell.set(key, [at]);
+      else here.push(at);
+    });
     if (items.length !== said) {
       said = items.length;
       note('roads', `${items.length} things along the roadside`);
@@ -194,37 +209,52 @@ export function createRoadsideLayer(pictures: SettlementPictures, repaint: () =>
         container.visible = false;
         return arrival.wants();
       }
-      if (stale) {
+      const version = standsVersion('roads');
+      if (stale || version !== readVersion) {
         rebuild();
         stale = false;
+        readVersion = version;
       }
       const { scale, x: left, y: top, tilt } = standingLayer(view);
       const perUnit = pixelsPerWorldUnit(view.zoom);
       container.visible = true;
       container.alpha = fade;
-      items.forEach((item, at) => {
-        const foot = tiltGround(item.x, item.y, tilt);
-        const x = foot.x * scale + left;
-        const y = foot.y * scale + top;
-        const near = x > -64 && x < view.width + 64 && y > -16 && y < view.height + 96;
-        let sprite = sprites[at] ?? null;
-        if (!near) {
-          if (sprite !== null) sprite.visible = false;
-          return;
+      // Only the cells about the view, two deep so a wall or a bush leaning in from beyond its edge is drawn.
+      const { fromX, toX, fromY, toY } = viewCells(view, toMercatorExact(view.center), scale, tilt, 2);
+      const now = new Set<number>();
+      for (let cellY = fromY; cellY <= toY; cellY += 1) {
+        for (let cellX = fromX; cellX <= toX; cellX += 1) {
+          for (const at of byCell.get(sceneryCellKey(cellX, cellY)) ?? []) {
+            const item = items[at]!;
+            const foot = tiltGround(item.x, item.y, tilt);
+            const x = foot.x * scale + left;
+            const y = foot.y * scale + top;
+            if (!(x > -64 && x < view.width + 64 && y > -16 && y < view.height + 96)) continue;
+            let sprite = sprites[at] ?? null;
+            if (sprite === null) {
+              const made = spriteOf(item);
+              if (made === null) continue;
+              sprite = made;
+              sprite.zIndex = at;
+              sprites[at] = sprite;
+              container.addChild(sprite);
+            }
+            sprite.visible = true;
+            sprite.position.set(x, y);
+            const tall =
+              'wall' in item ? (pictures.of(wallKey(item.wall, item.way))?.tall ?? 0.3) : sizeOf(item);
+            sprite.scale.set((tall * perUnit) / sprite.texture.height);
+            now.add(at);
+          }
         }
-        if (sprite === null) {
-          const made = spriteOf(item);
-          if (made === null) return;
-          sprite = made;
-          sprite.zIndex = at;
-          sprites[at] = sprite;
-          container.addChild(sprite);
+      }
+      for (const at of drawn) {
+        if (!now.has(at)) {
+          const sprite = sprites[at];
+          if (sprite) sprite.visible = false;
         }
-        sprite.visible = true;
-        sprite.position.set(x, y);
-        const tall = 'wall' in item ? (pictures.of(wallKey(item.wall, item.way))?.tall ?? 0.3) : sizeOf(item);
-        sprite.scale.set((tall * perUnit) / sprite.texture.height);
-      });
+      }
+      drawn = now;
       return arrival.wants();
     },
 

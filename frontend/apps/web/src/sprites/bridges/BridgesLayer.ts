@@ -5,8 +5,8 @@ import { BRIDGE_SPAN, bridgeKey } from '@villages/world';
 import { pixelsPerWorldUnit, standingLayer, tiltGround } from '../../geometry/cameraMath';
 import type { CameraView } from '../../geometry/cameraMath';
 import { note } from '../../log/log';
-import { heldStandsOf, onStandsArrived, onStandsFollowed } from '../../net/stands';
-import { piecesHeld } from '../ground/roads';
+import { standsVersion } from '../../net/stands';
+import { roadsHeld } from '../ground/roads';
 import type { Layer } from '../layer';
 import type { SettlementPictures } from '../settlements/settlementPictures';
 import type { StandingLayer, StandingThing } from '../standing/StandingLayer';
@@ -29,24 +29,15 @@ export interface BridgesLayer extends Layer {
 
 export function createBridgesLayer(pictures: SettlementPictures, standing: StandingLayer): BridgesLayer {
   const arrival = createArrival();
-  let stale = true;
-  const stopArriving = onStandsArrived((_, __, layer) => {
-    if (layer === 'roads') stale = true;
-  });
-  const stopFollowing = onStandsFollowed(() => {
-    stale = true;
-  });
+  /** The version of the `roads` layer the bridges were gathered from: gathered again only when it moves. */
+  let readVersion = -1;
   const held = new Map<string, { bridge: Bridge; sprite: Sprite | null }>();
   let said = -1;
   let drawn = 0;
 
   /** The bridges held again, a sprite each kept while its bridge is, made once its picture is read. */
   function gather(): void {
-    const now = bridgesAmong(
-      piecesHeld(
-        [...heldStandsOf('roads')].flatMap((tile) => (tile.roads === undefined ? [] : [tile.roads])),
-      ),
-    );
+    const now = bridgesAmong(roadsHeld());
     const ids = new Set(now.map((bridge) => bridge.id));
     for (const [id, one] of held) {
       if (ids.has(id)) continue;
@@ -64,9 +55,10 @@ export function createBridgesLayer(pictures: SettlementPictures, standing: Stand
 
   return {
     draw(view: CameraView, _now: number, elapsed: number): number | null {
-      if (stale) {
+      const version = standsVersion('roads');
+      if (version !== readVersion) {
         gather();
-        stale = false;
+        readVersion = version;
       }
       const fade = arrival.step(view.zoom, elapsed);
       const { scale, x: left, y: top, tilt } = standingLayer(view);
@@ -122,8 +114,6 @@ export function createBridgesLayer(pictures: SettlementPictures, standing: Stand
     report: () => ({ bridges: held.size, drawn }),
 
     destroy(): void {
-      stopArriving();
-      stopFollowing();
       for (const one of held.values()) one.sprite?.destroy();
       held.clear();
     },
