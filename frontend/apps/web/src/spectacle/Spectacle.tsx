@@ -31,6 +31,27 @@ export type Held = 'wide' | 'deep';
 
 const SIDES: readonly SideKey[] = ['a', 'b'];
 
+/**
+ * The seconds before the first that a run is watched from, so the first happening is seen coming: the time its seal
+ * forms in the mist and comes along its path.
+ */
+const APPROACH = -6;
+
+/** The field before a challenge begins: nobody on it, the tug even, nothing done, and no slice yet working. */
+function beforeItBegins(first: Field): Field {
+  return {
+    ...first,
+    tug: 0,
+    standing: [],
+    pulled: new Map(),
+    moments: [],
+    slices: {
+      a: first.slices.a.map((slice) => ({ ...slice, state: 'idle', bearing: [] })),
+      b: first.slices.b.map((slice) => ({ ...slice, state: 'idle', bearing: [] })),
+    },
+  };
+}
+
 /** Whom a happening lights: the slices that match it, and the ones that answer it, by house. */
 function lightsSaid(field: Field, houses: Readonly<Record<SideKey, HouseShown>>, boost: string): string {
   const said: string[] = [];
@@ -67,8 +88,8 @@ export function Spectacle({
   held?: Held;
 }) {
   const replay = useMemo(() => replayOf(run, sides, content), [run, sides, content]);
-  const clock = useReplayClock(replay.last, 0);
-  const field = replay.at(clock.second);
+  const clock = useReplayClock(replay.last, { start: APPROACH, first: APPROACH, autoplay: 900 });
+  const field = clock.second < 0 ? beforeItBegins(replay.at(0)) : replay.at(clock.second);
   const sheets = useSheets();
   const [open, setOpen] = useState<Record<SideKey, boolean>>({ a: true, b: true });
   const [opened, setOpened] = useState<string | null>(null);
@@ -170,6 +191,8 @@ export function Spectacle({
           onPause={clock.pause}
           onQuicken={clock.quicken}
           onShow={clock.show}
+          onToEnd={clock.toEnd}
+          seen={clock.seen}
           bands={bands}
           tug={replay.tug}
           ticks={ticks}
@@ -181,7 +204,15 @@ export function Spectacle({
         onClose={() => setHistory(false)}
         from={held === 'wide' ? 'right' : 'bottom'}
       >
-        <History run={run} tug={replay.tug} field={field} sides={sides} content={content} houses={houses} />
+        <History
+          run={run}
+          tug={replay.tug}
+          seen={clock.seen}
+          field={field}
+          sides={sides}
+          content={content}
+          houses={houses}
+        />
       </Drawer>
     </div>
   );

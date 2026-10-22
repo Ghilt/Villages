@@ -85,6 +85,21 @@
     text-overflow: ellipsis;
   }
 
+  .ui-replay__haze {
+    position: absolute;
+    top: -0.1rem;
+    right: 0;
+    height: 2.95rem;
+    pointer-events: none;
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--ui-cream) 10%, transparent) 0%,
+      color-mix(in srgb, var(--ui-cream) 22%, transparent) 30%,
+      color-mix(in srgb, var(--ui-cream) 14%, transparent) 100%
+    );
+    filter: blur(2px);
+  }
+
   .ui-replay__head {
     position: absolute;
     top: -0.1rem;

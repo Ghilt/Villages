@@ -16,13 +16,15 @@ const deltaSaid = (delta: number) =>
   delta === 0 ? '' : `${delta > 0 ? '+' : '−'}${numberSaid(Math.abs(delta))}`;
 
 /**
- * A challenge's history, as its drawer holds it: the tug second by second with the second shown marked, what happened
+ * A challenge's history, as its drawer holds it: the tug second by second as far as it has been played, the second shown
+ * marked, what happened
  * in that second in words - the same words the inspect page's table of moments says - and every slice's numbers and
  * state. Decision record 0116.
  */
 export function History({
   run,
   tug,
+  seen,
   field,
   sides,
   content,
@@ -30,6 +32,8 @@ export function History({
 }: {
   run: Run;
   tug: readonly number[];
+  /** The furthest second played to; the chart stops there. */
+  seen: number;
   field: Field;
   sides: Readonly<Record<SideKey, readonly SliceView[]>>;
   content: Challenges;
@@ -38,7 +42,7 @@ export function History({
   const called = summonNames(run.summons, content);
   return (
     <div className="spectacle-history">
-      <TugChart tug={tug} second={field.second} first={houses.a} other={houses.b} />
+      <TugChart tug={tug} second={field.second} seen={seen} first={houses.a} other={houses.b} />
       <h4 className="ui-caps spectacle-history__heading">
         second {field.second} · {field.happening.aspects.map(aspectName).join(' and ')}
       </h4>

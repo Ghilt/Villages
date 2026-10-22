@@ -446,8 +446,11 @@ A line each: what it is for, its variants, and where on the page it is.
   700, 350 or 140 milliseconds - and to the end, every one a `MarkButton` on Adam's word of 2026-10-21; the
   happenings as bands of their aspects' colours with their names, the tug drawn over them as a line with the first
   side's end at the top, a gilt tick where something arrived and a velvet one where it fell; and the scrub, a range
-  the arrow keys step a second at a time. Held by whoever shows it; `useReplayClock` is the clock, counted from when
-  it began rather than ticked, stopping at the last second and starting again from the first. In the `bar.replay`
+  the arrow keys step a second at a time. Watched for the first time it shows nothing past the furthest second
+  `seen` - the line, the bands and the ticks stop there under a haze - the scrub reaches back over what has been
+  seen, and to the end shows the rest. Held by whoever shows it; `useReplayClock` is the clock, counted from when
+  it began rather than ticked, remembering the furthest second played to, playing by itself after a moment if asked,
+  from a second before the first for a moment of approach, stopping at the last and starting again from there. In the `bar.replay`
   recipe. **`TugChart`**, beside it, is the tug second by second larger, the first side's end at the top and the other's
   at the bottom, each named in its colour, a hairline at the second shown: what a challenge's history opens with.
   `ui/replay/replayClock.ts` is their arithmetic. *Challenges*.

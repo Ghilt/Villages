@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import type { CSSProperties } from 'react';
 
 import { Channels } from '../../ui/diorama/Channels';
@@ -64,10 +63,8 @@ function Font() {
 
 /** Happenings coming out of the mist along their path to a font, played, scrubbed and played again. */
 function Travelling() {
-  const clock = useReplayClock(LAST, 0);
+  const clock = useReplayClock(LAST, { autoplay: 600 });
   const structures = useAtlas<Atlas>('structures');
-  const { play } = clock;
-  useEffect(() => play(), [play]);
   const palace =
     structures !== null && structures !== 'missing' ? structures.frames['palace@european'] : undefined;
   const pictures: Standing[] =
@@ -170,6 +167,8 @@ function Travelling() {
         onPause={clock.pause}
         onQuicken={clock.quicken}
         onShow={clock.show}
+        onToEnd={clock.toEnd}
+        seen={clock.seen}
         bands={bands}
         tug={Array.from({ length: LAST + 1 }, () => 0)}
       />

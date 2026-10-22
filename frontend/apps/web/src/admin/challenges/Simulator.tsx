@@ -172,23 +172,6 @@ function Fought({
           {towardSaid(batch.meanTug)}. The first run, below, is the seed's.
         </p>
       )}
-      <p className="challenges-outcome">
-        seed <span className="inspect-key">{seed}</span>{' '}
-        <button type="button" className="inspect-button" onClick={() => onAgain(seed)}>
-          keep this seed
-        </button>{' '}
-        {ended} in second {outcome.second}, the tug {towardSaid(outcome.tug)}, {won}; {moments.length} moments
-      </p>
-      {outcome.gains.map((gain, at) => (
-        <p key={`gain-${at}`} className="inspect-note">
-          gained: {gain.side.toUpperCase()} {gain.amount} {gain.resource}, by {gain.effect}
-        </p>
-      ))}
-      {outcome.losses.map((loss, at) => (
-        <p key={`loss-${at}`} className="inspect-note">
-          lost: {loss.side.toUpperCase()} {loss.name} {loss.became}, {loss.effectiveness}% effectiveness
-        </p>
-      ))}
       {batch === undefined && content !== null && (
         <>
           <p className="challenges-held">
@@ -206,6 +189,7 @@ function Fought({
           </p>
           <div className={`challenges-spectacle challenges-spectacle--${held}`}>
             <Spectacle
+              key={`${seed}-${moments.length}`}
               run={answer.challenge}
               sides={draft}
               content={content}
@@ -215,6 +199,23 @@ function Fought({
           </div>
         </>
       )}
+      <p className="challenges-outcome">
+        seed <span className="inspect-key">{seed}</span>{' '}
+        <button type="button" className="inspect-button" onClick={() => onAgain(seed)}>
+          keep this seed
+        </button>{' '}
+        {ended} in second {outcome.second}, the tug {towardSaid(outcome.tug)}, {won}; {moments.length} moments
+      </p>
+      {outcome.gains.map((gain, at) => (
+        <p key={`gain-${at}`} className="inspect-note">
+          gained: {gain.side.toUpperCase()} {gain.amount} {gain.resource}, by {gain.effect}
+        </p>
+      ))}
+      {outcome.losses.map((loss, at) => (
+        <p key={`loss-${at}`} className="inspect-note">
+          lost: {loss.side.toUpperCase()} {loss.name} {loss.became}, {loss.effectiveness}% effectiveness
+        </p>
+      ))}
       {batch === undefined ? (
         <TugChart tugs={tugBySecond(moments, progression.seconds)} progression={progression} ends={ends} />
       ) : (

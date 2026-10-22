@@ -21,7 +21,7 @@ import { Part, Specimen, Specimens } from './Specimen';
 
 /** A replay held here, its clock the library's own. */
 function LiveReplay({ start = 26 }: { start?: number }) {
-  const clock = useReplayClock(60, start);
+  const clock = useReplayClock(60, { start, autoplay: start === 0 ? 600 : undefined });
   return (
     <ReplayBar
       second={clock.second}
@@ -32,6 +32,8 @@ function LiveReplay({ start = 26 }: { start?: number }) {
       onPause={clock.pause}
       onQuicken={clock.quicken}
       onShow={clock.show}
+      onToEnd={clock.toEnd}
+      seen={clock.seen}
       bands={BANDS}
       tug={TUG}
       ticks={TICKS}

@@ -40,3 +40,13 @@ export function linePoints(tug: readonly number[], width: number, height: number
     })
     .join(' ');
 }
+
+/** The stretches of a replay's happenings that have been seen: those begun by the furthest second seen, cut there. */
+export function seenBands<B extends { readonly from: number; readonly to: number }>(
+  bands: readonly B[],
+  seen: number,
+): B[] {
+  return bands
+    .filter((band) => band.from <= seen)
+    .map((band) => ({ ...band, to: Math.min(band.to, Math.max(seen, band.from)) }));
+}

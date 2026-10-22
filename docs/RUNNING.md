@@ -1044,8 +1044,10 @@ and `-- --drop` takes them off; by hand only.
   Generosity, over eight happenings of a minute. **run** has the server's engine fight it out with the catalogue in force - not edits not
   yet saved - from the seed typed, or from one it draws when the box is empty, and shows what it came to: the seed,
   with **keep this seed** to fight the same challenge again, how it ended and in which second, the tug toward the side
-  it favours, who won, what was gained and lost; the run's **spectacle**, the challenge played out in the square seen
-  as the map sees it (decision record 0116): the map's palace, market and manor at the back, each side's speaker on a
+  it favours, who won, what was gained and lost - under the run's **spectacle**, which stands first and plays by
+  itself from a moment before the first second, as if for the first time, showing nothing past the furthest second
+  played until to the end is pressed: the challenge played out in the square seen as the map sees it (decision record
+  0116): the map's palace, market and manor at the back, each side's speaker on a
   platform at the back of its bank - A on the left in lapis, B on the right in vermilion - its summons beside it as
   they come, turning and falling, a thing on the line standing as the map's own picture of it, and twenty townsfolk
   between who walk to whoever is winning them, the share of them the tug's; over it the tug bar and the happening and

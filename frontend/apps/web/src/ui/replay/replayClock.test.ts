@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { linePoints, nextPace, PACE_MS, scrubbedTo, secondAt, shareAlong } from './replayClock';
+import { linePoints, nextPace, PACE_MS, scrubbedTo, secondAt, seenBands, shareAlong } from './replayClock';
 
 describe('the replay’s clock', () => {
   it('goes round its three paces, slowest first', () => {
@@ -40,5 +40,25 @@ describe('the tug drawn along the replay', () => {
   it('draws nothing for nothing, and a single second at the left', () => {
     expect(linePoints([], 100, 20)).toBe('');
     expect(linePoints([50], 100, 20)).toBe('0.0,5.0');
+  });
+});
+
+describe('what has been seen of a replay', () => {
+  const bands = [
+    { from: 0, to: 15, name: 'Holy' },
+    { from: 15, to: 30, name: 'Reason' },
+    { from: 30, to: 45, name: 'Diplomacy' },
+  ];
+
+  it('is the happenings begun by the furthest second seen, the one going on cut there', () => {
+    expect(seenBands(bands, 20)).toEqual([
+      { from: 0, to: 15, name: 'Holy' },
+      { from: 15, to: 20, name: 'Reason' },
+    ]);
+  });
+
+  it('is the first happening alone at the first second, and every one once the last is seen', () => {
+    expect(seenBands(bands, 0)).toEqual([{ from: 0, to: 0, name: 'Holy' }]);
+    expect(seenBands(bands, 45)).toEqual(bands);
   });
 });
