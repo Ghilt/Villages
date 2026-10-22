@@ -112,13 +112,6 @@ export function Spectacle({
       : standingOf(field, arrangement, sheets, sides, houses, content);
   const happenings = run.progression.happenings.map((aspects) => aspects.filter(isAspect));
   const jolt = joltAt(clock.second, starts, field);
-  const channelJolt =
-    jolt === undefined
-      ? undefined
-      : {
-          key: jolt.key,
-          lit: jolt.to.map((one) => ({ path: one.side === 'a' ? 1 : 2, colour: one.colour })),
-        };
   const chipJolt = (slice: SliceNow) => {
     const colour = joltColour(slice);
     return jolt === undefined || colour === null ? {} : { jolt: { key: jolt.key, colour } };
@@ -131,11 +124,7 @@ export function Spectacle({
           ground={
             <>
               {arrangement.ground}
-              <Channels
-                scene={arrangement.scene}
-                paths={[arrangement.path, arrangement.channels.a, arrangement.channels.b]}
-                {...(channelJolt === undefined ? {} : { jolt: channelJolt })}
-              />
+              <Channels scene={arrangement.scene} paths={[arrangement.path]} />
             </>
           }
           pictures={drawn.pictures}

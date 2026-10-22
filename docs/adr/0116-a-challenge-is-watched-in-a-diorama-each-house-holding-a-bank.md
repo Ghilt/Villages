@@ -75,3 +75,18 @@ path, as the seal's look and nothing else. The happening box over the stage goes
 **Nothing past the furthest second played is shown.** A run plays by itself from a moment before its first second;
 the replay and the history stop at the furthest second reached, the rest under haze, and to the end shows it all.
 Where a seal stands is a pure function of the second shown, as the field is, so scrubbing back shows it where it was.
+
+## Amended 2026-10-22: the venue is laid on the map's lattice
+
+Adam's word after seeing the seals cross the square: the ground is drawn as the map's own grid, so the map's pictures fit
+it, and the scene is laid out by that grid; the seals are a little smaller; and the grooves from the receptacle to the
+platforms go, what strikes the slices instead to come.
+
+**A venue is laid on the map's lattice, a world unit to a cell.** Its ground is the lattice the map's ground is painted
+on, turned twenty-six degrees and squashed as the camera sees it closest in, so its cells are the skewed diamonds of
+the map and not a two-to-one pattern. A building stands on the front corner of its footprint as tall as the map draws
+it at its first level, a tree as tall as its kind, a figure three world units, in the middle of a cell; a platform and
+a receptacle are blocks of whole cells; the happenings' path runs along the cells' sides, a leg at a time and turning
+square. The second house's places are the first's mirrored and moved into the cell each falls in, since the turned
+lattice has no mirror of its own. `ui/diorama/lattice.ts` is the arithmetic, `LatticeGround` the ground, and a test holds
+the square to it: no two figures in a cell, none on a platform or the font, every leg along one axis.

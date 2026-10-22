@@ -10,6 +10,7 @@ import { aspectShown, borneOf, speakerOf } from './said';
 import { building, scenery } from './sheets';
 import type { Sheets } from './sheets';
 import type { HouseShown } from './said';
+import { blockPlaced, PLATFORM } from './venues/blocks';
 import { townsfolkPlaces, townsfolkSides } from './venues/townsfolk';
 import type { Arrangement, Point } from './venues/venue';
 
@@ -23,53 +24,29 @@ const ON_THE_LINE: Readonly<Record<string, string>> = {
   'industry.works': 'manufactory',
 };
 
-/** A side's summons in the order they came, each with the place it takes. */
+/**
+ * A side's summons in the order they came, each with the place it takes: when there are more than places, the next
+ * round stands two cells further out along the lattice, left for the first house and right for the second.
+ */
 function placesOf(
   standing: readonly OnField[],
   side: SideKey,
-  places: readonly Point[],
+  arrangement: Arrangement,
 ): (OnField & Point)[] {
+  const places = arrangement.summons[side];
+  const out = side === 'a' ? -2 : 2;
   return standing
     .filter((one) => one.side === side && !one.onTheLine)
     .sort((one, other) => one.arrived - other.arrived || one.serial - other.serial)
     .map((one, at) => {
       const place = places[at % places.length]!;
-      return { ...one, x: place.x + Math.floor(at / places.length) * 34, y: place.y };
+      const round = Math.floor(at / places.length) * out;
+      return {
+        ...one,
+        x: place.x + round * arrangement.lattice.u.x,
+        y: place.y + round * arrangement.lattice.u.y,
+      };
     });
-}
-
-/** A drawn platform for a house's speaker, its top a diamond turned as the map's are: a stand-in until it is painted. */
-function Platform() {
-  const a = 92;
-  const h = 34;
-  return (
-    <svg
-      width={2 * a}
-      height={a + h}
-      viewBox={`0 0 ${2 * a} ${a + h}`}
-      aria-hidden="true"
-      style={{ display: 'block' }}
-    >
-      <polygon
-        points={`${a},0 ${2 * a},${a / 2} ${a},${a} 0,${a / 2}`}
-        fill="#a7835a"
-        stroke="#2b1d10"
-        strokeWidth="1.5"
-      />
-      <polygon
-        points={`0,${a / 2} ${a},${a} ${a},${a + h} 0,${a / 2 + h}`}
-        fill="#6f5236"
-        stroke="#2b1d10"
-        strokeWidth="1.5"
-      />
-      <polygon
-        points={`${a},${a} ${2 * a},${a / 2} ${2 * a},${a / 2 + h} ${a},${a + h}`}
-        fill="#8a6a46"
-        stroke="#2b1d10"
-        strokeWidth="1.5"
-      />
-    </svg>
-  );
 }
 
 /** Everything standing in the venue at a second: the map's pictures, the platforms, speakers, summons, townsfolk. */
@@ -96,19 +73,16 @@ export function standingOf(
   for (const side of SIDES) {
     const facing = side === 'a' ? 'east' : 'west';
     const platform = arrangement.platforms[side];
-    placed.push({
-      id: `platform-${side}`,
-      x: platform.x,
-      y: platform.y + 92 / 2 + 34,
-      depth: platform.y - 1,
-      node: <Platform />,
-    });
+    const lift = PLATFORM.lift * arrangement.cell;
+    placed.push(
+      blockPlaced(`platform-${side}`, arrangement.lattice, platform, PLATFORM.cells, lift, PLATFORM.faces),
+    );
     const speaker = speakerOf(sides[side]);
     const spoke = field.slices[side].reduce((sum, slice) => sum + (field.pulled.get(slice.actor) ?? 0), 0);
     placed.push({
       id: `speaker-${side}`,
       x: platform.x,
-      y: platform.y + 6,
+      y: platform.y - lift,
       node: (
         <FieldFigure
           kind="keyFigure"
@@ -120,7 +94,7 @@ export function standingOf(
         />
       ),
     });
-    for (const one of placesOf(field.standing, side, arrangement.summons[side])) {
+    for (const one of placesOf(field.standing, side, arrangement)) {
       const pulled = field.pulled.get(`#${one.serial}`);
       placed.push({
         id: `summon-${one.serial}`,

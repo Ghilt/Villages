@@ -2,6 +2,8 @@ import type { CSSProperties } from 'react';
 
 import { Diorama } from '../../ui/diorama/Diorama';
 import type { Placed, Standing } from '../../ui/diorama/Diorama';
+import { latticeAt, latticeOf } from '../../ui/diorama/lattice';
+import { LatticeGround } from '../../ui/diorama/LatticeGround';
 import { FieldFigure } from '../../ui/fieldFigure/FieldFigure';
 import { useAtlas } from '../frame/Atlas';
 import type { Atlas } from '../frame/Atlas';
@@ -45,26 +47,10 @@ function picture(
   return standing;
 }
 
-/** A square's cobbles, the diamonds turned as the map's ground is. */
-function Cobbles({ width, height }: { width: number; height: number }) {
-  return (
-    <svg viewBox={`0 0 ${width} ${height}`} aria-hidden="true">
-      <defs>
-        <pattern id="showcase-cobbles" width="40" height="20" patternUnits="userSpaceOnUse">
-          <path d="M0 10 L20 0 L40 10 L20 20 Z" fill="none" stroke="rgba(60,48,30,0.16)" />
-        </pattern>
-        <linearGradient id="showcase-cobbles-light" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#c4b593" />
-          <stop offset="1" stopColor="#d3c6a6" />
-        </linearGradient>
-      </defs>
-      <rect width={width} height={height} fill="url(#showcase-cobbles-light)" />
-      <rect width={width} height={height} fill="url(#showcase-cobbles)" />
-    </svg>
-  );
-}
-
 const BOX: CSSProperties = { border: '1px solid #3d3427', borderRadius: 4, overflow: 'hidden' };
+
+/** How many of the scene's units a world unit is: a cell of the cobbles. */
+const CELL = 20;
 
 /** A corner of a square: a palace and a market among trees, a figure of each house facing the other, and townsfolk. */
 function Sample({ wide }: { wide: boolean }) {
@@ -77,40 +63,75 @@ function Sample({ wide }: { wide: boolean }) {
     return <p className="showcase__to-come">The map’s sheets are not cut in this tree: npm run world:art.</p>;
   }
   const scene = wide ? { width: 900, height: 500 } : { width: 500, height: 800 };
-  const across = (share: number) => share * scene.width;
-  const down = (share: number) => share * scene.height;
+  const lattice = latticeOf(wide ? { x: 440, y: 205 } : { x: 236, y: 230 }, CELL);
+  const corner = (u: number, v: number) => latticeAt(lattice, u, v);
+  const cell = (u: number, v: number) => latticeAt(lattice, u + 0.5, v + 0.5);
+  const at = (point: { x: number; y: number }, name: 'structures' | 'scenery', key: string, tall: number) =>
+    picture(name, name === 'structures' ? structures : scenery, key, point.x, point.y, tall * CELL);
   const pictures = [
-    picture('scenery', scenery, 'oak', across(0.08), down(wide ? 0.34 : 0.22), 130),
-    picture('scenery', scenery, 'pine', across(0.94), down(wide ? 0.3 : 0.2), 120),
-    picture('structures', structures, 'palace@european', across(0.5), down(wide ? 0.42 : 0.3), 190),
-    picture('structures', structures, 'market@european', across(0.22), down(wide ? 0.46 : 0.36), 140),
-    picture('structures', structures, 'manor@european', across(0.8), down(wide ? 0.45 : 0.36), 140),
+    at(cell(wide ? -15 : -9, wide ? 7 : 4), 'scenery', 'oak', 4.8),
+    at(cell(wide ? 15 : 9, wide ? -10 : -6), 'scenery', 'pine', 3),
+    at(corner(0, 0), 'structures', 'palace@european', 10),
+    at(corner(wide ? -8 : -5, wide ? 4 : 6), 'structures', 'market@european', 5.6),
+    at(corner(wide ? 10 : 7, wide ? -4 : 0), 'structures', 'manor@european', 6),
   ].filter((one): one is Standing => one !== null);
   const placed: Placed[] = [
     {
       id: 'varga',
-      x: across(0.18),
-      y: down(wide ? 0.75 : 0.62),
-      node: <FieldFigure kind="summon" facing="east" colour={VARGA} aspect={HOLY} lit name="Priest #4" />,
+      ...cell(wide ? -6 : -3, wide ? 13 : 15),
+      node: (
+        <FieldFigure
+          kind="summon"
+          facing="east"
+          colour={VARGA}
+          aspect={HOLY}
+          lit
+          name="Priest #4"
+          height={3 * CELL}
+        />
+      ),
     },
     {
       id: 'brannock',
-      x: across(0.82),
-      y: down(wide ? 0.75 : 0.62),
-      node: <FieldFigure kind="summon" facing="west" colour={BRANNOCK} aspect={INDUSTRY} name="Machine #2" />,
+      ...cell(wide ? 13 : 12, wide ? 3 : 7),
+      node: (
+        <FieldFigure
+          kind="summon"
+          facing="west"
+          colour={BRANNOCK}
+          aspect={INDUSTRY}
+          name="Machine #2"
+          height={3 * CELL}
+        />
+      ),
     },
-    ...[0.38, 0.44, 0.41, 0.58, 0.62].map((share, at) => ({
+    ...[
+      [2, 9],
+      [4, 9],
+      [3, 10],
+      [6, 7],
+      [7, 8],
+    ].map(([u = 0, v = 0], at) => ({
       id: `townsperson-${at}`,
-      x: across(share),
-      y: down((wide ? 0.66 : 0.55) + (at % 3) * 0.06),
-      node: <FieldFigure kind="townsperson" facing={share < 0.5 ? 'west' : 'east'} height={52} />,
+      ...cell(u, wide ? v : v + 3),
+      node: (
+        <FieldFigure kind="townsperson" facing={at < 3 ? 'west' : 'east'} height={Math.round(2.4 * CELL)} />
+      ),
     })),
   ];
   return (
     <div style={{ ...BOX, width: wide ? 560 : 300, height: wide ? 320 : 470, maxWidth: '100%' }}>
       <Diorama
         scene={scene}
-        ground={<Cobbles width={scene.width} height={scene.height} />}
+        ground={
+          <LatticeGround
+            scene={scene}
+            lattice={lattice}
+            id={`showcase-cobbles-${wide ? 'wide' : 'deep'}`}
+            fill="#cbbd9c"
+            joint="rgba(60,48,30,0.3)"
+          />
+        }
         pictures={pictures}
         placed={placed}
         label="A corner of a square"
@@ -126,9 +147,11 @@ export function ChallengeDiorama() {
       <p className="ui-label showcase__lead">
         A small piece of the world drawn as the map draws it, from the south and above: the map’s own
         pictures, each on its foot and in front of what stands behind it, and figures among them, in a scene
-        of its own units scaled to cover its box. It reads the map’s sheets,{' '}
-        <code>public/art/structures.webp</code> and <code>scenery.webp</code>, as the map cuts them; nothing
-        new to paint.
+        of its own units scaled to cover its box. Its ground is the map’s own lattice,{' '}
+        <code>LatticeGround</code>, turned and tipped as the map’s is, a world unit to a cell: each building
+        stands on the front corner of its footprint as tall as the map draws it, each figure in the middle of
+        a cell. It reads the map’s sheets, <code>public/art/structures.webp</code> and{' '}
+        <code>scenery.webp</code>, as the map cuts them; nothing new to paint.
       </p>
       <Specimens>
         <Specimen name="Diorama, held wide" note="a scene 900 by 500 covering a box 560 by 320" wide>

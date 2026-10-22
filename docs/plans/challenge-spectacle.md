@@ -171,3 +171,30 @@ that is plainly also a sign.
 | 15 | **The channels in the ground and the jolt**: channels drawn into the ground, light running along the ones a happening lights, and a slice's chip flashing as it lands | 1. 👀 On a sample, the light runs only to the platforms whose slices the happening lights, and those chips flash. |
 | 16 | **Watched for the first time**: playing by itself from before the first second, nothing shown past the furthest played, the scrub over what has been seen, to the end shows the rest; the spectacle above the run's outcome | 1. 👀 Run the sample: it starts by itself and nothing ahead of the second played gives it away. |
 | 17 | **The seal, its path and the jolt in the square**, held wide and deep, in place of the happening box | 1. 👀 Watch a run: each happening's seal comes out of the mist, crosses the square to the font and jolts the slices it lights. |
+
+## Part three: the square on the map's lattice, and lightning to the slices
+
+Adam's notes on 2026-10-22, after watching the seals cross the square: the ground's grid is the map's own, turned
+twenty-six degrees, so the map's pictures fit it; the scene is laid out by that grid, the seals' path coming along the
+cells' sides; the seals a little smaller; and the grooves from the font to the platforms go, the happening striking the
+slices instead with lightning through the air that makes them crackle, its look chosen from screenshots of what can be
+done and how it is guided to what it strikes.
+
+- **The lattice**: `ui/diorama/lattice.ts` the map's lattice in a scene, a world unit to so many of its units, and
+  `LatticeGround` the ground drawn in it. The square at 24 units to the world unit: buildings as tall as the map draws
+  them at their first level and standing on their footprints' front corners, trees as tall as their kinds, figures three
+  world units in the middles of cells, platforms of three cells a side and the font on a plinth of four; the path along
+  the cells' sides, turning square, ending up into the font's water. The second bank is the first mirrored and moved
+  into the cell each place falls in. A test holds it.
+- **The seals** 58 units wide held wide and 60 held deep, from 72 and 76.
+- **Lightning**: `ui/lightning/`, three looks - `forked`, `leader`, `tendrils` - drawn as strokes on a canvas or by a
+  WebGL 2 shader, the bolt midpoint displacement along an arc from the receptacle to the chip so it goes wherever the
+  chip is, the chip crackling round its edge and flashing as it is reached. Over the whole spectacle, letting the
+  pointer through. The look is chosen on the challenges page and the components page; the default, until Adam picks,
+  a leader drawn by the shader.
+- **The channels to the platforms and their jolt go.** The path's channel stays.
+
+| # | Step | Verification requests |
+|---|---|---|
+| 18 | **The square on the map's lattice**: the lattice, its ground, the square laid on it held wide and deep, the seals smaller, a test of the layout | 1. 👀 The grid is the map's, the pictures stand on it, the path comes along the cells' sides. |
+| 19 | **Lightning from the font to the slices**, in the library in three looks drawn two ways, in place of the channels to the platforms | 1. 👀 Pick a look and a way of drawing it. 2. 👀 Watch it strike the slices a happening lights. |

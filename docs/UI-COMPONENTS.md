@@ -487,6 +487,11 @@ A line each: what it is for, its variants, and where on the page it is.
   each path it lights, in that path's colour - gold for a slice matching, the aspect's for one answering its
   anti-aspect - and again whenever its key changes; a `SliceChip` given the same jolt flashes in its colour a moment
   after, as the light reaches it. Drawn. *Challenges*.
+- **`LatticeGround`**, `ui/diorama/LatticeGround.tsx`: a diorama's ground in the map's own lattice - a fill, whatever
+  the venue lays on it, and the joints between the cells over both, turned twenty-six degrees and squashed as the camera
+  sees the ground closest in, so the map's pictures stand square on it (decision record 0116, amended).
+  `ui/diorama/lattice.ts` is its arithmetic: `latticeOf` a lattice in a scene, a world unit to so many of its units,
+  `latticeAt` and `latticeFrom` there and back, `onCell` the middle of the cell a place is in. Drawn. *Challenges*.
 - **`Drawer`**, `ui/drawer/Drawer.tsx`: what a mark opens over a stage without leaving it - a challenge's history,
   behind the `history` mark - sliding in `from` the stage's right edge when it is held wide and from its bottom when
   it is held deep, so it takes the longer side and leaves the rest to be watched (decision record 0116). Its title
