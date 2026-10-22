@@ -70,3 +70,13 @@ scenery, structures, people, roads, their roadside, bridges, worn ground - is dr
 switched there with the marks' `CROSSOVER_STICK` and faded over the trade's `CROSSFADE_MS`, never across a band of
 zoom (`sprites/arrival.ts`). The **info layer** - the marks and their crowds, the fog, the areas, the zones, the
 water's ripple - is what the player is told, and keeps to zooms of its own. Which one a new thing is, is asked.
+
+## Amendment, 2026-10-22: built half a zoom before it is shown
+
+Crossing 7.5 with the fog lifted over busy ground, the woods were built only once the zoom had crossed, eight cells a
+frame, and swept in over half a second: the first rows as the camera crossed, the rest after it stopped. The woods are
+now **built from half a zoom before they arrive** (`BUILT_AHEAD` in `sprites/scenery/showing.ts`): every cell in view,
+the middle first, cut and its trees made hidden while the info layer is still what the player sees, a few
+milliseconds of a frame at a time (`BUILD_MS`), so the crossing only fades them in. The rule above is unchanged: the
+zoom decides whether the real world is shown, and time how long it takes to come; what changes is only when it is
+built. Pulled back past 7, nothing is held. See `docs/plans/smooth-crossing-into-the-real-world.md`.

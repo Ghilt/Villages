@@ -1,4 +1,4 @@
-import { Container, ImageSource, Matrix, Particle, ParticleContainer, Rectangle, Texture } from 'pixi.js';
+import { Container, ImageSource, Matrix, Particle, ParticleContainer, Texture } from 'pixi.js';
 
 import { note } from '../../log/log';
 import { WORLD_MASTER_WIDTH } from '../../geometry/world';
@@ -11,8 +11,18 @@ import { removeAll } from '../standing/leaving';
 import { createStandingLayer } from '../standing/StandingLayer';
 import type { SceneryShaders } from '../trees/TreesLayer';
 import { currentPointsOf, noteDrawn, pointsOf, sceneryMap, sceneryTally } from './sceneryCells';
+import { kindFrames } from './kindFrames';
 import { sceneryReport } from './sceneryReport';
-import { MOST_CUT_AT_ONCE, groupCount, splitByGroup, thresholdOf, wantedAt, worthDrawing } from './showing';
+import {
+  BUILD_MS,
+  MOST_CUT_AT_ONCE,
+  groupCount,
+  nearestFirst,
+  splitByGroup,
+  thresholdOf,
+  wantedAt,
+  worthBuilding,
+} from './showing';
 
 /**
  * The world's furniture, drawn as particles under the marks.
@@ -35,10 +45,15 @@ import { MOST_CUT_AT_ONCE, groupCount, splitByGroup, thresholdOf, wantedAt, wort
  * states and this used to break. Two things fall out of that, and the second is the reason the first was
  * worth doing:
  *
- * - **A particle exists only while its group does.** Experiment 0006's worst measurement was 42,087
- *   particles held to draw 410, and the follow-up it named was exactly this. A point whose group has not
- *   arrived is not a particle at all now, so pulling the camera back does not quietly build a screenful
- *   of invisible furniture on the way out.
+ * - **A particle exists only while the woods are built**, from half a zoom before they arrive
+ *   (`BUILT_AHEAD`), and is made then whether or not its group has arrived, hidden at its group's fade of
+ *   nought: the crossing only fades the woods in, where it used to build them a few cells a frame over half a
+ *   second (decision record 0096, amended 2026-10-22). Pulled back past that, nothing is held: experiment
+ *   0006's worst measurement was 42,087 particles held to draw 410, and a screenful of invisible furniture
+ *   is still not built on the way out. The building takes `BUILD_MS` of a frame, the middle of the view first.
+ * - **A tree is built once while its cell is held.** The worn ground and the fog only say whether it shows:
+ *   one on a road, a yard or ground the house has not revealed is held at a fade of nought, and a change of
+ *   either asks again only the trees of the cells it touched (decision record 0118).
  * - **A fade touches only the groups that are moving.** Standing still costs nothing, and a fade costs
  *   one group's particles rather than every particle on the screen.
  *
@@ -63,7 +78,7 @@ const RING = 1;
 const ART = '/art/scenery';
 
 export interface SceneryDrawn {
-  /** Particles in the container. Every one of them is showing, because the others are not made. */
+  /** Particles in the container: every tree built, shown or held hidden. */
   particles: number;
   /** Their shadows: one each while shadows are drawn, none at all while they are not. */
   shadows: number;
@@ -74,10 +89,7 @@ export interface SceneryDrawn {
   moving: number;
 }
 
-/**
- * One cell's points - all of them, and those split by group that may grow where the fog allows - and
- * whichever of them are currently drawn, and their shadows.
- */
+/** One cell's points - all of them, and split by group - and the trees and the shadows built for them. */
 interface Held {
   all: readonly ScatteredPoint[];
   points: Map<number, ScatteredPoint[]>;
@@ -106,6 +118,10 @@ export function createSceneryLayer(sway: SceneryShaders) {
    */
   const goingTrees = new Set<Particle>();
   const goingShades = new Set<Particle>();
+  /** The trees and shadows built on ground they may not grow on, worn or not revealed: held at a fade of nought. */
+  const bare = new Set<Particle>();
+  /** Whether the woods are built now: from `BUILT_AHEAD` before they arrive, a little sticky either way. */
+  let built = false;
   let frames: Texture[] = [];
   /** Where each kind stands in its own frame, as a fraction of it, and its tint: how it bends in the wind. */
   let feet: { x: number; y: number; tint: number }[] = [];
@@ -133,8 +149,14 @@ export function createSceneryLayer(sway: SceneryShaders) {
    * revealed. The haze has no wood standing in it; step 5 of the fog of war.
    */
   let grows: ((x: number, y: number) => boolean) | null = null;
-  const growing = (points: readonly ScatteredPoint[]): readonly ScatteredPoint[] =>
-    grows === null ? points : points.filter((point) => grows!(point.x, point.y));
+  const growsAt = (point: ScatteredPoint) => grows === null || grows(point.x, point.y);
+
+  /** A tree or a shadow at the fade it should be drawn at: its group's, or nought on ground it may not grow on. */
+  function lay(particle: Particle, hidden: boolean, alpha: number): void {
+    if (hidden) bare.add(particle);
+    else bare.delete(particle);
+    particle.alpha = hidden ? 0 : alpha;
+  }
 
   /** How much of each group is on the screen, nought to one, moved by the clock and not by the zoom. */
   let alphaOf = new Float32Array(0);
@@ -171,51 +193,15 @@ export function createSceneryLayer(sway: SceneryShaders) {
     }
   }
 
-  /**
-   * A frame and a foot for each of the sprite map's kinds, in its order.
-   *
-   * A kind the atlas has no frame for - one added to world/biomes.json since the art was last cut - is
-   * drawn as the first frame and said once, which is visibly wrong rather than silently missing.
-   */
+  /** A frame and a foot for each of the sprite map's kinds, and their shadows, from the atlas (`kindFrames.ts`). */
   function frameKinds(kinds: readonly Kind[], file: ArtAtlasFile, source: ImageSource): void {
-    const missing: string[] = [];
-    const cut = kinds.map((kind) => {
-      const own = file.frames[kind.name];
-      if (own === undefined) {
-        missing.push(kind.name);
-      }
-      const frame = own ?? Object.values(file.frames)[0];
-      if (frame === undefined) {
-        return { texture: Texture.EMPTY, foot: { x: 0.5, y: 1, tint: sway.tintOf(kind.name) } };
-      }
-      return {
-        texture: new Texture({ source, frame: new Rectangle(frame.x, frame.y, frame.width, frame.height) }),
-        foot: { x: frame.footX / frame.width, y: frame.footY / frame.height, tint: sway.tintOf(kind.name) },
-      };
-    });
-    frames = cut.map((one) => one.texture);
-    feet = cut.map((one) => one.foot);
-    // The shadows, in the same order and from the same atlas, when it was cut with them.
-    const shadows = file.shadows;
-    const shade = shadows === undefined ? [] : kinds.map((kind) => shadows[kind.name]);
-    if (shade.length > 0 && shade.every((frame) => frame !== undefined)) {
-      shadowFrames = shade.map(
-        (frame) =>
-          new Texture({ source, frame: new Rectangle(frame!.x, frame!.y, frame!.width, frame!.height) }),
-      );
-      shadowFeet = shade.map((frame) => ({
-        x: frame!.footX / frame!.width,
-        y: frame!.footY / frame!.height,
-      }));
-      shadowLayer.texture = shadowFrames[0]!;
-    } else {
-      shadowFrames = [];
-      shadowFeet = [];
-    }
-    if (missing.length > 0) {
+    const cut = kindFrames(kinds, file, source, sway.tintOf);
+    ({ frames, feet, shadowFrames, shadowFeet } = cut);
+    if (shadowFrames.length > 0) shadowLayer.texture = shadowFrames[0]!;
+    if (cut.missing.length > 0) {
       note(
         'scenery',
-        `the art has no picture for ${missing.join(', ')}; run npm run world:art --prefix frontend`,
+        `the art has no picture for ${cut.missing.join(', ')}; run npm run world:art --prefix frontend`,
       );
     }
     // Named rather than left to be latched from the first particle: the container takes its texture
@@ -262,7 +248,7 @@ export function createSceneryLayer(sway: SceneryShaders) {
       // Sized in world units, so the container's one transform turns it into pixels.
       particle.scaleY = point.height / texture.height;
       particle.scaleX = particle.scaleY;
-      particle.alpha = alpha;
+      lay(particle, !growsAt(point), alpha);
       return particle;
     });
     cell.made.set(group, made);
@@ -292,7 +278,7 @@ export function createSceneryLayer(sway: SceneryShaders) {
       particle.anchorY = foot.y;
       particle.scaleY = point.height / standing.height;
       particle.scaleX = particle.scaleY;
-      particle.alpha = alpha * shadowStrength;
+      lay(particle, !growsAt(point), alpha * shadowStrength);
       return particle;
     });
     cell.shade.set(group, shade);
@@ -307,6 +293,7 @@ export function createSceneryLayer(sway: SceneryShaders) {
     }
     for (const particle of shade) {
       goingShades.add(particle);
+      bare.delete(particle);
     }
     cell.shade.delete(group);
     unsorted = true;
@@ -359,19 +346,20 @@ export function createSceneryLayer(sway: SceneryShaders) {
     }
     for (const particle of made) {
       goingTrees.add(particle);
+      bare.delete(particle);
     }
     cell.made.delete(group);
   }
 
-  /** A cell's groups dropped and split again by where the scenery grows now, and made again at the fade they were at. */
-  function recut(cell: Held): void {
-    for (const group of [...cell.made.keys()]) {
-      dropGroup(cell, group);
-    }
-    cell.points = splitByGroup(growing(cell.all));
-    for (const group of cell.points.keys()) {
+  /** Every tree and shadow of a cell shown or hidden by where the scenery grows now, at its group's fade. */
+  function showWhereItGrows(cell: Held): void {
+    for (const [group, made] of cell.made) {
+      const points = cell.points.get(group)!;
       const alpha = alphaOf[group] ?? 0;
-      if (alpha > 0) makeGroup(cell, group, alpha);
+      made.forEach((particle, index) => lay(particle, !growsAt(points[index]!), alpha));
+      cell.shade
+        .get(group)
+        ?.forEach((particle, index) => lay(particle, !growsAt(points[index]!), alpha * shadowStrength));
     }
   }
 
@@ -400,7 +388,7 @@ export function createSceneryLayer(sway: SceneryShaders) {
         for (const [group, shade] of cell.shade) {
           const alpha = (alphaOf[group] ?? 0) * strength;
           for (const particle of shade) {
-            particle.alpha = alpha;
+            particle.alpha = bare.has(particle) ? 0 : alpha;
           }
         }
       }
@@ -537,11 +525,12 @@ export function createSceneryLayer(sway: SceneryShaders) {
       const fromY = cellOf(Math.min(...southUnits)) - RING;
       const toY = cellOf(Math.max(...southUnits)) + RING;
 
-      // Nothing is drawn until the camera is close enough that something would show, and the view is
+      // Nothing is built until the camera is close enough that something is about to show, and the view is
       // small enough to be worth walking. Pulled right back a cell is eight pixels across and the view
       // holds twenty thousand of them; without this the page hangs before the map has drawn.
       const cellsInView = (toX - fromX + 1) * (toY - fromY + 1);
-      if (!worthDrawing(map.kinds, view.zoom, cellsInView, laterBy)) {
+      built = worthBuilding(map.kinds, view.zoom, cellsInView, built, laterBy);
+      if (!built) {
         if (shown.size > 0) {
           takeEverythingOut();
         }
@@ -571,51 +560,50 @@ export function createSceneryLayer(sway: SceneryShaders) {
         askForAFrame();
       }
 
-      // Pass two: the cells, holding exactly the groups that are in.
+      // Pass two: the cells, the middle first, each cut and its trees built while the frame's budget lasts.
       const wanted = new Set<string>();
+      const until = performance.now() + BUILD_MS;
       let cutting = 0;
-      for (let cellY = fromY; cellY <= toY; cellY += 1) {
-        for (let cellX = fromX; cellX <= toX; cellX += 1) {
-          const key = keyOf(cellX, cellY);
-          wanted.add(key);
-          let cell = shown.get(key);
-          if (cell === undefined) {
-            // Only so many new cells a frame. Arriving somewhere new otherwise cuts a screenful at
-            // once, which is one long frame exactly when the camera is moving.
-            if (cutting >= MOST_CUT_AT_ONCE) {
-              askForAFrame();
-              continue;
-            }
-            const points = pointsOf(tilesRoot, cellX, cellY, dial, spacing, askForAFrame);
-            if (points === null) {
-              continue;
-            }
-            cutting += 1;
-            cell = { all: points, points: splitByGroup(growing(points)), made: new Map(), shade: new Map() };
-            shown.set(key, cell);
-          } else {
-            // The fog moved and the gateway sent this cell's stands again, so it has been cut again: its new
-            // points take the old ones' place at the fade they were at, in this frame, so nothing blinks. On
-            // ground already revealed they are the same points. See decision record 0067.
-            const now = currentPointsOf(tilesRoot, cellX, cellY, dial, spacing, askForAFrame);
-            if (now !== undefined && now !== cell.all) {
-              for (const group of [...cell.made.keys()]) {
-                dropGroup(cell, group);
-              }
-              cell.all = now;
-              cell.points = splitByGroup(growing(now));
-              unsorted = true;
-            }
+      for (const { x: cellX, y: cellY } of nearestFirst(fromX, toX, fromY, toY)) {
+        const key = keyOf(cellX, cellY);
+        wanted.add(key);
+        let cell = shown.get(key);
+        if (cell === undefined) {
+          // Only so many new cells a frame. Cutting one is finished after the frame's budget is reckoned, so
+          // they are counted rather than timed.
+          if (cutting >= MOST_CUT_AT_ONCE) {
+            askForAFrame();
+            continue;
           }
-          for (const group of cell.points.keys()) {
-            const alpha = alphaOf[group]!;
-            const has = cell.made.has(group);
-            if (alpha > 0 && !has) {
-              makeGroup(cell, group, alpha);
-            } else if (alpha === 0 && has) {
+          const points = pointsOf(tilesRoot, cellX, cellY, dial, spacing, askForAFrame);
+          if (points === null) {
+            continue;
+          }
+          cutting += 1;
+          cell = { all: points, points: splitByGroup(points), made: new Map(), shade: new Map() };
+          shown.set(key, cell);
+        } else {
+          // The fog moved and the gateway sent this cell's stands again, so it has been cut again: its new
+          // points take the old ones' place at the fade they were at, in this frame whatever the budget, so
+          // nothing blinks. On ground already revealed they are the same points. See decision record 0067.
+          const now = currentPointsOf(tilesRoot, cellX, cellY, dial, spacing, askForAFrame);
+          if (now !== undefined && now !== cell.all) {
+            for (const group of [...cell.made.keys()]) {
               dropGroup(cell, group);
             }
+            cell.all = now;
+            cell.points = splitByGroup(now);
+            for (const group of cell.points.keys()) makeGroup(cell, group, alphaOf[group]!);
           }
+        }
+        // Built whether or not the group has arrived: hidden at its fade until it does.
+        for (const group of cell.points.keys()) {
+          if (cell.made.has(group)) continue;
+          if (performance.now() > until) {
+            askForAFrame();
+            break;
+          }
+          makeGroup(cell, group, alphaOf[group]!);
         }
       }
 
@@ -638,10 +626,10 @@ export function createSceneryLayer(sway: SceneryShaders) {
             continue;
           }
           for (const particle of made) {
-            particle.alpha = alpha;
+            particle.alpha = bare.has(particle) ? 0 : alpha;
           }
           for (const particle of cell.shade.get(group) ?? []) {
-            particle.alpha = alpha * shadowStrength;
+            particle.alpha = bare.has(particle) ? 0 : alpha * shadowStrength;
           }
         }
       }
@@ -658,11 +646,18 @@ export function createSceneryLayer(sway: SceneryShaders) {
         unsorted = false;
       }
 
+      // Built ahead and hidden until a kind has begun to arrive, and not drawn at all till then.
+      if (!alphaOf.some((alpha) => alpha > 0)) {
+        layers.visible = false;
+      }
+
       let particles = 0;
+      let showing = 0;
       let shade = 0;
       for (const cell of shown.values()) {
-        for (const made of cell.made.values()) {
+        for (const [group, made] of cell.made) {
           particles += made.length;
+          if ((alphaOf[group] ?? 0) > 0) showing += made.length;
         }
         for (const cast of cell.shade.values()) {
           shade += cast.length;
@@ -671,7 +666,7 @@ export function createSceneryLayer(sway: SceneryShaders) {
       return {
         particles,
         shadows: shade,
-        showing: particles,
+        showing,
         cells: shown.size,
         waiting: sceneryTally().waiting,
         moving,
@@ -679,18 +674,16 @@ export function createSceneryLayer(sway: SceneryShaders) {
     },
 
     /**
-     * Where the scenery may grow from now on: everywhere, with null, or only where this says. The cells `touched`
-     * names (`cellsTouched`), or every cell held when it names none, are cut again at once and made afresh in this
-     * same call at the fade they were at, so what stays does not flicker, no tree is left on ground a road or a yard
-     * has just worn, and what the house has newly seen stands as the haze over it lifts. A cell not touched keeps its
-     * trees: the ground under them is as it was. See decision record 0118.
+     * Where the scenery may grow from now on: everywhere, with null, or only where this says. The trees of the cells
+     * `touched` names (`cellsTouched`), or of every cell held when it names none, are shown or hidden by it in this
+     * same call, so no tree is left on ground a road or a yard has just worn and what the house has newly seen stands
+     * as the haze over it lifts. Nothing is built for it: a tree is built once (decision record 0118).
      */
     setGround(next: ((x: number, y: number) => boolean) | null, touched?: ReadonlySet<string>): void {
       grows = next;
       for (const [key, cell] of shown) {
-        if (touched === undefined || touched.has(key)) recut(cell);
+        if (touched === undefined || touched.has(key)) showWhereItGrows(cell);
       }
-      letGo();
     },
 
     /** Everything drawn is taken out, for a change that makes every cell wrong. */

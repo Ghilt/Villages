@@ -51,3 +51,16 @@ The roads and the settlements follow in the plan's later steps, by the same rule
   the crossing's stutter is the roadside, a dense wood's scattering and the settlements, which the plan takes next.
 - Nothing a player sees changes but the stutter: the same trees stand in the same places, and none blinks while a road
   arrives beside it.
+
+## Amendment, 2026-10-22: a tree is built once
+
+The woods are built ahead of the crossing now (decision record 0096, amended the same day), before the roads and the
+buildings about them have all come, so a road or a house arriving must not mean building trees again. **A tree is
+built once while its cell is held**: where it stands comes from the ground, the forest map and the stands, none of
+which a road or a house changes, and the worn ground and the fog only say whether it shows. One on worn ground, or on
+ground the house has not revealed, is held at a fade of nought; a change asks again only the trees of the cells it
+touched, and builds nothing.
+
+| Rule | What keeps it | When it holds |
+|---|---|---|
+| A tree is built once while its cell is held: the worn ground and the fog only say whether it shows | `setGround` shows or hides the trees of the cells touched, a change of the fog all of them; a cell is built again only when its stands change | At the instant the scene is applied |

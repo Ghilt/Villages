@@ -124,8 +124,12 @@ export function createStandingLayer(
     };
   }
 
-  /** Cuts the trees into slices and puts each structure between the two it stands between. */
-  function cut(camera: CameraView, shown: readonly StandingThing[]): void {
+  /**
+   * Cuts the trees into slices and puts each structure between the two it stands between. While the trees are not
+   * drawn - built ahead and hidden, or switched off - only the structures are placed, and the trees are cut in the
+   * frame they are first drawn.
+   */
+  function cut(camera: CameraView, shown: readonly StandingThing[], withTrees: boolean): void {
     const tilt = groundTilt(camera);
     const buildings = shown.map((thing) => ({
       corners: tilted(thing.footprint, tilt),
@@ -134,14 +138,17 @@ export function createStandingLayer(
       tall: thing.tall,
       wide: thing.wide,
     }));
-    const { order, slices: of } = drawOrder(buildings, shown.length === 0 ? [] : all.map(treeOf));
+    const { order, slices: of } = drawOrder(
+      buildings,
+      shown.length === 0 || !withTrees ? [] : all.map(treeOf),
+    );
     cuts += 1;
     const parts: Particle[][] = slices.map(() => []);
     for (let at = 0; at <= order.length; at += 1) {
       slice(at);
       parts[at] ??= [];
     }
-    all.forEach((particle, at) => parts[of[at] ?? 0]!.push(particle));
+    if (withTrees) all.forEach((particle, at) => parts[of[at] ?? 0]!.push(particle));
     cutOf = { shown, buildings, order, parts };
     slices.forEach((one, at) => {
       one.particleChildren = parts[at]!;
@@ -215,14 +222,14 @@ export function createStandingLayer(
       for (const one of slices) one.visible = drawTrees;
       const shown = things.filter((thing) => thing.shown);
       const tilt = groundTilt(camera);
-      const key = `${tilt.cos},${tilt.sin},${tilt.lean}|${shown
+      const key = `${drawTrees}|${tilt.cos},${tilt.sin},${tilt.lean}|${shown
         .map(
           ({ id, sprites, place, tall, anchor, footprint }) =>
             `${id}:${sprites.length}:${tall}:${anchor}:${place.x},${place.y}:${footprint[2].x},${footprint[2].y}`,
         )
         .join('|')}`;
       if (unsliced || key !== cutFor) {
-        cut(camera, shown);
+        cut(camera, shown, drawTrees);
         cutFor = key;
         unsliced = false;
         const standing = shown.map(({ id }) => id).join(' ');

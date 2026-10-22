@@ -5,14 +5,16 @@ import { BECOMES_A_MARK_AT, CROSSOVER_STICK, LONGEST_STEP_MS, PRESENCE_MS, easeT
 import { CELL } from '@villages/world';
 import { EXAMPLE_KINDS as KINDS } from '@villages/world/testing';
 import {
+  BUILT_AHEAD,
   MOST_CELLS,
   STEPS,
   groupCount,
   groupOf,
+  nearestFirst,
   nothingBelowAny,
   thresholdOf,
   wantedAt,
-  worthDrawing,
+  worthBuilding,
 } from './showing';
 
 /** How many cells a view of this size holds at a zoom, which is what the bounds are about. */
@@ -21,32 +23,45 @@ function cellsInView(zoom: number, width = 1400, height = 900): number {
   return (Math.ceil(width / across) + 2) * (Math.ceil(height / across) + 2);
 }
 
-describe('when scenery is worth drawing at all', () => {
-  it('draws nothing at the zoom the camera opens on', () => {
+describe('when the woods are worth building at all', () => {
+  it('builds nothing at the zoom the camera opens on', () => {
     // The regression this exists for. A cell is eight screen pixels at zoom 4, so the view held about
     // twenty thousand of them and five million points behind those, and the page hung before the map
     // had drawn. Nothing about the fade caught it, because a fade says how much, not whether.
-    expect(worthDrawing(KINDS, CAMERA.initialZoom, cellsInView(CAMERA.initialZoom))).toBe(false);
-    expect(CAMERA.initialZoom).toBeLessThan(nothingBelowAny(KINDS));
+    expect(worthBuilding(KINDS, CAMERA.initialZoom, cellsInView(CAMERA.initialZoom))).toBe(false);
+    expect(CAMERA.initialZoom).toBeLessThan(nothingBelowAny(KINDS) - BUILT_AHEAD);
   });
 
-  it('draws nothing however small the view, below the zoom anything would show', () => {
-    const floor = nothingBelowAny(KINDS);
+  it('builds them half a zoom before they arrive, so the crossing only fades them in', () => {
+    const from = nothingBelowAny(KINDS) - BUILT_AHEAD;
 
-    expect(worthDrawing(KINDS, floor - 0.01, 1)).toBe(false);
-    expect(worthDrawing(KINDS, floor, 1)).toBe(true);
+    expect(worthBuilding(KINDS, from - 0.01, 1)).toBe(false);
+    expect(worthBuilding(KINDS, from, 1)).toBe(true);
+  });
+
+  it('keeps them built while the camera rests on that zoom, and tears them down once it has gone past', () => {
+    const from = nothingBelowAny(KINDS) - BUILT_AHEAD;
+
+    expect(worthBuilding(KINDS, from - CROSSOVER_STICK / 2, 1, true)).toBe(true);
+    expect(worthBuilding(KINDS, from - CROSSOVER_STICK - 0.01, 1, true)).toBe(false);
+  });
+
+  it('has room for a large screen’s view where they are built', () => {
+    expect(
+      cellsInView(nothingBelowAny(KINDS) - BUILT_AHEAD - CROSSOVER_STICK, 2560, 1440),
+    ).toBeLessThanOrEqual(MOST_CELLS);
   });
 
   it('refuses a view holding more cells than it will hold, however far in the camera is', () => {
-    expect(worthDrawing(KINDS, 10, MOST_CELLS)).toBe(true);
-    expect(worthDrawing(KINDS, 10, MOST_CELLS + 1)).toBe(false);
+    expect(worthBuilding(KINDS, 10, MOST_CELLS)).toBe(true);
+    expect(worthBuilding(KINDS, 10, MOST_CELLS + 1)).toBe(false);
   });
 
   it('only ever refuses ground where no group has arrived anyway', () => {
     // The claim the cell cap rests on. If it ever refused a view where something had begun to arrive,
     // scenery would vanish in a step rather than fading - which is the fault 0051 is against.
     for (let zoom = nothingBelowAny(KINDS); zoom <= 10; zoom += 0.02) {
-      if (worthDrawing(KINDS, zoom, cellsInView(zoom))) {
+      if (worthBuilding(KINDS, zoom, cellsInView(zoom))) {
         continue;
       }
       for (let group = 0; group < groupCount(KINDS); group += 1) {
@@ -121,5 +136,21 @@ describe('the zoom decides whether, and time decides how long', () => {
       alpha = easeTowards(alpha, 1, LONGEST_STEP_MS, PRESENCE_MS);
     }
     expect(alpha).toBe(1);
+  });
+});
+
+describe('the order the woods are built in', () => {
+  it('is the middle of the view first, so what the camera comes in on is ready before the edges', () => {
+    const cells = nearestFirst(0, 4, 0, 2);
+    expect(cells).toHaveLength(15);
+    expect(cells[0]).toEqual({ x: 2, y: 1 });
+    expect(cells.slice(-4)).toEqual(
+      expect.arrayContaining([
+        { x: 0, y: 0 },
+        { x: 4, y: 0 },
+        { x: 0, y: 2 },
+        { x: 4, y: 2 },
+      ]),
+    );
   });
 });

@@ -5,6 +5,7 @@ import { NO_STANDS, furnishCell } from '@villages/world';
 import type { RuinsMapFile, ScatteredPoint, SpriteMap, StandChunk } from '@villages/world';
 
 import { ruinTilesAround, tilesRead } from './cellTiles';
+import { MOST_CELLS } from './showing';
 import { RUINS_TILE, asScenery, ruinsAround, ruinsMap, withRuins } from './ruinsMap';
 import { spriteMap } from './spriteMap';
 import {
@@ -51,10 +52,12 @@ const TILE_UNITS = TILE;
 /**
  * How many cells to keep.
  *
- * A screenful at zoom 8 on a wide desktop is about a hundred, and the ring built ahead of it another
- * hundred or so. Four hundred holds that with room to pan back to where you were.
+ * As many as the scenery will hold in view at once (`MOST_CELLS`): the woods are built from half a zoom before they
+ * arrive, where a wide desktop's view and its ring are seven hundred cells and a 2560 by 1440 one's twelve hundred,
+ * and a cell let go of while it is still in view is cut again when it comes back. Four hundred held a screenful at
+ * zoom 8 and a ring when the woods were built there.
  */
-const REMEMBER = 400;
+const REMEMBER = MOST_CELLS;
 
 /** The layer of the sprite map the scenery is drawn from. Others will join it; see decision 0054. */
 const LAYER = 'biome';

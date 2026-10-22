@@ -97,12 +97,25 @@ export function nothingBelowAny(kinds: readonly Standing[], laterBy = 0): number
  * How many cells the layer will hold at once.
  *
  * A second bound under the first, because the first still leaves hundreds of cells at the zoom it lets go
- * of. A thousand since scenery arrives at 7.5, where a cell is ninety pixels and a 2560 by 1440 screen holds
- * about six hundred of them: at four hundred, a large screen would have refused the scenery the zoom it is
- * meant to arrive at. It still binds only where no group has arrived, so the ground it refuses to furnish is
- * ground that would have been drawn empty anyway.
+ * of. Sixteen hundred since the woods are built half a zoom before they arrive (`BUILT_AHEAD`), where a cell is
+ * sixty pixels and a 2560 by 1440 screen holds about twelve hundred of them with the ring; a thousand when they
+ * were built at 7.5, four hundred before that. It still binds only where no group has arrived, so the ground it
+ * refuses to furnish is ground that would have been drawn empty anyway.
  */
-export const MOST_CELLS = 1000;
+export const MOST_CELLS = 1600;
+
+/**
+ * How far before the woods arrive they are built: half a zoom. From there every cell in view is cut and its trees
+ * made, hidden until their kind fades in, so the crossing at `BECOMES_A_MARK_AT` only fades them (decision record
+ * 0096, amended 2026-10-22). Built at the crossing itself, they came in a few cells a frame over half a second.
+ */
+export const BUILT_AHEAD = 0.5;
+
+/**
+ * How many milliseconds of a frame the woods may spend being built: their trees and shadows made, a cell's worth at
+ * a time, until this is spent. A budget by the clock, since a count of cells costs whatever the cells hold.
+ */
+export const BUILD_MS = 4;
 
 /**
  * How many cells may be cut in one frame.
@@ -114,12 +127,38 @@ export const MOST_CELLS = 1000;
  */
 export const MOST_CUT_AT_ONCE = 8;
 
-/** Whether the view is close enough in, and small enough, for scenery to be worth drawing at all. */
-export function worthDrawing(
+/**
+ * Whether the view is close enough in, and small enough, for the woods to be built at all: from `BUILT_AHEAD` before
+ * anything arrives, given whether they are built now, a little sticky either way so a camera resting there does not
+ * build and tear down on every jitter of the wheel.
+ */
+export function worthBuilding(
   kinds: readonly Standing[],
   zoom: number,
   cellsInView: number,
+  built = false,
   laterBy = 0,
 ): boolean {
-  return zoom >= nothingBelowAny(kinds, laterBy) && cellsInView <= MOST_CELLS;
+  const from = nothingBelowAny(kinds, laterBy) - BUILT_AHEAD;
+  return (built ? zoom >= from - CROSSOVER_STICK : zoom >= from) && cellsInView <= MOST_CELLS;
+}
+
+/**
+ * The cells of a view in the order they are built: the middle first, so whatever the camera comes in on is ready
+ * before the edges it is leaving.
+ */
+export function nearestFirst(
+  fromX: number,
+  toX: number,
+  fromY: number,
+  toY: number,
+): { x: number; y: number }[] {
+  const midX = (fromX + toX) / 2;
+  const midY = (fromY + toY) / 2;
+  const cells: { x: number; y: number }[] = [];
+  for (let y = fromY; y <= toY; y += 1) {
+    for (let x = fromX; x <= toX; x += 1) cells.push({ x, y });
+  }
+  const away = (cell: { x: number; y: number }) => (cell.x - midX) ** 2 + (cell.y - midY) ** 2;
+  return cells.sort((one, other) => away(one) - away(other));
 }
