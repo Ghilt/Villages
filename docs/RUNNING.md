@@ -458,7 +458,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   to rest, and half a second later the roll is sent from where it landed; **let go with a flick, it is thrown** the
   way the hand went, flying one arc as at `/admin/inspect-die`, and the roll is sent from where it comes to rest; let
   go over its slot, it goes back and nothing is paid; Enter on the podium drops it at the middle of the view. The
-  number on top is painted on as the throw is worked out, one the page chooses for now. The die lies where it fell, its ring breathing, while the
+  number on top is painted on as the throw is worked out, one the page chooses for now. The die lies where it fell,
+  after a reload too, drawn from where the waiting hand says its roll landed,, its ring breathing, while the
   hand is open, and goes back to its podium once it is answered. Once it has rolled, the pane opens out over everything, the rest of the stage dimmed under a **veil**
   that puts it away when pressed, and plays the roll as
   a report card - the omens slam into a list a third of a second apart, and under a divider the hand of three

@@ -5,6 +5,7 @@ import type { Looking } from '@villages/client-core';
 import type { ChoiceView, OmenView, OptionView } from '@villages/protocol';
 
 import { sessionStore, takeOption } from '../net/gateway';
+import { dieStore } from '../sprites/die/hand';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import type { Along, Room } from '../stage/panes';
 import { useStore } from '../store/useStore';
@@ -65,6 +66,17 @@ export function Choosing({ room, along, looking }: { room: Room; along: Along; l
     setAt(0);
     if (asked !== undefined && rolled !== undefined && handExpected()) setPlaying(asked);
   }, [asked, rolled]);
+
+  // While a rolled hand is open its die lies where it fell, after a reload too; once it is answered the die goes back
+  // to its podium. A die already lying there from the throw is left as it is. See decision record 0118.
+  const die = useStore(dieStore, (state) => state.hand);
+  const landing = choice?.landing;
+  const circleKm = choice?.circleKm;
+  useEffect(() => {
+    if (die === null) return;
+    if (landing === undefined) die.putBack();
+    else die.lieAt(landing, circleKm ?? 0);
+  }, [die, landing?.lat, landing?.lon, circleKm]);
 
   const omens = useMemo(() => (choice?.omens ?? []).map(lineOf), [choice]);
   const { play, hurry } = usePlay(playing, omens.length, choice?.options.length ?? 0);

@@ -1,6 +1,7 @@
 import { Container, Graphics } from 'pixi.js';
 
-import type { CameraView, ScreenPoint } from '../../geometry/cameraMath';
+import { toMercatorExact } from '../../geometry/cameraMath';
+import type { CameraView, MercatorPoint, ScreenPoint } from '../../geometry/cameraMath';
 import type { Layer } from '../layer';
 import { createDieDrawing, createDust } from './dieDrawing';
 import { kept, speedAtRelease } from './gesture';
@@ -8,14 +9,15 @@ import type { Sample } from './gesture';
 import { holdTheDie } from './hand';
 import type { DieHand, HandAt, Landing } from './hand';
 import { heldTurn } from './playback';
-import { DIE_SETTINGS, drawHeld, drawThrown, heldGround, letGo } from './throwing';
+import { DIE_SETTINGS, drawHeld, drawLying, drawThrown, heldGround, letGo } from './throwing';
 import type { DieSettings, Thrown } from './throwing';
 
 /**
  * The choice roll's die on the game's sprite canvas: held under the pointer or above the finger with the landing circle
  * round its shadow; let go still, it drops by its shadow, and with a flick it is thrown the way the hand went, the
  * hand's speed read over its last tenth of a second; played back pinned to the ground, and lying where it rests with
- * its ring breathing until it is put back. The number on top is painted on as the throw is worked out, a number the
+ * its ring breathing until it is put back - or, on a page that reloads with its hand open, lying there with no throw
+ * behind it. The number on top is painted on as the throw is worked out, a number the
  * page chooses, since what it means is not decided. Of the info layer, over the fog and the clouds and every sign
  * (0096, 0118). Fetched only once the game has started, and it says it is here through `hand.ts`, which the pane
  * holds it by. See `docs/plans/choice-roll-podium.md`.
@@ -38,7 +40,9 @@ type Now =
       readonly kind: 'flying' | 'resting';
       readonly thrown: Thrown;
       readonly rested: (landing: Landing) => void;
-    };
+    }
+  /** Lying where a roll's die fell, with no throw behind it: drawn by a page that reloaded with its hand open. */
+  | { readonly kind: 'lying'; readonly place: MercatorPoint };
 
 export interface DieLayer extends Layer {
   /** What it draws into, for the renderer to lay over everything. */
@@ -115,6 +119,12 @@ export function createDieLayer(box: HTMLElement, repaint: () => void): DieLayer 
       settings = { ...DIE_SETTINGS, circleKm };
       fall({ x: camera.width / 2, y: camera.height / 2 }, { x: 0, y: 0 }, performance.now(), rested);
     },
+    lieAt(landing, circleKm) {
+      if (now.kind !== 'idle') return;
+      settings = { ...DIE_SETTINGS, circleKm };
+      now = { kind: 'lying', place: toMercatorExact({ lng: landing.lon, lat: landing.lat }) };
+      repaint();
+    },
   };
   holdTheDie(hand);
 
@@ -130,6 +140,9 @@ export function createDieLayer(box: HTMLElement, repaint: () => void): DieLayer 
       } else if (now.kind === 'held') {
         drawHeld(parts, heldGround(now.at, now.byTouch, settings, pitch), now.since, cameraView, settings, t);
         wants = 0;
+      } else if (now.kind === 'lying') {
+        drawLying(parts, now.place, cameraView, settings, t);
+        wants = BREATHES_MS;
       } else {
         const drawn = drawThrown(parts, now.thrown, cameraView, settings, t, knocked);
         knocked = drawn.knocked;

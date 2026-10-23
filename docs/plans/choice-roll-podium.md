@@ -730,6 +730,7 @@ Step 1 is this plan. Bringing the work to main is the implicit last step.
 | 8 | **The die thrown.** The flick on a desktop and on a phone, the speed read over its last 100 ms; the pips painted as the throw is worked out; the juice the spike settled; striking what is drawn, if the spike kept it | 👀 Throw the die with a flick, on a desktop and at phone size: it flies, bounces and rolls, and the report card reads the ground round where it stopped |
 | 8, as built | The number painted on is one the page chooses, at random, until what it means is decided. Striking what is drawn stays out, as decision record 0118 has it | |
 | 9 | **The die where it fell.** It lies at its landing with its ring while the hand is open, after a reload too, and goes back to its podium once the hand is answered | 👀 Roll, leave the hand open and reload: the die lies where it fell and the podium's slot is empty. Answer it: the die fades and stands on its podium again |
+| 9, as built | The pane lays the die where the waiting hand says its roll landed, with no throw behind it, flat and five pips up, since the number is the page's and not kept; a die already lying there from its throw is left as it is | |
 
 Steps 4 and 5 are the server's half and work with no die at all, which is what a house bot needs. Steps 6 to 9 are the
 page's half.

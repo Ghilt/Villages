@@ -45,9 +45,6 @@ export function TakeAction({ room, along, looking }: { room: Room; along: Along;
   const [out, setOut] = useState(false);
   const waiting = useRef<'not' | 'sent' | 'answering'>('not');
 
-  // Back with no hand pending, after a hand was answered: whatever die lay on the map goes back to its podium.
-  useEffect(() => die?.putBack(), [die]);
-
   // A roll refused - the house could not pay after all - sends no hand back, and the die goes back to its podium.
   useEffect(() => {
     if (waiting.current === 'sent' && !ready) waiting.current = 'answering';

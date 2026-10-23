@@ -32,6 +32,11 @@ export interface DieHand {
   putBack(): void;
   /** Dropped at once at the middle of the view, with no hand: Enter on the podium. */
   dropAtCentre(circleKm: number, rested: (landing: Landing) => void): void;
+  /**
+   * Lying where a roll's die fell, its ring `circleKm` round it: as a page that reloads with a hand open draws it.
+   * Nothing, when the die is already in the hand, in the air or lying.
+   */
+  lieAt(landing: Landing, circleKm: number): void;
 }
 
 const store = createStore<{ hand: DieHand | null }>({ hand: null });

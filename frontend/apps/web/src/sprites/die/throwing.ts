@@ -15,7 +15,7 @@ import { FLIGHT, asADie, flightOf, flownAt, flyingLift, flyingSize, landingOf } 
 import type { Flight, FlightFeel } from './flight';
 import { isThrow } from './gesture';
 import { mercatorOf, screenOf } from './onTheGround';
-import { FEEL, throwDie } from './physics';
+import { FEEL, STILL, throwDie } from './physics';
 import type { DieFeel, Obstacle, Quat, ThrowPath } from './physics';
 import { LAYOUT, layoutShowing } from './pips';
 import { between, heldTurn, squashAt } from './playback';
@@ -138,6 +138,39 @@ export function drawHeld(
     inTheHandLift(chosen.look, pitch),
   );
   drawLandingCircle(parts.ring, ground, view, mercatorOf(ground, view), chosen.circleKm, t, 0);
+}
+
+/**
+ * Draws a die lying at `place` with its ring breathing round it and no throw behind it: where a roll's die fell, as a
+ * page that was not there when it fell draws it. It lies flat, its number unknown here, five pips up.
+ */
+export function drawLying(
+  parts: DieParts,
+  place: MercatorPoint,
+  view: CameraView,
+  chosen: DieSettings,
+  t: number,
+): void {
+  const pitch = view.pitch ?? 0;
+  const ground = screenOf(place, view);
+  const landed = landedAt(chosen.look, view.zoom);
+  if (asAPin(landed, view.zoom)) {
+    parts.die.drawPin(ground, 5, 0);
+  } else {
+    const lying = { at: { x: 0, y: 0, z: 0.5 }, turn: STILL };
+    parts.die.draw(
+      ground,
+      lying,
+      LAYOUT,
+      pitch,
+      chosen.look,
+      0,
+      landed,
+      landed,
+      onTheGroundLift(0.5, landed, chosen.look, pitch),
+    );
+  }
+  drawLandingCircle(parts.ring, ground, view, place, chosen.circleKm, t, 0);
 }
 
 /**
