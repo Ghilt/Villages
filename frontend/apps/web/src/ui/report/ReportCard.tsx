@@ -30,6 +30,10 @@ export function OmenRow({ omen, landing = false }: { omen: OmenLine; landing?: b
  * slamming into the list as it lands. `landed` says how many have landed, and while some are still to come the
  * newest is the one slamming in. A press anywhere on it is `onHurry`, which lands the rest at once. The rarity is
  * not said here: the options say it, by their tag and their glow. See decision record 0083.
+ *
+ * The omens read from the map round where the roll's die landed stand in a section of their own, first, so it is
+ * plain which the die brought; the rest follow under theirs. A roll that read nothing of the map is one plain list.
+ * Adam's word of 2026-10-23, and decision record 0118.
  */
 export function ReportCard({
   omens,
@@ -42,15 +46,38 @@ export function ReportCard({
   onHurry?: () => void;
   title?: string;
 }) {
-  const shown = omens.slice(0, landed);
+  const fromTheDie = omens.filter((omen) => omen.kind === 'map');
+  const ordered =
+    fromTheDie.length === 0 ? omens : [...fromTheDie, ...omens.filter((omen) => omen.kind !== 'map')];
+  const shown = ordered.slice(0, landed);
+  const rows = (from: number, to: number) => (
+    <ol className="ui-report__rows">
+      {shown.slice(from, to).map((omen, at) => (
+        <OmenRow
+          key={omen.key}
+          omen={omen}
+          landing={Number.isFinite(landed) && from + at === shown.length - 1}
+        />
+      ))}
+    </ol>
+  );
   return (
     <div className="ui-report" onClick={onHurry} aria-live="polite">
       <h3 className="ui-heading ui-report__title">{title}</h3>
-      <ol className="ui-report__rows">
-        {shown.map((omen, at) => (
-          <OmenRow key={omen.key} omen={omen} landing={Number.isFinite(landed) && at === shown.length - 1} />
-        ))}
-      </ol>
+      {fromTheDie.length === 0 ? (
+        rows(0, shown.length)
+      ) : (
+        <>
+          <h4 className="ui-report__section">Where the die fell</h4>
+          {rows(0, fromTheDie.length)}
+          {shown.length > fromTheDie.length && (
+            <>
+              <h4 className="ui-report__section">Everything else</h4>
+              {rows(fromTheDie.length, shown.length)}
+            </>
+          )}
+        </>
+      )}
     </div>
   );
 }

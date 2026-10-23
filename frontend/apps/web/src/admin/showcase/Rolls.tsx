@@ -23,6 +23,7 @@ const OMENS: readonly OmenLine[] = [
   { key: 'dialogue', kind: 'dialogue', words: 'Unresolved: A letter from the coast' },
   { key: 'figure', kind: 'keyFigure', words: 'Jacob Marchand' },
   { key: 'map.river', kind: 'map', words: 'River' },
+  { key: 'map.ground.forest', kind: 'map', words: 'Forest' },
   { key: 'season', kind: 'season', words: 'Autumn' },
 ];
 
@@ -110,8 +111,11 @@ export function Rolls() {
 
       <Part title="Its parts">
         <Specimens>
-          <Specimen name="ReportCard" note="every omen landed" wide>
+          <Specimen name="ReportCard" note="every omen landed: where the die fell, then everything else" wide>
             <ReportCard omens={OMENS} />
+          </Specimen>
+          <Specimen name="ReportCard" note="a roll that read nothing of the map: one list" wide>
+            <ReportCard omens={OMENS.filter((omen) => omen.kind !== 'map')} />
           </Specimen>
           <Specimen name="OmenRow" note="one of every kind, with its mark" wide>
             <ol className="ui-report__rows">

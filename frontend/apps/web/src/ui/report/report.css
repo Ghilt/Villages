@@ -20,6 +20,16 @@
     text-transform: uppercase;
   }
 
+  /* A section of the omens: where the die fell, and everything else. Smaller than the card's title, above its rows. */
+  .ui-report__section {
+    margin: 0.4em 0 0;
+    font-size: 0.78em;
+    font-style: italic;
+    font-weight: normal;
+    letter-spacing: 0.04em;
+    opacity: 0.8;
+  }
+
   .ui-report__rows {
     display: flex;
     flex-direction: column;

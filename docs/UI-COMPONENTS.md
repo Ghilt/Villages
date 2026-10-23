@@ -571,7 +571,9 @@ A line each: what it is for, its variants, and where on the page it is.
   elsewhere it is the browser's. Held with `chosen` and `onChoose`. *Dialogs and fields*.
 - **`ReportCard`**, `ui/report/ReportCard.tsx`: what a choice roll took into account, filling like the scores
   at the end of a level - each **`OmenRow`**, its kind's mark, its words and a value at the far end, slamming in
-  as it lands. `landed` says how many omens are in; a press on it is `onHurry`. **`OmenStrip`** is the list folded
+  as it lands. The omens of the map, round where the die fell, stand first in a section of their own, *Where the
+  die fell*, and the rest under *Everything else*; with none of the map it is one list. `landed` says how many omens
+  are in; a press on it is `onHurry`. **`OmenStrip`** is the list folded
   away, the marks in a row with their words for tooltips; `small` on an option card, the omens that brought
   it. The rarity is
   the options' to say, by their tag and their glow, and nothing here says it. **`RolledHand`**, beside them, lays

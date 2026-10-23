@@ -106,6 +106,8 @@ decides where it lands.
 
 The roll then plays like **a report card at the end of a level**, Balatro's scoring the reference: the omens slam
 into a list one after another, each a mark, words and sometimes a value, and then the options pop in under it.
+The omens the die brought, from the map round where it fell, stand first under *Where the die fell*, and the rest
+under *Everything else*, Adam's word of 2026-10-23, so it is plain which the die read.
 A click hurries the list. **The rarity is said by the options alone**, by the tag on each and its colour's glow,
 Adam's word of 2026-10-05: nothing stamps it across the list. The list stays where it can be read, and each
 option carries the marks of the omens that brought it, so the two can be matched.
