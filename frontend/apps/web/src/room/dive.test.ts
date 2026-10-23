@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
+import { drawnAt, flatWindow } from '../map/sheet';
 import type { Viewport } from '../map/sheet';
 
 import {
   DIVE_MS,
+  carried,
   castleHeight,
   keepAbove,
   keepAt,
@@ -17,7 +19,7 @@ import {
   lightAt,
 } from './dive';
 import type { Dive } from './dive';
-import { roomAtTurn, sheetAtFloor } from './roomBox';
+import { pulledBack, roomAtTurn, scaledAbout, sheetAtFloor } from './roomBox';
 
 const STAGES: Viewport[] = [
   { width: 1600, height: 900 },
@@ -26,12 +28,17 @@ const STAGES: Viewport[] = [
   { width: 844, height: 390 },
 ];
 
-/** A dive into a castle standing a little off the middle, as one the player has not centred would be. */
-function diveIn(
-  viewport: Viewport,
-  foot = { x: viewport.width / 2 + 40, y: viewport.height / 2 + 30 },
-): Dive {
-  const end = roomAtTurn(sheetAtFloor(viewport), viewport);
+/** How far the map is tipped at its closest zoom, and so how far the room tips once the pull is spent. */
+const TIP = 45;
+
+/**
+ * A dive into a castle standing a little off the middle, as one the player has not centred would be: worked
+ * out in the closest zoom's flat window, ending in the room the pull draws at the floor, looking straight down.
+ */
+function diveIn(viewport: Viewport, about: { x: number; y: number } | null = null): Dive {
+  const flat = flatWindow(viewport, TIP);
+  const foot = { x: flat.width / 2 + 40, y: flat.height / 2 + 30 };
+  const end = carried(roomAtTurn(sheetAtFloor(viewport), viewport, about, TIP), 0, TIP);
   return { going: 'in', progress: 0, keep: keepAbove(foot, 10), span: spanTo(end), end };
 }
 
@@ -63,37 +70,60 @@ describe('the passage', () => {
   it('starts as the identity, so the first frame of it changes nothing at all', () => {
     for (const viewport of STAGES) {
       const dive = diveIn(viewport);
-      const { slide, scale } = sceneAt(dive, viewport, 0);
+      const { slide, scale } = sceneAt(dive, 0);
       expect(scale).toBeCloseTo(1);
       expect(slide.x).toBeCloseTo(0);
       expect(slide.y).toBeCloseTo(0);
     }
   });
 
-  it('brings the castle to the middle of the window by the end', () => {
+  it('brings the castle to the middle of the window by the end, for a room nobody has looked round', () => {
     for (const viewport of STAGES) {
-      const dive = diveIn(viewport);
-      const there = keepAt(dive, viewport, 1);
-      expect(there.x).toBeCloseTo(viewport.width / 2);
-      expect(there.y).toBeCloseTo(viewport.height / 2);
+      const flat = flatWindow(viewport, TIP);
+      const there = keepAt(diveIn(viewport), 1);
+      expect(there.x).toBeCloseTo(flat.width / 2);
+      expect(there.y).toBeCloseTo(flat.height / 2);
     }
   });
 
   it('leaves the room exactly where the real one is about to be, which is what hides the jump', () => {
     for (const viewport of STAGES) {
-      const dive = diveIn(viewport);
-      const landed = roomAt(dive, viewport, 1);
-      expect(landed.left).toBeCloseTo(dive.end.left);
-      expect(landed.top).toBeCloseTo(dive.end.top);
-      expect(landed.width).toBeCloseTo(dive.end.width);
-      expect(landed.height).toBeCloseTo(dive.end.height);
+      // A room looked round to one wall as well as one nobody has, because a dive out sets out from either.
+      for (const about of [null, { x: 1e6, y: -1e6 }]) {
+        const dive = diveIn(viewport, about);
+        const landed = roomAt(dive, 1);
+        expect(landed.left).toBeCloseTo(dive.end.left);
+        expect(landed.top).toBeCloseTo(dive.end.top);
+        expect(landed.width).toBeCloseTo(dive.end.width);
+        expect(landed.height).toBeCloseTo(dive.end.height);
+      }
+    }
+  });
+
+  it('is drawn on the window where the pull draws the room, tipped, so the camera moves under the same room', () => {
+    for (const viewport of STAGES) {
+      const spent = pulledBack(sheetAtFloor(viewport), viewport, 1, null, TIP);
+      const room = scaledAbout(spent.room, spent.about, spent.scale, spent.lean);
+      const inTheCastle = drawnAt(roomAt(diveIn(viewport), 1), TIP);
+      expect(inTheCastle.left).toBeCloseTo(room.left);
+      expect(inTheCastle.top).toBeCloseTo(room.top);
+      expect(inTheCastle.width).toBeCloseTo(room.width);
+      expect(inTheCastle.height).toBeCloseTo(room.height);
+    }
+  });
+
+  it("is the room's own shape where the dive works it out, because the room is tipped as far as the camera is", () => {
+    for (const viewport of STAGES) {
+      const { room } = pulledBack(sheetAtFloor(viewport), viewport, 1, null, TIP);
+      const { end } = diveIn(viewport);
+      expect(end.width / end.height).toBeCloseTo(room.width / room.height);
     }
   });
 
   it('starts with the room inside the castle rather than around it', () => {
     const viewport = { width: 1088, height: 900 };
     const dive = diveIn(viewport);
-    const begun = roomAt(dive, viewport, 0);
+    const begun = roomAt(dive, 0);
     expect(begun.width).toBeLessThan(castleHeight(10));
     expect(begun.left + begun.width / 2).toBeCloseTo(dive.keep.x);
     expect(begun.top + begun.height / 2).toBeCloseTo(dive.keep.y);
@@ -104,7 +134,7 @@ describe('the passage', () => {
     const dive = diveIn(viewport);
     const shape = dive.end.width / dive.end.height;
     for (const progress of [0, 0.3, 0.7, 1]) {
-      const rect = roomAt(dive, viewport, progress);
+      const rect = roomAt(dive, progress);
       expect(rect.width / rect.height).toBeCloseTo(shape);
     }
   });

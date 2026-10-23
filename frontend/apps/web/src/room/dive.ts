@@ -1,4 +1,5 @@
 import type { DeskTop } from '../desk/deskTop';
+import { leanOf } from '../map/sheet';
 import type { Viewport } from '../map/sheet';
 import { pixelsPerWorldUnit } from '../geometry/cameraMath';
 
@@ -36,7 +37,10 @@ export interface Dive {
   keep: Point;
   /** How much larger the scene gets across the whole dive. */
   span: number;
-  /** Where the room ends: the rectangle the real one has at a full pull, so the handover is invisible. */
+  /**
+   * Where the room ends: the rectangle the real one has at a full pull, so the handover is invisible. In the
+   * flat window of the closest zoom, where the dive's arithmetic is done, and so carried there from the floor's.
+   */
   end: DeskTop;
 }
 
@@ -123,16 +127,18 @@ export function scaleAt(dive: Dive, progress: number): number {
 }
 
 /**
- * Where the castle's middle sits on the screen: where it was, easing to the middle of the window.
+ * Where the castle's middle sits on the screen: where it was, easing to the middle of the room the dive ends in.
  *
- * It has to arrive in the middle, because that is where the room is when it is the window, and the room
- * being anywhere else at the end would be a jump at the very moment the whole thing exists to hide.
+ * It has to arrive there, because that is where the room is when the pull is spent, and the room being
+ * anywhere else at the end would be a jump at the very moment the whole thing exists to hide. That is the
+ * middle of the window only for a room nobody has looked round: one dragged to a wall is off to one side.
  */
-export function keepAt(dive: Dive, viewport: Viewport, progress: number): Point {
+export function keepAt(dive: Dive, progress: number): Point {
   const t = ease(clamp(progress, 0, 1));
+  const to = { x: dive.end.left + dive.end.width / 2, y: dive.end.top + dive.end.height / 2 };
   return {
-    x: dive.keep.x + (viewport.width / 2 - dive.keep.x) * t,
-    y: dive.keep.y + (viewport.height / 2 - dive.keep.y) * t,
+    x: dive.keep.x + (to.x - dive.keep.x) * t,
+    y: dive.keep.y + (to.y - dive.keep.y) * t,
   };
 }
 
@@ -142,12 +148,8 @@ export function keepAt(dive: Dive, viewport: Viewport, progress: number): Point 
  * With `transform-origin` at the keep, `translate(d) scale(s)` sends a point `q` to
  * `keep + (q - keep) * s + d`, so `d` is the whole of the drift and the two can be worked out apart.
  */
-export function sceneAt(
-  dive: Dive,
-  viewport: Viewport,
-  progress: number,
-): { origin: Point; slide: Point; scale: number } {
-  const now = keepAt(dive, viewport, progress);
+export function sceneAt(dive: Dive, progress: number): { origin: Point; slide: Point; scale: number } {
+  const now = keepAt(dive, progress);
   return {
     origin: dive.keep,
     slide: { x: now.x - dive.keep.x, y: now.y - dive.keep.y },
@@ -159,11 +161,22 @@ export function sceneAt(
  * The room, in window pixels. It is a rectangle standing at the castle's middle in the scene's own
  * coordinates, so it grows with everything around it and stays where it is inside the pixels.
  */
-export function roomAt(dive: Dive, viewport: Viewport, progress: number): DeskTop {
-  const centre = keepAt(dive, viewport, progress);
+export function roomAt(dive: Dive, progress: number): DeskTop {
+  const centre = keepAt(dive, progress);
   const width = ROOM_IN_THE_KEEP * scaleAt(dive, progress);
   const height = (width * dive.end.height) / dive.end.width;
   return { left: centre.x - width / 2, top: centre.y - height / 2, width, height };
+}
+
+/**
+ * A rectangle laid out in the flat window of one tip, in the flat window of another: drawn on the real window
+ * by the first and read back off it by the second. The room is laid out at the floor, where the camera looks
+ * straight down and the room's own tip is a scale, and the dive is worked out at the closest zoom, where the
+ * camera itself is tipped; the room has to be carried from the one to the other to be the same room.
+ */
+export function carried(rect: DeskTop, from: number, to: number): DeskTop {
+  const ratio = leanOf(from) / leanOf(to);
+  return { ...rect, top: rect.top * ratio, height: rect.height * ratio };
 }
 
 /** How solid the room is: nothing at first, and everything by the time it is worth looking at. */

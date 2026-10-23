@@ -11,6 +11,7 @@ import { lightAt, roomAt, sceneAt, solidAt } from './dive';
 import { pullStore, attachPull } from './pull';
 import { BEYOND, roomFloor } from './roomArt';
 import { atTheEnd, pulledBack } from './roomBox';
+import { roomTip } from './seen';
 import { useStore } from '../store/useStore';
 
 interface RoomProps {
@@ -93,7 +94,7 @@ export function Room({ map, seat, strip, children }: RoomProps) {
     const pull = pullStore.get();
 
     if (pull.dive !== null) {
-      const flat = sceneAt(pull.dive, viewport, pull.dive.progress);
+      const flat = sceneAt(pull.dive, pull.dive.progress);
       const origin = drawnPoint(flat.origin, pitch);
       const slide = drawnPoint(flat.slide, pitch);
       const scale = flat.scale;
@@ -105,7 +106,7 @@ export function Room({ map, seat, strip, children }: RoomProps) {
       walls.hidden = true;
       openWas.current = undefined;
       still.hidden = false;
-      lay(still, drawnAt(roomAt(pull.dive, viewport, pull.dive.progress), pitch));
+      lay(still, drawnAt(roomAt(pull.dive, pull.dive.progress), pitch));
       still.style.opacity = `${solidAt(pull.dive.progress)}`;
       return;
     }
@@ -121,12 +122,20 @@ export function Room({ map, seat, strip, children }: RoomProps) {
       ...viewport,
     });
     const pulled = pull.amount > 0;
-    const { desk, room, scale, about } = pulledBack(lying, viewport, pull.amount, pull.about);
+    const { desk, room, scale, lean, about } = pulledBack(
+      lying,
+      viewport,
+      pull.amount,
+      pull.about,
+      roomTip(),
+    );
     const origin = drawnPoint(about, pitch);
     scene.style.transformOrigin = pulled ? `${origin.x}px ${origin.y}px` : '';
-    scene.style.transform = pulled ? `scale(${scale})` : '';
+    // Tipped back as it draws back: a scale down on top of the scale, the whole of what a north-up parallel
+    // camera does to flat ground, so the map, the desk and the room lie on the one tipped floor.
+    scene.style.transform = pulled ? `scale(${scale}, ${scale * lean})` : '';
     scene.style.willChange = pulled ? 'transform' : '';
-    const open = pulled && !deskCoversView(desk, viewport, scale, about);
+    const open = pulled && !deskCoversView(desk, viewport, scale, about, lean);
     walls.hidden = !open;
     if (open) {
       lay(walls, drawnAt(room, pitch));

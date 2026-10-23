@@ -1,9 +1,10 @@
 import type * as maplibregl from 'maplibre-gl';
 
-import { flatPoint, flatWindow, sheetOnScreen } from '../map/sheet';
+import { flatPoint, sheetOnScreen } from '../map/sheet';
 
 import type { Point } from './dive';
 import { aboutWithin, pulledBack, scaledAbout } from './roomBox';
+import { roomTip, seen } from './seen';
 
 /**
  * Looking round the room: a drag, and the click that takes you back to the map.
@@ -40,7 +41,7 @@ export function attachLook({ map, surface, pulled, lookAt, back }: LookHooks): (
     const camera = seen(map);
     const view = { width: camera.width, height: camera.height };
     const sheet = sheetOnScreen(camera);
-    return { view, sheet, ...pulledBack(sheet, view, now.amount, now.about) };
+    return { view, sheet, ...pulledBack(sheet, view, now.amount, now.about, roomTip()) };
   };
 
   /** Where a pointer is in the flat window, where the pull's arithmetic is done. */
@@ -71,14 +72,17 @@ export function attachLook({ map, surface, pulled, lookAt, back }: LookHooks): (
       press.dragging = true;
       surface.setPointerCapture(event.pointerId);
     }
+    // Down the window everything is drawn back by the tip as well as the scale, so the point moves further
+    // for the same drag down than across.
     const now = drawn();
-    const free = now === null ? 0 : 1 - now.scale;
-    if (now !== null && free > 0) {
+    const across = now === null ? 0 : 1 - now.scale;
+    const down = now === null ? 0 : 1 - now.scale * now.lean;
+    if (now !== null && across > 0 && down > 0) {
       const moved = {
-        x: now.about.x + (at.x - press.at.x) / free,
-        y: now.about.y + (at.y - press.at.y) / free,
+        x: now.about.x + (at.x - press.at.x) / across,
+        y: now.about.y + (at.y - press.at.y) / down,
       };
-      lookAt(aboutWithin(now.room, now.view, now.scale, moved));
+      lookAt(aboutWithin(now.room, now.view, now.scale, moved, now.lean));
     }
     press.at = at;
   };
@@ -103,6 +107,7 @@ export function attachLook({ map, surface, pulled, lookAt, back }: LookHooks): (
       { left: sheet.left, top: sheet.top, width: sheet.size, height: sheet.size },
       now.about,
       now.scale,
+      now.lean,
     );
     const at = pointOf(event);
     if (
@@ -128,21 +133,5 @@ export function attachLook({ map, surface, pulled, lookAt, back }: LookHooks): (
     surface.removeEventListener('pointermove', onPointerMove);
     surface.removeEventListener('pointerup', onPointerUp);
     surface.removeEventListener('pointercancel', onPointerCancel);
-  };
-}
-
-/** The camera as `sheetOnScreen` wants it: looking straight down, in the flat window. */
-export function seen(map: maplibregl.Map): {
-  center: { lng: number; lat: number };
-  zoom: number;
-  width: number;
-  height: number;
-} {
-  const container = map.getContainer();
-  const centre = map.getCenter();
-  return {
-    center: { lng: centre.lng, lat: centre.lat },
-    zoom: map.getZoom(),
-    ...flatWindow({ width: container.clientWidth, height: container.clientHeight }, map.getPitch()),
   };
 }

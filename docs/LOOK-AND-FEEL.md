@@ -445,6 +445,8 @@ stands in the middle of the foot, in gold where the options are in the parchment
   the desk; and whether the map's own look leads the rest of the interface or stands apart from it. Two forms settles one corner of this: what stands in the world is
   drawn by distance, which is the map's rule and not the interface's.
 - What the **room** the desk stands in is made of, and whether it is a place with anything in it or only
-  the far end of a zoom. It is simple shapes today, deliberately, so that the motion of pulling back into
-  it can be judged before anything is drawn properly. See experiment 0009.
+  the far end of a zoom. It is seen tipped back as far as the map is at its closest, the pull tipping the
+  map's square from flat on the desk to lying like the ground, and it is simple shapes today, deliberately,
+  so that the motion of pulling back into it can be judged before anything is drawn properly. See experiment
+  0009.
 - Whether the parchment survives contact with a second mechanic, or turns out to be the choice roll's own.

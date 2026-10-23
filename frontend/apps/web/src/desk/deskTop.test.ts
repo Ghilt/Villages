@@ -71,6 +71,13 @@ describe('the desk', () => {
     expect(deskCoversView(desk, viewport, 0.4, { x: 0, y: 0 })).toBe(false);
   });
 
+  it('is squashed down as the room tips, and stops reaching the bottom of the window sooner', () => {
+    const viewport = { width: 1600, height: 900 };
+    const desk = { left: -2000, top: -1000, width: 5000, height: 3000 };
+    expect(deskCoversView(desk, viewport, 0.4, undefined, 1)).toBe(true);
+    expect(deskCoversView(desk, viewport, 0.4, undefined, Math.SQRT1_2)).toBe(false);
+  });
+
   it('is wider than it is deep, whatever the shape of the window', () => {
     for (const viewport of STAGES) {
       const desk = deskOnScreen(atFloor(viewport), viewport);

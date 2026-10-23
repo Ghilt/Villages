@@ -191,6 +191,28 @@ a click on the map itself takes you back to it, eased by the pull rather than sn
 straight from the pull's store on each change rather than by drawing the component again, so a frame of the pull
 or of a drag is one written transform.
 
+**The room tipped like the map, and bigger.** Adam asked for the room in the map's own look, and for more floor round
+the desk. The pull now tips the scene back as it draws back: straight down at the floor, where the map lies on the
+desk as a square, and as far as the map is tipped at its closest zoom once the pull is spent, eased at both ends as
+the map's own tilt is and driven by the wheel the whole way, so nothing is taken from the player. North-up and
+parallel, a tip does exactly one thing to what lies flat, which is squash it down by the cosine of the tip (decision
+0060), so it is a second scale on the scene, down only, and MapLibre's camera stays pinned flat at the floor and
+draws nothing new. The map's square lies as a rectangle 1.41 times as wide as it is tall at the far end: squashed,
+not turned into a diamond, because the map never turns. Upright things on the far-out map squash with it.
+
+The room is 3.2 desks across where it was 2.6, and 4.1 deep, deeper than across, because tipped back the floor is
+squashed down and a room the desk's own shape would have been a letterbox in the window. The turn is worked out on
+the room as it is drawn, tipped. On a 1100 by 700 stage the spent room is 1031 by 644 in a 748 by 700 window, so there
+is floor to look round to either side.
+
+**The dive used to arrive on a room of another shape.** It draws the room inside the castle squashed by the closest
+zoom's tilt, and once landed the room was drawn flat at the floor: forty-five degrees of squash came off in one frame,
+on arrival and again on leaving. With the room tipped as far as the camera is at its closest, the two are the one
+squash, and the room is carried from the floor's flat window into the closest zoom's (`carried` in `dive.ts`) so the
+dive ends on exactly the room the pull draws. It also ends where that room is, which for a room looked round to one
+wall is not the middle of the window: the castle's middle now eases to the middle of the room it lands in. Before this,
+a way out from a room dragged to one side jumped to the middle on its first frame.
+
 ## Result
 
 Open.

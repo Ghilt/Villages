@@ -69,7 +69,7 @@ export function flatPoint(point: { x: number; y: number }, pitch: number): { x: 
 }
 
 /** How much the tip squashes what lies flat: its cosine, and never quite nothing. */
-function leanOf(pitch: number): number {
+export function leanOf(pitch: number): number {
   return Math.max(1e-6, Math.cos((pitch * Math.PI) / 180));
 }
 

@@ -1,17 +1,31 @@
+import { DESK_ASPECT } from '../desk/deskTop';
+
+import { ROOM_ACROSS, ROOM_DEEP } from './roomBox';
+
 /**
- * A placeholder room, seen from the ceiling, drawn by the browser from an SVG rather than shipped as an
+ * A placeholder room, its floor seen from above, drawn by the browser from an SVG rather than shipped as an
  * image. The same trick as the desk's grain, and the same standing: it is here to be looked at before it
- * is made, and swapping it for a painted room is a change to this file and nothing else.
+ * is made, and swapping it for a painted room is a change to this file and nothing else. The pull tips it
+ * back with everything else, as the map's ground is tipped.
  *
- * Its aspect is the desk's, because the room is a fixed multiple of the desk, so the viewBox and the
- * element it is drawn into always agree and nothing is squashed. Simple shapes on purpose - boards, a
- * rug, a chair, a chest, a hearth, a door and a window - so that what is being judged is the motion of
- * pulling back into it, not the furniture. See experiment 0009.
+ * Its aspect is worked out from the desk's and from how many desks across and deep the room is, so the
+ * viewBox and the element it is drawn into always agree and nothing is squashed but by the tip. Simple shapes
+ * on purpose - boards, a rug, a chair, a chest, a hearth, a door and a window - so that what is being judged
+ * is the motion of pulling back into it, not the furniture. See experiment 0009.
  */
 
-/** The viewBox, whose ratio is `DESK_ASPECT` in desk/deskTop.ts. Change one and change the other. */
+/** The viewBox: as wide as it always was, and as deep as the room's shape makes it. */
 const WIDE = 1450;
-const DEEP = 1000;
+const DEEP = Math.round((WIDE * ROOM_DEEP) / (ROOM_ACROSS * DESK_ASPECT));
+
+/** The desk in the viewBox's units, which the rug it stands on and the chair pushed back from it follow. */
+const DESK_W = WIDE / ROOM_ACROSS;
+const DESK_D = DEEP / ROOM_DEEP;
+
+/** The rug and the chair were drawn for a desk this wide; they are scaled to the desk as it is now. */
+const AT = DESK_W / 558;
+
+const round = (value: number): number => Math.round(value);
 
 /** How far the stone runs in from the edge. The floor is what is left. */
 const WALL = 112;
@@ -28,7 +42,9 @@ function boards(): string {
     lines.push(`M${WALL} ${y}H${WIDE - WALL}`);
   }
   // Each board ends somewhere, and the ends are staggered so the floor does not read as a grid.
-  const ends = [320, 700, 1010, 505, 880, 245, 1120, 610, 400, 950, 760, 1060, 290, 840];
+  const ends = [
+    320, 700, 1010, 505, 880, 245, 1120, 610, 400, 950, 760, 1060, 290, 840, 560, 1090, 350, 730, 980, 470,
+  ];
   ends.forEach((x, index) => {
     const top = WALL + BOARD * index;
     if (top + BOARD <= DEEP - WALL) {
@@ -36,6 +52,13 @@ function boards(): string {
     }
   });
   return lines.join('');
+}
+
+/** A rectangle round the middle of the room, so many desks across and so many deep. */
+function rug(across: number, deep: number, look: string): string {
+  const width = round(DESK_W * across);
+  const height = round(DESK_D * deep);
+  return `<rect x="${round(WIDE / 2 - width / 2)}" y="${round(DEEP / 2 - height / 2)}" width="${width}" height="${height}" ${look}/>`;
 }
 
 const svg =
@@ -73,12 +96,12 @@ const svg =
   `<path d="M${WALL - 40} ${DEEP / 2 - 82}a82 82 0 0 1 0 164Z" fill="#2a1d15"/>` +
   `<circle cx="${WALL + 6}" cy="${DEEP / 2}" r="26" fill="#d2702a"/>` +
   // The rug the desk stands on, big enough to show around it.
-  `<rect x="${WIDE / 2 - 392}" y="${DEEP / 2 - 272}" width="784" height="544" rx="10" fill="#7a3b35"/>` +
-  `<rect x="${WIDE / 2 - 356}" y="${DEEP / 2 - 240}" width="712" height="480" rx="6" fill="none" stroke="#c9a15a" stroke-width="9" opacity="0.72"/>` +
-  `<rect x="${WIDE / 2 - 300}" y="${DEEP / 2 - 196}" width="600" height="392" rx="4" fill="#8c4a3e"/>` +
+  rug(1.405, 1.413, 'rx="10" fill="#7a3b35"') +
+  rug(1.276, 1.247, 'rx="6" fill="none" stroke="#c9a15a" stroke-width="9" opacity="0.72"') +
+  rug(1.075, 1.018, 'rx="4" fill="#8c4a3e"') +
   // The chair, pushed back from where the desk's south edge falls.
-  `<rect x="${WIDE / 2 - 62}" y="${DEEP / 2 + 214}" width="124" height="116" rx="16" fill="#54381f"/>` +
-  `<rect x="${WIDE / 2 - 72}" y="${DEEP / 2 + 316}" width="144" height="26" rx="12" fill="#3f2917"/>` +
+  `<rect x="${round(WIDE / 2 - 62 * AT)}" y="${round(DEEP / 2 + DESK_D / 2 + 22 * AT)}" width="${round(124 * AT)}" height="${round(116 * AT)}" rx="16" fill="#54381f"/>` +
+  `<rect x="${round(WIDE / 2 - 72 * AT)}" y="${round(DEEP / 2 + DESK_D / 2 + 124 * AT)}" width="${round(144 * AT)}" height="${round(26 * AT)}" rx="12" fill="#3f2917"/>` +
   // A chest in one corner and a shelf along the east wall, so the room has a use.
   `<rect x="${WALL + 44}" y="${WALL + 44}" width="186" height="118" rx="7" fill="#5b3f24"/>` +
   `<rect x="${WALL + 44}" y="${WALL + 92}" width="186" height="16" fill="#8d6a3a"/>` +

@@ -16,9 +16,13 @@ import {
   scaleFor,
   sheetAtFloor,
   spanOf,
+  tipAt,
   turnsAt,
   wheelZooms,
 } from './roomBox';
+
+/** How far the map is tipped at its closest zoom, and so how far the room tips once the pull is spent. */
+const TIP = 45;
 
 const STAGES: Viewport[] = [
   { width: 1600, height: 900 },
@@ -58,12 +62,48 @@ describe('the room', () => {
       expect(roomOnScreen(desk).width).toBeGreaterThan(desk.width);
     }
   });
+
+  it('has more floor round the desk than the two and a half desks each way it was first tried at', () => {
+    const viewport = { width: 1088, height: 900 };
+    const desk = deskOnScreen(sheetAtFloor(viewport), viewport);
+    const room = roomOnScreen(desk);
+    expect(room.width / desk.width).toBeGreaterThan(3);
+    expect(room.height / desk.height).toBeGreaterThan(3);
+  });
+
+  it('is deep enough that, tipped as the map is at its closest, it is not a letterbox in a wide window', () => {
+    for (const viewport of STAGES.slice(0, 3)) {
+      const rect = roomAtTurn(sheetAtFloor(viewport), viewport, null, TIP);
+      expect(rect.width / rect.height).toBeGreaterThan(1.2);
+      expect(rect.width / rect.height).toBeLessThan(2);
+    }
+  });
+});
+
+describe('the tip', () => {
+  it("is none at the floor, where the map lies seen from straight above, and the map's own in the room", () => {
+    expect(tipAt(0, TIP)).toBe(0);
+    expect(tipAt(1, TIP)).toBeCloseTo(TIP);
+    expect(tipAt(0.5, TIP)).toBeCloseTo(TIP / 2);
+  });
+
+  it("starts and stops without a jolt, as the map's own tilt does", () => {
+    const step = 1e-6;
+    expect(tipAt(step, TIP) / step).toBeLessThan(0.001);
+    expect((TIP - tipAt(1 - step, TIP)) / step).toBeLessThan(0.001);
+  });
+
+  it('draws the room tipped once the pull is spent, and the floor flat', () => {
+    const viewport = { width: 1088, height: 900 };
+    expect(pulledBack(sheetAtFloor(viewport), viewport, 0, null, TIP).lean).toBe(1);
+    expect(pulledBack(sheetAtFloor(viewport), viewport, 1, null, TIP).lean).toBeCloseTo(Math.SQRT1_2);
+  });
 });
 
 describe('the turn', () => {
   it('leaves the room filling the window, so there is almost no surround when the camera jumps', () => {
     for (const viewport of STAGES) {
-      const rect = roomAtTurn(sheetAtFloor(viewport), viewport);
+      const rect = roomAtTurn(sheetAtFloor(viewport), viewport, null, TIP);
       const short = Math.min(rect.width, rect.height) / Math.min(viewport.width, viewport.height);
       // Never less than filling it, because a gap is where the illusion would show.
       expect(short).toBeGreaterThanOrEqual(0.9);
@@ -73,7 +113,7 @@ describe('the turn', () => {
 
   it('is centred in the window, wherever the sheet was', () => {
     const viewport = { width: 1600, height: 900 };
-    const rect = roomAtTurn(sheetAtFloor(viewport), viewport);
+    const rect = roomAtTurn(sheetAtFloor(viewport), viewport, null, TIP);
     expect(rect.left + rect.width / 2).toBeCloseTo(viewport.width / 2);
     expect(rect.top + rect.height / 2).toBeCloseTo(viewport.height / 2);
   });
@@ -154,30 +194,33 @@ describe('looking round the room', () => {
     rect.top + rect.height >= viewport.height - 1e-6;
 
   it('draws back about the middle until it is moved, which is the pull as it always was', () => {
-    const pulled = pulledBack(sheetAtFloor(viewport), viewport, 0.5, null);
+    const pulled = pulledBack(sheetAtFloor(viewport), viewport, 0.5, null, TIP);
     expect(pulled.about).toEqual(middleOf(viewport));
-    const drawn = scaledAbout(pulled.room, pulled.about, pulled.scale);
+    const drawn = scaledAbout(pulled.room, pulled.about, pulled.scale, pulled.lean);
     expect(drawn.left).toBeCloseTo(
       pulled.room.left * pulled.scale + (viewport.width * (1 - pulled.scale)) / 2,
     );
   });
 
-  it('moves everything drawn by as much as the pointer moved', () => {
-    const pulled = pulledBack(sheetAtFloor(viewport), viewport, 0.5, null);
-    const free = 1 - pulled.scale;
-    const moved = aboutWithin(pulled.room, viewport, pulled.scale, {
-      x: pulled.about.x + 40 / free,
-      y: pulled.about.y - 30 / free,
-    });
-    const before = scaledAbout(pulled.room, pulled.about, pulled.scale);
-    const after = scaledAbout(pulled.room, moved, pulled.scale);
+  it('moves everything drawn by as much as the pointer moved, tipped or not', () => {
+    const pulled = pulledBack(sheetAtFloor(viewport), viewport, 0.5, null, TIP);
+    const { scale, lean } = pulled;
+    const moved = aboutWithin(
+      pulled.room,
+      viewport,
+      scale,
+      { x: pulled.about.x + 40 / (1 - scale), y: pulled.about.y - 30 / (1 - scale * lean) },
+      lean,
+    );
+    const before = scaledAbout(pulled.room, pulled.about, scale, lean);
+    const after = scaledAbout(pulled.room, moved, scale, lean);
     expect(after.left - before.left).toBeCloseTo(40);
     expect(after.top - before.top).toBeCloseTo(-30);
   });
 
   it('stops at the walls, however far the pointer goes', () => {
-    const pulled = pulledBack(sheetAtFloor(viewport), viewport, 0.5, { x: 1e6, y: -1e6 });
-    const drawn = scaledAbout(pulled.room, pulled.about, pulled.scale);
+    const pulled = pulledBack(sheetAtFloor(viewport), viewport, 0.5, { x: 1e6, y: -1e6 }, TIP);
+    const drawn = scaledAbout(pulled.room, pulled.about, pulled.scale, pulled.lean);
     expect(covers(drawn)).toBe(true);
     expect(drawn.left).toBeCloseTo(0);
     expect(drawn.top + drawn.height).toBeCloseTo(viewport.height);
@@ -191,14 +234,16 @@ describe('looking round the room', () => {
   });
 
   it('moves nothing in at the floor, so the map is handed back exactly as it was left', () => {
-    const pulled = pulledBack(sheetAtFloor(viewport), viewport, 0, { x: 5000, y: -5000 });
-    expect(scaledAbout(pulled.room, pulled.about, pulled.scale)).toEqual(pulled.room);
+    const pulled = pulledBack(sheetAtFloor(viewport), viewport, 0, { x: 5000, y: -5000 }, TIP);
+    expect(scaledAbout(pulled.room, pulled.about, pulled.scale, pulled.lean)).toEqual(pulled.room);
   });
 
   it('sets a dive out from the room it was showing, wherever in it the player was looking', () => {
     const sheet = sheetAtFloor(viewport);
     const looked = { x: 1e6, y: 1e6 };
-    const spent = pulledBack(sheet, viewport, 1, looked);
-    expect(roomAtTurn(sheet, viewport, looked)).toEqual(scaledAbout(spent.room, spent.about, spent.scale));
+    const spent = pulledBack(sheet, viewport, 1, looked, TIP);
+    expect(roomAtTurn(sheet, viewport, looked, TIP)).toEqual(
+      scaledAbout(spent.room, spent.about, spent.scale, spent.lean),
+    );
   });
 });
