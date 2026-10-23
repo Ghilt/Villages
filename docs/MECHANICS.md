@@ -371,7 +371,7 @@ Every node has:
 - **its edges out**, the nodes it leads to. More than one is a **fork**: the player will take one road and
   lose the others.
 
-There are three kinds of node.
+There are four kinds of node.
 
 **A dialogue node** offers the house a **Dialogue** when the quest reaches it, which opens in the dialogue pane.
 The node is done when the dialogue is finished, and **where the dialogue ends decides which edge is taken**:
@@ -385,6 +385,15 @@ box, and a button when it is the player who meets it.
 
 **A reward node** is what the house gets: some of one or more resources. It waits with *Collect*; collecting
 pays it and the node is done. The last node of a quest is almost always a reward.
+
+**A challenge node** puts a **Challenge** to the house: a debate in the square against a named opponent, say.
+- **Pressing it** opens the choosing screen, where the player brings up to three of the house's slices; the
+  opponent's slices are not shown.
+- ***Accept challenge*** fights it out there and then. The player watches it, and the quest takes the result.
+- **Its two edges are won and lost.** Winning is the cheaper road; losing leads to a node where the house pays. A draw
+  is lost.
+- **Nothing waits:** a challenge exists only once it is accepted, so none can sit waiting to be started after it has
+  stopped making sense. Adam's word of 2026-10-23.
 
 **An objective is met by the player or by the world.** Three kinds come first, and more are added beside them
 without changing any of these:
@@ -447,6 +456,7 @@ Two states, as the dialogues have:
 
 **The column down the right takes turns** between the dialogues and the quests, behind a tab bar of two marks, a
 speech bubble and a little map of seals, as the corner's tabs are marks; the column is one size whichever is up.
+A third tab, the challenges, joins them; see Challenge.
 On a phone it is a pane like any other, below the map, and the little map of seals is its mark in the bottom bar.
 **A quest offered opens it on the quest's map**: in the spread its tab comes up, from its strip if the column was
 put away, and on a phone it takes the bay below the map, as every pane but a window does. The
@@ -468,7 +478,7 @@ the quests' tab are all marks, Adam's word of 2026-10-15.
 
 ### Where it stands
 
-The quest itself is in the source: it checks itself when it is made, so one that could loop, that leads to a node it does not hold, or that forks where no dialogue's ending could decide it is refused before anything is written; and one walk works out from what a house recorded where it stands, what is done and lost, and what is drawn, as a question mark or as what it is. `OfferQuest` writes it whole on the house's stream, where the house keeps every one it has open, and a quest that starts at a dialogue node offers that dialogue from the same decision. An objective the player meets is ticked and paid from one decision - a delivery spent, a pledge tied under the quest's title - and one the world meets is ticked by a mark that costs nothing; the last tick moves the quest on, offering the next node's dialogue, and a reward collected pays once and finishes the quest. A dialogue node is done when its dialogue ends, in the same decision as the last step: the ending picks the edge, and every node the other roads led to is lost then, one event each. A dialogue that lapses at a quest's node loses the quest, naming the same requirement. Nothing in the world offers one yet: the debug panel's Quests section offers a sample, *the abbot of the isle*, from wire version 50, whose dialogue at the gate arrives in the dialogues pane and is played there. A read model keeps every quest a house was offered and what it recorded of each, and the player is sent each one as its walk draws it, from wire version 51: a question mark as no more than its place, a node shown for what it is with its checklist, its dialogue or its gifts, and an edge to a node not drawn as a stub; the log says where each stands. An objective the world meets is ticked by a listener a moment after: a castle raised for the house on an island, or handed to it, ticks *Hold a castle on an island*, and a house that holds one already has it ticked as the quest reaches the checklist. The quests' tab stands in the column down the right beside the dialogues from the house's first quest, and lists them; a quest offered opens it on the quest's map over its scene, laid out from the top down with the order in each row chosen to keep the roads from crossing, every node and road as its walk draws it. A quest is played in it, from wire version 52: a dialogue node pressed opens its conversation on the dialogues' tab, a checklist's *Deliver* and *Pledge* pay and tick from its card, and *Collect* pays a reward and finishes the quest, the road walked in gilt and the roads lost crossed out as it goes. Its shape is decision record 0096: a quest offered whole on the house's stream,
+The quest itself is in the source: it checks itself when it is made, so one that could loop, that leads to a node it does not hold, or that forks where no dialogue's ending could decide it is refused before anything is written; and one walk works out from what a house recorded where it stands, what is done and lost, and what is drawn, as a question mark or as what it is. `OfferQuest` writes it whole on the house's stream, where the house keeps every one it has open, and a quest that starts at a dialogue node offers that dialogue from the same decision. An objective the player meets is ticked and paid from one decision - a delivery spent, a pledge tied under the quest's title - and one the world meets is ticked by a mark that costs nothing; the last tick moves the quest on, offering the next node's dialogue, and a reward collected pays once and finishes the quest. A dialogue node is done when its dialogue ends, in the same decision as the last step: the ending picks the edge, and every node the other roads led to is lost then, one event each. A dialogue that lapses at a quest's node loses the quest, naming the same requirement. Nothing in the world offers one yet: the debug panel's Quests section offers a sample, *the abbot of the isle*, from wire version 50, whose dialogue at the gate arrives in the dialogues pane and is played there. A read model keeps every quest a house was offered and what it recorded of each, and the player is sent each one as its walk draws it, from wire version 51: a question mark as no more than its place, a node shown for what it is with its checklist, its dialogue or its gifts, and an edge to a node not drawn as a stub; the log says where each stands. An objective the world meets is ticked by a listener a moment after: a castle raised for the house on an island, or handed to it, ticks *Hold a castle on an island*, and a house that holds one already has it ticked as the quest reaches the checklist. The challenge node is planned in `docs/plans/challenges-in-the-game.md`, and not built. The quests' tab stands in the column down the right beside the dialogues from the house's first quest, and lists them; a quest offered opens it on the quest's map over its scene, laid out from the top down with the order in each row chosen to keep the roads from crossing, every node and road as its walk draws it. A quest is played in it, from wire version 52: a dialogue node pressed opens its conversation on the dialogues' tab, a checklist's *Deliver* and *Pledge* pay and tick from its card, and *Collect* pays a reward and finishes the quest, the road walked in gilt and the roads lost crossed out as it goes. Its shape is decision record 0096: a quest offered whole on the house's stream,
 its moves and its lost nodes recorded, how it is shown worked out and never written, objectives met by the
 player in the house's own rules and by the world through one listener. `docs/plans/quests.md` is the order it
 is built in, one commit a step, and experiment 0020 is what it is meant to show.
@@ -1273,13 +1283,31 @@ bottom the replay: play and pause, its pace, to the end, the happenings as bands
 scrub to any second. The history, the tug second by second and what happened in the second shown, opens behind a
 mark. Every control is a mark. Decision record 0116 is the shape; the steps are in `docs/plans/challenge-spectacle.md`.
 
+### In the game
+
+**A quest raises the first challenges**, through a challenge node (see Quest). Adam's word of 2026-10-23, in
+`docs/plans/challenges-in-the-game.md`:
+- **Pressing the node** opens the **challenges' tab** of the right column, beside the dialogues and the quests, on its
+  choosing screen:
+  - the opponent's name and the challenge's kind;
+  - the house's **starting slices**, up to three of them brought;
+  - not the opponent's slices, which are seen only once it starts.
+- ***Accept challenge*** fights it out there and then, in one decision with the quest's next step, so a challenge never
+  waits to be started.
+- **The spectacle plays in the tab**, watched for the first time.
+- **A result follows:** who won, how, and what the quest does next.
+- **The tab keeps every challenge the house has fought,** newest first, each saying who stood against whom, the kind,
+  and who won and how, and any of them can be watched again.
+
+**Every house holds the same starting slices** until houses come by their own; making slices is a later part.
+
 ### Not decided
 
-- **Who raises a challenge, and when**: a battle over a structure, a debate a dialogue starts, a rival.
-- **The pane**: where a player watches a challenge in the game, and how a side chooses its slices. The spectacle
-  itself is designed, above.
+- **Who else raises a challenge, and when**: a battle over a structure, a debate a dialogue starts, a rival. A quest's
+  node is the first.
+- **The pane's place**: the challenges' tab is in the right column until the bays are reworked.
 - **The other venues**: a ford, a siege, a trial were drawn; which kind is shown in which, and how many there are.
-- **How a house comes by slices**: every house starts with the same one, and others are unlocked "in different
+- **How a house comes by slices**: every house starts with the same set, and others are unlocked "in different
   ways" that are not named yet.
 - **What damage and fatigue do in the world** beyond the number, and how either is mended.
 - **Effects outside their slice's aspect**, which Adam named as a design space for later.
@@ -1299,7 +1327,9 @@ thousand says how often each side wins; a grid of matchups weighs every aspect a
 buffs and debuffs, is built too, in `docs/plans/challenge-matching.md`. The spectacle, the square watched on the same
 page, was planned on 2026-10-21 in `docs/plans/challenge-spectacle.md` and is built: a single run on the page is
 played out in the square, held wide or deep, with the replay, each side's slices and the history, from parts of the
-component library. The square is the only venue so far.
+component library. The square is the only venue so far. Challenges in the game, raised by a quest's challenge node,
+chosen for and watched in the right column, were planned on 2026-10-23 in `docs/plans/challenges-in-the-game.md`, and
+are not built.
 
 ---
 

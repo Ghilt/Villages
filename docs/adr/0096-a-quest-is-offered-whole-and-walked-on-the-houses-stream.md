@@ -126,3 +126,18 @@ Adam's to tune.
   the program already carries a death to a dialogue.
 - **The quest by reference**, a key to an authored quest rather than the whole of it. Rejected as for a
   dialogue: the history would stop saying what was offered.
+
+## Amendment, 2026-10-23: the challenge node
+
+A fourth kind of node: **a challenge node** puts a **Challenge** to the house (decision record 0107, amended the same
+day).
+- **Its terms are written in the node:** the kind, the opponent's name and colour, and the opponent's slices. They are
+  checked against the challenge catalogue as the shelf is read.
+- **It is done when the player accepts it** with slices of the house's own. The same decision fights it out and moves
+  the quest on.
+
+**It forks by outcome.** Its edges carry `won` and `lost` where a dialogue node's carry endings: the new condition
+the record above foresaw, not a new shape.
+- **Soundness:** a challenge node has exactly those two roads, both leading on, and a draw takes `lost`.
+- **The fork's purpose:** in Adam's words, winning should be the cheaper road, and losing should lead to a node where
+  the house pays.

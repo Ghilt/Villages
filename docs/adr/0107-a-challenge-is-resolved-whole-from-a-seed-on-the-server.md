@@ -98,3 +98,44 @@ different ones add up. Like an effect, its words, numbers and what it goes on ar
 code, held to each other both ways. A buff or a debuff is named for what it does, not for one effect's flavour, so that many effects can put on the same one. The Enforcer's silence became the first debuff, *stunned*, and *Curfew* took the place of *By
 Decree*, which never fired between slices of equal numbers. The moments name each one put on and lifted, at
 protocol 64. A debuff may take a share off what a summon does, or wear its integrity, which was fixed as it came; at nothing the summon is gone, counted as killed. A cleansing lifts every debuff on its side. The aspect boost became a buff, Adam's word of the same day: *empowered*, which a happening puts on whatever matches it until it ends and an effect may put on out of its aspect, its share the buff's own number rather than the balance's. A buff lands before the turns and debuffs of its second, so a ward or a stand holds against them whichever side asked first. A slice can be weakened too, and penalised, paying for each trigger it fires out of its aspect: the first pull Authority has of its own. And the anti-aspect took its place in the effects, as the amendment above foresaw: a second mark, *needs its anti-aspect*, lets an effect work only in its anti-aspect's happenings, unboosted, and each aspect has one that answers its opposite. What an effect or a summon needs is one field, `needs`, `match` or `anti` or nothing.
+
+## Amendment, 2026-10-23: a challenge one house fights is one decision on its stream
+
+Adam's word, planning challenges into the game (`docs/plans/challenges-in-the-game.md`):
+- a quest puts a challenge to the house;
+- the player chooses the slices to bring and accepts;
+- they watch it;
+- the quest takes the result.
+
+**Nothing may be stored in between.** A challenge that waited to be started could be started after it had stopped
+making sense, as a quest's timed objectives can.
+
+**A challenge one house fights against what the world puts up is recorded on that house's stream, in the decision that
+raises and fights it.**
+- **The decision:** the house's own command, *accept challenge*, fights it out on the spot and writes
+  `villages.player.resolvedChallenge.v1`, Adam's name for it.
+- **What it carries:** everything `ChallengeResolved` was to carry:
+  - the kind, the progression, both sides' slices and the seed;
+  - the catalogue's fingerprint and the engine's version;
+  - the outcome;
+  - each side, and what raised it.
+- **Why the same decision:** whatever raised the challenge takes the result in that same decision. A quest moves on
+  along the road the outcome names.
+
+A challenge does not exist until it is accepted, so none can wait, and none can be fought without its result being
+taken.
+
+`villages.challenge.resolved.v1` on `challenge:<id>` is kept for a challenge between two houses, which no one house's
+decision can write. It is still unbuilt.
+
+**Every house holds the same starting slices** until houses come by their own: a section of the challenge catalogue,
+`startingSlices`.
+- Nothing about them is stored per house; the slices a challenge was fought with are in its event.
+- The application fights a challenge out before the house decides, as it draws a fate roll. The house checks the fight
+  was the node's: its kind and its opponent's slices, and one to three of the starting slices, none twice.
+
+**The opponent's slices are not shown before the challenge starts.** They travel to the player only in the run they
+watch.
+
+**A replay re-runs the moments from the stored seed and slices**, which are still not stored. It says so when the
+catalogue or the engine has changed and the run comes out otherwise; the recorded outcome stands.
