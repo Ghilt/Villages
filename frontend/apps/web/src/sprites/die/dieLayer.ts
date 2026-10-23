@@ -3,6 +3,8 @@ import { Container, Graphics } from 'pixi.js';
 import type { CameraView, ScreenPoint } from '../../geometry/cameraMath';
 import type { Layer } from '../layer';
 import { createDieDrawing, createDust } from './dieDrawing';
+import { kept, speedAtRelease } from './gesture';
+import type { Sample } from './gesture';
 import { holdTheDie } from './hand';
 import type { DieHand, HandAt, Landing } from './hand';
 import { heldTurn } from './playback';
@@ -11,12 +13,12 @@ import type { DieSettings, Thrown } from './throwing';
 
 /**
  * The choice roll's die on the game's sprite canvas: held under the pointer or above the finger with the landing circle
- * round its shadow, let go, played back pinned to the ground, and lying where it rests with its ring breathing until
- * it is put back. Of the info layer, over the fog and the clouds and every sign (0096, 0118). Fetched only once the
- * game has started, and it says it is here through `hand.ts`, which the pane holds it by.
- *
- * A die let go is dropped by its shadow whatever the hand was doing; the throw is the next step of
- * `docs/plans/choice-roll-podium.md`.
+ * round its shadow; let go still, it drops by its shadow, and with a flick it is thrown the way the hand went, the
+ * hand's speed read over its last tenth of a second; played back pinned to the ground, and lying where it rests with
+ * its ring breathing until it is put back. The number on top is painted on as the throw is worked out, a number the
+ * page chooses, since what it means is not decided. Of the info layer, over the fog and the clouds and every sign
+ * (0096, 0118). Fetched only once the game has started, and it says it is here through `hand.ts`, which the pane
+ * holds it by. See `docs/plans/choice-roll-podium.md`.
  */
 
 /** How often a die at rest is drawn again, for its ring's breath: twenty times a second is plenty for a slow light. */
@@ -24,7 +26,14 @@ const BREATHES_MS = 50;
 
 type Now =
   | { readonly kind: 'idle' }
-  | { readonly kind: 'held'; at: ScreenPoint; readonly byTouch: boolean; readonly since: number }
+  | {
+      readonly kind: 'held';
+      at: ScreenPoint;
+      readonly byTouch: boolean;
+      readonly since: number;
+      /** Where the hand was lately, on the map, and when: what a flick is read from. */
+      samples: Sample[];
+    }
   | {
       readonly kind: 'flying' | 'resting';
       readonly thrown: Thrown;
@@ -53,11 +62,25 @@ export function createDieLayer(box: HTMLElement, repaint: () => void): DieLayer 
     const edges = box.getBoundingClientRect();
     return { x: at.x - edges.left, y: at.y - edges.top };
   };
-  const fall = (ground: ScreenPoint, turnedSince: number, rested: (landing: Landing) => void) => {
+  const fall = (
+    ground: ScreenPoint,
+    speed: { x: number; y: number },
+    turnedSince: number,
+    rested: (landing: Landing) => void,
+  ) => {
     if (camera === null) return;
     const t = performance.now();
-    // Dropped by its shadow, whatever the hand was doing: the flick's throw is the next step.
-    const thrown = letGo(ground, { x: 0, y: 0 }, heldTurn(turnedSince, t), camera, settings, () => [], t);
+    // The number the game wants on top, painted on the face the throw leaves there: the page's own for now (0118).
+    const showing = 1 + Math.floor(Math.random() * 6);
+    const thrown = letGo(
+      ground,
+      speed,
+      heldTurn(turnedSince, t),
+      camera,
+      { ...settings, showing },
+      () => [],
+      t,
+    );
     knocked = 0;
     now = { kind: 'flying', thrown, rested };
     repaint();
@@ -66,19 +89,22 @@ export function createDieLayer(box: HTMLElement, repaint: () => void): DieLayer 
   const hand: DieHand = {
     pickUp(at, byTouch, circleKm) {
       settings = { ...DIE_SETTINGS, circleKm };
-      now = { kind: 'held', at: onTheMap(at), byTouch, since: at.at };
+      const there = onTheMap(at);
+      now = { kind: 'held', at: there, byTouch, since: at.at, samples: [{ t: at.at, ...there }] };
       repaint();
     },
     move(path) {
       const last = path[path.length - 1];
       if (now.kind !== 'held' || last === undefined) return;
+      const passed = path.map((step) => ({ t: step.at, ...onTheMap(step) }));
+      now.samples = kept([...now.samples, ...passed], last.at);
       now.at = onTheMap(last);
       repaint();
     },
     letGo(at, rested) {
       if (now.kind !== 'held' || camera === null) return;
       const ground = heldGround(onTheMap(at), now.byTouch, settings, camera.pitch ?? 0);
-      fall(ground, now.since, rested);
+      fall(ground, speedAtRelease(now.samples, at.at), now.since, rested);
     },
     putBack() {
       now = { kind: 'idle' };
@@ -87,7 +113,7 @@ export function createDieLayer(box: HTMLElement, repaint: () => void): DieLayer 
     dropAtCentre(circleKm, rested) {
       if (camera === null) return;
       settings = { ...DIE_SETTINGS, circleKm };
-      fall({ x: camera.width / 2, y: camera.height / 2 }, performance.now(), rested);
+      fall({ x: camera.width / 2, y: camera.height / 2 }, { x: 0, y: 0 }, performance.now(), rested);
     },
   };
   holdTheDie(hand);

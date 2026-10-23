@@ -75,6 +75,8 @@ test('the map, a house founded, another window seeing it, an action taken, and a
     await player.mouse.down();
     await expect(podium).toHaveAttribute('data-out', 'true');
     await player.mouse.move(map.x + map.width / 2, map.y + map.height / 3, { steps: 12 });
+    // Held still a moment before letting go, so it is dropped rather than thrown.
+    await player.waitForTimeout(150);
     await player.mouse.up();
     await logSays(player, /hand of \d+, from \d+ omens/);
     // Dealt once the omens have landed, which is when a card can be pressed.

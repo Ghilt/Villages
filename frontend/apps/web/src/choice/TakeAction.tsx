@@ -21,7 +21,7 @@ const SEEN_MS = 500;
 /**
  * **Take action**: the choice roll at rest, the die on its podium, over the words, Adam's call. A long press lifts
  * it onto the map, where it hangs under the pointer or above the finger with the landing circle round its shadow; let
- * go, it drops by its shadow, and once it rests the roll is sent from where it landed, with what else the page is
+ * go still, it drops by its shadow, and with a flick it is thrown; once it rests the roll is sent from where it landed, with what else the page is
  * looking at, `looking` handed down from the root, and the hand that comes back takes the pane over while the die lies
  * where it fell. Let go over its slot, it goes back and nothing is paid. Enter drops it at the middle of the view.
  * Greyed while the house cannot pay or a command of the player's is waiting on its answer, and saying which. Put away
