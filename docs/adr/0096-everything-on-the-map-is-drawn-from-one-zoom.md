@@ -80,3 +80,13 @@ the middle first, cut and its trees made hidden while the info layer is still wh
 milliseconds of a frame at a time (`BUILD_MS`), so the crossing only fades them in. The rule above is unchanged: the
 zoom decides whether the real world is shown, and time how long it takes to come; what changes is only when it is
 built. Pulled back past 7, nothing is held. See `docs/plans/smooth-crossing-into-the-real-world.md`.
+
+## Amendment, 2026-10-23: what only the real world draws is compiled ahead
+
+A browser that had compiled nothing crossed 7.5 over busy ground the first time at nineteen frames a second: the
+page waited on the graphics driver to compile the worn ground's program (84 ms), the roads' (49 ms), and the trees'
+and their shadows' (36 and 34 ms), each at its first draw. They are handed to the driver as the land's and the
+clouds' are, through `programsAhead` in `shaders/compileAhead.ts`: once the game has started, or the first time
+their layer is wanted if that is sooner. The worn ground and the roads are drawn only once their program is compiled,
+and the woods' arrival waits on the trees' programs as it waits on the woods being built, for as long as that takes;
+a browser that cannot compile ahead draws at once and waits on the driver as it always did. The log says each once.

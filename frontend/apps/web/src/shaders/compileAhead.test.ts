@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { compileAhead } from './compileAhead';
+import { compileAhead, programsAhead } from './compileAhead';
 
 const COMPLETION = 0x91b1;
 
@@ -84,5 +84,66 @@ describe('compiling a program ahead of its first use', () => {
     lost.lose();
     await vi.advanceTimersByTimeAsync(100);
     expect(await losing).toBeNull();
+  });
+});
+
+describe("a layer's programs compiled ahead", () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  const two = [
+    { glProgram: SOURCES },
+    { glProgram: { vertex: 'the second vertex', fragment: 'the second fragment' } },
+  ];
+
+  it('are handed to the driver once however often begun, and ready only once every one is compiled', async () => {
+    const fake = fakeGl({ parallel: true, askedUntilDone: 4 });
+    const said: (number | null)[] = [];
+    let repainted = 0;
+    const ahead = programsAhead(
+      fake.gl,
+      two,
+      (ms) => said.push(ms),
+      () => (repainted += 1),
+    );
+    expect(fake.sources).toEqual([]);
+    ahead.begin();
+    ahead.begin();
+    expect(fake.sources).toEqual(['the vertex', 'the fragment', 'the second vertex', 'the second fragment']);
+    expect(ahead.ready()).toBe(false);
+    await vi.advanceTimersByTimeAsync(300);
+    expect(ahead.ready()).toBe(true);
+    expect(said).toHaveLength(1);
+    expect(typeof said[0]).toBe('number');
+    expect(repainted).toBe(1);
+  });
+
+  it('are ready at once where the browser cannot compile ahead, whose first draw waits as it always did', async () => {
+    const said: (number | null)[] = [];
+    const ahead = programsAhead(
+      fakeGl({ parallel: false }).gl,
+      two,
+      (ms) => said.push(ms),
+      () => undefined,
+    );
+    ahead.begin();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(ahead.ready()).toBe(true);
+    expect(said).toEqual([null]);
+  });
+
+  it('are never ready, nor said, once stopped', async () => {
+    const said: (number | null)[] = [];
+    const ahead = programsAhead(
+      fakeGl({ parallel: true, askedUntilDone: 1000 }).gl,
+      two,
+      (ms) => said.push(ms),
+      () => undefined,
+    );
+    ahead.begin();
+    ahead.stop();
+    await vi.advanceTimersByTimeAsync(500);
+    expect(ahead.ready()).toBe(false);
+    expect(said).toEqual([]);
   });
 });

@@ -89,3 +89,47 @@ function shaderOf(gl: WebGL2RenderingContext, type: number, source: string): Web
   gl.compileShader(shader);
   return shader;
 }
+
+/** A layer's programs compiled ahead: handed to the driver when `begin` is first called, and `ready` once compiled. */
+export interface ProgramsAhead {
+  /** Hands the programs to the driver now, if they have not been already. */
+  begin(): void;
+  /** Whether they are compiled, or this browser cannot compile ahead and its first use will wait as it always did. */
+  ready(): boolean;
+  stop(): void;
+}
+
+/**
+ * The programs of a layer that draws only once the driver has compiled them, as the land's and the clouds' are:
+ * `begin` once the game has started, so as not to slow the start, or the first time the layer is wanted if that is
+ * sooner. `said` is told the milliseconds the slowest of them took, or null where this browser cannot compile ahead;
+ * `repaint` asks for the frame that draws them. Pixi keeps a program's sources, preprocessed, until it is destroyed.
+ */
+export function programsAhead(
+  gl: WebGL2RenderingContext | null | undefined,
+  programs: readonly { readonly glProgram: { readonly vertex?: string; readonly fragment?: string } }[],
+  said: (ms: number | null) => void,
+  repaint: () => void,
+): ProgramsAhead {
+  const stopping = new AbortController();
+  let begun = false;
+  let compiled = false;
+  return {
+    begin(): void {
+      if (begun || stopping.signal.aborted) return;
+      begun = true;
+      void Promise.all(
+        programs.map(({ glProgram: { vertex, fragment } }) =>
+          compileAhead(gl, { vertex: vertex!, fragment: fragment! }, stopping.signal),
+        ),
+      ).then((times) => {
+        if (stopping.signal.aborted) return;
+        compiled = true;
+        said(times.some((ms) => ms === null) ? null : Math.max(...(times as number[])));
+        repaint();
+      });
+    },
+    ready: () => compiled,
+    stop: () => stopping.abort(),
+  };
+}

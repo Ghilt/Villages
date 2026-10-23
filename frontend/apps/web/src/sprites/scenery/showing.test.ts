@@ -165,4 +165,14 @@ describe('the woods arriving whole', () => {
     expect(arrivalWaits(true, true, false, 0)).toBe(false);
     expect(arrivalWaits(false, false, false, 0)).toBe(false);
   });
+
+  it('waits for the trees’ programs as long as they take, and asks after them only while it waits', () => {
+    expect(arrivalWaits(true, false, true, HOLD_FOR_WHOLE_MS * 10, () => false)).toBe(true);
+    expect(arrivalWaits(true, false, true, 0, () => true)).toBe(false);
+    const asked = { times: 0 };
+    const compiled = () => (asked.times += 1) > 0;
+    arrivalWaits(true, true, false, 0, compiled);
+    arrivalWaits(false, false, false, 0, compiled);
+    expect(asked.times).toBe(0);
+  });
 });

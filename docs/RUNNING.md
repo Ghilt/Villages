@@ -1488,8 +1488,10 @@ and `-- --drop` takes them off; by hand only.
   its slowest frames each with what ran in it: the game's own function nearest the top of the stack with whatever it
   called in the libraries, or a library's name where none of the game's was running, the profile lined up with the
   page by a function of its own run just before the camera moves (`frontend/perf/slowFrames.ts`). The run's first
-  crossing is kept apart, waiting on whatever programs only the real world needs; then three, the middle by late
-  frames. Every zoom keeps its slowest frames too. See `docs/plans/smooth-crossing-into-the-real-world.md`.
+  crossing is kept apart, waiting on whatever programs only the real world needs - the roads', the worn ground's and
+  the trees', which are compiled ahead once the game has started, so it waits on none of them, and the log says each
+  once under `roads`, `ground` and `trees`; with `--only crossing` it is the run's first cold one, as a player's who
+  opens the page and comes straight in over busy ground - then three, the middle by late frames. Every zoom keeps its slowest frames too. See `docs/plans/smooth-crossing-into-the-real-world.md`.
 - **The pan**, after the crossing: a fresh page settled at zoom 8.5 over the same ground, the real world in, and panned
   two screens east over four seconds, a brisk drag, watched three seconds more; kept and compared as the crossing is.
   It is where a wood or a roadside laid out again whole is felt, which one crossing on a fresh page hardly shows.

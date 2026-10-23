@@ -9,13 +9,14 @@ import {
   Sprite,
   UniformGroup,
 } from 'pixi.js';
-import type { Container, Renderer } from 'pixi.js';
+import type { Container, Renderer, WebGLRenderer } from 'pixi.js';
 
 import type { RoadsMapFile } from '@villages/world';
 
 import { standingLayer } from '../../geometry/cameraMath';
 import type { CameraView } from '../../geometry/cameraMath';
 import { note } from '../../log/log';
+import { programsAhead } from '../../shaders/compileAhead';
 import { onStandsArrived, onStandsFollowed, standsVersion } from '../../net/stands';
 import { roadsHeld, roadsMap } from '../ground/roads';
 import { workedGroundStore } from '../ground/settings';
@@ -51,6 +52,8 @@ export interface RoadsLayer extends Layer {
   setTilesRoot(tilesRoot: string): void;
   /** How many stretches are held to draw. */
   report(): { strips: number; roadside: number };
+  /** Hands their program to the graphics driver now, if it has not been already. */
+  compileAhead(): void;
 }
 
 /** How many floats each corner of a stretch's quad carries: its ends, its corner, its half-width and grade. */
@@ -126,6 +129,19 @@ export function createRoadsLayer(
     }),
     resources: { roadUniforms: uniforms },
   });
+  // Drawn only once the driver has compiled their program, so the page never waits on it (`programsAhead`).
+  const ahead = programsAhead(
+    (renderer as WebGLRenderer).gl as WebGL2RenderingContext | undefined,
+    [shader],
+    (ms) =>
+      note(
+        'roads',
+        ms === null
+          ? "this browser cannot compile the roads' program ahead, so its first draw waits on the driver"
+          : `the roads' program compiled ahead in ${(ms / 1000).toFixed(1)} s, the page never waiting`,
+      ),
+    repaint,
+  );
   const target = RenderTexture.create({ width: 1, height: 1, dynamic: true, scaleMode: 'linear' });
   const sprite = new Sprite(target);
   sprite.visible = false;
@@ -202,7 +218,8 @@ export function createRoadsLayer(
         stale = false;
         readVersion = version;
       }
-      if (!on || appear === 0 || mesh === null) {
+      if (on && appear > 0 && mesh !== null) ahead.begin();
+      if (!on || appear === 0 || mesh === null || !ahead.ready()) {
         sprite.visible = false;
         return soonest(besides, arrival.wants());
       }
@@ -239,7 +256,10 @@ export function createRoadsLayer(
       return soonest(besides, arrival.wants());
     },
 
+    compileAhead: () => ahead.begin(),
+
     destroy(): void {
+      ahead.stop();
       roadside.destroy();
       stopArriving();
       stopFollowing();

@@ -8,13 +8,15 @@ import {
   Sprite,
   UniformGroup,
 } from 'pixi.js';
-import type { Renderer } from 'pixi.js';
+import type { Renderer, WebGLRenderer } from 'pixi.js';
 
 import { GROUND_LATTICE, alongU, alongV, frameOf } from '@villages/world';
 
 import { groundTilt, pixelsPerWorldUnit, toMercatorExact } from '../../geometry/cameraMath';
 import type { CameraView } from '../../geometry/cameraMath';
 import { WORLD_MASTER_WIDTH } from '../../geometry/world';
+import { note } from '../../log/log';
+import { programsAhead } from '../../shaders/compileAhead';
 import { groundAt } from '../land/landMask';
 import type { Layer } from '../layer';
 import { createArrival } from '../arrival';
@@ -63,6 +65,8 @@ export interface GroundLayer extends Layer {
   sprite: Sprite;
   /** The ground the buildings now on the map wear. */
   setWorked(worked: ReadonlyMap<number, Worked>): void;
+  /** Hands its program to the graphics driver now, if it has not been already. */
+  compileAhead(): void;
 }
 
 export function createGroundLayer(renderer: Renderer, repaint: () => void): GroundLayer {
@@ -103,6 +107,19 @@ export function createGroundLayer(renderer: Renderer, repaint: () => void): Grou
     }),
     shader,
   });
+  // Drawn only once the driver has compiled its program, so the page never waits on it (`programsAhead`).
+  const ahead = programsAhead(
+    (renderer as WebGLRenderer).gl as WebGL2RenderingContext | undefined,
+    [shader],
+    (ms) =>
+      note(
+        'ground',
+        ms === null
+          ? "this browser cannot compile the worn ground's program ahead, so its first draw waits on the driver"
+          : `the worn ground's program compiled ahead in ${(ms / 1000).toFixed(1)} s, the page never waiting`,
+      ),
+    repaint,
+  );
   const target = RenderTexture.create({ width: 1, height: 1, dynamic: true, scaleMode: 'linear' });
   const sprite = new Sprite(target);
   sprite.visible = false;
@@ -145,6 +162,8 @@ export function createGroundLayer(renderer: Renderer, repaint: () => void): Grou
   return {
     sprite,
 
+    compileAhead: () => ahead.begin(),
+
     setWorked(next: ReadonlyMap<number, Worked>): void {
       if (next === worked) {
         return;
@@ -157,7 +176,8 @@ export function createGroundLayer(renderer: Renderer, repaint: () => void): Grou
     draw(view: CameraView, _now: number, elapsed: number): number | null {
       const { strength, earth, grass, road } = workedGroundStore.get();
       const fade = arrival.step(view.zoom, elapsed);
-      const at = fade > 0 && worked.size > 0 ? windowOfView(view) : null;
+      if (fade > 0 && worked.size > 0) ahead.begin();
+      const at = fade > 0 && worked.size > 0 && ahead.ready() ? windowOfView(view) : null;
       if (at === null) {
         sprite.visible = false;
         return arrival.wants();
@@ -205,6 +225,7 @@ export function createGroundLayer(renderer: Renderer, repaint: () => void): Grou
 
     destroy(): void {
       stopWatching();
+      ahead.stop();
       sprite.destroy();
       target.destroy(true);
       mesh.destroy();

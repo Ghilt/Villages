@@ -150,11 +150,19 @@ export function worthBuilding(
 export const HOLD_FOR_WHOLE_MS = 250;
 
 /**
- * Whether the woods' arrival waits this frame: wanted and not begun, the view not all built yet, and not waited for
- * `HOLD_FOR_WHOLE_MS`. Once begun it never waits again, so a fade is never stopped part-way.
+ * Whether the woods' arrival waits this frame: wanted and not begun, and either the trees' programs not `compiled` yet,
+ * for as long as that takes, so the page never waits on the driver for them, or the view not all built yet and not
+ * waited for `HOLD_FOR_WHOLE_MS`. Once begun it never waits again, so a fade is never stopped part-way. `compiled` is
+ * asked only while the woods are wanted and not begun.
  */
-export function arrivalWaits(wanted: boolean, begun: boolean, viewBuilt: boolean, waitedMs: number): boolean {
-  return wanted && !begun && !viewBuilt && waitedMs < HOLD_FOR_WHOLE_MS;
+export function arrivalWaits(
+  wanted: boolean,
+  begun: boolean,
+  viewBuilt: boolean,
+  waitedMs: number,
+  compiled: () => boolean = () => true,
+): boolean {
+  return wanted && !begun && (!compiled() || (!viewBuilt && waitedMs < HOLD_FOR_WHOLE_MS));
 }
 
 /**

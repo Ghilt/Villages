@@ -212,10 +212,8 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       ground?.setWorked(next.worked);
       roads?.setWorked(next.worked);
       // Only the woods whose ground came or went are cut again: a road tile arriving touches a few (0118).
-      scenery?.setGround(
-        whereSceneryGrows(groundField, next.worked),
-        was === null ? undefined : cellsTouched(was.worked, next.worked),
-      );
+      const touched = was === null ? undefined : cellsTouched(was.worked, next.worked);
+      scenery?.setGround(whereSceneryGrows(groundField, next.worked), touched);
     }
   }
 
@@ -324,7 +322,9 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       // Whatever was handed over before the canvas was ready - the seats a founding choice offers always are,
       // since they arrive with the first frames - is given now, whole.
       apply(null, scene);
-      void started.then(() => land.compileAhead());
+      // What only the real world draws is compiled ahead too, so the first crossing into it waits on no driver.
+      const ahead = [land, ground, roads, trees];
+      void started.then(() => ahead.forEach((layer) => layer.compileAhead()));
       // The choice roll's die, over everything and fetched only once the game has started, so it costs the start
       // nothing (0118).
       void started

@@ -548,7 +548,7 @@ export function createSceneryLayer(sway: SceneryShaders) {
       const wanting = Array.from(alphaOf, (_, group) => wantedOf(group)).some(Boolean);
       const begun = arrival > 0;
       waitingSince = wanting && !begun ? (waitingSince ?? now) : null;
-      const waits = arrivalWaits(wanting, begun, viewBuilt, now - (waitingSince ?? now));
+      const waits = arrivalWaits(wanting, begun, viewBuilt, now - (waitingSince ?? now), sway.ready);
       if (waits) askForAFrame();
       let moving = 0;
       arrival = 0;

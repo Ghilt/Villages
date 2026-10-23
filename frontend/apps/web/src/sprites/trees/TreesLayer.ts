@@ -4,6 +4,7 @@ import type { Renderer, WebGLRenderer } from 'pixi.js';
 import { groundTilt, tiltGround } from '../../geometry/cameraMath';
 import type { CameraView } from '../../geometry/cameraMath';
 import { note } from '../../log/log';
+import { programsAhead } from '../../shaders/compileAhead';
 import { createCostMeter } from '../../shaders/costMeter';
 import { drawnAt, shadersStore } from '../../shaders/levels';
 import type { ShaderLevel } from '../../shaders/levels';
@@ -34,10 +35,17 @@ export interface SceneryShaders {
   standing: Shader;
   shadows: Shader;
   tintOf(kind: string): number;
+  /**
+   * Whether the trees' programs are compiled, asked as the woods would begin to arrive, which wait on them: asking
+   * hands them to the driver if the game has not started yet (`programsAhead`).
+   */
+  ready: () => boolean;
 }
 
 export interface TreesLayer extends Layer {
   shaders: SceneryShaders;
+  /** Hands the trees' programs to the graphics driver now, if they have not been already. */
+  compileAhead(): void;
   /** Marks the start of a frame of the sprite canvas, when this one is to be measured: true when it is. */
   measure(): boolean;
   /** Marks its end, after a start that said true. */
@@ -75,6 +83,18 @@ export function createTreesLayer(renderer: Renderer, repaint: () => void): Trees
     });
   const standing = shaderOf(false);
   const shadows = shaderOf(true);
+  const ahead = programsAhead(
+    (renderer as WebGLRenderer).gl as WebGL2RenderingContext | undefined,
+    [standing, shadows],
+    (ms) =>
+      note(
+        'trees',
+        ms === null
+          ? "this browser cannot compile the trees' programs ahead, so its first draw waits on the driver"
+          : `the trees' programs compiled ahead in ${(ms / 1000).toFixed(1)} s, the page never waiting`,
+      ),
+    repaint,
+  );
 
   // What each level costs, measured on the graphics card where it will say, and said once a level.
   const meter = createCostMeter((renderer as WebGLRenderer).gl as WebGL2RenderingContext | undefined);
@@ -89,7 +109,17 @@ export function createTreesLayer(renderer: Renderer, repaint: () => void): Trees
   const stopWatchingTuning = treesTuningStore.watch(repaint);
 
   return {
-    shaders: { standing, shadows, tintOf },
+    shaders: {
+      standing,
+      shadows,
+      tintOf,
+      ready: () => {
+        ahead.begin();
+        return ahead.ready();
+      },
+    },
+
+    compileAhead: () => ahead.begin(),
 
     draw(view: CameraView): number | null {
       const level = drawnAt(treesStore.get().level);
@@ -142,6 +172,7 @@ export function createTreesLayer(renderer: Renderer, repaint: () => void): Trees
       stopWatchingShaders();
       stopWatchingTuning();
       meter.dispose();
+      ahead.stop();
       standing.destroy();
       shadows.destroy();
     },
