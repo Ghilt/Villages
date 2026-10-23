@@ -14,7 +14,9 @@ Re-planned the same day, after step 2, from Adam's notes: still stuttery, and wo
 pop in on the other half a second later; a deeper fix asked for, and whether bigger, fewer sprites would help.
 After step 3 a step was added before the rest: the measures had run on a world without the settlements' buildings,
 37,461 of them in a world opened as a player's is. And after step 5 the roads, the roadside and the settlements came before
-the worker, Adam's word: the stall when the camera stops was by then the largest thing left, and it is theirs.
+the worker, Adam's word: the stall when the camera stops was by then the largest thing left, and it is theirs. After
+step 7 a pan was added to the measure, Adam's word again: the roadside a tile at a time felt like a large difference,
+and the crossing alone, a fresh page and one flight, hardly showed it.
 
 ---
 
@@ -127,9 +129,10 @@ Every fix step's hand-over measures the crossing with `npm run perf:zoom --prefi
 | 5 | The view arrives whole: the woods in view fade in together, and a wood ready later fades in on its own clock rather than appearing at full | 👀 Zooming in at a seam and panning fast at 8: a wood that comes late fades in, nothing pops. The crossing compared: no worse than step 3 |
 | 6 | The roads read once: a version for each layer of stands, one list of the pieces held shared by the roads, the roadside, the bridges and the worn ground, and the roadside walked only near the screen | 👀 Roads, walls, growth and bridges as they were at a busy place, in and out of 7.5 and panning. The crossing compared: the roadside's cost a frame and its rebuilds down |
 | 7 | The roadside laid out a tile at a time: a tile come or gone, or its worn ground changed, lays out that tile and its neighbours | 👀 Panning along a road across tile edges: no wall or bush pops in or out at an edge, and the same roadside when the camera comes back. The crossing compared: no roadside among the slowest frames |
-| 8 | The settlements keep their identity: the list held and the map's sprites are the very same while nothing in them changed | 👀 Settlements and their buildings laid out as their ground comes, as before. The crossing compared: the stall when the camera stops gone, the settlements worked out a handful of times, not fifty |
-| 9 | The scattering in a worker: the cells cut off the page's thread, fed the ground, the sprite map and the stands the page holds, the same woods as before | 👀 The woods at the busy place and in the forest as they were, tree for tree. A test cutting cells in the worker and on the page alike. The crossing compared: no cut among the slowest frames |
-| 10 | The roads', the worn ground's and the trees' programs compiled ahead, as the land's and the clouds' are | The first crossing's programs waited on, with none of these among them. The checks |
+| 8 | The pan measured: after the crossing, the camera settled at zoom 8.5 over `settled` and panned two screens east over four seconds, its late frames, stutters, long tasks and slowest frames kept beside the crossing's, and a point of the branch kept to compare the next steps with | 👀 The zoom chapter of the performance page: the pan beside the crossing, with its slowest frames and what ran in each. The checks |
+| 9 | The settlements keep their identity: the list held and the map's sprites are the very same while nothing in them changed | 👀 Settlements and their buildings laid out as their ground comes, as before. The crossing compared: the stall when the camera stops gone, the settlements worked out a handful of times, not fifty |
+| 10 | The scattering in a worker: the cells cut off the page's thread, fed the ground, the sprite map and the stands the page holds, the same woods as before | 👀 The woods at the busy place and in the forest as they were, tree for tree. A test cutting cells in the worker and on the page alike. The crossing compared: no cut among the slowest frames |
+| 11 | The roads', the worn ground's and the trees' programs compiled ahead, as the land's and the clouds' are | The first crossing's programs waited on, with none of these among them. The checks |
 
 Clumps of trees at the widest zooms, and the whole page drawn again at every cell's answer, are not in this plan: they
 come after it, if the crossing still stutters.
