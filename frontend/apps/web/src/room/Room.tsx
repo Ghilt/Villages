@@ -3,15 +3,17 @@ import type { ReactNode } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
 import { note } from '../log/log';
-import { deskCoversView } from '../desk/deskTop';
 import type { DeskTop } from '../desk/deskTop';
 import { drawnAt, drawnPoint, flatWindow, floorZoom, sheetOnScreen } from '../map/sheet';
 
+import { coversWindow, cssOf, project } from './camera';
 import { lightAt, roomAt, sceneAt, solidAt } from './dive';
+import type { Dive } from './dive';
+import { roomMarkup } from './draw';
+import { BEYOND, tableOf } from './model';
 import { pullStore, attachPull } from './pull';
-import { BEYOND, roomFloor } from './roomArt';
 import { atTheEnd, pulledBack } from './roomBox';
-import { roomTip } from './seen';
+import { roomMost } from './seen';
 import { useStore } from '../store/useStore';
 
 interface RoomProps {
@@ -32,12 +34,12 @@ const lay = (element: HTMLElement, rect: DeskTop): void => {
 /**
  * The room the desk stands in, and everything that lies on the desk.
  *
- * Three layers, and the order of them is the whole design. The room's floor sits behind the map and the
- * desk, inside the part that scales, so that pulling back shrinks the desk away from it and opens the
- * room around it - the same rule that reveals the desk from under the sheet, one level further out. The
- * copy over the top is outside the part that scales, and is the only thing ever drawn in front of the
- * map: it is the room inside the castle during a dive, growing out of the sprite's own pixels on the way
- * in and shrinking back into them on the way out.
+ * Three layers, and the order of them is the whole design. The room's floor is drawn behind the map and the
+ * desk, through the same camera that draws them back, turns them and tips them, so that pulling back shrinks
+ * the desk away from it and opens the room round it - the same rule that reveals the desk from under the
+ * sheet, one level further out. The room inside the castle is drawn over the top, and is the only thing ever
+ * drawn in front of the map: during a dive it grows out of the sprite's own pixels on the way in and shrinks
+ * back into them on the way out, and it is the same drawing of the same room. See `docs/plans/room.md`.
  *
  * On the rail the part that scales is not a map any more but a picture of one, so it is drawn with its
  * pixels hard rather than smeared. That is the point of the passage: you go into the mark for your own
@@ -53,8 +55,12 @@ const lay = (element: HTMLElement, rect: DeskTop): void => {
 export function Room({ map, seat, strip, children }: RoomProps) {
   const surfaceRef = useRef<HTMLDivElement | null>(null);
   const sceneRef = useRef<HTMLDivElement | null>(null);
-  const wallsRef = useRef<HTMLDivElement | null>(null);
+  const floorRef = useRef<HTMLDivElement | null>(null);
+  const floorPictureRef = useRef<SVGSVGElement | null>(null);
   const stillRef = useRef<HTMLDivElement | null>(null);
+  const stillPictureRef = useRef<SVGSVGElement | null>(null);
+  // The room the picture inside the castle was last drawn for: it is drawn once a dive, not once a frame.
+  const stillFor = useRef<Dive['room'] | null>(null);
   // Only who takes the pointer is React's. Everything drawn is written straight to the styles from the store
   // below, so a frame of the pull or of a drag is one write of a transform and no drawing of components.
   const away = useStore(pullStore, (state) => state.amount > 0 || state.dive !== null);
@@ -83,14 +89,24 @@ export function Room({ map, seat, strip, children }: RoomProps) {
   const place = useRef<() => void>(() => {});
   place.current = () => {
     const scene = sceneRef.current;
-    const walls = wallsRef.current;
+    const floor = floorRef.current;
+    const floorPicture = floorPictureRef.current;
     const still = stillRef.current;
-    if (map === null || scene === null || walls === null || still === null) {
+    const stillPicture = stillPictureRef.current;
+    if (
+      map === null ||
+      scene === null ||
+      floor === null ||
+      floorPicture === null ||
+      still === null ||
+      stillPicture === null
+    ) {
       return;
     }
     const container = map.getContainer();
     const pitch = map.getPitch();
-    const viewport = flatWindow({ width: container.clientWidth, height: container.clientHeight }, pitch);
+    const real = { width: container.clientWidth, height: container.clientHeight };
+    const viewport = flatWindow(real, pitch);
     const pull = pullStore.get();
 
     if (pull.dive !== null) {
@@ -103,11 +119,20 @@ export function Room({ map, seat, strip, children }: RoomProps) {
       scene.style.willChange = 'transform';
       scene.style.imageRendering = 'pixelated';
       scene.style.opacity = `${lightAt(pull.dive.progress)}`;
-      walls.hidden = true;
+      floor.hidden = true;
       openWas.current = undefined;
       still.hidden = false;
       lay(still, drawnAt(roomAt(pull.dive, pull.dive.progress), pitch));
       still.style.opacity = `${solidAt(pull.dive.progress)}`;
+      // The room as the pull draws it at the turn, framed by the box it is drawn in there, which is the box the
+      // dive grows to: so at the end of the passage the picture is the room, pixel for pixel.
+      const shot = pull.dive.room;
+      if (stillFor.current !== shot) {
+        stillFor.current = shot;
+        const box = drawnAt(shot.box, shot.pitch);
+        stillPicture.setAttribute('viewBox', `${box.left} ${box.top} ${box.width} ${box.height}`);
+        stillPicture.innerHTML = roomMarkup(shot.desk, shot.camera, shot.pitch, 'still');
+      }
       return;
     }
 
@@ -122,23 +147,23 @@ export function Room({ map, seat, strip, children }: RoomProps) {
       ...viewport,
     });
     const pulled = pull.amount > 0;
-    const { desk, room, scale, lean, about } = pulledBack(
-      lying,
-      viewport,
-      pull.amount,
-      pull.about,
-      roomTip(),
-    );
-    const origin = drawnPoint(about, pitch);
-    scene.style.transformOrigin = pulled ? `${origin.x}px ${origin.y}px` : '';
-    // Tipped back as it draws back: a scale down on top of the scale, the whole of what a north-up parallel
-    // camera does to flat ground, so the map, the desk and the room lie on the one tipped floor.
-    scene.style.transform = pulled ? `scale(${scale}, ${scale * lean})` : '';
+    const { desk, camera } = pulledBack(lying, viewport, pull.amount, pull.about, roomMost());
+    // Drawn back, turned and tipped as one picture: the map, the sprites and the desk are the table top, and the
+    // camera draws a plane with one matrix.
+    const css = cssOf(camera, pitch);
+    scene.style.transformOrigin = pulled ? css.origin : '';
+    scene.style.transform = pulled ? css.transform : '';
     scene.style.willChange = pulled ? 'transform' : '';
-    const open = pulled && !deskCoversView(desk, viewport, scale, about, lean);
-    walls.hidden = !open;
+    const open =
+      pulled &&
+      !coversWindow(
+        tableOf(desk).map((corner) => project(camera, corner)),
+        viewport,
+      );
+    floor.hidden = !open;
     if (open) {
-      lay(walls, drawnAt(room, pitch));
+      floorPicture.setAttribute('viewBox', `0 0 ${real.width} ${real.height}`);
+      floorPicture.innerHTML = roomMarkup(desk, camera, pitch, 'floor');
     }
     // Only while the pull is on and the camera is still pinned at its floor. A dive moves the camera, and
     // the move it fires runs this before React has heard, so without the second half of the guard leaving
@@ -188,11 +213,15 @@ export function Room({ map, seat, strip, children }: RoomProps) {
         background: away ? BEYOND : 'none',
       }}
     >
+      <div className="room__floor" ref={floorRef} hidden>
+        <svg ref={floorPictureRef} aria-hidden="true" />
+      </div>
       <div className="room__scene" ref={sceneRef} style={{ pointerEvents: away ? 'none' : 'auto' }}>
-        <div className="room__walls" ref={wallsRef} hidden style={{ backgroundImage: roomFloor }} />
         {children}
       </div>
-      <div className="room__still" ref={stillRef} hidden style={{ backgroundImage: roomFloor }} />
+      <div className="room__still" ref={stillRef} hidden>
+        <svg ref={stillPictureRef} preserveAspectRatio="none" aria-hidden="true" />
+      </div>
     </div>
   );
 }

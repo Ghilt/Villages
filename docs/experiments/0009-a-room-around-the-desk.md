@@ -213,6 +213,30 @@ dive ends on exactly the room the pull draws. It also ends where that room is, w
 wall is not the middle of the window: the castle's middle now eases to the middle of the room it lands in. Before this,
 a way out from a room dragged to one side jumped to the middle on its first frame.
 
+### Third round, 2026-10-23: the room as a model, turned and tipped like the map
+
+A fourth step drew the room as tipped pictures: a floor plan, and pictures of a back wall, a shelf, a chest, a chair
+and the front of the desk, each raised by the tip on its own foot. Adam looked and said it was not right, and asked
+for the room to be planned rather than improvised: the table in crude 3D, and a tiled floor to establish the
+perspective in the map's own numbers, tipped forty-five and turned twenty-six. A tipped picture has no perspective of
+its own to agree with; a model does. That step was not committed, and `docs/plans/room.md` is the plan that replaced
+it, four steps, after a preview he moved. In it he chose the whole room turned, over a north-up room with only its
+tiles turned, and the back and west walls extra high: "an imposing little room with a high ceiling".
+
+**The camera, and the floor.** One camera now draws the table top and the room round it (decision record 0118): it
+turns, draws back and tips about the look point, all three driven by the pull, and at rest it is nothing. The scene
+the page already draws is the table top and goes through it as one CSS matrix; the room is a model in metres, so far
+a floor 7.8 by 6.8 with 0.5 metre tiles, drawn through it as an SVG behind the scene and again inside the castle
+during the dive. The tiles' lines lie along the map's ground diamonds at the closest zoom, which a test holds against
+the map's own projection. Measured on a 748 by 700 stage: drawn back to 0.165, the furthest the pull goes, the turned
+floor runs past the window's corners and the table is about a third of the stage across, the map a skewed diamond on
+it. Halfway back the table is half turned and half tipped. A click on the skewed map still takes you back to it,
+carried through the camera onto the table top.
+
+The desk had been cut off at the window's edge all along: `.desk` clipped its children to the window before the pull
+drew them back, so in the room it showed as a piece of itself the shape of the window. It is drawn whole now; the room
+clips at the window after the pull, which is the clip that was wanted.
+
 ## Result
 
 Open.

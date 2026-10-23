@@ -4,11 +4,14 @@
  * The desk the map lies on: behind the map, never in the way of a drag, and seen only once the camera is
  * pulled back past the point where the world covers the window. The Desk component sizes and places the
  * grain as the map moves, and hides the whole thing while the map covers it. See docs/adr/0033.
+ *
+ * Not clipped here: it lies in the room, which clips everything at the window's edge after the pull has
+ * drawn it back. Clipped here, at the window's edge before the pull, the desk showed as a piece of itself
+ * the shape of the window once the room was in view, rather than as a desk with edges. Experiment 0009.
  */
 .desk {
   position: absolute;
   inset: 0;
-  overflow: hidden;
   pointer-events: none;
 }
 

@@ -3,6 +3,9 @@ import { leanOf } from '../map/sheet';
 import type { Viewport } from '../map/sheet';
 import { pixelsPerWorldUnit } from '../geometry/cameraMath';
 
+import type { Point } from './camera';
+import type { RoomAtTurn } from './roomBox';
+
 /**
  * The dive: going into your own castle, and coming back out of it.
  *
@@ -22,10 +25,7 @@ import { pixelsPerWorldUnit } from '../geometry/cameraMath';
  * you came, from wherever it has got to, rather than sat through and then walked back. See experiment 0009.
  */
 
-export interface Point {
-  x: number;
-  y: number;
-}
+export type { Point } from './camera';
 
 export type Going = 'in' | 'out';
 
@@ -38,10 +38,15 @@ export interface Dive {
   /** How much larger the scene gets across the whole dive. */
   span: number;
   /**
-   * Where the room ends: the rectangle the real one has at a full pull, so the handover is invisible. In the
+   * Where the room ends: the box the real one is drawn in at a full pull, so the handover is invisible. In the
    * flat window of the closest zoom, where the dive's arithmetic is done, and so carried there from the floor's.
    */
   end: DeskTop;
+  /**
+   * The room the dive goes into or comes out of, as the pull draws it at the turn, in the flat window of the
+   * camera at the floor tipped `pitch`: what is drawn inside the castle, so it is the same room.
+   */
+  room: RoomAtTurn & { pitch: number };
 }
 
 /**

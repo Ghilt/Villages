@@ -2,18 +2,19 @@ import type * as maplibregl from 'maplibre-gl';
 
 import { flatPoint, sheetOnScreen } from '../map/sheet';
 
-import type { Point } from './dive';
-import { aboutWithin, pulledBack, scaledAbout } from './roomBox';
-import { roomTip, seen } from './seen';
+import { lookBy, unproject } from './camera';
+import type { Point } from './camera';
+import { aboutWithin, pulledBack } from './roomBox';
+import { roomMost, seen } from './seen';
 
 /**
  * Looking round the room: a drag, and the click that takes you back to the map.
  *
- * The pull draws back about a point of the window, and a drag moves that point by as much as it takes for
- * everything drawn to follow the pointer, no further than the room's walls. A click on the map takes you back
- * to it. A click anywhere else is not this file's: the table is meant to hold things beside the map that can
- * be pressed, so a press takes nothing from the page until it has moved, and only a drag takes the pointer for
- * itself. See experiment 0009.
+ * The pull draws back, turns and tips about a point of the window, and a drag moves that point by as much as
+ * it takes for everything drawn to follow the pointer, no further than the floor's edges. A click on the map
+ * takes you back to it. A click anywhere else is not this file's: the table is meant to hold things beside the
+ * map that can be pressed, so a press takes nothing from the page until it has moved, and only a drag takes the
+ * pointer for itself. See experiment 0009.
  */
 
 /** How far a press may wander, in pixels, and still be a click rather than the start of a drag. */
@@ -41,7 +42,7 @@ export function attachLook({ map, surface, pulled, lookAt, back }: LookHooks): (
     const camera = seen(map);
     const view = { width: camera.width, height: camera.height };
     const sheet = sheetOnScreen(camera);
-    return { view, sheet, ...pulledBack(sheet, view, now.amount, now.about, roomTip()) };
+    return { view, sheet, ...pulledBack(sheet, view, now.amount, now.about, roomMost()) };
   };
 
   /** Where a pointer is in the flat window, where the pull's arithmetic is done. */
@@ -72,17 +73,13 @@ export function attachLook({ map, surface, pulled, lookAt, back }: LookHooks): (
       press.dragging = true;
       surface.setPointerCapture(event.pointerId);
     }
-    // Down the window everything is drawn back by the tip as well as the scale, so the point moves further
-    // for the same drag down than across.
+    // Turned and tipped, the point the room is drawn about has to move askew for the room to follow the
+    // pointer straight; the camera works out how far, and the floor's edges stop it.
     const now = drawn();
-    const across = now === null ? 0 : 1 - now.scale;
-    const down = now === null ? 0 : 1 - now.scale * now.lean;
-    if (now !== null && across > 0 && down > 0) {
-      const moved = {
-        x: now.about.x + (at.x - press.at.x) / across,
-        y: now.about.y + (at.y - press.at.y) / down,
-      };
-      lookAt(aboutWithin(now.room, now.view, now.scale, moved, now.lean));
+    const by = now === null ? null : lookBy(now.camera, { x: at.x - press.at.x, y: at.y - press.at.y });
+    if (now !== null && by !== null) {
+      const moved = { x: now.camera.about.x + by.x, y: now.camera.about.y + by.y };
+      lookAt(aboutWithin(now.floor, now.view, { ...now.camera, about: moved }));
     }
     press.at = at;
   };
@@ -102,19 +99,15 @@ export function attachLook({ map, surface, pulled, lookAt, back }: LookHooks): (
     if (now === null) {
       return;
     }
+    // The map's square is turned and tipped into a skewed diamond on the window, so the click is carried back
+    // through the camera onto the table top and looked for in the square there.
     const { sheet } = now;
-    const paper = scaledAbout(
-      { left: sheet.left, top: sheet.top, width: sheet.size, height: sheet.size },
-      now.about,
-      now.scale,
-      now.lean,
-    );
-    const at = pointOf(event);
+    const on = unproject(now.camera, pointOf(event));
     if (
-      at.x >= paper.left &&
-      at.x <= paper.left + paper.width &&
-      at.y >= paper.top &&
-      at.y <= paper.top + paper.height
+      on.x >= sheet.left &&
+      on.x <= sheet.left + sheet.size &&
+      on.y >= sheet.top &&
+      on.y <= sheet.top + sheet.size
     ) {
       back();
     }

@@ -6,15 +6,17 @@ import type * as maplibregl from 'maplibre-gl';
 import { note } from '../log/log';
 import { deskOnScreen } from '../desk/deskTop';
 import { CAMERA } from '../map/mapConfig';
-import { flatPoint, floorZoom, leanOf, sheetOnScreen } from '../map/sheet';
+import { flatPoint, floorZoom, sheetOnScreen } from '../map/sheet';
 import type { Viewport } from '../map/sheet';
 import { easeTowards } from '../sprites/twoForms';
 
 import { carried, keepAbove, overTheHolding, railFrom, spanTo } from './dive';
-import type { Dive, Going, Point } from './dive';
+import type { Point } from './camera';
+import type { Dive, Going } from './dive';
 import { attachLook } from './look';
-import { atTheFloor, flatViewOf, roomTip, seen } from './seen';
-import { atTheEnd, roomAtTurn, roomOnScreen, spanOf, turnsAt, wheelZooms } from './roomBox';
+import { floorOf } from './model';
+import { atTheFloor, flatViewOf, roomMost, seen } from './seen';
+import { atTheEnd, roomAtTurn, spanOf, turnsAt, wheelZooms } from './roomBox';
 import { worldStill } from '../motion/motion';
 
 /**
@@ -95,8 +97,8 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
   /** How far the pull is, in zoom levels, which is what a wheel notch is measured against. */
   const span = (): number => {
     const view = viewport();
-    const room = roomOnScreen(deskOnScreen(sheetOnScreen(seen(map)), view));
-    return spanOf(turnsAt(room, view, leanOf(roomTip())));
+    const floor = floorOf(deskOnScreen(sheetOnScreen(seen(map)), view));
+    return spanOf(turnsAt(floor, view, roomMost()));
   };
 
   let ours = false;
@@ -174,7 +176,7 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
       going === 'in'
         ? atTheFloor(map)
         : { view: viewport(), pitch: map.getPitch(), sheet: sheetOnScreen(seen(map)) };
-    const room = roomAtTurn(floor.sheet, floor.view, about, roomTip());
+    const room = roomAtTurn(floor.sheet, floor.view, about, roomMost());
 
     // Whatever MapLibre's wheel was still easing towards stops where it is, rather than creeping on under a
     // picture of itself.
@@ -194,7 +196,7 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
 
     // Carried from the floor's flat window into the closest zoom's, where the camera is tipped as far as the
     // room is, so the room drawn inside the castle is squashed exactly as the room it becomes.
-    const end = carried(room, floor.pitch, map.getPitch());
+    const end = carried(room.box, floor.pitch, map.getPitch());
     const foot = map.project([seat.lon, seat.lat]);
     const started: Dive = {
       going,
@@ -205,6 +207,7 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
       keep: flatPoint(keepAbove({ x: foot.x, y: foot.y }, map.getZoom()), map.getPitch()),
       span: spanTo(end),
       end,
+      room: { ...room, pitch: floor.pitch },
     };
     wanted = going === 'in' ? 0 : 1;
     settle({ amount: going === 'in' ? 0 : 1, dive: started, about });
@@ -319,7 +322,7 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
         said = false;
         note(
           'room',
-          `off the desk: ${span().toFixed(2)} zoom levels of pull to the turn, tipping back to ${roomTip().toFixed(0)} degrees`,
+          `off the desk: ${span().toFixed(2)} zoom levels of pull to the turn, turning ${roomMost().turn.toFixed(0)} degrees and tipping back ${roomMost().tip.toFixed(0)}`,
         );
       } else if (event.deltaY < 0 && atTheEnd(zoom, CAMERA.maxZoom)) {
         // The way in is through your own house, so it is only there when that is what you are looking at.

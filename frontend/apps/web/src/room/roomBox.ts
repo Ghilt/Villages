@@ -1,10 +1,12 @@
 import { deskOnScreen } from '../desk/deskTop';
 import type { DeskTop } from '../desk/deskTop';
-import { floorZoom, leanOf } from '../map/sheet';
+import { floorZoom } from '../map/sheet';
 import type { Sheet, Viewport } from '../map/sheet';
 import { worldSize } from '../geometry/cameraMath';
 
-import type { Point } from './dive';
+import { boxOf, lookBy, offsetOf, project } from './camera';
+import type { Point, RoomCamera } from './camera';
+import { floorOf } from './model';
 
 /**
  * The room the desk stands in, and the arithmetic of pulling back into it.
@@ -12,21 +14,14 @@ import type { Point } from './dive';
  * The sheet lies on the desk, the desk stands in the room, and each is hidden while the one in front of
  * it covers the window: the same rule decision 0033 gave the desk, one level further out. What is new is
  * that the room is not reached by the camera. Below the map's floor the camera is pinned, and the pull is
- * a scale on what is drawn - so this file is the whole of the geometry, and it is pure.
+ * the room's own camera on what is drawn, drawing it back, turning it and tipping it - so this file and
+ * `camera.ts` are the whole of the geometry, and both are pure.
  *
- * See experiment 0009.
+ * See experiment 0009 and `docs/plans/room.md`.
  */
 
-/**
- * How many desks across the room is, and how many deep. More floor round the desk than the 2.6 each way it
- * was first tried at, Adam's word of 2026-10-22, and deeper than across: tipped back, the floor is squashed
- * down by the tip, and a room the desk's own shape would be a letterbox in the window.
- */
-export const ROOM_ACROSS = 3.2;
-export const ROOM_DEEP = 4.1;
-
-/** At the turn, the room's shorter side is this much of the window's: nearly all of it, so there is */
-/* almost no surround to see when the live map is swapped underneath it. */
+/** At the turn, the shorter side of the box the room is drawn in is this much of the window's: nearly all */
+/* of it, so there is almost no surround to see when the live map is swapped underneath it. */
 const ROOM_FILLS = 0.92;
 
 /** A pull shorter than this is not a journey, whatever the shape of the window says. */
@@ -71,40 +66,36 @@ export function sheetAtFloor(viewport: Viewport): Sheet {
   return { left: (viewport.width - size) / 2, top: (viewport.height - size) / 2, size };
 }
 
-/** The room, concentric with the desk, so pulling back draws away from the map rather than from a corner. */
-export function roomOnScreen(desk: DeskTop): DeskTop {
-  const width = desk.width * ROOM_ACROSS;
-  const height = desk.height * ROOM_DEEP;
-  return {
-    left: desk.left + desk.width / 2 - width / 2,
-    top: desk.top + desk.height / 2 - height / 2,
-    width,
-    height,
-  };
-}
-
 /**
- * The scale the pull ends at: where the room's shorter side, as it is drawn, tipped by `lean`, has come down
- * to `ROOM_FILLS` of the window's. Worked out rather than declared, because the room's size follows the
- * window and a declared number would be wrong on the first stage nobody tried.
+ * How far the room turns and tips once the pull is spent, in degrees: the map's own pair, the turn of the
+ * ground's grid and the tilt at the closest zoom, so the room a dive lands in is seen as the map is.
  */
-export function turnsAt(room: DeskTop, viewport: Viewport, lean = 1): number {
-  const shorter = Math.min(room.width, room.height * lean);
-  const wanted = (ROOM_FILLS * Math.min(viewport.width, viewport.height)) / shorter;
-  return 2 ** -clamp(-Math.log2(wanted), LEAST_SPAN, MOST_SPAN);
+export interface Most {
+  turn: number;
+  tip: number;
 }
 
 /**
- * How far the room is tipped back at a pull, in degrees: not at all at the floor, where the map lies on the
- * desk seen from straight above, and as far as the map is at its closest zoom once the pull is spent, so the
- * room a dive lands in and the room the pull draws are tipped alike. Eased at both ends the way the map's own
- * tilt is, so the tip neither starts nor stops with a jolt, and it follows the pull rather than a clock: the
- * wheel drives it the whole way. Tipped north-up by a parallel camera, flat ground is squashed down by the
- * cosine of the tip and nothing else, so a tip is a scale down and no more. See decision record 0060.
+ * How far the room is turned or tipped at a pull, in degrees: not at all at the floor, where the map lies on
+ * the desk seen from straight above, and the most once the pull is spent. Eased at both ends the way the map's
+ * own tilt is, so it neither starts nor stops with a jolt, and it follows the pull rather than a clock: the
+ * wheel drives it the whole way.
  */
 export function tipAt(amount: number, most: number): number {
   const t = clamp(amount, 0, 1);
   return most * t * t * (3 - 2 * t);
+}
+
+/**
+ * The scale the pull ends at: where the room's floor, as it is drawn turned and tipped, has its box's shorter
+ * side come down to `ROOM_FILLS` of the window's. Worked out rather than declared, because the room's size
+ * follows the window and a declared number would be wrong on the first stage nobody tried.
+ */
+export function turnsAt(floor: readonly Point[], viewport: Viewport, most: Most): number {
+  const spent: RoomCamera = { scale: 1, about: middleOf(viewport), turn: most.turn, tip: most.tip };
+  const box = boxOf(floor.map((corner) => project(spent, corner)));
+  const wanted = (ROOM_FILLS * Math.min(viewport.width, viewport.height)) / Math.min(box.width, box.height);
+  return 2 ** -clamp(-Math.log2(wanted), LEAST_SPAN, MOST_SPAN);
 }
 
 /** How far the whole pull is, in zoom levels, which is what a wheel notch is measured against. */
@@ -118,93 +109,77 @@ export function middleOf(viewport: Viewport): Point {
 }
 
 /**
- * Where a rectangle of the scene is drawn, the scene scaled about a point of the window: `about + (x - about)
- * * scale` across, and the same down with the tip's `lean` on it. The point is the one thing that stays where
- * it is, so a scale about the middle is the pull as it always was, and a scale about anywhere else is the same
- * pull looking somewhere else.
- */
-export function scaledAbout(rect: DeskTop, about: Point, scale: number, lean = 1): DeskTop {
-  return {
-    left: about.x + (rect.left - about.x) * scale,
-    top: about.y + (rect.top - about.y) * scale * lean,
-    width: rect.width * scale,
-    height: rect.height * scale * lean,
-  };
-}
-
-/**
- * The point to draw back about, kept where the room still covers the window.
+ * The point to draw back about, kept where the floor's box, as the camera draws it, still covers the window.
  *
- * Moving the point by `d` moves everything drawn by `d * (1 - scale)`, so a drag moves it by its own length
- * over that and everything follows the pointer, and at no pull at all it moves nothing: there is no look to
- * hand back when the pull comes in to the floor, because at the floor the point does not matter. Along an
- * axis where the room is wider than the window it may go as far as the room's walls and no further; along
- * one where the room is narrower it is the point that puts the room in the middle.
+ * A point of the table top is drawn at `M q + (1 - M) about`, so the box of the first half is fixed for a
+ * camera and the point only slides it: along an axis where the box is wider than the window it may slide as
+ * far as the floor's edge and no further, and along one where it is narrower it is put in the middle. The
+ * slide is worked back into a point through the camera, and at no pull there is nothing to slide.
  */
-export function aboutWithin(
-  room: DeskTop,
-  viewport: Viewport,
-  scale: number,
-  wanted: Point,
-  lean = 1,
-): Point {
-  return {
-    x: alongWithin(room.left, room.width, viewport.width, scale, wanted.x),
-    y: alongWithin(room.top, room.height, viewport.height, scale * lean, wanted.y),
+export function aboutWithin(floor: readonly Point[], viewport: Viewport, camera: RoomCamera): Point {
+  const fixed: RoomCamera = { ...camera, about: { x: 0, y: 0 } };
+  const box = boxOf(floor.map((corner) => project(fixed, corner)));
+  const now = offsetOf(camera);
+  const wanted = {
+    x: alongWithin(box.left, box.width, viewport.width, now.x),
+    y: alongWithin(box.top, box.height, viewport.height, now.y),
   };
+  const by = lookBy(camera, { x: wanted.x - now.x, y: wanted.y - now.y });
+  return by === null ? camera.about : { x: camera.about.x + by.x, y: camera.about.y + by.y };
 }
 
-function alongWithin(start: number, length: number, window: number, scale: number, wanted: number): number {
-  const free = 1 - scale;
-  if (free <= 0) {
-    return window / 2;
+function alongWithin(start: number, length: number, window: number, offset: number): number {
+  if (length <= window) {
+    return window / 2 - (start + length / 2);
   }
-  if (length * scale <= window) {
-    return (window / 2 - (start + length / 2) * scale) / free;
-  }
-  return clamp(wanted, (window - (start + length) * scale) / free, (-start * scale) / free);
+  return clamp(offset, window - (start + length), -start);
 }
 
-/** The pull as it is drawn: the desk and the room in the scene's own pixels, and how it is drawn back. */
+/** The pull as it is drawn: the desk and the floor in the scene's own pixels, and the camera they are seen by. */
 export interface PulledBack {
   desk: DeskTop;
-  room: DeskTop;
-  /** How much smaller everything is drawn: one at the floor, the turn's scale in the room. */
-  scale: number;
-  /** How much the tip squashes it down on top of that: one at the floor, the cosine of the most in the room. */
-  lean: number;
-  /** The point of the window it is drawn back about, kept where the room covers the window. */
-  about: Point;
+  floor: Point[];
+  camera: RoomCamera;
 }
 
 /**
  * The pull at an amount, with the sheet where it lies and the point the player last looked round to, or the
- * middle of the window if they have not, tipped back towards `most` degrees, the map's own at its closest.
- * The room drawn on the page and the room a dive sets out from are both this, so they cannot disagree.
+ * middle of the window if they have not. The room drawn on the page and the room a dive sets out from are
+ * both this, so they cannot disagree.
  */
 export function pulledBack(
   sheet: Sheet,
   viewport: Viewport,
   amount: number,
   wanted: Point | null,
-  most: number,
+  most: Most,
 ): PulledBack {
   const desk = deskOnScreen(sheet, viewport);
-  const room = roomOnScreen(desk);
-  const lean = leanOf(tipAt(amount, most));
-  const scale = scaleFor(amount, turnsAt(room, viewport, leanOf(most)));
-  const about = aboutWithin(room, viewport, scale, wanted ?? middleOf(viewport), lean);
-  return { desk, room, scale, lean, about };
+  const floor = floorOf(desk);
+  const camera: RoomCamera = {
+    scale: scaleFor(amount, turnsAt(floor, viewport, most)),
+    about: wanted ?? middleOf(viewport),
+    turn: tipAt(amount, most.turn),
+    tip: tipAt(amount, most.tip),
+  };
+  return { desk, floor, camera: { ...camera, about: aboutWithin(floor, viewport, camera) } };
+}
+
+/** The room once the pull is spent: the desk it is laid round, the camera, and the box the floor is drawn in. */
+export interface RoomAtTurn {
+  desk: DeskTop;
+  camera: RoomCamera;
+  box: DeskTop;
 }
 
 /**
- * Where the room ends up, in window pixels, once the pull is spent, wherever in it the player was looking,
- * tipped back `most` degrees. This is where a dive has to start and finish, in both directions: the room it
- * leaves you in has to be the room it was showing you.
+ * The room once the pull is spent, wherever in it the player was looking. This is where a dive has to start
+ * and finish, in both directions: the room it leaves you in has to be the room it was showing you.
  */
-export function roomAtTurn(sheet: Sheet, viewport: Viewport, about: Point | null, most: number): DeskTop {
+export function roomAtTurn(sheet: Sheet, viewport: Viewport, about: Point | null, most: Most): RoomAtTurn {
   const spent = pulledBack(sheet, viewport, 1, about, most);
-  return scaledAbout(spent.room, spent.about, spent.scale, spent.lean);
+  const box = boxOf(spent.floor.map((corner) => project(spent.camera, corner)));
+  return { desk: spent.desk, camera: spent.camera, box };
 }
 
 /**
