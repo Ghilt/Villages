@@ -6,9 +6,13 @@ import type { Viewport } from '../map/sheet';
 import { worldSize } from '../geometry/cameraMath';
 
 import {
+  aboutWithin,
   atTheEnd,
+  middleOf,
+  pulledBack,
   roomAtTurn,
   roomOnScreen,
+  scaledAbout,
   scaleFor,
   sheetAtFloor,
   spanOf,
@@ -138,5 +142,63 @@ describe('the end of the zoom', () => {
   it('is not reached a notch short of it, so a wheel there still zooms the map', () => {
     expect(atTheEnd(9.85, 10)).toBe(false);
     expect(atTheEnd(0, -0.186)).toBe(false);
+  });
+});
+
+describe('looking round the room', () => {
+  const viewport = { width: 1088, height: 900 };
+  const covers = (rect: { left: number; top: number; width: number; height: number }) =>
+    rect.left <= 1e-6 &&
+    rect.top <= 1e-6 &&
+    rect.left + rect.width >= viewport.width - 1e-6 &&
+    rect.top + rect.height >= viewport.height - 1e-6;
+
+  it('draws back about the middle until it is moved, which is the pull as it always was', () => {
+    const pulled = pulledBack(sheetAtFloor(viewport), viewport, 0.5, null);
+    expect(pulled.about).toEqual(middleOf(viewport));
+    const drawn = scaledAbout(pulled.room, pulled.about, pulled.scale);
+    expect(drawn.left).toBeCloseTo(
+      pulled.room.left * pulled.scale + (viewport.width * (1 - pulled.scale)) / 2,
+    );
+  });
+
+  it('moves everything drawn by as much as the pointer moved', () => {
+    const pulled = pulledBack(sheetAtFloor(viewport), viewport, 0.5, null);
+    const free = 1 - pulled.scale;
+    const moved = aboutWithin(pulled.room, viewport, pulled.scale, {
+      x: pulled.about.x + 40 / free,
+      y: pulled.about.y - 30 / free,
+    });
+    const before = scaledAbout(pulled.room, pulled.about, pulled.scale);
+    const after = scaledAbout(pulled.room, moved, pulled.scale);
+    expect(after.left - before.left).toBeCloseTo(40);
+    expect(after.top - before.top).toBeCloseTo(-30);
+  });
+
+  it('stops at the walls, however far the pointer goes', () => {
+    const pulled = pulledBack(sheetAtFloor(viewport), viewport, 0.5, { x: 1e6, y: -1e6 });
+    const drawn = scaledAbout(pulled.room, pulled.about, pulled.scale);
+    expect(covers(drawn)).toBe(true);
+    expect(drawn.left).toBeCloseTo(0);
+    expect(drawn.top + drawn.height).toBeCloseTo(viewport.height);
+  });
+
+  it('keeps a room narrower than the window in its middle', () => {
+    const room = { left: 100, top: -2000, width: 1000, height: 6000 };
+    const about = aboutWithin(room, viewport, 0.5, { x: 0, y: 0 });
+    const drawn = scaledAbout(room, about, 0.5);
+    expect(drawn.left + drawn.width / 2).toBeCloseTo(viewport.width / 2);
+  });
+
+  it('moves nothing in at the floor, so the map is handed back exactly as it was left', () => {
+    const pulled = pulledBack(sheetAtFloor(viewport), viewport, 0, { x: 5000, y: -5000 });
+    expect(scaledAbout(pulled.room, pulled.about, pulled.scale)).toEqual(pulled.room);
+  });
+
+  it('sets a dive out from the room it was showing, wherever in it the player was looking', () => {
+    const sheet = sheetAtFloor(viewport);
+    const looked = { x: 1e6, y: 1e6 };
+    const spent = pulledBack(sheet, viewport, 1, looked);
+    expect(roomAtTurn(sheet, viewport, looked)).toEqual(scaledAbout(spent.room, spent.about, spent.scale));
   });
 });

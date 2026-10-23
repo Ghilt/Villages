@@ -47,7 +47,7 @@ interface CameraSectionProps {
  */
 function ZoomReading({ map }: CameraSectionProps) {
   const [zoom, setZoom] = useState<number | null>(() => map?.getZoom() ?? null);
-  const pull = useStore(pullStore);
+  const inTheRoom = useStore(pullStore, (state) => state.amount > 0 || state.dive !== null);
   useEffect(() => {
     if (map === null) {
       return;
@@ -59,7 +59,6 @@ function ZoomReading({ map }: CameraSectionProps) {
       map.off('move', read);
     };
   }, [map]);
-  const inTheRoom = pull.amount > 0 || pull.dive !== null;
   return (
     <span className="debug__quiet" title="the camera's zoom, or a dash in the room">
       {inTheRoom || zoom === null ? '–' : `z${zoom.toFixed(2)}`}

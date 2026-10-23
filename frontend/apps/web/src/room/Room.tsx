@@ -3,14 +3,14 @@ import type { ReactNode } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
 import { note } from '../log/log';
-import { deskCoversView, deskOnScreen } from '../desk/deskTop';
+import { deskCoversView } from '../desk/deskTop';
 import type { DeskTop } from '../desk/deskTop';
 import { drawnAt, drawnPoint, flatWindow, floorZoom, sheetOnScreen } from '../map/sheet';
 
 import { lightAt, roomAt, sceneAt, solidAt } from './dive';
 import { pullStore, attachPull } from './pull';
 import { BEYOND, roomFloor } from './roomArt';
-import { atTheEnd, roomOnScreen, scaleFor, turnsAt } from './roomBox';
+import { atTheEnd, pulledBack } from './roomBox';
 import { useStore } from '../store/useStore';
 
 interface RoomProps {
@@ -54,7 +54,9 @@ export function Room({ map, seat, strip, children }: RoomProps) {
   const sceneRef = useRef<HTMLDivElement | null>(null);
   const wallsRef = useRef<HTMLDivElement | null>(null);
   const stillRef = useRef<HTMLDivElement | null>(null);
-  const pull = useStore(pullStore);
+  // Only who takes the pointer is React's. Everything drawn is written straight to the styles from the store
+  // below, so a frame of the pull or of a drag is one write of a transform and no drawing of components.
+  const away = useStore(pullStore, (state) => state.amount > 0 || state.dive !== null);
 
   // Read through refs so that the pull can ask about them at any moment without being rebuilt when they
   // change; rebuilding it would drop the wheel listener mid-scroll.
@@ -88,6 +90,7 @@ export function Room({ map, seat, strip, children }: RoomProps) {
     const container = map.getContainer();
     const pitch = map.getPitch();
     const viewport = flatWindow({ width: container.clientWidth, height: container.clientHeight }, pitch);
+    const pull = pullStore.get();
 
     if (pull.dive !== null) {
       const flat = sceneAt(pull.dive, viewport, pull.dive.progress);
@@ -108,7 +111,6 @@ export function Room({ map, seat, strip, children }: RoomProps) {
     }
 
     still.hidden = true;
-    scene.style.transformOrigin = '';
     scene.style.imageRendering = '';
     scene.style.opacity = '';
 
@@ -119,14 +121,15 @@ export function Room({ map, seat, strip, children }: RoomProps) {
       ...viewport,
     });
     const pulled = pull.amount > 0;
-    const desk = deskOnScreen(lying, viewport);
-    const scale = pulled ? scaleFor(pull.amount, turnsAt(roomOnScreen(desk), viewport)) : 1;
+    const { desk, room, scale, about } = pulledBack(lying, viewport, pull.amount, pull.about);
+    const origin = drawnPoint(about, pitch);
+    scene.style.transformOrigin = pulled ? `${origin.x}px ${origin.y}px` : '';
     scene.style.transform = pulled ? `scale(${scale})` : '';
     scene.style.willChange = pulled ? 'transform' : '';
-    const open = pulled && !deskCoversView(desk, viewport, scale);
+    const open = pulled && !deskCoversView(desk, viewport, scale, about);
     walls.hidden = !open;
     if (open) {
-      lay(walls, drawnAt(roomOnScreen(desk), pitch));
+      lay(walls, drawnAt(room, pitch));
     }
     // Only while the pull is on and the camera is still pinned at its floor. A dive moves the camera, and
     // the move it fires runs this before React has heard, so without the second half of the guard leaving
@@ -142,6 +145,8 @@ export function Room({ map, seat, strip, children }: RoomProps) {
     place.current();
   });
 
+  useEffect(() => pullStore.watch(() => place.current()), []);
+
   useEffect(() => {
     if (map === null) {
       return;
@@ -155,8 +160,6 @@ export function Room({ map, seat, strip, children }: RoomProps) {
     };
   }, [map]);
 
-  const away = pull.amount > 0 || pull.dive !== null;
-
   /*
    * Which of the two takes the pointer, and it is only ever one of them. At rest the scene takes
    * everything and this element is not even in the way, so a drag, a click and a wheel reach the map
@@ -169,7 +172,12 @@ export function Room({ map, seat, strip, children }: RoomProps) {
     <div
       className="room"
       ref={surfaceRef}
-      style={{ pointerEvents: away ? 'auto' : 'none', background: away ? BEYOND : 'none' }}
+      style={{
+        pointerEvents: away ? 'auto' : 'none',
+        // A finger dragged in the room looks round it, rather than scrolling the page.
+        touchAction: away ? 'none' : 'auto',
+        background: away ? BEYOND : 'none',
+      }}
     >
       <div className="room__scene" ref={sceneRef} style={{ pointerEvents: away ? 'none' : 'auto' }}>
         <div className="room__walls" ref={wallsRef} hidden style={{ backgroundImage: roomFloor }} />

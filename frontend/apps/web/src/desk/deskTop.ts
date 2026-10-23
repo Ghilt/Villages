@@ -47,13 +47,22 @@ export function deskOnScreen(sheet: Sheet, viewport: Viewport): DeskTop {
   };
 }
 
-/** Whether the desk reaches every edge of the window, which is when the room cannot be seen. */
-export function deskCoversView(desk: DeskTop, viewport: Viewport, scale: number): boolean {
-  const half = (1 - scale) / 2;
+/**
+ * Whether the desk reaches every edge of the window, which is when the room cannot be seen: drawn back by
+ * `scale` about a point of the window, the middle unless the room is being looked round.
+ */
+export function deskCoversView(
+  desk: DeskTop,
+  viewport: Viewport,
+  scale: number,
+  about: { x: number; y: number } = { x: viewport.width / 2, y: viewport.height / 2 },
+): boolean {
+  const left = about.x + (desk.left - about.x) * scale;
+  const top = about.y + (desk.top - about.y) * scale;
   return (
-    desk.left * scale + viewport.width * half <= 0 &&
-    desk.top * scale + viewport.height * half <= 0 &&
-    (desk.left + desk.width) * scale + viewport.width * half >= viewport.width &&
-    (desk.top + desk.height) * scale + viewport.height * half >= viewport.height
+    left <= 0 &&
+    top <= 0 &&
+    left + desk.width * scale >= viewport.width &&
+    top + desk.height * scale >= viewport.height
   );
 }

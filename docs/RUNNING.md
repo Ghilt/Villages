@@ -498,6 +498,13 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `uncommon`, `rare` or `legendary` whatever the throw, or `the throw` again: it stands in for the world's
   luck, not for the player. What a roll drew from is sent only while the instruments are open. See
   `docs/adr/0083` and `docs/plans/choice-roll.md`.
+- The room, the player's own: scroll out past the far end of the map and the desk it lies on draws back into
+  the room it stands in; scroll in on your own castle at the closest zoom and you go into it, and the room is
+  inside. Scrolling on out of the room goes out through your castle onto the map at zoom 10, and scrolling in
+  from it goes back to the desk. Either passage turns round if you scroll the other way while it is running.
+  In the room a drag looks round it, as far as its walls, and a click on the map takes you back to it; a click
+  anywhere else does nothing, so that what is put on the table beside the map can be pressed. Each passage,
+  each turn and the click back is a `room` line of the debug log. See experiment 0009.
 - Water, the player's own: a click on a river, a lake or the sea on the map, zoomed in to 6 or closer, opens an
   **inspect window** on it, marked with two waves for a river, a shore for a lake and an anchor for the sea: its
   name in English - the one of 1790 where the review chose it, with today's under it - or *A river*, *A lake* or

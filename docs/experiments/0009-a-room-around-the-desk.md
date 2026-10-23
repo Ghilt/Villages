@@ -149,7 +149,7 @@ loop ran and came out on the seat.
 whenever it is hidden, which is between every action, so an eased pull only advances when a screenshot
 pumps a frame. Every number above is a geometry or a log line, and none of them is a timing.
 
-### Second round, 2026-10-22: quicker, with no stop, and the wheel can turn it round
+### Second round, 2026-10-22: quicker, with no stop, turnable, and a room to look round
 
 Adam, from his own browser: going into the castle "is not such a nice experience". The dive wanted to be half
 again as fast, there was "a little stop before the transition plays", and a dive started by accident could
@@ -174,6 +174,22 @@ zoom it left, which is zoom 10 within a hair; turned round on the way out, it go
 on the camera it was seen from rather than on the world's centre, which is where a dive in from the castle lands.
 Each turn is a `room` note in the debug panel. A passage is still a thing that finishes, and nobody can stand
 half way: what changed is that the one who started it can take it back.
+
+**Looking round the room.** Adam found panning in the room janky, and it was worse than that: pulled back, the scene
+took no pointer, a drag ended in a click, and a click anywhere put the pull straight back to the floor in one frame.
+Now a drag looks round the room. The pull draws back about a point of the window rather than always its middle,
+and a drag moves that point by its own length over one less the scale, which is what makes everything drawn follow
+the pointer; the point is kept where the room still covers the window, and along an axis where the room is
+narrower than the window it is the one that centres it. In at the floor the point moves nothing at all, so the
+map is handed back exactly as it was left and the next pull starts from the middle. `pulledBack` and `aboutWithin`
+in `roomBox.ts`; the room a dive sets out from is the same arithmetic, so it leaves from the part of the room you
+were looking at, and a way out turned round comes back to it.
+
+A click is no longer the way out from anywhere. Adam means the table to hold things that can be pressed, beside
+the map, so a press takes nothing from the page until it moves: a click goes to whatever is under it, and only
+a click on the map itself takes you back to it, eased by the pull rather than snapped. And the room is drawn
+straight from the pull's store on each change rather than by drawing the component again, so a frame of the pull
+or of a drag is one written transform.
 
 ## Result
 

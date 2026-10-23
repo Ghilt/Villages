@@ -4,6 +4,8 @@ import { floorZoom } from '../map/sheet';
 import type { Sheet, Viewport } from '../map/sheet';
 import { worldSize } from '../geometry/cameraMath';
 
+import type { Point } from './dive';
+
 /**
  * The room the desk stands in, and the arithmetic of pulling back into it.
  *
@@ -91,24 +93,87 @@ export function spanOf(turn: number): number {
   return -Math.log2(turn);
 }
 
+/** The middle of the window, which the pull draws back about until a drag moves it. */
+export function middleOf(viewport: Viewport): Point {
+  return { x: viewport.width / 2, y: viewport.height / 2 };
+}
+
 /**
- * Where the room ends up, in window pixels, once the pull is spent.
- *
- * The scale is taken about the middle of the window, so a rectangle in the scene's own pixels lands at
- * `x * scale + width * (1 - scale) / 2`. This is where a dive has to start and finish, in both
- * directions: the room it leaves you in has to be the room it was showing you.
+ * Where a rectangle of the scene is drawn, the scene scaled about a point of the window: `about + (x - about)
+ * * scale` on each axis. The point is the one thing that stays where it is, so a scale about the middle is
+ * the pull as it always was, and a scale about anywhere else is the same pull looking somewhere else.
  */
-export function roomAtTurn(sheet: Sheet, viewport: Viewport): DeskTop {
-  const room = roomOnScreen(deskOnScreen(sheet, viewport));
-  const scale = turnsAt(room, viewport);
-  const across = (viewport.width * (1 - scale)) / 2;
-  const down = (viewport.height * (1 - scale)) / 2;
+export function scaledAbout(rect: DeskTop, about: Point, scale: number): DeskTop {
   return {
-    left: room.left * scale + across,
-    top: room.top * scale + down,
-    width: room.width * scale,
-    height: room.height * scale,
+    left: about.x + (rect.left - about.x) * scale,
+    top: about.y + (rect.top - about.y) * scale,
+    width: rect.width * scale,
+    height: rect.height * scale,
   };
+}
+
+/**
+ * The point to draw back about, kept where the room still covers the window.
+ *
+ * Moving the point by `d` moves everything drawn by `d * (1 - scale)`, so a drag moves it by its own length
+ * over that and everything follows the pointer, and at no pull at all it moves nothing: there is no look to
+ * hand back when the pull comes in to the floor, because at the floor the point does not matter. Along an
+ * axis where the room is wider than the window it may go as far as the room's walls and no further; along
+ * one where the room is narrower it is the point that puts the room in the middle.
+ */
+export function aboutWithin(room: DeskTop, viewport: Viewport, scale: number, wanted: Point): Point {
+  return {
+    x: alongWithin(room.left, room.width, viewport.width, scale, wanted.x),
+    y: alongWithin(room.top, room.height, viewport.height, scale, wanted.y),
+  };
+}
+
+function alongWithin(start: number, length: number, window: number, scale: number, wanted: number): number {
+  const free = 1 - scale;
+  if (free <= 0) {
+    return window / 2;
+  }
+  if (length * scale <= window) {
+    return (window / 2 - (start + length / 2) * scale) / free;
+  }
+  return clamp(wanted, (window - (start + length) * scale) / free, (-start * scale) / free);
+}
+
+/** The pull as it is drawn: the desk and the room in the scene's own pixels, and how it is drawn back. */
+export interface PulledBack {
+  desk: DeskTop;
+  room: DeskTop;
+  /** How much smaller everything is drawn: one at the floor, the turn's scale in the room. */
+  scale: number;
+  /** The point of the window it is drawn back about, kept where the room covers the window. */
+  about: Point;
+}
+
+/**
+ * The pull at an amount, with the sheet where it lies and the point the player last looked round to, or the
+ * middle of the window if they have not. The room drawn on the page and the room a dive sets out from are
+ * both this, so they cannot disagree.
+ */
+export function pulledBack(
+  sheet: Sheet,
+  viewport: Viewport,
+  amount: number,
+  wanted: Point | null,
+): PulledBack {
+  const desk = deskOnScreen(sheet, viewport);
+  const room = roomOnScreen(desk);
+  const scale = scaleFor(amount, turnsAt(room, viewport));
+  return { desk, room, scale, about: aboutWithin(room, viewport, scale, wanted ?? middleOf(viewport)) };
+}
+
+/**
+ * Where the room ends up, in window pixels, once the pull is spent, wherever in it the player was looking.
+ * This is where a dive has to start and finish, in both directions: the room it leaves you in has to be the
+ * room it was showing you.
+ */
+export function roomAtTurn(sheet: Sheet, viewport: Viewport, about: Point | null = null): DeskTop {
+  const spent = pulledBack(sheet, viewport, 1, about);
+  return scaledAbout(spent.room, spent.about, spent.scale);
 }
 
 /**

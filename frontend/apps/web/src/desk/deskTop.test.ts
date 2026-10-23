@@ -62,6 +62,15 @@ describe('the desk', () => {
     expect(deskCoversView(desk, viewport, 0.5)).toBe(false);
   });
 
+  it('is drawn back about the point the room is looked round from, not only the middle', () => {
+    const viewport = { width: 1600, height: 900 };
+    const desk = { left: -2000, top: -1000, width: 5000, height: 3000 };
+    // Drawn back about the middle it still reaches every edge; about the top left corner the same scale
+    // pulls its right edge in past the window's.
+    expect(deskCoversView(desk, viewport, 0.4)).toBe(true);
+    expect(deskCoversView(desk, viewport, 0.4, { x: 0, y: 0 })).toBe(false);
+  });
+
   it('is wider than it is deep, whatever the shape of the window', () => {
     for (const viewport of STAGES) {
       const desk = deskOnScreen(atFloor(viewport), viewport);

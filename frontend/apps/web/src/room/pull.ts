@@ -11,7 +11,8 @@ import type { Viewport } from '../map/sheet';
 import { easeTowards } from '../sprites/twoForms';
 
 import { keepAbove, overTheHolding, railFrom, spanTo } from './dive';
-import type { Dive, Going } from './dive';
+import type { Dive, Going, Point } from './dive';
+import { attachLook, seen } from './look';
 import { atTheEnd, roomAtTurn, roomOnScreen, sheetAtFloor, spanOf, turnsAt, wheelZooms } from './roomBox';
 import { worldStill } from '../motion/motion';
 
@@ -35,6 +36,11 @@ export interface PullState {
   amount: number;
   /** The passage into the castle or out of it, while one is running. */
   dive: Dive | null;
+  /**
+   * The point of the window the pull draws back about, which dragging round the room moves; null for the
+   * middle, which is where every pull starts and where it is put back once the pull is in at the floor.
+   */
+  about: Point | null;
 }
 
 /** How long the drawn pull takes to catch what the wheel asked for. MapLibre's own wheel ease is 200. */
@@ -43,7 +49,7 @@ const SETTLE_MS = 180;
 /** A frame longer than this is a tab that was not being drawn, not a slow machine. */
 const LONGEST_STEP_MS = 50;
 
-const still: PullState = { amount: 0, dive: null };
+const still: PullState = { amount: 0, dive: null, about: null };
 
 const store = createStore<PullState>(still);
 
@@ -96,39 +102,38 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
   let ours = false;
   let said = false;
 
-  const release = (why: string | null): void => {
+  /** Puts the pull straight back to the floor, for a window or a camera that has moved under it. */
+  const release = (): void => {
     if (wanted === 0 && store.get().amount === 0) {
       return;
     }
     wanted = 0;
-    settle({ ...store.get(), amount: 0 });
-    if (why !== null) {
-      note('room', why);
-    }
+    settle({ ...store.get(), amount: 0, about: null });
   };
 
   // ---- the dive -------------------------------------------------------------------------------------
 
   /**
-   * The camera the room is seen from, which a dive going in lands on. The world's centre at the floor, as the
-   * room coming in through the castle is drawn; but a dive that set out from the room and was turned round
-   * goes back to the camera it left, or the room would land somewhere other than where it was showing.
+   * Where the room is seen from, which a dive going in lands on. The world's centre at the floor, looking at
+   * the middle, as the room coming in through the castle is drawn; but a dive that set out from the room and
+   * was turned round goes back to the camera it left and the part of the room it was looking at, or the room
+   * would land somewhere other than where it was showing.
    */
-  let roomCamera: { center: [number, number]; zoom: number } | null = null;
+  let roomView: { center: [number, number]; zoom: number; about: Point | null } | null = null;
 
   /** Where the dive leaves you. Going in, that is the room; coming out, the map at your own seat. */
   const land = (going: Going): void => {
     if (going === 'in') {
       ours = true;
-      map.jumpTo(roomCamera ?? { center: [0, 0], zoom: floorZoom(viewport()) });
+      map.jumpTo(roomView ?? { center: [0, 0], zoom: floorZoom(viewport()) });
       ours = false;
       wanted = 1;
-      settle({ amount: 1, dive: null });
+      settle({ amount: 1, dive: null, about: roomView?.about ?? null });
     } else {
       wanted = 0;
-      settle({ amount: 0, dive: null });
+      settle({ amount: 0, dive: null, about: null });
     }
-    roomCamera = null;
+    roomView = null;
   };
 
   let railing: number | null = null;
@@ -163,7 +168,8 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
    */
   const dive = (going: Going, seat: { lat: number; lon: number }): void => {
     const view = viewport();
-    const end = roomAtTurn(going === 'in' ? sheetAtFloor(view) : sheetOnScreen(seen(map)), view);
+    const about = going === 'in' ? null : store.get().about;
+    const end = roomAtTurn(going === 'in' ? sheetAtFloor(view) : sheetOnScreen(seen(map)), view, about);
 
     // Whatever MapLibre's wheel was still easing towards stops where it is, rather than creeping on under a
     // picture of itself.
@@ -171,7 +177,7 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
     map.stop();
     if (going === 'out') {
       const centre = map.getCenter();
-      roomCamera = { center: [centre.lng, centre.lat], zoom: map.getZoom() };
+      roomView = { center: [centre.lng, centre.lat], zoom: map.getZoom(), about };
       map.jumpTo({ center: [seat.lon, seat.lat], zoom: CAMERA.maxZoom });
     }
     ours = false;
@@ -193,7 +199,7 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
       end,
     };
     wanted = going === 'in' ? 0 : 1;
-    settle({ amount: going === 'in' ? 0 : 1, dive: started });
+    settle({ amount: going === 'in' ? 0 : 1, dive: started, about });
     note(
       'room',
       going === 'in'
@@ -229,8 +235,11 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
     const elapsed = Math.min(now - lastFrameAt, LONGEST_STEP_MS);
     lastFrameAt = now;
     const amount = calm() ? wanted : easeTowards(store.get().amount, wanted, elapsed, SETTLE_MS);
-    if (amount !== store.get().amount) {
-      settle({ ...store.get(), amount });
+    // In at the floor the point the pull was drawn back about stops mattering, and the next pull starts from
+    // the middle again.
+    const about = amount === 0 ? null : store.get().about;
+    if (amount !== store.get().amount || about !== store.get().about) {
+      settle({ ...store.get(), amount, about });
     }
     if (amount >= 1 && wanted >= 1) {
       const seat = seatNow();
@@ -258,12 +267,17 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
     owed = requestAnimationFrame(frame);
   };
 
-  const push = (by: number): void => {
-    wanted = Math.min(1, Math.max(0, wanted + by / span()));
+  /** Asks for a pull, which the drawn one then eases towards. */
+  const ask = (next: number): void => {
+    wanted = Math.min(1, Math.max(0, next));
     if (owed === null) {
       lastFrameAt = performance.now();
     }
     keep();
+  };
+
+  const push = (by: number): void => {
+    ask(wanted + by / span());
   };
 
   const onWheel = (event: WheelEvent): void => {
@@ -317,13 +331,19 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
     push((out ? 1 : -1) * wheelZooms(event.deltaY, event.deltaMode));
   };
 
-  // A wheel is not the only way to be here and it is the only way out, so a click puts it back. Without
-  // it a touch or a keyboard leaves the room with no door.
-  const onClick = (): void => {
-    if (store.get().dive === null) {
-      release('back on the desk');
-    }
-  };
+  const detachLook = attachLook({
+    map,
+    surface,
+    pulled: () => {
+      const { amount, dive, about } = store.get();
+      return dive === null && amount > 0 ? { amount, about } : null;
+    },
+    lookAt: (about) => settle({ ...store.get(), about }),
+    back: () => {
+      ask(0);
+      note('room', 'back to the map: a click on it');
+    },
+  });
 
   // The floor moves with the window, so a pull measured against the old one is a lie; and a dive is
   // anchored to a castle that is no longer where it was, so it is landed rather than carried over.
@@ -334,23 +354,22 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
       land(dive.going);
       return;
     }
-    release(null);
+    release();
   };
 
   const onMoveStart = (): void => {
     if (!ours && store.get().dive === null) {
-      release(null);
+      release();
     }
   };
 
   surface.addEventListener('wheel', onWheel, { capture: true, passive: false });
-  surface.addEventListener('click', onClick);
   map.on('resize', onResize);
   map.on('movestart', onMoveStart);
 
   return () => {
     surface.removeEventListener('wheel', onWheel, { capture: true });
-    surface.removeEventListener('click', onClick);
+    detachLook();
     map.off('resize', onResize);
     map.off('movestart', onMoveStart);
     stopRail();
@@ -360,21 +379,5 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
     }
     wanted = 0;
     settle(still);
-  };
-}
-
-/** The camera as `sheetOnScreen` wants it: looking straight down, in the flat window. */
-function seen(map: maplibregl.Map): {
-  center: { lng: number; lat: number };
-  zoom: number;
-  width: number;
-  height: number;
-} {
-  const container = map.getContainer();
-  const centre = map.getCenter();
-  return {
-    center: { lng: centre.lng, lat: centre.lat },
-    zoom: map.getZoom(),
-    ...flatWindow({ width: container.clientWidth, height: container.clientHeight }, map.getPitch()),
   };
 }
