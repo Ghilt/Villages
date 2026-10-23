@@ -1,4 +1,4 @@
-import type { ChallengeRowView, QuestNodeView, QuestView } from '@villages/protocol';
+import type { ChallengeRowView, ChallengeRunFrame, QuestNodeView, QuestView } from '@villages/protocol';
 import type { Challenges } from '@villages/world';
 
 import type { ChallengeAsked } from './toChoose';
@@ -70,24 +70,28 @@ function towardSaid(tug: number, house: string, against: string): string {
   return `${Math.round(Math.abs(tug) * 10) / 10} toward ${tug > 0 ? house : against}`;
 }
 
+/** Who won a challenge, by name: the house, who stood against it, or nobody at an even tug. */
+function winnerOf(row: ChallengeRowView): string | null {
+  const { wonBy } = row.outcome;
+  return wonBy === 'a' ? row.house : wonBy === 'b' ? row.against.name : null;
+}
+
+/** How a challenge ended: `pulled to the end in second 12`, or `time ran out in second 30, 41.5 toward Ravenscar`. */
+function endedSaid(row: ChallengeRowView): string {
+  const { outcome } = row;
+  return outcome.ended === 'pulled'
+    ? `pulled to the end in second ${outcome.second}`
+    : `time ran out in second ${outcome.second}, ${towardSaid(outcome.tug, row.house, row.against.name)}`;
+}
+
 /**
  * A challenge fought, in a line of its history: who stood against whom, its kind, who won it, and how it ended -
  * `Ravenscar against Brother Anselm, a debate, won by Ravenscar: time ran out in second 30, 41.5 toward Ravenscar`.
  */
 export function historyLine(row: ChallengeRowView): string {
-  const { house, against, outcome } = row;
   const kind = kindSaid(row.kind);
-  const won =
-    outcome.wonBy === 'a'
-      ? `won by ${house}`
-      : outcome.wonBy === 'b'
-        ? `won by ${against.name}`
-        : 'won by nobody';
-  const how =
-    outcome.ended === 'pulled'
-      ? `pulled to the end in second ${outcome.second}`
-      : `time ran out in second ${outcome.second}, ${towardSaid(outcome.tug, house, against.name)}`;
-  return `${house} against ${against.name}, ${/^[aeiou]/.test(kind) ? 'an' : 'a'} ${kind}, ${won}: ${how}`;
+  const won = `won by ${winnerOf(row) ?? 'nobody'}`;
+  return `${row.house} against ${row.against.name}, ${/^[aeiou]/.test(kind) ? 'an' : 'a'} ${kind}, ${won}: ${endedSaid(row)}`;
 }
 
 /** Where the challenge's quest went on to, in a line, once it is known. */
@@ -123,4 +127,69 @@ export function whatChangedIn(
     const then = thenSaid(row);
     return was.revision !== row.revision && then !== null ? [then] : [];
   });
+}
+
+/** The house's colour in a challenge's spectacle, until a house's banner gives one: the map's lapis. */
+export const HOUSE_COLOUR = '#3d6aa6';
+
+/** Who stands on each side of a challenge's spectacle: the house on the first, who stood against it on the second. */
+export function housesOf(row: ChallengeRowView): Record<'a' | 'b', { name: string; colour: string }> {
+  return { a: { name: row.house, colour: HOUSE_COLOUR }, b: row.against };
+}
+
+/** A challenge's result, as the card after it says it: who won, how it ended, what each side gained and lost. */
+export interface ResultSaid {
+  /** `Ravenscar won`, `Brother Anselm won`, `Nobody won`. */
+  readonly won: string;
+  /** `Time ran out in second 30, 41.5 toward Ravenscar.` */
+  readonly how: string;
+  /** A line for each thing gained and lost: `Brother Anselm: 5 piety gained`, `Brother Anselm: the chapel damaged`. */
+  readonly spoils: readonly string[];
+}
+
+export function resultSaid(row: ChallengeRowView): ResultSaid {
+  const side = (which: 'a' | 'b') => (which === 'a' ? row.house : row.against.name);
+  const ended = endedSaid(row);
+  return {
+    won: `${winnerOf(row) ?? 'Nobody'} won`,
+    how: `${ended.charAt(0).toUpperCase()}${ended.slice(1)}.`,
+    spoils: [
+      ...row.outcome.gains.map(
+        (gain) => `${side(gain.side)}: ${Math.round(gain.amount * 10) / 10} ${gain.resource} gained`,
+      ),
+      ...row.outcome.losses.map((loss) => `${side(loss.side)}: ${loss.name} ${loss.became}`),
+    ],
+  };
+}
+
+/** Where the quest goes on to after a challenge, once that is known: `The debate in the square goes on to A penance.` */
+export function nextSaid(row: ChallengeRowView): string | null {
+  return row.then === undefined ? null : `${row.quest} goes on to ${row.then}.`;
+}
+
+/**
+ * What a challenge fought again says of itself beside what was recorded: nothing when it comes out the same; that it
+ * cannot be watched when the challenges in force could not fight it again; and that it comes out otherwise when they
+ * did, what was recorded standing.
+ */
+export function replaySaid(run: ChallengeRunFrame): string | null {
+  if (!run.differs) return null;
+  return run.moments.length === 0
+    ? 'It cannot be watched again: the challenges have changed since it was fought.'
+    : 'The challenges have changed since it was fought, and fought again it comes out otherwise; what was recorded stands.';
+}
+
+/** The challenge newly fought for the challenge that was accepted: its row in the history, once it is there. */
+export function foughtFor(
+  rows: readonly ChallengeRowView[],
+  accepted: ChallengeAsked | null,
+): ChallengeRowView | null {
+  if (accepted === null) return null;
+  return rows.find((row) => row.questId === accepted.questId && row.nodeId === accepted.nodeId) ?? null;
+}
+
+/** A log line for a challenge fought again to be watched: `watching "Brother Anselm's challenge" again`. */
+export function watchingSaid(run: ChallengeRunFrame, rows: readonly ChallengeRowView[] | null): string {
+  const title = rows?.find((row) => row.id === run.id)?.title ?? 'a challenge';
+  return `watching "${title}"${run.differs ? ', which comes out otherwise now than recorded' : ''}`;
 }

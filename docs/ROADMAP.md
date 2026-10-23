@@ -37,8 +37,8 @@ started; the world cache is built and waiting on Adam's eye; quests are built an
 eye for their experiment; catalogues are built and waiting on Adam's eye; ruined cities are planned and not
 started; worked ground is planned and not started; challenges are built on their admin page and on main; settlements
 and roads are built and on main; houses, bridges and the road render are built and on main, the Roads renderer waiting
-on Adam's eye; the challenge spectacle is built and on main; and challenges in the game, the newest, are planned and
-not started.
+on Adam's eye; the challenge spectacle is built and on main; and challenges in the game, the newest, are built and waiting
+on Adam's eye.
 
 - **Characters and key figures**: the people of the world, each with a history of their own, and the
   house's tie to the few it acts through, shown in a pane in the corner beside the house status. The shape
@@ -198,10 +198,10 @@ not started.
   record 0107; the rules and the steps are in `docs/plans/challenges.md` and `docs/plans/challenge-matching.md`, all
   built and on main. The spectacle - the challenge played out in a diorama seen as the map is, the square first, the
   townsfolk walking to whoever is winning them - is decision record 0116 and twelve steps in
-  `docs/plans/challenge-spectacle.md`, all built and on main. In the game next: a quest's challenge node, the house's
+  `docs/plans/challenge-spectacle.md`, all built and on main. In the game: a quest's challenge node, the house's
   starting slices chosen from, *Accept challenge* fighting it out in one decision with the quest's next step, and a
   challenges' tab in the right column to watch it, see the result and keep the history; six steps in
-  `docs/plans/challenges-in-the-game.md`, planned and not started. Adam's own mechanic, planned with him on 2026-10-20,
+  `docs/plans/challenges-in-the-game.md`, all built and waiting on Adam's eye. Adam's own mechanic, planned with him on 2026-10-20,
   its spectacle on 2026-10-21, in the game on 2026-10-23.
 - **House bots**: the world begins populated, with a few hundred houses whose player is the world itself, each
   standing outside the ruin of a town of 1790 and named after it, made at every opening - as the server starts,

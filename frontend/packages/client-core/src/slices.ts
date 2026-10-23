@@ -1,5 +1,6 @@
 import type {
   ChallengeRowView,
+  ChallengeRunFrame,
   ChoiceView,
   DialogueView,
   InspectedAtFrame,
@@ -68,6 +69,11 @@ export interface SessionState {
   yourQuests: readonly QuestView[] | null;
   /** Every challenge the player's house fought, oldest first, or null until the gateway has said. See 0107, amended. */
   yourChallenges: readonly ChallengeRowView[] | null;
+  /**
+   * The last challenge of the house fought again to be watched, as the gateway sent it, until another comes, or null
+   * before any. See decision record 0107, amended.
+   */
+  challengeRun: ChallengeRunFrame | null;
   /**
    * The last step through a dialogue the house refused, and why, until another is sent: which the pane says
    * under the options, because a press that seems to do nothing is a press the player cannot read.
@@ -225,6 +231,13 @@ const SLICES = {
     onFrame: { yourChallenges: (_, frame) => ({ yourChallenges: frame.challenges }) },
     onReset: forgottenWhenTakenOver({ yourChallenges: null }),
   } satisfies Slice<'yourChallenges'>,
+
+  /** The last challenge fought again to be watched, which only the challenges' pane asks for. Forgotten to a takeover. */
+  challengeRuns: {
+    initial: { challengeRun: null },
+    onFrame: { challengeRun: (_, frame) => ({ challengeRun: frame }) },
+    onReset: forgottenWhenTakenOver({ challengeRun: null }),
+  } satisfies Slice<'challengeRun'>,
 
   /**
    * The player's command waiting on its answer, and a step refused. A refusal of the step out is said in its pane,

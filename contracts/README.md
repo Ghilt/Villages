@@ -174,3 +174,14 @@ recorded over. See decision record 0037. What each one changed:
   hello from a browser signed in to nobody. See decision record 0111.
 - **66** - `signedOut`, the browser's sign-in ended - signed out, run out, or ended from another browser - and the
   window stood down as a taken-over one is. See decision record 0111.
+- **70** - a quest's node may be a `challenge`, saying its kind and who stands against the house, a name and a colour,
+  and nothing of the opponent's slices; an edge may carry the `verdict`, `won` or `lost`, that takes it. See decision
+  record 0107, amended, and `docs/plans/challenges-in-the-game.md`.
+- **71** - `acceptChallenge`, a command naming the quest, the node and one to three of the house's starting slices: the
+  challenge fought out and the quest moved on in one decision.
+- **72** - `yourChallenges`, every challenge the house fought, sent after `yourQuests` on hello and again with every
+  change: who stood against whom, the kind, the slices brought, what it came to and the road its quest took.
+- **73** - `watchChallenge`, answered by `challengeRun`: a challenge of the house's history fought again to be watched,
+  each side's slices, the progression, the recorded outcome and the moments of the fight again, and whether it came out
+  otherwise; `noSuchChallenge` as an error for one the house did not fight. A challenge's row in `yourChallenges`
+  carries its quest's id and its node's.

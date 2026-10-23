@@ -222,6 +222,14 @@ export function acceptChallenge(
 }
 
 /**
+ * Asks for a challenge of the house's history fought again, to watch it in its spectacle: the answer comes back into
+ * the session as `challengeRun`. See decision record 0107, amended.
+ */
+export function watchChallenge(challengeId: string): void {
+  session.watchChallenge(challengeId);
+}
+
+/**
  * Starts over as a new player: this browser's sign-in ended, a newcomer's begun, and a reload.
  *
  * The house the old player founded stays in the world as somebody's, because events are never deleted.

@@ -1,4 +1,4 @@
-import { whatChangedIn as whatChangedInChallenges } from './challenges/describe';
+import { watchingSaid, whatChangedIn as whatChangedInChallenges } from './challenges/describe';
 import { charactersInView, structuresInView } from '@villages/client-core';
 import { PROTOCOL_VERSION, describeDay } from '@villages/protocol';
 import type { ServerFrame } from '@villages/protocol';
@@ -213,6 +213,9 @@ export const sessionLog: GatewayListener = {
         for (const line of whatChangedInChallenges(was.yourChallenges, frame.challenges)) {
           note('challenges', line);
         }
+        return;
+      case 'challengeRun':
+        note('challenges', watchingSaid(frame, was.yourChallenges));
         return;
       case 'worldWiped':
         note('world', `${frame.message}; arriving anew`);

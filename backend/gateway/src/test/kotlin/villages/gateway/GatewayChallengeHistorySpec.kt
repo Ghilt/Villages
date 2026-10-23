@@ -6,7 +6,9 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import villages.domain.PlayerResolvedChallenge
 import villages.domain.challenge.Side
+import villages.protocol.ChallengeRun
 import villages.protocol.CommandAccepted
+import villages.protocol.ErrorFrame
 import villages.protocol.OpponentView
 import villages.protocol.ServerFrame
 import villages.protocol.YourChallenges
@@ -58,5 +60,39 @@ class GatewayChallengeHistorySpec : StringSpec({
 
         sent.filterIsInstance<YourChallenges>().last().challenges shouldHaveSize 1
         overheard.filterIsInstance<YourChallenges>().shouldBeEmpty()
+    }
+
+    "a challenge fought is watched again: both sides' slices, its moments fought again, and what it came to as recorded" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+        mine.receive(offeringAQuest("skirmish", commandNumber(1)))
+        val quest = sent.filterIsInstance<YourQuests>().last().quests.single()
+        mine.receive(acceptingChallenge(quest.id, "field", listOf("hirer"), commandNumber(2)))
+        val row = sent.filterIsInstance<YourChallenges>().last().challenges.single()
+        row.questId shouldBe quest.id
+        row.nodeId shouldBe "field"
+
+        mine.receive("""{"type":"watchChallenge","challengeId":"${row.id}"}""")
+
+        val run = sent.last() as ChallengeRun
+        run.id shouldBe row.id
+        run.sides.a.single().effects shouldBe listOf("violence.sellswords")
+        run.sides.b.single().aspect shouldBe "violence"
+        run.outcome shouldBe row.outcome
+        run.moments.isNotEmpty() shouldBe true
+        run.differs shouldBe false
+    }
+
+    "a challenge the house did not fight, or no challenge at all, is not one to watch" {
+        val rig = Rig()
+        val (mine, sent) = rig.introduced()
+        mine.receive(founding())
+
+        mine.receive("""{"type":"watchChallenge","challengeId":"c4000000-0000-4000-8000-0000000000d1"}""")
+        (sent.last() as ErrorFrame).code shouldBe "noSuchChallenge"
+
+        mine.receive("""{"type":"watchChallenge","challengeId":"not an id"}""")
+        (sent.last() as ErrorFrame).code shouldBe "noSuchChallenge"
     }
 })

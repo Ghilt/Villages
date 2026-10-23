@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { ChallengeRowView, QuestView } from '@villages/protocol';
+import type { ChallengeRowView, ChallengeRunFrame, QuestView } from '@villages/protocol';
 import type { Challenges } from '@villages/world';
 
 import {
@@ -7,12 +7,18 @@ import {
   bringing,
   effectsSaid,
   firstWaiting,
+  foughtFor,
   historyLine,
   historySaid,
   kindSaid,
+  housesOf,
   newestFirst,
+  nextSaid,
+  replaySaid,
+  resultSaid,
   thenSaid,
   waitingAt,
+  watchingSaid,
   whatChangedIn,
 } from './describe';
 
@@ -86,6 +92,8 @@ const fought: ChallengeRowView = {
   revision: 1,
   title: "Brother Anselm's challenge",
   quest: 'The debate in the square',
+  questId: 'q2',
+  nodeId: 'square',
   kind: 'debate',
   house: 'Ravenscar',
   against: { name: 'Brother Anselm', colour: '#a8452a' },
@@ -148,5 +156,93 @@ describe('the history', () => {
   it('puts a challenge waiting first: the first open quest standing at one', () => {
     expect(firstWaiting([movedOn, debate])?.quest.revision).toBe(1);
     expect(firstWaiting([movedOn])).toBeNull();
+  });
+});
+
+describe('a challenge watched', () => {
+  const run: ChallengeRunFrame = {
+    type: 'challengeRun',
+    id: 'c1',
+    sides: { a: [], b: [] },
+    progression: { seconds: 30, happenings: [['reason']] },
+    outcome: fought.outcome,
+    moments: [
+      {
+        second: 0,
+        happening: 0,
+        side: null,
+        actor: 'challenge',
+        what: 'happeningBegan',
+        effect: null,
+        target: null,
+        amount: null,
+        boosted: false,
+        tugDelta: 0,
+        tugAfter: 0,
+        targetEffect: null,
+        status: null,
+      },
+    ],
+    summons: [],
+    differs: false,
+  };
+
+  it('is the one newly fought for the challenge accepted, once it is in the history', () => {
+    expect(foughtFor([fought], { questId: 'q2', nodeId: 'square' })?.id).toBe('c1');
+    expect(foughtFor([], { questId: 'q2', nodeId: 'square' })).toBeNull();
+    expect(foughtFor([fought], null)).toBeNull();
+  });
+
+  it('stands the house on the first side in its lapis, and who stood against it on the second in their colour', () => {
+    expect(housesOf(fought)).toEqual({
+      a: { name: 'Ravenscar', colour: '#3d6aa6' },
+      b: { name: 'Brother Anselm', colour: '#a8452a' },
+    });
+  });
+
+  it('ends in a result: who won, how, what each side gained and lost, and where the quest goes on to', () => {
+    const lost: ChallengeRowView = {
+      ...fought,
+      then: 'A penance',
+      outcome: {
+        tug: -100,
+        ended: 'pulled',
+        second: 16,
+        wonBy: 'b',
+        gains: [{ side: 'b', resource: 'piety', amount: 5, effect: 'holy.sanctuary' }],
+        losses: [
+          {
+            side: 'a',
+            name: 'the chapel',
+            became: 'damaged',
+            effectiveness: 10,
+            effect: 'reason.refutation',
+          },
+        ],
+      },
+    };
+    expect(resultSaid(lost)).toEqual({
+      won: 'Brother Anselm won',
+      how: 'Pulled to the end in second 16.',
+      spoils: ['Brother Anselm: 5 piety gained', 'Ravenscar: the chapel damaged'],
+    });
+    expect(nextSaid(lost)).toBe('The debate in the square goes on to A penance.');
+    expect(nextSaid(fought)).toBeNull();
+    expect(resultSaid({ ...fought, outcome: { ...fought.outcome, tug: 0, wonBy: null } }).won).toBe(
+      'Nobody won',
+    );
+  });
+
+  it('says when fought again it comes out otherwise, or cannot be fought again, and nothing when it is the same', () => {
+    expect(replaySaid(run)).toBeNull();
+    expect(replaySaid({ ...run, differs: true })).toMatch(/comes out otherwise; what was recorded stands/);
+    expect(replaySaid({ ...run, differs: true, moments: [] })).toMatch(/cannot be watched again/);
+  });
+
+  it('is logged by its title', () => {
+    expect(watchingSaid(run, [fought])).toBe(`watching "Brother Anselm's challenge"`);
+    expect(watchingSaid({ ...run, differs: true }, null)).toBe(
+      'watching "a challenge", which comes out otherwise now than recorded',
+    );
   });
 });

@@ -103,3 +103,55 @@
   justify-content: flex-end;
   padding-top: 0.25rem;
 }
+
+.challenges__back {
+  flex: none;
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0.2rem;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Watching, the spectacle runs edge to edge of the column, ten by sixteen, and the result is written under it. */
+.challenges__body--watching {
+  padding: 0;
+}
+
+.challenges__watching {
+  display: flex;
+  flex-direction: column;
+}
+
+.challenges__stage {
+  width: 100%;
+  aspect-ratio: 10 / 16;
+  max-height: 75vh;
+}
+
+.challenges__waiting,
+.challenges__note {
+  padding: 0.75rem;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.challenges__result {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.75rem;
+}
+
+.challenges__spoils {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+
+.challenges__next {
+  font-weight: 600;
+}

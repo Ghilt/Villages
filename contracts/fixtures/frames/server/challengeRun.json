@@ -1,0 +1,153 @@
+{
+  "type": "challengeRun",
+  "id": "c4000000-0000-4000-8000-0000000000d1",
+  "sides": {
+    "a": [
+      {
+        "aspect": "diplomacy",
+        "power": 50,
+        "integrity": 50,
+        "summonCount": 3,
+        "effects": [
+          "diplomacy.envoy",
+          "diplomacy.parley"
+        ],
+        "slotted": {
+          "diplomacy.envoy": {
+            "kind": "keyFigure",
+            "name": "Ines",
+            "stats": {
+              "piety": 9,
+              "reason": 11,
+              "kindness": 14,
+              "physical": 8
+            }
+          }
+        }
+      }
+    ],
+    "b": [
+      {
+        "aspect": "holy",
+        "power": 40,
+        "integrity": 60,
+        "summonCount": 2,
+        "effects": [
+          "holy.sanctuary"
+        ],
+        "slotted": {
+          "holy.sanctuary": {
+            "kind": "building",
+            "name": "Cathedral of Lund",
+            "level": 2
+          }
+        }
+      }
+    ]
+  },
+  "progression": {
+    "seconds": 30,
+    "happenings": [
+      [
+        "violence"
+      ],
+      [
+        "holy",
+        "diplomacy"
+      ]
+    ]
+  },
+  "outcome": {
+    "tug": -12.5,
+    "ended": "timeRanOut",
+    "second": 29,
+    "wonBy": "b",
+    "gains": [
+      {
+        "side": "b",
+        "resource": "piety",
+        "amount": 5,
+        "effect": "holy.sanctuary"
+      }
+    ],
+    "losses": [
+      {
+        "side": "b",
+        "name": "Cathedral of Lund",
+        "became": "damaged",
+        "effectiveness": 10,
+        "effect": "holy.sanctuary"
+      }
+    ]
+  },
+  "moments": [
+    {
+      "second": 0,
+      "happening": 0,
+      "side": null,
+      "actor": "challenge",
+      "what": "happeningBegan",
+      "effect": null,
+      "target": null,
+      "amount": null,
+      "boosted": false,
+      "tugDelta": 0,
+      "tugAfter": 0,
+      "targetEffect": null,
+      "status": null
+    },
+    {
+      "second": 0,
+      "happening": 0,
+      "side": "a",
+      "actor": "a1",
+      "what": "lent",
+      "effect": "diplomacy.envoy",
+      "target": null,
+      "amount": 21,
+      "boosted": true,
+      "tugDelta": 21,
+      "tugAfter": 21,
+      "targetEffect": null,
+      "status": null
+    },
+    {
+      "second": 15,
+      "happening": 1,
+      "side": "b",
+      "actor": "#2",
+      "what": "debuffed",
+      "effect": null,
+      "target": "#1",
+      "amount": 3,
+      "boosted": false,
+      "tugDelta": 0,
+      "tugAfter": 21,
+      "targetEffect": null,
+      "status": "stunned"
+    },
+    {
+      "second": 15,
+      "happening": 1,
+      "side": "b",
+      "actor": "#1",
+      "what": "arrived",
+      "effect": "holy.sanctuary",
+      "target": null,
+      "amount": 30,
+      "boosted": true,
+      "tugDelta": -30,
+      "tugAfter": -9,
+      "targetEffect": null,
+      "status": null
+    }
+  ],
+  "summons": [
+    {
+      "serial": 1,
+      "kind": "onTheLine",
+      "called": "Cathedral of Lund"
+    }
+  ],
+  "differs": false
+}

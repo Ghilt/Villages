@@ -6,6 +6,8 @@
       "revision": 2,
       "title": "Brother Anselm's challenge",
       "quest": "The debate in the square",
+      "questId": "ee000000-0000-4000-8000-00000000a002",
+      "nodeId": "square",
       "kind": "debate",
       "house": "Ravenscar",
       "against": { "name": "Brother Anselm", "colour": "#a8452a" },

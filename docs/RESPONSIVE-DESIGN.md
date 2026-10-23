@@ -316,7 +316,9 @@ deep one. The challenges page holds it wide, deep, or as a phone of 390 by 844.
 **The challenges' pane** is a tab of the column down the right in the spread, beside the dialogues and the quests,
 and on a phone a pane like any other below the map, its mark the challenge's in the bottom bar. Its choosing is a
 column of chips whatever the width, each the full width of the pane, so it reads the same in the column and on a
-phone.
+phone. A challenge is watched in it held deep, edge to edge of the pane, ten by sixteen and never taller than three
+quarters of the screen, the result written under it; on a phone the bay it stands in is opened to half or more as it
+arrives, as anything arriving is.
 
 ## The instrument
 

@@ -27,7 +27,7 @@ import {
 } from './structureFrames';
 import { inspectAtFrameSchema, inspectedAtFrameSchema } from './placeFrames';
 import { catalogueClientFrames, catalogueServerFrames } from './catalogueFrames';
-import { yourChallengesSchema } from './challengeHistoryFrames';
+import { challengeRunSchema, watchChallengeSchema, yourChallengesSchema } from './challengeHistoryFrames';
 import { challengeClientFrames, challengeServerFrames } from './challengeFrames';
 import { playerClientFrames, playerServerFrames } from './playerFrames';
 import { saveClientFrames, saveServerFrames } from './saveFrames';
@@ -263,6 +263,7 @@ export const clientFrameSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('inspect'), kind: z.enum(['house', 'character', 'structure']), id: z.string() }),
   ...catalogueClientFrames,
   ...challengeClientFrames,
+  watchChallengeSchema,
   ...saveClientFrames,
   ...playerClientFrames,
 ]);
@@ -366,6 +367,7 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
   }),
   ...catalogueServerFrames,
   ...challengeServerFrames,
+  challengeRunSchema,
   ...saveServerFrames,
   ...playerServerFrames,
 ]);

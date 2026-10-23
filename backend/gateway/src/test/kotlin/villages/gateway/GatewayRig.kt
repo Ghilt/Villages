@@ -1,6 +1,7 @@
 package villages.gateway
 
 import villages.application.Catalogues
+import villages.application.ChallengeReplays
 import villages.application.ChallengeService
 import villages.application.Antarctica
 import villages.application.QuestService
@@ -296,7 +297,7 @@ internal class Rig(
                 questRows,
                 ChallengeService(world, clock = { noon }, world = worldClock, quests = questRows, catalogues = { questCatalogues }, seeds = { 7L }) { "rig" },
             ),
-            ChallengeHistoryMechanic(challengeRows),
+            ChallengeHistoryMechanic(challengeRows, ChallengeReplays(challengeRows) { questCatalogues }),
             challengesInTheRig(),
         ),
     )

@@ -430,14 +430,21 @@ stage alone, with none of the debug panel in it (decision record 0079).
   chips, each saying its two effects, pressed to bring it or leave it, up to three; *Accept challenge*, in words, sends
   it, the server fights it out and the quest moves on along the road its outcome names in the same decision - won
   straight to the blessing, the penance crossed out; lost to the penance, whose *Deliver* pays forty wealth - and the
-  column turns back to the quest. Nothing is kept while choosing: leave it, and the node waits as it was. The accepting
+  tab plays it: the challenge's spectacle, held deep, edge to edge of the column, the house in lapis on the near bank
+  and Brother Anselm in his red on the far, his slices seen only now. Played or skipped to its end, the result is
+  written under it - who won, how it ended, what each side gained and lost, which reaches no house yet, and where the
+  quest goes on to - with *Back to the quest* and *All challenges*. The list mark at the head goes back to the history
+  at any moment, the spectacle stopping where it was. Nothing is kept while choosing: leave it, and the node waits as it was. The accepting
   is a line of the log under `challenges`, and the challenge whole is at `/admin/inspect-events-log`. Away from a
   choosing the tab is the house's history: a challenge waiting first, pressed to choose for it, then under *Fought*
-  every challenge the house fought, newest first, each a row with its title and a line saying who stood against whom,
+  every challenge the house fought, newest first, each a row, pressed to watch it again, with its title and a line saying who stood against whom,
   the kind, who won and how it ended, and where its quest went on to - *Ravenscar against Brother Anselm, a debate, won
   by Ravenscar: time ran out in second 30, 41.5 toward Ravenscar. The debate in the square went on to The brother's
   blessing.* The history arrives on hello and again with every change, and each challenge fought and each road heard is
-  a line of the log under `challenges`. Watching it comes with the last step of `docs/plans/challenges-in-the-game.md`. A castle for the bad road must stand on land the
+  a line of the log under `challenges`. A challenge watched is fought again on the server from the setup and seed it
+  was fought from, its moments never kept; what it came to is always the one recorded, and when the challenges have
+  changed since and it comes out otherwise, a line under the spectacle says so, or says it cannot be watched again and
+  shows the result alone. Each watching is a line of the log under `challenges`. A castle for the bad road must stand on land the
   server counts as an island on the master - the British island there is at 54.8, -1.0, and 54.0, -2.0 is shallow
   sea - which `?at=54.8,-1.0&zoom=8` and the Structures section's *raise here*, yours, do in a moment.
   See `docs/adr/0096` and `docs/plans/quests.md`.

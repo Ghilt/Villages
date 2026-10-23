@@ -74,7 +74,7 @@ function beforeItBegins(first: Field): Field {
  * a seal coming out of the mist along its channel to the font, from which lightning strikes the slices it lights; over it the
  * tug, along the bottom each house's slices in its tray and the replay. Everything shown is the run
  * folded to the second shown, so a second scrubbed back to is the same as one played to. Built of the library's
- * parts. Decision record 0116.
+ * parts. Decision record 0116. Played or skipped to its last second, it says so once, for whatever is shown after it.
  */
 export function Spectacle({
   run,
@@ -83,6 +83,7 @@ export function Spectacle({
   houses,
   held = 'wide',
   striking = { look: 'leader', glow: 'shader' },
+  onEnded,
 }: {
   run: Run;
   /** The slices each side brought, as the page sent them. */
@@ -91,10 +92,17 @@ export function Spectacle({
   houses: Readonly<Record<SideKey, HouseShown>>;
   held?: Held;
   striking?: Striking;
+  /** Told once, when the run has first been played or skipped to its last second: the challenges' pane's result. */
+  onEnded?: () => void;
 }) {
   const replay = useMemo(() => replayOf(run, sides, content), [run, sides, content]);
   const clock = useReplayClock(replay.last, { start: APPROACH, first: APPROACH, autoplay: 900 });
   const field = clock.second < 0 ? beforeItBegins(replay.at(0)) : replay.at(clock.second);
+  const over = clock.seen >= replay.last;
+  useEffect(() => {
+    if (over) onEnded?.();
+    // Said once, as it first comes to the end; what is told is read then.
+  }, [over]);
   const sheets = useSheets();
   const [open, setOpen] = useState<Record<SideKey, boolean>>({ a: true, b: true });
   const [opened, setOpened] = useState<string | null>(null);

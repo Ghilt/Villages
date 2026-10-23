@@ -45,6 +45,11 @@ export interface Session {
    * `inspectedAt`, kept in the state. Nothing is asked while the connection is not open. See 0087.
    */
   inspectAt(at: Point): void;
+  /**
+   * Asks for a challenge of the house's history fought again, to watch it: the answer comes back as `challengeRun`,
+   * kept in the state. Nothing is asked while the connection is not open. See decision record 0107, amended.
+   */
+  watchChallenge(challengeId: string): void;
   /** Takes one option of the choice the player has: a player's command. See 0035 on its story. */
   takeOption(choice: ChoiceView, option: OptionView): void;
   /** Take action: rolls for a hand, saying what the page is looking at. A player's command. See 0083. */
@@ -166,6 +171,7 @@ export function createSession(ports: SessionPorts): Session {
     yourDialogues: () => undefined,
     yourQuests: () => undefined,
     yourChallenges: () => undefined,
+    challengeRun: () => undefined,
     // The world this window was looking at is gone. Arriving anew is the only honest thing to do. See 0036.
     worldWiped: () => ports.arriveAnew(),
     // A player plays from one place. This window is finished; the socket goes with it. See 0028.
@@ -260,6 +266,10 @@ export function createSession(ports: SessionPorts): Session {
 
     inspectAt: (at) => {
       if (open()) connection?.send({ type: 'inspectAt', at });
+    },
+
+    watchChallenge: (challengeId) => {
+      if (open()) connection?.send({ type: 'watchChallenge', challengeId });
     },
 
     inspect: (kind, id) => {

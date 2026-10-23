@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import villages.application.Catalogues
 import villages.application.ChallengeMatchups
+import villages.application.ChallengeReplays
 import villages.application.ChallengeSimulator
 import villages.application.Seeds
 import villages.application.Shelf
@@ -35,9 +36,14 @@ class ChallengesConfig {
     @Bean(initMethod = "start", destroyMethod = "close")
     fun challengeRows(world: EventWorld): ChallengesProjection = ChallengesProjection(world.feed)
 
-    /** The history's place in the gateway: every challenge a house fought, sent to its player. See 0107, amended. */
+    /** A challenge of a house's history fought again to be watched, on the catalogue and the balance in force. See 0107, amended. */
     @Bean
-    fun challengeHistoryInTheGateway(challengeRows: ChallengesProjection): GatewayMechanic = ChallengeHistoryMechanic(challengeRows)
+    fun challengeReplays(challengeRows: ChallengesProjection, shelf: Shelf): ChallengeReplays = ChallengeReplays(challengeRows) { shelf.inForce }
+
+    /** The history's place in the gateway: every challenge a house fought, sent to its player, and watched again. See 0107, amended. */
+    @Bean
+    fun challengeHistoryInTheGateway(challengeRows: ChallengesProjection, replays: ChallengeReplays): GatewayMechanic =
+        ChallengeHistoryMechanic(challengeRows, replays)
 
     /** The challenge's place in the gateway: the simulator's page has the engine fight a challenge out. See 0107. */
     @Bean

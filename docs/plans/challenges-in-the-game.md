@@ -17,7 +17,7 @@
 
 When a part of it is decided, that part becomes a decision record and leaves.
 
-Planned on 2026-10-23 from Adam's word, with the challenge spectacle on main.
+Planned on 2026-10-23 from Adam's word, with the challenge spectacle on main, and built the same day, its six steps waiting on his eye.
 
 ## What Adam asked for
 
