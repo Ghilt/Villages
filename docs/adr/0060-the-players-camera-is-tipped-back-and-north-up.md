@@ -100,5 +100,5 @@ stops having a bound.
 
 **Turn the desk and the room with the camera.** A rotated CSS transform per element, and the room's
 pull-back arithmetic done in turned space. Nobody playing can turn the camera, so it would buy nothing a
-player sees. *Amended by 0118:* the room has a camera of its own, which turns the room and the table top as the
+player sees. *Amended by 0119:* the room has a camera of its own, which turns the room and the table top as the
 map's ground grid is turned once the pull draws back into it; the map's camera still does not turn.

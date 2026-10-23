@@ -452,5 +452,5 @@ stands in the middle of the foot, in gold where the options are in the parchment
   view above the table, with a tall window in the one and a hearth in the other, a rug under the table, a chair
   pushed back from it, a chest and a shelf of books. It is flat colours and simple
   shapes today, deliberately, so that the room's shape can be judged before anything is drawn properly. See
-  experiment 0009 and decision record 0118.
+  experiment 0009 and decision record 0119.
 - Whether the parchment survives contact with a second mechanic, or turns out to be the choice roll's own.

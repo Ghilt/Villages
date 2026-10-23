@@ -223,7 +223,7 @@ its own to agree with; a model does. That step was not committed, and `docs/plan
 it, four steps, after a preview he moved. In it he chose the whole room turned, over a north-up room with only its
 tiles turned, and the back and west walls extra high: "an imposing little room with a high ceiling".
 
-**The camera, and the floor.** One camera now draws the table top and the room round it (decision record 0118): it
+**The camera, and the floor.** One camera now draws the table top and the room round it (decision record 0119): it
 turns, draws back and tips about the look point, all three driven by the pull, and at rest it is nothing. The scene
 the page already draws is the table top and goes through it as one CSS matrix; the room is a model in metres, so far
 a floor 7.8 by 6.8 with 0.5 metre tiles, drawn through it as an SVG behind the scene and again inside the castle

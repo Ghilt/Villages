@@ -1,4 +1,4 @@
-# 0118. The room is a model, drawn by its own camera, turned and tipped like the map
+# 0119. The room is a model, drawn by its own camera, turned and tipped like the map
 
 - Status: accepted
 - Date: 2026-10-23
