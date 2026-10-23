@@ -95,7 +95,11 @@ class MapOmens(
             .sortedBy { (place, _) -> kmBetween(place, centre) }
             .firstNotNullOfOrNull { (place, _) -> named.near(NameKind.RIVER, place, RIVER_REACH_KM).firstOrNull()?.name }
 
-    /** The cells of the circle, every one where there are few enough and an even spread of them where not. */
+    /**
+     * The cells of the circle, every one where there are few enough and an even spread of them where not, and always
+     * the cell the landing is in, at the landing: a circle narrower than a cell holds no cell's middle, and would read
+     * as *Unknown* the ground under the die the house has seen (0118).
+     */
     private fun sample(ground: GroundMap, centre: Location, km: Double): List<Pair<Location, GroundCell>> {
         val degreesDown = km / KM_A_DEGREE
         val degreesAcross = km / (KM_A_DEGREE * max(cos(Math.toRadians(centre.lat)), 0.05))
@@ -106,13 +110,18 @@ class MapOmens(
         val area = (x1 - x0 + 1).toDouble() * (y1 - y0 + 1)
         val stride = max(1, ceil(sqrt(area / MOST_CELLS)).toInt())
         val cells = mutableListOf<Pair<Location, GroundCell>>()
+        val read = mutableSetOf<Int>()
         for (y in y0..y1 step stride) {
             for (xs in x0..x1 step stride) {
                 val x = Math.floorMod(xs, ground.width)
                 val place = ground.middleOf(x, y)
-                if (kmBetween(place, centre) <= km) cells += place to ground.cell(x, y)
+                if (kmBetween(place, centre) <= km) {
+                    cells += place to ground.cell(x, y)
+                    read += y * ground.width + x
+                }
             }
         }
+        if (ground.indexOf(centre) !in read) cells += centre to ground.at(centre)
         return cells
     }
 

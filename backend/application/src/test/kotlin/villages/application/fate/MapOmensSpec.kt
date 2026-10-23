@@ -94,6 +94,12 @@ class MapOmensSpec : StringSpec({
         omens(Location(10.5, 21.0), 1500.0) shouldNotContain "House Varga"
     }
 
+    "a circle narrower than a cell still reads the ground under the landing, where the house has revealed it" {
+        // A degree a cell, so a circle of five kilometres holds no cell's middle.
+        omens(Location(12.3, 23.3), 5.0) shouldContain "Forest"
+        omens(Location(-40.3, 120.3), 5.0, seenKm = 50.0) shouldBe listOf("Unknown")
+    }
+
     "a wide circle over the forest reads the coast and the forest, and no river and no house by name" {
         val read = omens(Location(12.0, 23.0), 6000.0)
 

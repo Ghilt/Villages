@@ -624,7 +624,9 @@ What follows for the architecture:
   through a port. See decision records 0084 and 0118.
 - **The die's throw is the page's.** It is worked out by a rigid cube of the page's own, `apps/web/src/sprites/die/`,
   the moment the die is let go, and the server never seeds it, replays it or sees it: the physics decides nothing
-  the server keeps. So a house bot rolls by the same command with a landing and no die. See decision record 0118.
+  the server keeps. So a house bot rolls by the same command with a landing and no die. What a landing would read
+  and open can be asked without rolling, `FateEngine.opens`, which throws no dice and deals nothing: how a house AI
+  weighs where to drop its die. See decision record 0118.
 - **The server reads the names** the same way: the world tool files a master's real names beside its ground map
   as well as beside its tiles, the same bytes, and the server reads them through a port of their own. Their shape
   is a contract between the two languages, held by a shared fixture as the wire is. See decision record 0087.

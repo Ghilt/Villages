@@ -63,6 +63,17 @@ class FateEngineSpec : StringSpec({
 
     val commons = listOf(action("a"), action("b"), action("c"), action("d"))
 
+    "what a moment opens is what a roll there would read and open, worked out without a throw or a deal" {
+        val rolled = engine(commons, listOf(river, pious)).roll(moment, Rarity.COMMON)
+        val noDice = Dice { error("opening a moment throws nothing") }
+
+        val opening = engine(commons, listOf(river, pious), noDice).opens(moment)
+
+        opening.omens shouldBe rolled.omens
+        opening.opened shouldBe rolled.opened
+        opening.opened shouldBe listOf("Hearth", "Water", "Faith")
+    }
+
     "the odds run seventy, twenty-two, seven and one, in a throw of a hundred" {
         TEST_BALANCE.roll.odds.values.sum() shouldBe 100
         listOf(1, 70, 71, 92, 93, 99, 100).map { FateEngine.rarityFrom(it, TEST_BALANCE.roll.odds) } shouldBe listOf(

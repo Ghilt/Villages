@@ -31,6 +31,12 @@ data class Rolled(
 )
 
 /**
+ * What a moment would read and open without rolling: its omens, and the pools they open with Hearth, by name. See
+ * [FateEngine.opens].
+ */
+data class Opening(val omens: List<Omen>, val opened: List<String>)
+
+/**
  * The fate engine: it reads the omens, rolls a rarity, opens the pools the omens point at, and deals a hand of
  * actions from them. All the luck is here, before the command; `decide` only checks and records what this dealt.
  * The odds - chance out of a hundred of each rarity, the same for everyone, which omens never move - and how many
@@ -50,9 +56,9 @@ class FateEngine(
 
     /** Rolls for a house at a moment. `rarity` stands in for the world's luck, from the debug panel's lever. */
     fun roll(moment: Moment, rarity: Rarity? = null): Rolled {
-        val omens = sources.flatMap { it.read(moment) }.distinctBy(Omen::key)
+        val omens = omensAt(moment)
         val (pools, actions) = content()
-        val opened = listOf(Pool.HEARTH) + pools.filter { pool -> pool != Pool.HEARTH && omens.any(pool::opensOn) }
+        val opened = openedBy(pools, omens)
         val numbers = balance().roll
         val rolled = rarity ?: rarityFrom(dice.roll(numbers.odds.values.sum()), numbers.odds)
 
@@ -92,6 +98,20 @@ class FateEngine(
             considered = draw.map { (action, _) -> Considered(action.id, weightOf(action, opened)) },
         )
     }
+
+    /**
+     * What this moment would read, and which pools that would open, without rolling and without dealing: what a house
+     * AI asks of a landing it is weighing, to drop its die where the pool it wants opens (0118). Asks no dice.
+     */
+    fun opens(moment: Moment): Opening {
+        val omens = omensAt(moment)
+        return Opening(omens, openedBy(content().pools, omens).map(Pool::name))
+    }
+
+    private fun omensAt(moment: Moment): List<Omen> = sources.flatMap { it.read(moment) }.distinctBy(Omen::key)
+
+    private fun openedBy(pools: List<Pool>, omens: List<Omen>): List<Pool> =
+        listOf(Pool.HEARTH) + pools.filter { pool -> pool != Pool.HEARTH && omens.any(pool::opensOn) }
 
     private fun drawable(actions: List<Action>, rarity: Rarity, moment: Moment, omens: List<Omen>, opened: List<Pool>): List<Pair<Action, Dealt>> =
         actions
