@@ -1488,17 +1488,21 @@ and `-- --drop` takes them off; by hand only.
   page by a function of its own run just before the camera moves (`frontend/perf/slowFrames.ts`). The run's first
   crossing is kept apart, waiting on whatever programs only the real world needs; then three, the middle by late
   frames. Every zoom keeps its slowest frames too. See `docs/plans/smooth-crossing-into-the-real-world.md`.
+- **The pan**, after the crossing: a fresh page settled at zoom 8.5 over the same ground, the real world in, and panned
+  two screens east over four seconds, a brisk drag, watched three seconds more; kept and compared as the crossing is.
+  It is where a wood or a roadside laid out again whole is felt, which one crossing on a fresh page hardly shows.
 - `--record` keeps the run as a line of `docs/experiments/performance/zoom.jsonl`, and `--compare` puts the first
   zoom's stall, each place's long tasks, stutters and CPU, and the crossing's late frames, stutters, long tasks and
   CPU beside the last point kept and marks what moved by more than a fifth; the first zoom's stall beyond a second,
-  which is a program waited on again. `--only zoom` or `--only crossing` measures one of the two, for a hand-over's
-  comparison, and keeps nothing. About four minutes; the crossing alone, one and a half.
+  which is a program waited on again. `--only zoom`, `--only crossing` or `--only pan` measures one of them, for a
+  hand-over's comparison, and keeps nothing. About five minutes; the crossing or the pan alone, one and a half.
 - **On the performance page**, the chapter "Zooming in, crossing into the real world, and what the sprites cost": the
   first zoom and each place's in a table, each a link that opens the game there; each place's long tasks over its zoom
   point by point, and the first zoom's stall point by point, which is how long compiling the game's programs takes;
   each place's CPU time by module side by side; and the crossing: the first crossing and the crossing in a table, with
   the trees, the stretches of road and the roadside held, a link that opens the game at zoom 7 over the place to cross
-  by hand; the crossing's slowest frames and what ran in each; and its late frames and stutters point by point.
+  by hand; the crossing's slowest frames and what ran in each; and its late frames and stutters point by point; and
+  the pan drawn the same way.
 
 ## When the measures run
 

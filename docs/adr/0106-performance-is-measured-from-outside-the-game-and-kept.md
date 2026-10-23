@@ -138,3 +138,11 @@ opens with the settlements raised (`startGame`'s `settlements`), and a measure w
 it begins. That changes what every reading means, so `METHOD` is two: the points before it are kept and drawn apart,
 and a new first point of the crossing is kept on main's tip, the before of the plan
 `docs/plans/smooth-crossing-into-the-real-world.md`.
+
+## Amendment, 2026-10-23: the pan
+
+Adam felt the roadside laid out a tile at a time as a large difference, and the crossing hardly showed it: one flight
+on a fresh page, where whatever is laid out again whole is felt as the camera keeps moving over a while. The zoom's
+measure gains **the pan**: settled at zoom 8.5 over `settled`, the real world in, and panned two screens east over
+four seconds, its frames, stalls and slowest frames kept and compared as the crossing's are. A new part of a point:
+the method is unchanged.

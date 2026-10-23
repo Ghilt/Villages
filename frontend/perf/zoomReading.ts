@@ -19,46 +19,45 @@ export function zoomBeside(then: ZoomPoint, now: ZoomPoint): Beside[] {
     zoom?.during.late === undefined || zoom.after.late === undefined
       ? null
       : zoom.during.late + zoom.after.late;
-  const crossing: Beside[] =
-    now.crossing === undefined || now.crossing === null
+  /** A flight's lines - the crossing's, the pan's - its first's stall, then its late frames, stutters, stalls and CPU. */
+  const flight = (
+    name: string,
+    thenFirst: Zoomed | null | undefined,
+    nowFirst: Zoomed | null | undefined,
+    thenOne: Zoomed | null | undefined,
+    nowOne: Zoomed | null | undefined,
+  ): Beside[] =>
+    nowOne === undefined || nowOne === null
       ? []
       : [
           {
-            name: 'the first crossing: long tasks',
-            then: stalled(then.firstCrossing),
-            now: stalled(now.firstCrossing),
+            name: `the first ${name}: long tasks`,
+            then: stalled(thenFirst),
+            now: stalled(nowFirst),
+            least: 100,
+            unit: 'ms',
+          },
+          { name: `the ${name}: late frames`, then: late(thenOne), now: late(nowOne), least: 3, unit: '' },
+          { name: `the ${name}: stutters`, then: janky(thenOne), now: janky(nowOne), least: 2, unit: '' },
+          {
+            name: `the ${name}: long tasks`,
+            then: stalled(thenOne),
+            now: stalled(nowOne),
             least: 100,
             unit: 'ms',
           },
           {
-            name: 'the crossing: late frames',
-            then: late(then.crossing),
-            now: late(now.crossing),
-            least: 3,
-            unit: '',
-          },
-          {
-            name: 'the crossing: stutters',
-            then: janky(then.crossing),
-            now: janky(now.crossing),
-            least: 2,
-            unit: '',
-          },
-          {
-            name: 'the crossing: long tasks',
-            then: stalled(then.crossing),
-            now: stalled(now.crossing),
-            least: 100,
-            unit: 'ms',
-          },
-          {
-            name: 'the crossing: CPU',
-            then: then.crossing?.cpu.busy ?? null,
-            now: now.crossing.cpu.busy,
+            name: `the ${name}: CPU`,
+            then: thenOne?.cpu.busy ?? null,
+            now: nowOne.cpu.busy,
             least: 200,
             unit: 'ms',
           },
         ];
+  const crossing = [
+    ...flight('crossing', then.firstCrossing, now.firstCrossing, then.crossing, now.crossing),
+    ...flight('pan', then.firstPan, now.firstPan, then.pan, now.pan),
+  ];
   const first: Beside = {
     name: 'the first zoom: long tasks',
     then: stalled(then.firstZoom),
@@ -94,8 +93,8 @@ export function middleZoom(zooms: readonly Zoomed[]): Zoomed {
   return sorted[Math.floor((sorted.length - 1) / 2)]!;
 }
 
-/** Of the crossings, the middle by how many frames came late over it and the seconds after. */
-export function middleCrossing(crossings: readonly Zoomed[]): Zoomed {
+/** Of the crossings, or of the pans, the middle by how many frames came late over it and the seconds after. */
+export function middleByLate(crossings: readonly Zoomed[]): Zoomed {
   const late = (zoom: Zoomed) => (zoom.during.late ?? 0) + (zoom.after.late ?? 0);
   const sorted = [...crossings].sort((a, b) => late(a) - late(b));
   return sorted[Math.floor((sorted.length - 1) / 2)]!;

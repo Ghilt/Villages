@@ -52,6 +52,8 @@ export interface Zoomed {
   readonly roads?: { readonly strips: number; readonly roadside: number } | null;
   /** The slowest frames over the zoom and the seconds after, and what ran in each; absent before 2026-10-22. */
   readonly slowest?: readonly SlowFrame[];
+  /** How far the camera was panned east, in screen pixels, for a pan rather than a zoom. */
+  readonly east?: number;
   /** The programs the page waited on the graphics driver to compile while it came in, the longest first. */
   readonly compiles: readonly Compiled[];
 }
@@ -82,6 +84,12 @@ export interface ZoomPoint extends Measured {
    */
   readonly firstCrossing?: Zoomed | null;
   readonly crossing?: Zoomed | null;
+  /**
+   * The pan across the same ground with the real world in: settled at zoom 8.5 and panned two screens east over four
+   * seconds. The run's first, and the middle of `of` by how many frames came late. Absent before 2026-10-23.
+   */
+  readonly firstPan?: Zoomed | null;
+  readonly pan?: Zoomed | null;
 }
 
 export function readZoomPoints(text: string): { points: ZoomPoint[]; unreadable: number } {
