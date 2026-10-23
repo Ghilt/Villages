@@ -28,6 +28,15 @@ const FLOOR = { west: -3.9, east: 3.9, north: -3.6, south: 3.2 };
 /** How wide a floor tile is. */
 export const TILE = 0.5;
 
+/**
+ * How high the back and west walls stand above the floor, and how thick every wall is: an imposing little room
+ * with a high ceiling, Adam's word of 2026-10-23, at the height he left the preview's slider. The two near
+ * walls, south and east, are cut down to a low edge so that they never stand between the camera and the room.
+ */
+export const WALL_HIGH = 5.5;
+const WALL_THICK = 0.3;
+const NEAR_WALL_HIGH = 0.25;
+
 /** The colours, flat, because the shapes are what is being judged. */
 export const BEYOND = '#211a16';
 export const ROOM_COLOURS = {
@@ -40,6 +49,15 @@ export const ROOM_COLOURS = {
   slabSide: '#34210f',
   legFront: '#36230f',
   legSide: '#2b1b0c',
+  wallTop: '#3b3029',
+  wallFace: '#5c4b3f',
+  wallEnd: '#4a3c32',
+  frame: '#2a1d15',
+  glass: '#cfe0e6',
+  stone: '#6b5a4c',
+  firebox: '#1a120d',
+  fire: '#e8873a',
+  mantel: '#4a3624',
 };
 
 /** A point of the model in the scene's own pixels, and how many of them it stands above the table top. */
@@ -62,6 +80,14 @@ export interface Block {
   top: string | null;
   front: string;
   side: string;
+  /** Shapes drawn on a face, over it: a window on a wall, a hearth. */
+  marks?: Mark[];
+}
+
+/** Which face of a box a mark is on, and the shapes of it, each lying in that face. */
+export interface Mark {
+  face: 'north' | 'south' | 'east' | 'west';
+  shapes: { corners: Spot[]; fill: string }[];
 }
 
 /** How many of the scene's pixels a metre is. */
@@ -125,7 +151,7 @@ export function tableOf(desk: DeskTop): Point[] {
 function blockOf(
   desk: DeskTop,
   metres: { west: number; east: number; north: number; south: number; low: number; high: number },
-  colours: { top: string | null; front: string; side: string },
+  colours: { top: string | null; front: string; side: string; marks?: Mark[] },
 ): Block {
   const metre = metreOf(desk);
   const nw = sceneOf(desk, metres.west, metres.north);
@@ -168,4 +194,108 @@ export function tableBlocks(desk: DeskTop): Block[] {
     { top: null, front: ROOM_COLOURS.slabFront, side: ROOM_COLOURS.slabSide },
   );
   return [...legs, slab];
+}
+
+/** A floor's height above the floor, in metres, as the model's height above the table top. */
+const aboveFloor = (metres: number): number => metres - TABLE_HIGH;
+
+/**
+ * The walls: the back and the west ones standing their full height along the floor's north and west edges, the
+ * back one taking the corner between them; the south and east ones cut down to a low edge. The window is in the
+ * back wall's face, the hearth in the west wall's, each a hair in front of the face it is on.
+ */
+export function wallBlocks(desk: DeskTop): { far: Block[]; near: Block[] } {
+  const wall = { top: ROOM_COLOURS.wallTop, front: ROOM_COLOURS.wallFace, side: ROOM_COLOURS.wallEnd };
+  const floor = aboveFloor(0);
+  const high = aboveFloor(WALL_HIGH);
+  const low = aboveFloor(NEAR_WALL_HIGH);
+  const outer = {
+    west: FLOOR.west - WALL_THICK,
+    east: FLOOR.east + WALL_THICK,
+    south: FLOOR.south + WALL_THICK,
+  };
+
+  // The window, tall and narrow, in the middle of the back wall: its frame and its glass.
+  const onBack = (east: number, upFromFloor: number): Spot =>
+    spotOf(desk, east, FLOOR.north + 0.01, aboveFloor(upFromFloor));
+  const pane = (west: number, east: number, low: number, high: number) => [
+    onBack(west, low),
+    onBack(east, low),
+    onBack(east, high),
+    onBack(west, high),
+  ];
+  const windowTop = WALL_HIGH - 0.6;
+  const windowFoot = Math.max(0.7, windowTop - 4.2);
+  const window: Mark = {
+    face: 'south',
+    shapes: [
+      { corners: pane(-0.8, 0.8, windowFoot, windowTop), fill: ROOM_COLOURS.frame },
+      { corners: pane(-0.68, 0.68, windowFoot + 0.1, windowTop - 0.1), fill: ROOM_COLOURS.glass },
+      { corners: pane(-0.04, 0.04, windowFoot + 0.1, windowTop - 0.1), fill: ROOM_COLOURS.frame },
+    ],
+  };
+
+  // The hearth in the west wall: its stone surround, its mantel, the dark of the firebox and the fire in it.
+  const onWest = (south: number, upFromFloor: number): Spot =>
+    spotOf(desk, FLOOR.west + 0.01, south, aboveFloor(upFromFloor));
+  const panel = (north: number, south: number, low: number, high: number) => [
+    onWest(north, low),
+    onWest(south, low),
+    onWest(south, high),
+    onWest(north, high),
+  ];
+  const hearth: Mark = {
+    face: 'east',
+    shapes: [
+      { corners: panel(-1.7, -0.3, 0, 1.6), fill: ROOM_COLOURS.stone },
+      { corners: panel(-1.8, -0.2, 1.6, 1.75), fill: ROOM_COLOURS.mantel },
+      { corners: panel(-1.35, -0.65, 0, 0.9), fill: ROOM_COLOURS.firebox },
+      { corners: [onWest(-1.18, 0), onWest(-0.82, 0), onWest(-1.0, 0.5)], fill: ROOM_COLOURS.fire },
+    ],
+  };
+
+  const back = blockOf(
+    desk,
+    {
+      west: outer.west,
+      east: outer.east,
+      north: FLOOR.north - WALL_THICK,
+      south: FLOOR.north,
+      low: floor,
+      high,
+    },
+    { ...wall, marks: [window] },
+  );
+  // The west wall is seen by its east face, the one into the room, so that face takes the wall's face colour.
+  const west = blockOf(
+    desk,
+    { west: outer.west, east: FLOOR.west, north: FLOOR.north, south: outer.south, low: floor, high },
+    { ...wall, front: ROOM_COLOURS.wallEnd, side: ROOM_COLOURS.wallFace, marks: [hearth] },
+  );
+  const east = blockOf(
+    desk,
+    { west: FLOOR.east, east: outer.east, north: FLOOR.north, south: outer.south, low: floor, high: low },
+    wall,
+  );
+  const south = blockOf(
+    desk,
+    { west: FLOOR.west, east: FLOOR.east, north: FLOOR.south, south: outer.south, low: floor, high: low },
+    wall,
+  );
+  return { far: [back, west], near: [east, south] };
+}
+
+/**
+ * The room's outermost corners as the camera can see them: the floor's, and the tops of its walls. What the turn
+ * is framed by and what looking round stops at.
+ */
+export function shellOf(desk: DeskTop): Spot[] {
+  const { far, near } = wallBlocks(desk);
+  const tops = [...far, ...near].flatMap((block) => [
+    { x: block.west, y: block.north, up: block.high },
+    { x: block.east, y: block.north, up: block.high },
+    { x: block.east, y: block.south, up: block.high },
+    { x: block.west, y: block.south, up: block.high },
+  ]);
+  return [...floorOf(desk), ...tops];
 }

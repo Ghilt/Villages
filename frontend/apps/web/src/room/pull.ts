@@ -14,7 +14,7 @@ import { carried, keepAbove, overTheHolding, railFrom, spanTo } from './dive';
 import type { Point } from './camera';
 import type { Dive, Going } from './dive';
 import { attachLook } from './look';
-import { floorOf } from './model';
+import { shellOf } from './model';
 import { atTheFloor, flatViewOf, roomMost, seen } from './seen';
 import { atTheEnd, roomAtTurn, spanOf, turnsAt, wheelZooms } from './roomBox';
 import { worldStill } from '../motion/motion';
@@ -97,8 +97,8 @@ export function attachPull({ map, surface, seatNow, stripNow }: Hooks): () => vo
   /** How far the pull is, in zoom levels, which is what a wheel notch is measured against. */
   const span = (): number => {
     const view = viewport();
-    const floor = floorOf(deskOnScreen(sheetOnScreen(seen(map)), view));
-    return spanOf(turnsAt(floor, view, roomMost()));
+    const shell = shellOf(deskOnScreen(sheetOnScreen(seen(map)), view));
+    return spanOf(turnsAt(shell, view, roomMost()));
   };
 
   let ours = false;

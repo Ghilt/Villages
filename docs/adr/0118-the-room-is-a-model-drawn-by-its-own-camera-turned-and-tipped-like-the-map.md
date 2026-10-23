@@ -47,9 +47,10 @@ pure functions: the table top's corners drawn by the camera are where the scene'
 rest is nothing, the dive lands in the box the pull draws the room in, and a drag moves the room by exactly the
 pointer's move.
 
-Pulled all the way back, the turned floor's box is wider than the room, and the pull's longest journey, 2.6 zoom
-levels, is what frames it on a wide window: the floor's corners run past the window's edges. Step 3's walls are
-what will close the view.
+Pulled all the way back, the room's box - its floor and the tops of its walls, turned and tipped - is larger than the
+window, and the pull's longest journey, 2.6 zoom levels, is what frames it: the room arrives with the table near the
+middle and the walls rising out of view, and a drag looks up them. On a window wider than the turned room, it stands
+in the middle with dark beyond its corners.
 
 What a model costs: an SVG remade on every frame of the pull, a few dozen shapes now and a few dozen more with the
 table and the walls. A picture squashed by CSS cost nothing per frame. If the model grows past what a frame can

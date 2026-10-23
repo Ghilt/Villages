@@ -11,7 +11,7 @@ import { roomMost, seen } from './seen';
  * Looking round the room: a drag, and the click that takes you back to the map.
  *
  * The pull draws back, turns and tips about a point of the window, and a drag moves that point by as much as
- * it takes for everything drawn to follow the pointer, no further than the floor's edges. A click on the map
+ * it takes for everything drawn to follow the pointer, no further than the room's walls. A click on the map
  * takes you back to it. A click anywhere else is not this file's: the table is meant to hold things beside the
  * map that can be pressed, so a press takes nothing from the page until it has moved, and only a drag takes the
  * pointer for itself. See experiment 0009.
@@ -74,12 +74,12 @@ export function attachLook({ map, surface, pulled, lookAt, back }: LookHooks): (
       surface.setPointerCapture(event.pointerId);
     }
     // Turned and tipped, the point the room is drawn about has to move askew for the room to follow the
-    // pointer straight; the camera works out how far, and the floor's edges stop it.
+    // pointer straight; the camera works out how far, and the room's walls stop it.
     const now = drawn();
     const by = now === null ? null : lookBy(now.camera, { x: at.x - press.at.x, y: at.y - press.at.y });
     if (now !== null && by !== null) {
       const moved = { x: now.camera.about.x + by.x, y: now.camera.about.y + by.y };
-      lookAt(aboutWithin(now.floor, now.view, { ...now.camera, about: moved }));
+      lookAt(aboutWithin(now.shell, now.view, { ...now.camera, about: moved }));
     }
     press.at = at;
   };

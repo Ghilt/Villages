@@ -5,8 +5,8 @@ import { SEA } from '../map/worldStyle';
 
 import { nearness, project, towards } from './camera';
 import type { Direction, RoomCamera } from './camera';
-import { ROOM_COLOURS, floorOf, tableBlocks, tableOf, tileLines } from './model';
-import type { Block, Spot } from './model';
+import { ROOM_COLOURS, floorOf, tableBlocks, tableOf, tileLines, wallBlocks } from './model';
+import type { Block, Mark, Spot } from './model';
 
 /**
  * The room drawn through a camera, as the inside of an SVG laid in window pixels. Made afresh each time the
@@ -37,13 +37,27 @@ export function roomMarkup(
     .join('');
   const edge = ` stroke="${ROOM_COLOURS.edge}" stroke-width="0.6" stroke-linejoin="round"`;
 
-  const faces = tableBlocks(desk)
-    .flatMap((block) => facesOf(block))
-    .filter((face) => towards(camera, face.facing) > 1e-9)
-    .map((face) => ({ face, near: nearOf(camera, face.corners) }))
-    .sort((one, two) => one.near - two.near)
-    .map(({ face }) => polygon(face.corners, face.fill, edge))
-    .join('');
+  // The faces the camera can see, farthest first, each with whatever is marked on it drawn over it.
+  const drawn = (blocks: Block[]): string =>
+    blocks
+      .flatMap((block) => facesOf(block))
+      .filter((face) => towards(camera, face.facing) > 1e-9)
+      .map((face) => ({ face, near: nearOf(camera, face.corners) }))
+      .sort((one, two) => one.near - two.near)
+      .map(
+        ({ face }) =>
+          polygon(face.corners, face.fill, edge) +
+          face.marks
+            .flatMap((mark) => mark.shapes.map((shape) => polygon(shape.corners, shape.fill)))
+            .join(''),
+      )
+      .join('');
+
+  // The far walls are behind everything in the room and the near ones in front of it, so the room is drawn in
+  // three runs rather than sorted as one: what a box's middle says about its nearness is no use for a wall
+  // five metres high beside a table.
+  const walls = wallBlocks(desk);
+  const faces = drawn(walls.far) + drawn(tableBlocks(desk)) + drawn(walls.near);
 
   let top = '';
   if (sheet !== null) {
@@ -71,12 +85,14 @@ interface Face {
   corners: Spot[];
   facing: Direction;
   fill: string;
+  marks: Mark[];
 }
 
 /** A box's five faces that can ever be seen - its top and its four sides - each with the way it faces. */
 function facesOf(block: Block): Face[] {
   const { west, east, north, south, low, high } = block;
   const spot = (x: number, y: number, up: number): Spot => ({ x, y, up });
+  const marksOn = (face: Mark['face']): Mark[] => (block.marks ?? []).filter((mark) => mark.face === face);
   const faces: Face[] = [
     {
       corners: [
@@ -87,6 +103,7 @@ function facesOf(block: Block): Face[] {
       ],
       facing: { east: 0, south: 1, up: 0 },
       fill: block.front,
+      marks: marksOn('south'),
     },
     {
       corners: [
@@ -97,6 +114,7 @@ function facesOf(block: Block): Face[] {
       ],
       facing: { east: 0, south: -1, up: 0 },
       fill: block.front,
+      marks: marksOn('north'),
     },
     {
       corners: [
@@ -107,6 +125,7 @@ function facesOf(block: Block): Face[] {
       ],
       facing: { east: 1, south: 0, up: 0 },
       fill: block.side,
+      marks: marksOn('east'),
     },
     {
       corners: [
@@ -117,6 +136,7 @@ function facesOf(block: Block): Face[] {
       ],
       facing: { east: -1, south: 0, up: 0 },
       fill: block.side,
+      marks: marksOn('west'),
     },
   ];
   if (block.top !== null) {
@@ -129,6 +149,7 @@ function facesOf(block: Block): Face[] {
       ],
       facing: { east: 0, south: 0, up: 1 },
       fill: block.top,
+      marks: [],
     });
   }
   return faces;

@@ -6,7 +6,7 @@ import type { Viewport } from '../map/sheet';
 import { worldSize } from '../geometry/cameraMath';
 
 import { boxOf, coversWindow, lookBy, project } from './camera';
-import { TABLE_WIDE, floorOf, tableOf } from './model';
+import { TABLE_WIDE, floorOf, shellOf, tableOf } from './model';
 import {
   aboutWithin,
   atTheEnd,
@@ -32,11 +32,11 @@ const STAGES: Viewport[] = [
   { width: 844, height: 390 },
 ];
 
-const floorFor = (viewport: Viewport) => floorOf(deskOnScreen(sheetAtFloor(viewport), viewport));
+const shellFor = (viewport: Viewport) => shellOf(deskOnScreen(sheetAtFloor(viewport), viewport));
 
 /** The box the floor is drawn in by a pull. */
 const drawnFloor = (pulled: ReturnType<typeof pulledBack>) =>
-  boxOf(pulled.floor.map((corner) => project(pulled.camera, corner, corner.up)));
+  boxOf(pulled.shell.map((corner) => project(pulled.camera, corner, corner.up)));
 
 describe('the sheet at the floor', () => {
   it('is where the sheet actually is once the camera is put at the floor over the world centre', () => {
@@ -107,26 +107,35 @@ describe('the turn and the tip', () => {
 });
 
 describe('the turn of the pull', () => {
-  it('leaves the room filling the window, so there is almost no surround when the camera jumps', () => {
+  it('fills the window top to bottom when the camera jumps, the walls rising past its top', () => {
     for (const viewport of STAGES) {
       const { box } = roomAtTurn(sheetAtFloor(viewport), viewport, null, MOST);
-      const short = Math.min(box.width, box.height) / Math.min(viewport.width, viewport.height);
-      // Never less than filling it, because a gap is where the illusion would show.
-      expect(short).toBeGreaterThanOrEqual(0.9);
-      expect(short).toBeLessThan(1.7);
+      expect(box.top).toBeLessThan(0);
+      expect(box.top + box.height).toBeGreaterThanOrEqual(viewport.height - 1e-6);
+      // Across, it reaches both sides where it is wider than the window, and stands in the middle where it is not.
+      if (box.width >= viewport.width) {
+        expect(box.left).toBeLessThanOrEqual(1e-6);
+        expect(box.left + box.width).toBeGreaterThanOrEqual(viewport.width - 1e-6);
+      } else {
+        expect(box.left + box.width / 2).toBeCloseTo(viewport.width / 2);
+      }
     }
   });
 
-  it('is centred in the window when nobody has looked round', () => {
-    const viewport = { width: 1600, height: 900 };
-    const { box } = roomAtTurn(sheetAtFloor(viewport), viewport, null, MOST);
-    expect(box.left + box.width / 2).toBeCloseTo(viewport.width / 2);
-    expect(box.top + box.height / 2).toBeCloseTo(viewport.height / 2);
+  it('arrives looking at the table, near the middle of the window, when nobody has looked round', () => {
+    for (const viewport of STAGES) {
+      const spent = pulledBack(sheetAtFloor(viewport), viewport, 1, null, MOST);
+      const table = boxOf(tableOf(spent.desk).map((corner) => project(spent.camera, corner)));
+      expect(Math.abs(table.left + table.width / 2 - viewport.width / 2)).toBeLessThan(viewport.width * 0.1);
+      expect(Math.abs(table.top + table.height / 2 - viewport.height / 2)).toBeLessThan(
+        viewport.height * 0.1,
+      );
+    }
   });
 
   it('is a journey of between one and three zoom levels on every shape the stage can be', () => {
     for (const viewport of STAGES) {
-      const span = spanOf(turnsAt(floorFor(viewport), viewport, MOST));
+      const span = spanOf(turnsAt(shellFor(viewport), viewport, MOST));
       expect(span).toBeGreaterThanOrEqual(1.2);
       expect(span).toBeLessThanOrEqual(2.6);
     }
@@ -136,7 +145,7 @@ describe('the turn of the pull', () => {
 describe('the scale a pull comes to', () => {
   it('is one at rest, and the scale the turn happens at when it is spent', () => {
     const wide = { width: 1600, height: 900 };
-    const turn = turnsAt(floorFor(wide), wide, MOST);
+    const turn = turnsAt(shellFor(wide), wide, MOST);
     expect(scaleFor(0, turn)).toBe(1);
     expect(scaleFor(1, turn)).toBeCloseTo(turn);
   });
@@ -210,9 +219,9 @@ describe('looking round the room', () => {
       ...pulled.camera,
       about: { x: pulled.camera.about.x + (by?.x ?? 0), y: pulled.camera.about.y + (by?.y ?? 0) },
     };
-    const moved = aboutWithin(pulled.floor, viewport, camera);
-    const before = project(pulled.camera, pulled.floor[0] ?? { x: 0, y: 0 });
-    const after = project({ ...camera, about: moved }, pulled.floor[0] ?? { x: 0, y: 0 });
+    const moved = aboutWithin(pulled.shell, viewport, camera);
+    const before = project(pulled.camera, pulled.shell[0] ?? { x: 0, y: 0 });
+    const after = project({ ...camera, about: moved }, pulled.shell[0] ?? { x: 0, y: 0 });
     expect(after.x - before.x).toBeCloseTo(drag.x);
     expect(after.y - before.y).toBeCloseTo(drag.y);
   });
@@ -230,7 +239,7 @@ describe('looking round the room', () => {
 
   it('moves nothing in at the floor, so the map is handed back exactly as it was left', () => {
     const pulled = pulledBack(sheet, viewport, 0, { x: 5000, y: -5000 }, MOST);
-    for (const corner of pulled.floor) {
+    for (const corner of pulled.shell) {
       const drawn = project(pulled.camera, corner);
       expect(drawn.x).toBeCloseTo(corner.x);
       expect(drawn.y).toBeCloseTo(corner.y);

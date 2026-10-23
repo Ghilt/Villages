@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { project } from './camera';
+import { project, towards } from './camera';
 import type { Point, RoomCamera } from './camera';
-import { TABLE_HIGH, floorOf, metreOf, tableBlocks, tableOf } from './model';
+import { TABLE_HIGH, WALL_HIGH, floorOf, metreOf, shellOf, tableBlocks, tableOf, wallBlocks } from './model';
 
 const DESK = { left: -300, top: -150, width: 1800, height: 1800 / 1.45 };
 
@@ -59,5 +59,54 @@ describe('the table', () => {
     expect(inside(drawnTop, project(SPENT, { x: southEast.east, y: southEast.south }, southEast.low))).toBe(
       false,
     );
+  });
+});
+
+describe('the walls', () => {
+  const metre = metreOf(DESK);
+  const { far, near } = wallBlocks(DESK);
+  const [back, west] = far;
+
+  it('stand the back and west walls their full height from the floor, an imposing room', () => {
+    for (const wall of far) {
+      expect(wall.low).toBeCloseTo(-TABLE_HIGH * metre);
+      expect((wall.high - wall.low) / metre).toBeCloseTo(WALL_HIGH);
+    }
+    expect(WALL_HIGH).toBeGreaterThan(5);
+  });
+
+  it('cut the two near walls down to a low edge, so they never stand between the camera and the room', () => {
+    for (const wall of near) {
+      expect((wall.high - wall.low) / metre).toBeLessThan(0.5);
+    }
+  });
+
+  it('turn their faces into the room towards the camera: the back wall its south face, the west wall its east', () => {
+    expect(towards(SPENT, { east: 0, south: 1, up: 0 })).toBeGreaterThan(0);
+    expect(towards(SPENT, { east: 1, south: 0, up: 0 })).toBeGreaterThan(0);
+    expect(back?.marks?.[0]?.face).toBe('south');
+    expect(west?.marks?.[0]?.face).toBe('east');
+  });
+
+  it('hold the window inside the back wall and the hearth inside the west wall', () => {
+    for (const shape of back?.marks?.[0]?.shapes ?? []) {
+      for (const corner of shape.corners) {
+        expect(corner.x).toBeGreaterThanOrEqual(back?.west ?? 0);
+        expect(corner.x).toBeLessThanOrEqual(back?.east ?? 0);
+        expect(corner.up).toBeGreaterThanOrEqual(back?.low ?? 0);
+        expect(corner.up).toBeLessThanOrEqual(back?.high ?? 0);
+      }
+    }
+    for (const shape of west?.marks?.[0]?.shapes ?? []) {
+      for (const corner of shape.corners) {
+        expect(corner.y).toBeGreaterThanOrEqual(west?.north ?? 0);
+        expect(corner.y).toBeLessThanOrEqual(west?.south ?? 0);
+      }
+    }
+  });
+
+  it("put the walls' tops among the corners the room is framed by", () => {
+    const highest = Math.max(...shellOf(DESK).map((corner) => corner.up));
+    expect(highest).toBeCloseTo(back?.high ?? 0);
   });
 });

@@ -115,7 +115,7 @@ describe('the passage', () => {
   it('ends in the box the pull draws the room in, turned and tipped, so the camera moves under the same room', () => {
     for (const viewport of STAGES) {
       const spent = pulledBack(sheetAtFloor(viewport), viewport, 1, null, MOST);
-      const room = boxOf(spent.floor.map((corner) => project(spent.camera, corner, corner.up)));
+      const room = boxOf(spent.shell.map((corner) => project(spent.camera, corner, corner.up)));
       const inTheCastle = drawnAt(roomAt(diveIn(viewport), 1), TIP);
       expect(inTheCastle.left).toBeCloseTo(room.left);
       expect(inTheCastle.top).toBeCloseTo(room.top);

@@ -246,6 +246,15 @@ in front of it. The camera sorts the faces it can see farthest first, and turned
 and east sides of a box and not the others. Inside the castle there is no desk, so the drawing there carries the table
 top and a plain square for the map on it.
 
+**The high walls.** The back and west walls stand 5.5 metres from the floor and 0.3 thick, a tall window in the back
+one and the hearth with its fire in the west one, and the two near walls are cut down to a quarter of a metre so that
+they never stand between the camera and the room. The far walls are drawn before everything in the room and the near
+ones after it, rather than sorted with the table: how near a face's middle is says nothing useful about a wall five
+metres high beside a table. The turn and the look round are framed by the room's shell - the floor's corners and the
+walls' tops - so the room arrives with the table near the middle of the window and the walls rising out of view above
+it, and a drag goes up them as far as their tops and no further. On a window wider than the turned room, as a 1600 by
+900 one is, the room stands in the middle with dark beyond its corners at either side.
+
 ## Result
 
 Open.

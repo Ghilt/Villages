@@ -448,6 +448,8 @@ stands in the middle of the foot, in gold where the options are in the parchment
   the far end of a zoom. It is a model seen the way the map's ground is at the closest zoom, turned twenty-six
   degrees and tipped forty-five, the pull turning and tipping the map's square from flat and square on the desk
   to a skewed diamond on a table standing on four legs, the floor a table's height below it, tiled the way the
-  ground's diamonds run. It is flat colours and simple shapes today, deliberately, so that the room's shape can be
-  judged before anything is drawn properly. See experiment 0009 and decision record 0118.
+  ground's diamonds run, in an imposing little room: its back and west walls rise five and a half metres, out of
+  view above the table, with a tall window in the one and a hearth in the other. It is flat colours and simple
+  shapes today, deliberately, so that the room's shape can be judged before anything is drawn properly. See
+  experiment 0009 and decision record 0118.
 - Whether the parchment survives contact with a second mechanic, or turns out to be the choice roll's own.
