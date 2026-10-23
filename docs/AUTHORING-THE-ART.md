@@ -246,7 +246,8 @@ your picture and run:
 It never writes over a file that is there. The placeholders are the agent's, copied from the moodboard:
 most are **cut out of it** - the fourteen sample borders' top row, the cathedral panel's cherub, cross and
 drape, the four medallions, the knots on its dividers, the Paris plate, its two ends and a strip of its
-middle joined with the words left out, and the slider, its drape, its knob and its tube - and made four
+middle joined with the words left out, the slider, its drape, its knob and its tube, and the round maximise
+button of its window controls, its square socket the die's slot, as the choice roll's podium - and made four
 times the size, so they are soft; the rest are **drawn**, a gilt frame that slices cleanly, the fills,
 which have to repeat, the divider's rule, the tabs' faces and the meter. Where each is cut from is
 `frontend/packages/world/src/uiPlaceholders.ts`.

@@ -82,7 +82,7 @@ export const SECTIONS: readonly Section[] = [
   {
     id: 'roll',
     title: 'The choice roll',
-    says: 'The report card the omens slam into, the rarity stamped across it, and the strip it folds to.',
+    says: 'Take action, the die on its podium; the report card the omens slam into, and the strip it folds to.',
     Body: Rolls,
   },
   {

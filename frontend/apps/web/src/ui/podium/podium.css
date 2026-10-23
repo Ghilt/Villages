@@ -1,0 +1,190 @@
+/*
+ * The die on its podium: the dish, a picture, with the die drawn standing in its socket and a ring of light round
+ * the dish that fills as a long press is held - over the whole of the lift, at an even pace - and runs back fast when
+ * it is let go. The ring breathes once the die is out, to say where it goes back. Greyed, all of it dims and the die
+ * cannot be lifted.
+ */
+
+@layer ui {
+  .ui-podium {
+    --ui-podium-dish: 65px;
+    --ui-podium-die: 26px;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .ui-podium--small {
+    --ui-podium-dish: 44px;
+    --ui-podium-die: 18px;
+    gap: 2px;
+  }
+
+  .ui-podium__slot {
+    position: relative;
+    display: block;
+    height: var(--ui-podium-dish);
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  .ui-podium__slot:focus-visible {
+    outline: 2px solid var(--ui-focus);
+    outline-offset: 2px;
+    border-radius: 50%;
+  }
+
+  .ui-podium__dish {
+    display: block;
+    height: 100%;
+    width: auto;
+    pointer-events: none;
+  }
+
+  .ui-podium__dish--missing {
+    width: calc(var(--ui-podium-dish) * 0.88);
+    border: 1px dashed currentColor;
+    border-radius: 50%;
+  }
+
+  /* The ring of light, round the dish's own ring: filled as far as the press has been held. */
+  .ui-podium__ring {
+    position: absolute;
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%) rotate(-90deg);
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  .ui-podium__ring circle {
+    fill: none;
+    stroke: var(--ui-gilt-light);
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: calc(1 - var(--ui-podium-held));
+    filter: drop-shadow(0 0 3px color-mix(in srgb, var(--ui-focus) 85%, transparent));
+    opacity: 0;
+    transition:
+      stroke-dashoffset 0.16s ease-out,
+      opacity 0.16s ease-out;
+  }
+
+  .ui-podium[data-pressing='true'] .ui-podium__ring circle {
+    opacity: 1;
+    transition:
+      stroke-dashoffset var(--ui-podium-lift) linear,
+      opacity 0.06s linear;
+  }
+
+  /* Out of its slot: the whole ring, breathing, says where it goes back. */
+  .ui-podium[data-out='true'] .ui-podium__ring circle {
+    stroke-dashoffset: 0;
+    animation: ui-podium-breathe 1.8s ease-in-out infinite;
+  }
+
+  @keyframes ui-podium-breathe {
+    0%,
+    100% {
+      opacity: 0.25;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+
+  /* The die, ivory, standing in the dish's socket, five pips up. */
+  .ui-podium__die {
+    position: absolute;
+    width: var(--ui-podium-die);
+    height: var(--ui-podium-die);
+    transform: translate(-50%, -50%);
+    border-radius: 22%;
+    background: radial-gradient(circle at 32% 28%, #fffaf0, #e9dcc4 70%, #cbb894);
+    box-shadow:
+      0 0 0 1px #3a2a18,
+      0 2px 3px rgb(0 0 0 / 55%);
+    pointer-events: none;
+    transition: transform 0.12s ease-out;
+  }
+
+  .ui-podium[data-pressing='true'] .ui-podium__die {
+    transform: translate(-50%, -54%) scale(1.06);
+  }
+
+  .ui-podium__pip {
+    position: absolute;
+    width: 18%;
+    height: 18%;
+    border-radius: 50%;
+    background: #2b1d10;
+    transform: translate(-50%, -50%);
+  }
+
+  .ui-podium__pip--0 {
+    left: 27%;
+    top: 27%;
+  }
+
+  .ui-podium__pip--1 {
+    left: 73%;
+    top: 27%;
+  }
+
+  .ui-podium__pip--2 {
+    left: 50%;
+    top: 50%;
+  }
+
+  .ui-podium__pip--3 {
+    left: 27%;
+    top: 73%;
+  }
+
+  .ui-podium__pip--4 {
+    left: 73%;
+    top: 73%;
+  }
+
+  .ui-podium__words {
+    font-family: var(--ui-font-display);
+    font-variant: small-caps;
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+
+  .ui-podium--small .ui-podium__words {
+    font-size: 0.85em;
+  }
+
+  .ui-podium__aside {
+    font-size: 0.8em;
+    font-style: italic;
+    opacity: 0.8;
+    text-align: center;
+  }
+
+  .ui-podium[data-disabled='true'] .ui-podium__slot {
+    cursor: not-allowed;
+    filter: grayscale(0.85) brightness(0.8);
+    opacity: 0.6;
+  }
+
+  .ui-podium[data-disabled='true'] .ui-podium__words {
+    opacity: 0.55;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-podium[data-out='true'] .ui-podium__ring circle {
+      animation: none;
+      opacity: 0.6;
+    }
+  }
+}

@@ -330,6 +330,13 @@ A line each: what it is for, its variants, and where on the page it is.
   otherwise, by a pointer, a finger, or Space or Enter, while a fuse burns along under its words; let go
   sooner and nothing happens. A screen reader is told to hold it. `holdOf` in `ui/hold/hold.ts` is the rule,
   on a clock that can be stood in for. *Controls*.
+- **`Podium`**, `ui/podium/Podium.tsx`: the choice roll's Take action, a die standing on a little podium over
+  its words and what it costs. A long press lifts the die, a ring of light filling round the dish over
+  `LIFT_MS`, so a tap never does; lifted, its slot is empty and the ring breathes, and the hand's path is told
+  until it lets go, over the map or back over the slot, which puts it back. Enter drops it with no hand.
+  Greyed, it says why. `out`, `disabled`, `size` small for a strip, and `showing` the press part way. The dish
+  is the picture `embellishments/podium`, the die is drawn; `ui/podium/lift.ts` holds the rules of the press.
+  *The choice roll*.
 - **`TabBar`** and **`Tabbed`**, `ui/tabs/TabBar.tsx`: several things taking turns in one place, and a row
   of tabs saying which is up. **A tab is a mark or words, as a button is**, and which is Adam's call: the
   game's own bar is marks. `small` is 30 pixels, the game's strip, and `regular` 40. The arrow keys go

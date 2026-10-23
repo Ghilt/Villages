@@ -11,6 +11,7 @@ import type { OmenLine } from '../../ui/report/ReportCard';
 import { RolledHand } from '../../ui/report/RolledHand';
 import type { HandForm } from '../../ui/report/RolledHand';
 import { usePlay } from '../../ui/report/usePlay';
+import { Podiums } from './Podiums';
 import { Part, Specimen, Specimens } from './Specimen';
 
 /** What a roll at a house with a letter open and a key figure up reads: one omen of every kind. */
@@ -69,6 +70,7 @@ export function Rolls() {
 
   return (
     <>
+      <Podiums />
       <Part title="A roll, played">
         <p className="ui-label showcase__lead">
           The omens land one after another, then the options pop in under them. A press on the list hurries
