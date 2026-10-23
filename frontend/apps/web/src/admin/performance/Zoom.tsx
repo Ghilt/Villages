@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { Crossing } from './Crossing';
+import { Crossing, Pan } from './Crossing';
 import { Fold } from './Fold';
 import { LineChart } from './LineChart';
 import { lineOf, pointName } from './shaderPoints';
@@ -25,7 +25,8 @@ const compiled = (zoom: Zoomed) =>
  * `docs/experiments/performance/zoom.jsonl`. The run's first zoom, in a browser that has compiled none of the game's
  * programs, apart; then each place's zoom - the forest thick with sprites, the grassland, the bare ice - its frames,
  * stutters and stalls, and where the CPU's time went, so that what the sprites cost a zoom is the forest's against the
- * ice's; and the crossing into the real world over the busiest ground (`Crossing.tsx`). See decision record 0106.
+ * ice's; and the crossing into the real world over the busiest ground, and a pan across it (`Crossing.tsx`). See
+ * decision record 0106.
  */
 export function Zoom() {
   const [reading, setReading] = useState<Reading>({ state: 'reading' });
@@ -111,6 +112,7 @@ export function Zoom() {
           </section>
           <WhereItWent zooms={latest.zooms} />
           <Crossing line={line} />
+          <Pan line={line} />
         </>
       )}
     </Fold>

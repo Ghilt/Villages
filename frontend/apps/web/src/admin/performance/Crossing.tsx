@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 import { LineChart } from './LineChart';
 import { pointName } from './shaderPoints';
 import type { ZoomPoint, Zoomed } from './zoomPoints';
@@ -11,6 +13,44 @@ const late = (zoom: Zoomed) =>
   zoom.during.late === undefined ? null : zoom.during.late + (zoom.after.late ?? 0);
 const compiled = (zoom: Zoomed) =>
   zoom.compiles.length === 0 ? '-' : zoom.compiles.map((each) => `${each.name} ${ms(each.ms)}`).join(', ');
+const world = (point: ZoomPoint) =>
+  point.method >= 2
+    ? "the settlements' buildings standing as a player's world has them"
+    : "on a world without the settlements' buildings";
+const counted =
+  'A late frame is a gap of 25 ms or more, a frame lost at sixty a second; a stutter is one of 50 ms or more.';
+
+/** One of the flights over the busiest ground the zoom's measure keeps beside its zooms: the crossing, or the pan. */
+interface Flown {
+  name: 'crossing' | 'pan';
+  title: string;
+  of: (point: ZoomPoint) => Zoomed | null | undefined;
+  firstOf: (point: ZoomPoint) => Zoomed | null | undefined;
+  said: (point: ZoomPoint, one: Zoomed) => ReactNode;
+}
+
+const CROSSING: Flown = {
+  name: 'crossing',
+  title: 'Crossing into the real world',
+  of: (point) => point.crossing,
+  firstOf: (point) => point.firstCrossing,
+  said: (point, one) =>
+    `The latest point, ${pointName(point)}: the camera settled at zoom ${one.from} over ${one.place} and flown to ` +
+    `${one.to} over ${one.ms / 1000} s, across 7.5, where the real world arrives, the fog lifted, ${world(point)}; ` +
+    `the middle of ${point.of} by its late frames, then watched three seconds more. ${counted}`,
+};
+
+const PAN: Flown = {
+  name: 'pan',
+  title: 'Panning in the real world',
+  of: (point) => point.pan,
+  firstOf: (point) => point.firstPan,
+  said: (point, one) =>
+    `The latest point, ${pointName(point)}: the camera settled at zoom ${one.from} over ${one.place}, the real world ` +
+    `in, and panned ${count(one.east)} pixels east over ${one.ms / 1000} s, a brisk drag, where a wood or a ` +
+    `roadside laid out again is felt, the fog lifted, ${world(point)}; the middle of ${point.of} by its late ` +
+    `frames, then watched three seconds more. ${counted}`,
+};
 
 /**
  * The crossing into the real world, point by point: the camera settled at zoom 7 over the busiest ground, `settled`,
@@ -20,33 +60,37 @@ const compiled = (zoom: Zoomed) =>
  * the points before 2026-10-22. See `docs/plans/smooth-crossing-into-the-real-world.md`.
  */
 export function Crossing({ line }: { line: readonly ZoomPoint[] }) {
-  const latest = line.findLast((point) => point.crossing !== undefined && point.crossing !== null);
-  const crossing = latest?.crossing;
+  return <Flight line={line} flown={CROSSING} />;
+}
+
+/**
+ * The pan across the same ground with the real world in, as the crossing is drawn: what a roadside or a wood laid
+ * out again whole costs while the camera moves, which one crossing on a fresh page hardly shows. Absent from the
+ * points before 2026-10-23.
+ */
+export function Pan({ line }: { line: readonly ZoomPoint[] }) {
+  return <Flight line={line} flown={PAN} />;
+}
+
+function Flight({ line, flown }: { line: readonly ZoomPoint[]; flown: Flown }) {
+  const latest = line.findLast((point) => flown.of(point) !== undefined && flown.of(point) !== null);
+  const one = latest === undefined ? null : (flown.of(latest) ?? null);
   return (
-    <section className="inspect-group" aria-label="the crossing into the real world">
-      <h3 className="inspect-group__title">Crossing into the real world</h3>
-      {latest === undefined || crossing === undefined || crossing === null ? (
+    <section className="inspect-group" aria-label={flown.title.toLowerCase()}>
+      <h3 className="inspect-group__title">{flown.title}</h3>
+      {latest === undefined || one === null ? (
         <p className="inspect-quiet">
-          No crossing measured yet. One is `npm run perf:zoom --prefix frontend -- --record`.
+          No {flown.name} measured yet. One is `npm run perf:zoom --prefix frontend -- --record`.
         </p>
       ) : (
         <>
-          <p className="inspect-said">
-            The latest point, {pointName(latest)}: the camera settled at zoom {crossing.from} over{' '}
-            {crossing.place} and flown to {crossing.to} over {crossing.ms / 1000} s, across 7.5, where the
-            real world arrives, the fog lifted
-            {latest.method >= 2
-              ? ", the settlements' buildings standing as a player's world has them"
-              : ", on a world without the settlements' buildings"}
-            ; the middle of {latest.of} by its late frames, then watched three seconds more. A late frame is a
-            gap of 25 ms or more, a frame lost at sixty a second; a stutter is one of 50 ms or more.
-          </p>
-          <Table first={latest.firstCrossing ?? null} crossing={crossing} />
-          <Slowest crossing={crossing} />
+          <p className="inspect-said">{flown.said(latest, one)}</p>
+          <Table name={flown.name} first={flown.firstOf(latest) ?? null} one={one} />
+          <Slowest one={one} />
         </>
       )}
       <LineChart
-        label="the crossing's late frames and stutters, point by point"
+        label={`the ${flown.name}'s late frames and stutters, point by point`}
         labels={line.map(pointName)}
         captions={line.map((point) => point.code.subject)}
         unit=""
@@ -54,14 +98,18 @@ export function Crossing({ line }: { line: readonly ZoomPoint[] }) {
           {
             name: 'late frames',
             colour: LATE,
-            values: line.map((point) => (point.crossing ? late(point.crossing) : null)),
+            values: line.map((point) => {
+              const each = flown.of(point);
+              return each ? late(each) : null;
+            }),
           },
           {
             name: 'stutters',
             colour: STUTTERS,
-            values: line.map((point) =>
-              point.crossing ? point.crossing.during.janky + point.crossing.after.janky : null,
-            ),
+            values: line.map((point) => {
+              const each = flown.of(point);
+              return each ? each.during.janky + each.after.janky : null;
+            }),
           },
         ]}
       />
@@ -69,16 +117,16 @@ export function Crossing({ line }: { line: readonly ZoomPoint[] }) {
   );
 }
 
-function Table({ first, crossing }: { first: Zoomed | null; crossing: Zoomed }) {
+function Table({ name, first, one }: { name: string; first: Zoomed | null; one: Zoomed }) {
   const rows = [
-    ...(first === null ? [] : [{ label: 'the first crossing', zoom: first }]),
-    { label: 'the crossing', zoom: crossing },
+    ...(first === null ? [] : [{ label: `the first ${name}`, zoom: first }]),
+    { label: `the ${name}`, zoom: one },
   ];
   return (
     <table className="inspect-table perf-table">
       <thead>
         <tr>
-          <th>crossing</th>
+          <th>{name}</th>
           <th>trees</th>
           <th>stretches of road</th>
           <th>roadside</th>
@@ -120,9 +168,9 @@ function Table({ first, crossing }: { first: Zoomed | null; crossing: Zoomed }) 
   );
 }
 
-/** The crossing's slowest frames, the slowest first: when it began, how long, and the five things that ran longest. */
-function Slowest({ crossing }: { crossing: Zoomed }) {
-  const frames = crossing.slowest ?? [];
+/** A flight's slowest frames, the slowest first: when it began, how long, and the five things that ran longest. */
+function Slowest({ one }: { one: Zoomed }) {
+  const frames = one.slowest ?? [];
   if (frames.length === 0) return null;
   return (
     <>
