@@ -90,7 +90,7 @@ const finders = new WeakMap<readonly HeldSettlement[], (x: number, y: number) =>
 /**
  * `settlementAt` for one list of settlements, answered from a grid of their circles rather than a walk of them all, and
  * made once a list: every structure on the map asks it, and walking every settlement for each of them was the most of
- * the stall when the camera stopped over busy ground (decision record 0118). The same answers as `settlementAt`.
+ * the stall when the camera stopped over busy ground (decision record 0119). The same answers as `settlementAt`.
  */
 export function settlementFinder(
   settlements: readonly HeldSettlement[],

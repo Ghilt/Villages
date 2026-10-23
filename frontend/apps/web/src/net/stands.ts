@@ -46,7 +46,7 @@ const sent: Record<StandLayer, Map<number, SentStands>> = {
 /**
  * Each layer's version: a number that moves whenever a tile of the layer is kept new, changes or is let go, and only
  * then. A reader of a layer works it out again when the version has moved, rather than at every change of what is
- * followed, which comes with every step of the camera (decision record 0118).
+ * followed, which comes with every step of the camera (decision record 0119).
  */
 const versions: Record<StandLayer, number> = { biome: 0, ruins: 0, roads: 0, settlements: 0 };
 /** The tiles under the cells being followed: the only ones the gateway sends, and so the only ones kept. */

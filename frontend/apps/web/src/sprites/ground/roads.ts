@@ -61,7 +61,7 @@ let held: { version: number; pieces: HeldPiece[] } | null = null;
 /**
  * Every piece of road the page holds, worked out once a version of the `roads` layer and shared by everything that
  * reads them: the roads drawn, their roadside, the bridges and the worn ground. Each worked it out again at every
- * step of the camera, four times over (decision record 0118).
+ * step of the camera, four times over (decision record 0119).
  */
 export function roadsHeld(): readonly HeldPiece[] {
   const version = standsVersion('roads');
@@ -124,7 +124,7 @@ export function wearRoads(
  * `wearRoads` that hands back the very map it handed back last while the pieces, the widths, the width lever, the
  * ground and the sight are the ones they were, and the ground known (`known`) has grown only since a wear that left no
  * diamond waiting on ground not known yet: then nothing more of the ground can change it. A tile of ground arriving
- * wore every road again (decision record 0118).
+ * wore every road again (decision record 0119).
  */
 export function rememberingWornRoads(): (
   pieces: readonly HeldPiece[],

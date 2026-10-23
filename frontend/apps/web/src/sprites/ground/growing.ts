@@ -19,7 +19,7 @@ export function sceneryCellKey(cellX: number, cellY: number): string {
  * The scenery's cells a change of the worked ground touches: every cell a diamond that became worked or bare
  * overlaps, and the same cell a world away either side, for a view that has panned past the world's edge. Whether a
  * diamond is worked is all `whereSceneryGrows` asks, so one that only changed its kind touches nothing. Every other
- * cell grows as it did, which is what lets the scenery cut again only these (decision record 0118).
+ * cell grows as it did, which is what lets the scenery cut again only these (decision record 0119).
  */
 export function cellsTouched(
   was: ReadonlyMap<number, Worked>,
@@ -77,7 +77,7 @@ export function revealedBy(field: FogField | null | undefined): ((x: number, y: 
  * diamond of worked ground, so no tree stands in a building's yard. Null where it may grow everywhere. The scenery
  * shows or hides the trees of the cells a change of the worked ground touches (`cellsTouched`), and of every cell
  * when the fog changes, which is why the worked ground keeps its identity while the buildings hold still
- * (`rememberingWorkedGround`). See docs/plans/worked-ground.md and decision record 0118.
+ * (`rememberingWorkedGround`). See docs/plans/worked-ground.md and decision record 0119.
  */
 export function whereSceneryGrows(
   field: FogField | null | undefined,

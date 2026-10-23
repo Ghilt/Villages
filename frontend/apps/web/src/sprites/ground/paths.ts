@@ -260,7 +260,7 @@ export function wearPaths(
  * goes or changes, or more of the ground comes in (`version`) while that course waited on ground not known yet; and
  * hands back the very paths it handed back last while every one of them is the same. Not each time a person on the map
  * takes a step, a tile of ground comes in for somebody else, or one building more makes every path walked again
- * (decision record 0118).
+ * (decision record 0119).
  */
 export function rememberingPaths(): (
   yards: readonly Yard[],

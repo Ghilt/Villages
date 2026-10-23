@@ -12,7 +12,7 @@ import { spriteMap } from './spriteMap';
  * Cutting one cell of the scenery: the trees `furnishCell` scatters over its ground and the pieces of the ruins whose
  * feet stand in it, from the terrain under it, the stands the gateway sent for the tiles it reads, the sprite map and
  * the ruins map. The same function wherever it runs: in the scenery's worker (`sceneryWorker.ts`), off the page's
- * thread, where scattering a busy wood no longer takes a frame from the page (decision record 0118), and on the page
+ * thread, where scattering a busy wood no longer takes a frame from the page (decision record 0119), and on the page
  * where there is no worker to run it in. `sceneryCells.ts` asks for it through `sceneryCutter.ts`.
  */
 

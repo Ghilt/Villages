@@ -12,7 +12,7 @@ import { roadsideAlong } from './roadsideItems';
 import type { RoadsideGround, RoadsideItem } from './roadsideItems';
 
 /*
- * The roadside laid out a tile of the stands at a time (decision record 0118). A piece of road belongs to the tile its
+ * The roadside laid out a tile of the stands at a time (decision record 0119). A piece of road belongs to the tile its
  * middle stands in, so every piece is laid out by exactly one tile; a tile's roadside keeps off the bands of the
  * pieces of the tiles about it too, so it is laid out again whenever their pieces change as well as its own, which is
  * what makes the roadside the same whatever order its tiles came in. Pure, so that rule is held by a test.

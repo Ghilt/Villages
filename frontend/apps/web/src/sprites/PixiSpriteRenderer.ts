@@ -211,7 +211,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
     if (was === null || next.worked !== was.worked) {
       ground?.setWorked(next.worked);
       roads?.setWorked(next.worked);
-      // Only the woods whose ground came or went are cut again: a road tile arriving touches a few (0118).
+      // Only the woods whose ground came or went are cut again: a road tile arriving touches a few (0119).
       const touched = was === null ? undefined : cellsTouched(was.worked, next.worked);
       scenery?.setGround(whereSceneryGrows(groundField, next.worked), touched);
     }

@@ -56,7 +56,7 @@ import {
  *   is still not built on the way out. The building takes `BUILD_MS` of a frame, the middle of the view first.
  * - **A tree is built once while its cell is held.** The worn ground and the fog only say whether it shows:
  *   one on a road, a yard or ground the house has not revealed is held at a fade of nought, and a change of
- *   either asks again only the trees of the cells it touched (decision record 0118).
+ *   either asks again only the trees of the cells it touched (decision record 0119).
  * - **The arrival is one fade over the whole wood**, the trees' slices' and the shadows' own alpha, since
  *   every kind arrives at the one zoom (0096): no tree's own fade is written while the woods come in or go.
  *   A tree carries a fade of its own only to be hidden on worn ground, or when its wood was built after the
@@ -677,7 +677,7 @@ export function createSceneryLayer(sway: SceneryShaders) {
      * Where the scenery may grow from now on: everywhere, with null, or only where this says. The trees of the cells
      * `touched` names (`cellsTouched`), or of every cell held when it names none, are shown or hidden by it in this
      * same call, so no tree is left on ground a road or a yard has just worn and what the house has newly seen stands
-     * as the haze over it lifts. Nothing is built for it: a tree is built once (decision record 0118).
+     * as the haze over it lifts. Nothing is built for it: a tree is built once (decision record 0119).
      */
     setGround(next: ((x: number, y: number) => boolean) | null, touched?: ReadonlySet<string>): void {
       grows = next;

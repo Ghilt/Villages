@@ -46,7 +46,7 @@ import { piecesByOwner, roadsideOfTile, signaturesOf, tilesChanged, tilesOfWaysi
  * Laid out a tile of the stands at a time (`roadsideTiles.ts`): a tile is laid out again when its pieces, or those of
  * a tile about it, come, change or go, or the wayside under it changes, and never otherwise; a few milliseconds of a
  * frame at a time, the tiles nearest the view first, from the moment they arrive rather than at the crossing into the
- * real world (decision record 0118).
+ * real world (decision record 0119).
  */
 
 export interface RoadsideLayer extends Layer {
