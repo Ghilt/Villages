@@ -37,8 +37,8 @@ started; the world cache is built and waiting on Adam's eye; quests are built an
 eye for their experiment; catalogues are built and waiting on Adam's eye; ruined cities are planned and not
 started; worked ground is planned and not started; challenges are built on their admin page and on main; settlements
 and roads are built and on main; houses, bridges and the road render are built and on main, the Roads renderer waiting
-on Adam's eye; the challenge spectacle is built and on main; and challenges in the game, the newest, are built and waiting
-on Adam's eye.
+on Adam's eye; the challenge spectacle is built and on main; challenges in the game are built and waiting on Adam's
+eye; and the choice roll's die, the newest, is planned and felt on its spike page.
 
 - **Characters and key figures**: the people of the world, each with a history of their own, and the
   house's tie to the few it acts through, shown in a pane in the corner beside the house status. The shape
@@ -74,7 +74,10 @@ on Adam's eye.
   to read the ground so the map can be an omen. All seventeen steps of `docs/plans/choice-roll.md` are built
   and on main, with Adam's changes to the pane of 2026-10-05 and 06; experiment 0015 waits on his rolls. What
   is open: more content, actions only some omens unlock, characters on the map as omens, and tuning by
-  playing. Adam's own, planned with him on 2026-10-04.
+  playing. Adam's own, planned with him on 2026-10-04. **Its die**: Take action becomes a die on a podium,
+  dropped or thrown on the map, and the map's omens are read round where it lands, decision record 0118. The
+  steps are `docs/plans/choice-roll-podium.md`; the spike, `/admin/inspect-die`, and the documents are built,
+  and the server's half and the page's are not started. Adam's own, planned with him on 2026-10-22.
 - **Relief**: the ground shaded by its slope, the whole world, from ETOPO 2022's height, by a shader of our own
   with MapLibre's hillshade beside it to compare, heavy far out and light close in on four sliders in the Relief
   part of the Shaders section. Decision record 0090, closing experiment 0017; built and waiting on Adam's eye for

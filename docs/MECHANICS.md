@@ -25,21 +25,24 @@ something.
 
 ### What it is
 
-The player presses **Take action** and pays for it. The game shows them every **omen** it took into account -
-how the house stands, what they have open, where they are looking, the season, what changed since the last
+The player takes action: they lift the **die** from its little podium and drop it or throw it on the map, and
+pay for it once it comes to rest. The game shows them every **omen** it took into account - how the house
+stands, what they have open, the ground round where the die landed, the season, what changed since the last
 roll - and rolls a **rarity**, then deals a hand of three **actions** of that rarity. The player takes one.
-The rolling is done by the **fate engine**; see `ARCHITECTURE.md`. How it is built, step by step, is
-`docs/plans/choice-roll.md`.
+The rolling is done by the **fate engine**; see `ARCHITECTURE.md`. How it was built, step by step, is
+`docs/plans/choice-roll.md`, and how the die came to aim it is `docs/plans/choice-roll-podium.md` and decision
+record 0118.
 
 ### What it is for
 
 **Agency.** The player provokes a choice roll themselves, at the moments that seem interesting to them, and
 by choosing where and when they influence what the roll can offer. It is the main way a player reaches
-into the world on purpose rather than waiting to be asked. **They aim it by what they look at**: the inspect
-windows they have open, the dialogue they are in, the key figure they have focused, and the part of the map
-on their screen are all omens, and so is how the house stands. Each option carries the marks of the omens
-that brought it, so a player learns that looking at rivers while pious brings river-and-faith things, and
-aiming becomes a skill rather than superstition.
+into the world on purpose rather than waiting to be asked. **They aim it with the die, and by what they look
+at**: the ground round where the die lands, the inspect windows they have open, the dialogue they are in and
+the key figure they have focused are all omens, and so is how the house stands. Each option carries the marks
+of the omens that brought it, so a player learns that a die dropped on a river while pious brings
+river-and-faith things, and aiming becomes a skill rather than superstition. Adam's word of 2026-10-22: the
+die "will give the player more control and will feel more intuitive than jsut looking around".
 
 **The rush of a good roll.** Rolling legendary actions should feel like a gamble paying off. For that to
 work the odds have to be real, so:
@@ -62,9 +65,11 @@ dialogues, and one day interacts with other players. It is not a side activity.
 **A component the world can use.** A choice roll can also one day happen *without* the player provoking one,
 so that events and storylines can raise one as part of their flow.
 
-**It is clear when you provoke one.** One button does it, saying **Take action**, in words, Adam's call. It
-gives **no hint beforehand** of what the roll will read: the omens are revealed only after paying, and finding
-out what counts is part of the exploration.
+**It is clear when you provoke one.** One thing does it: the die on its podium, over the words **Take action**,
+Adam's call, picked up by a long press so that a tap meant for something else never lifts it. It gives **no
+hint beforehand** of what the roll will read: the ring round the die's shadow shows only the ground that will
+count, the omens are revealed only after paying, and finding out what counts is part of the exploration. A die
+put back on its podium costs nothing.
 
 **A choice can expire.** This is a multiplayer world that keeps moving. A player who rolls a choice and
 leaves it for a real-life week comes back to a world that has gone on without them, and a choice that no
@@ -79,16 +84,27 @@ many, and one the omens point at from two directions is likelier. **The player s
 An **action** is one thing a roll can offer, and it is dealt at the moment of the roll, so its details can come
 from the world: gossip about the nearest house names that house.
 
-The map's omens are worked out by the server from where the player is looking and how far they are zoomed in,
-never taken from the page: zoomed out the omens are broad, zoomed in they are close, and only ground the house
-has revealed counts. See decision record 0084. Where the master's real names are carried, the ground says
-whether and the names say what: the river is *The Vistula* and the open sea *The German Ocean*, opening what any
-river or open sea opens, and zoomed in as close as houses are named, a town of 1790 in view is an omen of its
-own, *Near Dantzic*, which a questline can open on by the town's real identity. See decision record 0087.
+The map's omens are worked out by the server from where the die landed, never taken from the page: the ground in
+the **landing circle**, 25 km round the **landing** at every zoom, of which only ground the house has revealed
+counts, and the ground under the die always. The die moves the circle and narrows it, and does nothing else: it
+has no omen of its own and never moves the odds. A die in the fog is a valid roll, *Unknown*: a player who wants
+to explore India goes there and rolls there. See decision records 0084 and 0118. Where the master's real names
+are carried, the ground says whether and the names say what: the river is *The Vistula* and the open sea *The
+German Ocean*, opening what any river or open sea opens, and a town of 1790 in the circle is an omen of its own,
+*Near Dantzic*, which a questline can open on by the town's real identity. See decision record 0087.
 
 ### Look and feel
 
-The roll plays like **a report card at the end of a level**, Balatro's scoring the reference: the omens slam
+**The die is a fun flourish**, Adam's word, and plays like a real one thrown from near the eye. Held, it is the
+size of a hand, hanging under the pointer or the finger with its shadow on the ground. Thrown, it flies one long
+arc, a flick near the ground scaled up, growing a little as it rises and shrinking as it falls, and strikes the
+ground still going, bouncing and rolling to rest; close in it lies there the size of a tree, and far out, where
+the map draws only marks, it shrinks to almost nothing in the air and lands as a pin. The ring round it is a light
+that breathes, like the selection ring under a castle. **The number it shows is the game's**: the page works out
+the throw the moment it is let go and paints the number on the face that will come up, while the player alone
+decides where it lands.
+
+The roll then plays like **a report card at the end of a level**, Balatro's scoring the reference: the omens slam
 into a list one after another, each a mark, words and sometimes a value, and then the options pop in under it.
 A click hurries the list. **The rarity is said by the options alone**, by the tag on each and its colour's glow,
 Adam's word of 2026-10-05: nothing stamps it across the list. The list stays where it can be read, and each
@@ -100,8 +116,9 @@ language this draws on - the diegetic rule, the rarity colours - is in `LOOK-AND
 
 ### UI
 
-A **pane** that is **always there** in the spread's bottom middle. Idle it is the Take action button; pressed,
-it opens out and plays the roll; answered, it goes back to the button. On a desktop it has two sizes and on a
+A **pane** that is **always there** in the spread's bottom middle. Idle it is the die on its podium, over
+Take action and what a roll costs; once the die rests, it opens out and plays the roll, the die lying where it
+fell; answered, the die goes back to its podium. On a desktop it has two sizes and on a
 phone three, and the mechanic owns them all:
 
 - **Full** - on a desktop it **lies over everything else**, 736 wide and up to 768 tall, centred on the stage, with
@@ -137,8 +154,13 @@ and answering leaves it there, back to Take action. See decision records 0044, 0
   anything but wealth. Ten wealth is a temporary number.
 - **Whether an action can be dealt only when its omens are present**, rather than every action being in the
   always-open pool and the omens only tilting the draw. The first content is the second kind.
-- **Hints on the button.** Settled as none for now; the old idea of a flourish when something new is among
+- **Hints on Take action.** Settled as none for now; the old idea of a flourish when something new is among
   the omens is kept here rather than forgotten.
+- **What the number on the die means.** The rarity is said by the options alone, so the first die shows a
+  number the page chooses.
+- **Whether the die strikes what is drawn on the map**, the trees and the buildings. Tried at the spike on a
+  switch; Adam decides by feel.
+- **Whether the landing circle grows** with the house's progression. One width for now, to experiment with.
 
 ### Where it stands
 
@@ -158,6 +180,10 @@ decision records 0034 and 0083.
 It is a pane with its three sizes as of 0044, which is also where the last media query in the app died: this
 mechanic's one breakpoint asked the window rather than the stage and had never fired. On a desktop it has had two
 since 0085.
+
+**The die is being built** from `docs/plans/choice-roll-podium.md`. It has been felt at the spike,
+`/admin/inspect-die`: picked up from its podium, dropped and thrown on the real map, its numbers on sliders. Until
+the plan's steps land, Take action is still a button and a roll still reads where the player is looking.
 
 ---
 

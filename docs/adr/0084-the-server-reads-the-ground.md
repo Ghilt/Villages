@@ -1,6 +1,8 @@
 # 0084. The server reads the ground
 
-- Status: accepted
+- Status: accepted; superseded in part by 0118, which aims a roll by where its die lands: the page sends the landing
+  rather than the view's centre and zoom, and the ground is read in the landing circle, one width at every zoom,
+  rather than the looking circle
 - Date: 2026-10-04
 - Amended 2026-10-06, as it was built: the grid is on the **master's own latitude and longitude** rather than the
   Mercator square, a cell every sixteen master pixels, 2048 by 1024 for today's masters, because the master is

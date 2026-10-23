@@ -592,8 +592,10 @@ of the other: enough actions that repeats are not noticeable, and never a legend
 two commons. It works in four moves:
 
 1. **The omens.** Every omen source is asked in turn - the house, what changed since its last roll, the
-   windows and the dialogue and the key figure the page says it has open, the ground in the **looking
-   circle**, the season - and each says what it sees. A source checks what a page names against the house's
+   windows and the dialogue and the key figure the page says it has open, the ground in the circle the roll
+   is aimed at, the season - and each says what it sees. That circle is the **looking circle** round the
+   view's centre today, and the **landing circle** round where the player's die landed once
+   `docs/plans/choice-roll-podium.md` is built (decision record 0118). A source checks what a page names against the house's
    own and against the fog, and drops what the house may not see. A new system that wants to colour the rolls
    adds a source and nothing else.
 2. **The rarity**, from fixed odds with the dice port. Nothing moves the odds.
@@ -610,15 +612,19 @@ only when it changes. The odds, the hand, the price and what each rarity grants 
 the shelf holds as it takes the catalogue on, rather than hopes: every action is in Hearth, and every rarity has at
 least three grants, which can always be dealt with no omens at all.
 
-Two things follow for the architecture:
+What follows for the architecture:
 
 - **A roll is a decision of the domain, and the luck is not.** The engine works out the omens, rolls and deals
   in the application, then sends all of it as one `Roll` command; `decide` checks the house can pay and has
   nothing pending, and records the roll, the price and the hand from one decision. Replaying a stream never
   asks the dice. See decision record 0083, which replaced the earlier rule that only a taken option is an
   event.
-- **The server reads the ground.** The page sends only where it is looking and how close; what is there comes
-  from each master's **ground map**, cut by a world tool and read through a port. See decision record 0084.
+- **The server reads the ground.** The page sends only where it is looking and how close, and with the die only
+  where the die landed; what is there comes from each master's **ground map**, cut by a world tool and read
+  through a port. See decision records 0084 and 0118.
+- **The die's throw is the page's.** It is worked out by a rigid cube of the page's own, `apps/web/src/sprites/die/`,
+  the moment the die is let go, and the server never seeds it, replays it or sees it: the physics decides nothing
+  the server keeps. So a house bot rolls by the same command with a landing and no die. See decision record 0118.
 - **The server reads the names** the same way: the world tool files a master's real names beside its ground map
   as well as beside its tiles, the same bytes, and the server reads them through a port of their own. Their shape
   is a contract between the two languages, held by a shared fixture as the wire is. See decision record 0087.
