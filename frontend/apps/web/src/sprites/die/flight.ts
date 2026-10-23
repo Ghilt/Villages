@@ -21,12 +21,19 @@ export interface FlightFeel {
   readonly arcs: number;
   /** How long a drop is in the air, in seconds; a throw is longer as the square root of how much further it goes. */
   readonly fallsIn: number;
-  /** How much it grows as it first rises, before it shrinks as it falls: nought for none. */
+  /** How much it grows as it rises to the top of its arc, before it shrinks as it falls: nought for none. */
   readonly grows: number;
   /**
-   * How much it slows over the ground as it nears it, as a thing thrown away from the eye does: one for not at all.
-   * It shrinks the same way, quickly as it leaves the hand and steadily as it comes down.
+   * How fast it shrinks as it falls from the top of its arc: one for steadily all the way down, more for quickly just
+   * after the top and slowly near the ground.
    */
+  readonly shrinks: number;
+  /**
+   * Out where the map draws only marks, how small it shrinks in the air, in pixels, before it becomes the mark: almost
+   * nothing, and then the pin falls the last of its arc, strikes and bounces.
+   */
+  readonly marksBelow: number;
+  /** How much it slows over the ground as it nears it, as a thing thrown away from the eye does: one for not at all. */
   readonly slows: number;
   /** How flat it comes down at the end of its arc: one for straight down its line, more for a longer, gentler fall. */
   readonly landsFlat: number;
@@ -64,6 +71,8 @@ export const FLIGHT: FlightFeel = {
   arcs: 0.3,
   fallsIn: 1,
   grows: 1,
+  shrinks: 2,
+  marksBelow: 6,
   slows: 1.5,
   landsFlat: 2,
   rollsOn: 0.45,
@@ -76,8 +85,8 @@ export const FLIGHT: FlightFeel = {
 
 /** How much longer a throw is in the air than a drop, for every so many pixels it carries: a flick's arc, scaled up. */
 const SCALES_EVERY = 120;
-/** The share of its flight a die grows over before it shrinks. */
-const RISES_FOR = 0.3;
+/** How much bigger than in the hand a die is at the top of its arc, for each of `grows`. */
+const GROWS_BY = 0.2;
 
 /** A flight worked out as the die is let go. */
 export interface Flight {
@@ -146,13 +155,17 @@ export function flownAt(
 
 /**
  * How wide the die is drawn so far into its flight, in pixels: the size of a hand as it is let go, growing a little as
- * it first rises, then shrinking to `landed`, its size on the ground, quickly as it leaves the hand and steadily as it
- * comes down, as a thing thrown away from the eye does.
+ * it rises to the top of its arc, then shrinking to `landed`, its size on the ground, quickly just after the top and
+ * slowly near the ground. Far out, where `landed` is a speck, it shrinks to almost nothing well before it lands, and
+ * becomes the mark there (`marksBelow`). Adam's word at the spike: "shrink faster after its apex. IT shrinks to almost
+ * nothing and at that point it becomes a mark, and then it shortly hits the ground and bounces".
  */
 export function flyingSize(flown: number, hand: number, landed: number, feel: FlightFeel): number {
-  const away = landed + (hand - landed) * (1 - flown) ** feel.slows;
-  const rising = Math.sin(Math.PI * Math.min(1, flown / RISES_FOR));
-  return away * (1 + feel.grows * 0.35 * rising);
+  const top = 1 / (1 + feel.landsFlat);
+  const biggest = hand * (1 + GROWS_BY * feel.grows);
+  if (flown <= top) return hand + (biggest - hand) * Math.sin((Math.PI / 2) * (flown / top));
+  const falling = (flown - top) / (1 - top);
+  return landed + (biggest - landed) * (1 - falling) ** feel.shrinks;
 }
 
 /**

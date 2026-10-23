@@ -42,6 +42,21 @@ describe('a die in flight', () => {
     expect(sizes[sizes.length - 1]).toBeCloseTo(LANDED, 9);
   });
 
+  it('shrinks quickly just after the top of its arc and slowly near the ground', () => {
+    const top = 1 / (1 + FLIGHT.landsFlat);
+    const at = (falling: number) => flyingSize(top + falling * (1 - top), HAND, LANDED, FLIGHT);
+    expect(at(0)).toBeGreaterThan(HAND);
+    expect(at(0) - at(0.25)).toBeGreaterThan((at(0.75) - at(1)) * 3);
+  });
+
+  it('far out, shrinks to almost nothing a while before it lands, where it becomes the mark', () => {
+    // Held 44 pixels wide, and 2.8 on the ground at zoom 6.5.
+    const sizes = Array.from({ length: 101 }, (_, i) => flyingSize(i / 100, HAND, 2.8, FLIGHT));
+    const marked = sizes.findIndex((size) => size < FLIGHT.marksBelow) / 100;
+    expect(marked).toBeGreaterThan(0.7);
+    expect(marked).toBeLessThan(0.95);
+  });
+
   it('strikes the ground where its arc ends, and the physics carries it on from there', () => {
     const flight = flightOf(600, Math.PI / 4, LANDED, STILL, FLIGHT);
     const end = flownAt(flight, flight.seconds);

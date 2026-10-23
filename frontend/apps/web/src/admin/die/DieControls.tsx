@@ -38,6 +38,8 @@ const FLIGHT_SLIDERS: readonly Slider<keyof FlightFeel>[] = [
   { key: 'arcs', label: 'arcs as high as, of its length', min: 0, max: 0.8, step: 0.01 },
   { key: 'fallsIn', label: 'a drop falls in, seconds', min: 0.1, max: 1, step: 0.01 },
   { key: 'grows', label: 'grows as it rises', min: 0, max: 1.2, step: 0.01 },
+  { key: 'shrinks', label: 'shrinks after the top of its arc', min: 1, max: 4, step: 0.05 },
+  { key: 'marksBelow', label: 'far out, a mark once smaller than, px', min: 1, max: 14, step: 0.5 },
   { key: 'slows', label: 'slows as it nears the ground', min: 1, max: 3, step: 0.05 },
   { key: 'landsFlat', label: 'comes down flatter', min: 1, max: 3.5, step: 0.05 },
   { key: 'rollsOn', label: 'speed kept as it strikes, of its mean', min: 0, max: 1, step: 0.01 },

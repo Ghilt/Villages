@@ -476,10 +476,14 @@ fall, it should be a continuous arc. just scaled up, as with a flick from near t
   ground scaled up. It rises early, as high as a share of its length, then comes down in a long, steady fall, quickly
   over the ground as it leaves the hand and slower as it nears it, as a thing thrown away from the eye does: Adam's
   word, at the spike, "it needs to take more time in the air falling towards the ground ... it should flow steadily
-  towards the surface as if thrown, and then land and bounce". It grows a little as it rises and shrinks to its size on
-  the ground as it falls, tumbling. Far out it stays a die all the way down, never smaller than a pin, and becomes a
-  pin only where it lands, so it never jumps to the ground and skates there. A drop is the same arc with no length: a
-  little rise, and down onto the shadow.
+  towards the surface as if thrown, and then land and bounce". It grows a little as it rises to the top of its arc and
+  shrinks to its size on the ground as it falls, tumbling, quickly just after the top and slowly near the ground. Far
+  out, where it lies as a pin, it shrinks to almost nothing, six pixels, and becomes the pin in the air a while before
+  it lands, about five sixths of the way through its flight at zoom 6.5, and the pin falls the last of the arc, strikes
+  and bounces: Adam's word, at the spike, "now it becomes a pin just as it bounces when tossed from up high. I want it
+  to become a pin earlier, and also shrink faster after its apex. IT shrinks to almost nothing and at that point it
+  becomes a mark, and then it shortly hits the ground and bounces just as it does now". A drop is the same arc with no
+  length: a little rise, and down onto the shadow.
 - **Its time on the ground**, where the arc ends: it strikes, and bounces and rolls by the physics. *Amended once more:*
   "I think we will get a sense of scale if we make sure it has some sideways travel left as it is a mark. maybe a big
   bounce or two if thrown from a great height." So the flight slows over the ground as it comes down but never to a

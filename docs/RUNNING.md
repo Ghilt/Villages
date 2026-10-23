@@ -1154,19 +1154,21 @@ and `-- --drop` takes them off; by hand only.
   slowing over the ground but never to a stop; where the arc ends it strikes the ground still going, bounces, bigger
   the higher it was thrown from but no bigger for a harder flick than a meek one, and rolls, and lies there the size
   of a tree, growing and shrinking with the zoom as the trees do; out from zoom 7.5, where the map draws only marks,
-  it stays a die all the way down and lies there as a pin with its number on the head. The throw is worked out whole
-  the moment it is let go, by a die of our own in `sprites/die/`, and played back pinned to the ground, the ring of
-  the landing circle round it, drawn when the map draws so it never slides over the ground as the map moves. Beside
-  the map are its numbers on sliders: how it flies - how far a flick carries and at most, how high the arc, how long a
-  drop falls, how much it grows, how much it slows as it nears the ground and how flat it comes down, what share of
-  its speed it keeps as it strikes and at most, how hard it strikes for the height of its arc, at most, and how much
-  harder from high up, and how fast it falls on the ground; how it moves on the ground - bounce, friction, how long it
-  keeps its spin and its speed there, and how hard it rolls as it strikes; how fast a hand must move to throw; its
-  size in the hand and on the ground, and how far it hangs above its shadow; how its height is drawn, at the map's
-  tilt alone or never flatter than an angle of its own; the number that comes up; the circle's width; the juice; and
-  striking a wood and three houses, stand-ins at the map's own sizes, which a button stands round the middle of the
-  view. *Copy the numbers* copies them all. Over the sliders it says how far the die flew, where it rested, how long
-  it took and how long it took to work out. It sends nothing to the game server (`apps/web/src/admin/die/`).
+  it shrinks to almost nothing after the top of its arc, becomes a pin with its number on the head in the air, and the
+  pin lands, bounces and lies there. The throw is worked out whole the moment it is let go, by a die of our own in
+  `sprites/die/`, and played back pinned to the ground, the ring of the landing circle round it, drawn when the map
+  draws so it never slides over the ground as the map moves. Beside the map are its numbers on sliders: how it flies -
+  how far a flick carries and at most, how high the arc, how long a drop falls, how much it grows, how fast it shrinks
+  after the top of its arc and how small far out before it is a mark, how much it slows as it nears the ground and how
+  flat it comes down, what share of its speed it keeps as it strikes and at most, how hard it strikes for the height
+  of its arc, at most, and how much harder from high up, and how fast it falls on the ground; how it moves on the
+  ground - bounce, friction, how long it keeps its spin and its speed there, and how hard it rolls as it strikes; how
+  fast a hand must move to throw; its size in the hand and on the ground, and how far it hangs above its shadow; how
+  its height is drawn, at the map's tilt alone or never flatter than an angle of its own; the number that comes up;
+  the circle's width; the juice; and striking a wood and three houses, stand-ins at the map's own sizes, which a
+  button stands round the middle of the view. *Copy the numbers* copies them all. Over the sliders it says how far the
+  die flew, where it rested, how long it took and how long it took to work out. It sends nothing to the game server
+  (`apps/web/src/admin/die/`).
 - **`/admin/inspect-architecture`** is how the world is set up, and needs nothing else running. Along the top,
   the numbers: how long a brand-new worktree takes to the game with its world borrowed, how long a master's
   world takes from its painting when nobody has made it, how many tools bake it, and how many baked files the

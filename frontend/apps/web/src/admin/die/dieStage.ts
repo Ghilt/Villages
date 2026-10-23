@@ -11,8 +11,9 @@ import {
 import type { CameraView, MercatorPoint, ScreenPoint } from '../../geometry/cameraMath';
 import { WORLD_MASTER_WIDTH } from '../../geometry/world';
 import {
+  aMarkInTheAir,
   asAPin,
-  inTheAir,
+  asItLies,
   createDieDrawing,
   createDust,
   inTheHandLift,
@@ -172,15 +173,18 @@ export async function startDieStage(
       const flown = flownAt(thrown.flight, seconds);
       const place = on(flown.x, flown.y);
       const ground = screenOf(place, view);
-      const size = inTheAir(flyingSize(flown.flown, chosen.look.size, landed, chosen.flight), view.zoom);
+      const size = flyingSize(flown.flown, chosen.look.size, landed, chosen.flight);
       // The arc as high as it was planned, at the ground's scale now, so it grows and shrinks with a zoom in its flight.
       const pixels = thrown.flight.pixels * (landed / thrown.landedThen);
-      const lift =
-        0.5 * Math.sin(seenAt(chosen.look, pitch)) * size +
-        flyingLift(flown.flown, chosen.look.hang, pixels, chosen.flight);
-      const state = { at: { x: flown.x, y: flown.y, z: 0.5 }, turn: flown.turn };
-      // Never a pin in the air: it stays a die all the way down, and becomes a pin where it lands.
-      die.draw(ground, state, thrown.numbers, pitch, chosen.look, 0, size, landed, lift);
+      const rise = flyingLift(flown.flown, chosen.look.hang, pixels, chosen.flight);
+      if (aMarkInTheAir(size, view.zoom, chosen.flight.marksBelow)) {
+        // Shrunk to almost nothing far out: the pin falls the last of the arc, and lands.
+        die.drawPin(ground, thrown.rested.came, rise);
+      } else {
+        const lift = 0.5 * Math.sin(seenAt(chosen.look, pitch)) * size + rise;
+        const state = { at: { x: flown.x, y: flown.y, z: 0.5 }, turn: flown.turn };
+        die.draw(ground, state, thrown.numbers, pitch, chosen.look, 0, size, landed, lift);
+      }
       drawRing(ground, view, place, t, 0);
       return false;
     }
@@ -289,7 +293,7 @@ export async function startDieStage(
     const end = flownAt(flight, flight.seconds);
     // Where the arc ends, and the ground's unit there: as wide as the die is drawn, a pin's width far out.
     const struck = { x: anchor.x + end.x * perDie, y: anchor.y + end.y * perDie };
-    const unit = inTheAir(landed, view.zoom);
+    const unit = asItLies(landed, view.zoom);
     const perUnit = unit / worldSize(view.zoom);
     // How far it fell, as how many times smaller it lies on the ground than it was in the hand: a mark far out fell far.
     const shrank = chosen.look.size / landed;

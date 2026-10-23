@@ -15,7 +15,8 @@ import type { DieState, Vec3 } from './physics';
  * In the hand it is the size of a hand, near the eye; on the ground it is the size of a tree, a thing in the world that
  * grows and shrinks with the zoom as the trees do. Between, it flies an arc (`flight.ts`), growing a little as it rises
  * and shrinking as it falls. Out where the map draws only marks, from
- * `BECOMES_A_MARK_AT`, a die on the ground would be a speck, so it is a pin there instead, Adam's word of 2026-10-22.
+ * `BECOMES_A_MARK_AT`, a die on the ground would be a speck, so it is a pin there instead, Adam's word of 2026-10-22: it
+shrinks to almost nothing as it falls and becomes the pin in the air, and the pin lands.
  *
  * From zoom 7 out the camera looks straight down, and a die in the air would sit exactly over its shadow. So the die
  * may be seen at an angle of its own wherever the map is flatter, its height a lift up the screen, as the standing
@@ -164,11 +165,19 @@ export function asAPin(pixels: number, zoom: number): boolean {
 }
 
 /**
- * How wide a die in the air is drawn: as wide as it is, but out where the map draws only marks never narrower than a
- * pin, so it stays a die all the way down and becomes a pin only once it has landed, where it lies.
+ * Whether a die this wide in the air is drawn as its pin, at this zoom: out where the map draws only marks, once it has
+ * shrunk below `below` pixels, almost nothing, on its way down.
  */
-export function inTheAir(pixels: number, zoom: number): number {
-  return zoom < BECOMES_A_MARK_AT ? Math.max(pixels, PIN_UNDER) : pixels;
+export function aMarkInTheAir(pixels: number, zoom: number, below: number): boolean {
+  return zoom < BECOMES_A_MARK_AT && pixels < below;
+}
+
+/**
+ * How wide the die is on the screen where it lies, the scale its bounce is worked out at: its own width, or a pin's
+ * out where the map draws only marks.
+ */
+export function asItLies(landed: number, zoom: number): number {
+  return zoom < BECOMES_A_MARK_AT ? Math.max(landed, PIN_UNDER) : landed;
 }
 
 /** Where a point in the die's world lands on the screen, from where its ground point is, seen at an angle. */
