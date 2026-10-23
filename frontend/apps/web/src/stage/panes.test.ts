@@ -21,6 +21,7 @@ import {
 } from './panes';
 import type { Subject } from '../inspect/subjects';
 import { panesOn, standingIn } from '../panes';
+import { CHALLENGE_PANE } from '../challenges/pane';
 import { DIALOGUE_PANE } from '../dialogues/pane';
 import { QUEST_PANE } from '../quests/pane';
 import { CHOICE_AT_REST, CHOICE_PANE } from '../choice/pane';
@@ -34,7 +35,27 @@ const ASKING = { ...NONE, yourChoice: {} } as unknown as SessionState;
 const HOUSED = { ...NONE, yourHouse: {} } as unknown as SessionState;
 const TALKING = { ...NONE, yourDialogues: [{}] } as unknown as SessionState;
 /** A house with a quest open, and the dialogue it led to. */
-const QUESTING = { ...NONE, yourDialogues: [{}], yourQuests: [{}] } as unknown as SessionState;
+const A_QUEST = { id: 'q', revision: 1, title: 'A quest', nodes: [], edges: [], ending: { kind: 'open' } };
+const QUESTING = { ...NONE, yourDialogues: [{}], yourQuests: [A_QUEST] } as unknown as SessionState;
+/** A quest standing at a challenge node, waiting to be chosen for. */
+const CHALLENGED = {
+  ...QUESTING,
+  yourQuests: [
+    {
+      ...A_QUEST,
+      nodes: [
+        {
+          id: 'square',
+          row: 0,
+          state: 'current',
+          kind: 'challenge',
+          title: 'A challenge',
+          challenge: { kind: 'debate', against: { name: 'A rival', colour: '#a8452a' } },
+        },
+      ],
+    },
+  ],
+} as unknown as SessionState;
 const BOTH = { ...NONE, yourChoice: {}, yourDialogues: [{}] } as unknown as SessionState;
 
 /** Every pane on the stage for what the gateway has said and the subjects open, as the stage is handed them. */
@@ -322,6 +343,20 @@ describe('quests', () => {
     expect(spreadWants(panesFor([], TALKING), { heights: {}, tiles: { right: 'strip' } }).right).toBe(
       'strip',
     );
+  });
+});
+
+/**
+ * The challenges, which stand while a quest waits at a challenge to be chosen for, a third tab of the column down the
+ * right. See decision record 0107, amended.
+ */
+describe('challenges', () => {
+  it('stand only while a quest stands at a challenge, and take turns in the column with the dialogues and the quests', () => {
+    expect(idsOf(panesFor([], QUESTING))).not.toContain(CHALLENGE_PANE.id);
+    const panes = panesFor([], CHALLENGED);
+
+    expect(idsOf(panes)).toContain(CHALLENGE_PANE.id);
+    expect(idsOf(panesIn(panes, 'right'))).toEqual([DIALOGUE_PANE.id, QUEST_PANE.id, CHALLENGE_PANE.id]);
   });
 });
 

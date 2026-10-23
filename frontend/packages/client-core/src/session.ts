@@ -101,6 +101,11 @@ export interface Session {
   /** Collects the reward a quest stands at: a player's command. See 0096. */
   collectReward(questId: string, nodeId: string, described: string): void;
   /**
+   * Accepts the challenge a quest stands at, bringing these starting slices by their ids: a player's command, fought
+   * out and taken by the house in one decision. See decision record 0107, amended.
+   */
+  acceptChallenge(questId: string, nodeId: string, slices: readonly string[], described: string): void;
+  /**
    * Asks after a window's subject wherever the camera is: answered once into `inspected`. Asked once a connection,
    * because nothing is sent again, and not at all before the welcome. See decision record 0088.
    */
@@ -374,6 +379,14 @@ export function createSession(ports: SessionPorts): Session {
         area: 'quests',
         what: described,
         command: { type: 'collectReward', questId, nodeId },
+      });
+    },
+    acceptChallenge: (questId, nodeId, slices, described) => {
+      issue({
+        lane: 'player',
+        area: 'challenges',
+        what: described,
+        command: { type: 'acceptChallenge', questId, nodeId, slices: [...slices] },
       });
     },
   };

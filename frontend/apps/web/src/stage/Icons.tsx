@@ -82,6 +82,12 @@ const QUESTS = {
   roads: 'M10.7 6.6 L7.6 10.7 M13.3 6.6 L16.4 10.7 M7.6 14.1 L10.7 17.5 M16.4 14.1 L13.3 17.5',
 } as const;
 
+/** The challenges' tab, as the library draws its `challenge` mark: two arrows pulling apart, a diamond between. */
+const CHALLENGE = {
+  pull: 'M2.5 12 H8.5 M15.5 12 H21.5 M5.5 8.5 L2.5 12 L5.5 15.5 M18.5 8.5 L21.5 12 L18.5 15.5',
+  diamond: 'M12 8 L15.5 12 L12 16 L8.5 12 Z',
+} as const;
+
 /**
  * Where the player has been: a clock's face with the hands on it, and its rim an arrow turning back,
  * against the clock. The usual sign for a history. A placeholder, like the bust.
@@ -115,6 +121,7 @@ export type IconName =
   | 'sea'
   | 'tower'
   | 'quests'
+  | 'challenges'
   | 'settings';
 
 /** Which way a needle points. The four are one drawing turned, never four drawings. */
@@ -165,6 +172,13 @@ export function Icon({ name, title }: IconProps) {
         <>
           <path d={QUESTS.seals} className="icon__line" />
           <path d={QUESTS.roads} className="icon__line" />
+        </>
+      )}
+      {/* The challenges' tab: the tug of war and the happening's diamond, the library's `challenge` mark. */}
+      {name === 'challenges' && (
+        <>
+          <path d={CHALLENGE.pull} className="icon__line" />
+          <path d={CHALLENGE.diamond} className="icon__fill" />
         </>
       )}
       {name === 'tower' && (

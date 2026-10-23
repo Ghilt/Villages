@@ -23,8 +23,8 @@ const ROWS: readonly (readonly string[])[] = [
   ['map', 'fog', 'desk', 'water'],
   // What stands on the ground, and the room around the desk.
   ['sprites', 'room'],
-  // The game's own surfaces: the panes and windows a player reads and presses, the loading screen over them, and a
-  // challenge's spectacle, watched on its inspect page until challenges reach the game (0116).
+  // The game's own surfaces: the panes and windows a player reads and presses, the loading screen over them, a
+  // challenge's spectacle, watched on its inspect page and in the challenges' pane (0116), and that pane.
   [
     'house',
     'figures',
@@ -37,6 +37,7 @@ const ROWS: readonly (readonly string[])[] = [
     'startup',
     'account',
     'spectacle',
+    'challenges',
   ],
   // What puts it all together, and the instruments beside it.
   ['(root)', 'debug', 'admin'],
@@ -65,6 +66,8 @@ const SIDEWAYS: readonly (readonly [string, string])[] = [
   ['holdings', 'inspect'],
   // Starting up puts the camera on the seat as close as the house's arrival comes.
   ['startup', 'house'],
+  // A challenge is chosen for in the house's slices and watched in its spectacle, in the words the spectacle says it in.
+  ['challenges', 'spectacle'],
 ];
 
 /**
@@ -118,7 +121,8 @@ function rowOf(folder: string): number {
  * with its rarity cards and Take action (0083); the inspect window the second, with the tag beside a window's name
  * saying how fresh what it shows is (0089); later the quests, and the marks on the map with the card a crowd of them
  * opens into (0096); the loading screen the game starts up under; the account's screens, which were drawn from it
- * from the first (0111); and a challenge's spectacle, built of it from the first too (0116).
+ * from the first (0111); a challenge's spectacle, built of it from the first too (0116); and the challenges' pane it
+ * is watched in, the same.
  */
 const TAKEN_UP: readonly string[] = [
   'choice',
@@ -129,6 +133,7 @@ const TAKEN_UP: readonly string[] = [
   'startup',
   'account',
   'spectacle',
+  'challenges',
 ];
 
 /** Whether the rows let one folder import another. */

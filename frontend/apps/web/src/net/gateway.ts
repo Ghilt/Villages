@@ -209,6 +209,19 @@ export function collectReward(questId: string, nodeId: string, described: string
 }
 
 /**
+ * Accepts the challenge a quest stands at, bringing these of the house's starting slices: the player's own command,
+ * fought out on the server and taken by the house with the quest's move on. See decision record 0107, amended.
+ */
+export function acceptChallenge(
+  questId: string,
+  nodeId: string,
+  slices: readonly string[],
+  described: string,
+): void {
+  session.acceptChallenge(questId, nodeId, slices, described);
+}
+
+/**
  * Starts over as a new player: this browser's sign-in ended, a newcomer's begun, and a reload.
  *
  * The house the old player founded stays in the world as somebody's, because events are never deleted.

@@ -313,6 +313,11 @@ every box shows. The tug and the happening stay at the top and the replay along 
 interface's own and not the scene's, and the history slides in from the right of a wide stage and the bottom of a
 deep one. The challenges page holds it wide, deep, or as a phone of 390 by 844.
 
+**The challenges' pane** is a tab of the column down the right in the spread, beside the dialogues and the quests,
+and on a phone a pane like any other below the map, its mark the challenge's in the bottom bar. Its choosing is a
+column of chips whatever the width, each the full width of the pane, so it reads the same in the column and on a
+phone.
+
 ## The instrument
 
 **Two toggles in the very top right of the debug panel confine the stage to a phone**, upright and in

@@ -4,6 +4,10 @@ import type { SessionState } from '@villages/client-core';
 
 import { SETTINGS_PANE } from './account/pane';
 import { SettingsPane } from './account/SettingsPane';
+import { CHALLENGE_PANE } from './challenges/pane';
+import { Challenges } from './challenges/Challenges';
+import { anyWaiting } from './challenges/describe';
+import { chooseFor } from './challenges/toChoose';
 import { CHOICE_AT_REST, CHOICE_PANE } from './choice/pane';
 import { Choosing } from './choice/Choosing';
 import { lookingNow } from './looking';
@@ -41,8 +45,8 @@ import {
  *
  * Each pane is declared by its feature, in its own folder, and named here once: the house status, the key
  * figures and the holdings, which share the corner; the choice roll while a question does, and at rest once there
- * is a house; character dialogue from the house's first dialogue on, and the quests from the first quest on, which
- * take turns in the column down the right; Recent, last in the corner; and on a phone the settings, last of the
+ * is a house; character dialogue from the house's first dialogue on, the quests from the first quest on, and the
+ * challenges while one waits to be chosen for, which take turns in the column down the right; Recent, last in the corner; and on a phone the settings, last of the
  * bottom bar, whose marks stand in this order, and in no tile of the spread. The map comes first, because it
  * is the floor, and its contents are App's, which holds the map; a window per subject open comes last,
  * newest first. A new mechanic's pane is a declaration in its folder and a line here. The stage is handed
@@ -61,6 +65,15 @@ interface Standing {
 function turnToQuest(questId: string): void {
   openQuest(questId);
   arrive(QUEST_PANE.id, { inTheSpread: 'small' });
+}
+
+/**
+ * Turn to the challenge a quest's node puts: the challenges' tab comes up on its choosing, the house's slices to bring.
+ * See decision record 0107, amended.
+ */
+function turnToChallenge(questId: string, nodeId: string): void {
+  chooseFor({ questId, nodeId });
+  arrive(CHALLENGE_PANE.id, { inTheSpread: 'small' });
 }
 
 const STANDING: readonly Standing[] = [
@@ -91,7 +104,13 @@ const STANDING: readonly Standing[] = [
     // Beside the dialogues, taking turns with them in the column down the right edge. See decision record 0096.
     pane: QUEST_PANE,
     stands: (session) => (session.yourQuests?.length ?? 0) > 0,
-    draw: (room) => <Quests room={room} />,
+    draw: (room) => <Quests room={room} toChallenge={turnToChallenge} />,
+  },
+  {
+    // Beside the quests, while one stands at a challenge to be chosen for. See decision record 0107, amended.
+    pane: CHALLENGE_PANE,
+    stands: (session) => anyWaiting(session.yourQuests ?? []),
+    draw: (room) => <Challenges room={room} toQuest={turnToQuest} />,
   },
   { pane: NAVIGATION_PANE, draw: (room) => <Navigating room={room} /> },
   { pane: SETTINGS_PANE, draw: (room) => <SettingsPane room={room} /> },

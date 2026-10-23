@@ -35,7 +35,14 @@ import { questOpened, questToOpenStore } from './toOpen';
  * open is the pane's own state, and outlives its sizes because a pane is never unmounted. Put away it is its name
  * and how many there are.
  */
-export function Quests({ room }: { room: Room }) {
+export function Quests({
+  room,
+  toChallenge,
+}: {
+  room: Room;
+  /** Opens the challenges' tab on the challenge a node puts, to choose for it. */
+  toChallenge: (questId: string, nodeId: string) => void;
+}) {
   const quests = useStore(sessionStore, (state) => state.yourQuests);
   const list = useMemo(() => listOf(quests ?? []), [quests]);
   const [open, setOpen] = useState<string | null>(null);
@@ -63,7 +70,7 @@ export function Quests({ room }: { room: Room }) {
   }
 
   if (quest !== null) {
-    return <QuestOpen quest={quest} room={room} onBack={() => setOpen(null)} />;
+    return <QuestOpen quest={quest} room={room} onBack={() => setOpen(null)} toChallenge={toChallenge} />;
   }
 
   return (
@@ -109,8 +116,21 @@ function Rows({ quests, onOpen }: { quests: readonly ListedQuest[]; onOpen: (id:
 /** The widest a map is drawn, however wide the pane: a road read from the top down, not a chart across a page. */
 const WIDEST_MAP = 440;
 
-/** A quest open: its map over its scene, read from the top down, and the way back to the list. */
-function QuestOpen({ quest, room, onBack }: { quest: QuestView; room: Room; onBack: () => void }) {
+/**
+ * A quest open: its map over its scene, read from the top down, and the way back to the list. A challenge node the
+ * quest stands at pressed opens the challenges' tab on its choosing rather than a card.
+ */
+function QuestOpen({
+  quest,
+  room,
+  onBack,
+  toChallenge,
+}: {
+  quest: QuestView;
+  room: Room;
+  onBack: () => void;
+  toChallenge: (questId: string, nodeId: string) => void;
+}) {
   const placed = useMemo(() => questLayout(quest), [quest]);
   const nodes: MapNode[] = quest.nodes.map((node) => ({
     id: node.id,
@@ -129,6 +149,10 @@ function QuestOpen({ quest, room, onBack }: { quest: QuestView; room: Room; onBa
     if (node?.kind === 'dialogue' && node.dialogueId !== undefined && node.state !== 'lost') {
       openConversation(node.dialogueId);
       arrive(DIALOGUE_PANE.id, { inTheSpread: 'small' });
+      return;
+    }
+    if (node?.kind === 'challenge' && node.state === 'current' && quest.ending.kind === 'open') {
+      toChallenge(quest.id, node.id);
       return;
     }
     setChosen((was) => (was === id ? undefined : id));

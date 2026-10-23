@@ -181,8 +181,9 @@ describe('the bottom bar', () => {
   it('has a mark for every pane that can stand below, in the order they are declared, and none for the top', async () => {
     const { panesOn } = await import('../panes');
     // Every pane there can be at once: the house, the key figures, the holdings, a question asked rather than Take
-    // action at rest, a dialogue offered, a quest offered, Recent and the settings, and a window open.
-    const all = panesOn('111101111', [KETTLEBY], () => null);
+    // action at rest, a dialogue offered, a quest offered, a challenge to choose for, Recent and the settings, and a
+    // window open.
+    const all = panesOn('1111011111', [KETTLEBY], () => null);
     const below = all.filter((pane) => bayOnAPhone(pane) === 1);
 
     expect(barButtons(all).map((button) => button.id)).toEqual(below.map((pane) => pane.id));
@@ -197,7 +198,7 @@ describe('the bottom bar', () => {
 
   it('stands the settings in no tile of the spread, where their mark in the corner opens them in a dialog', async () => {
     const { panesOn } = await import('../panes');
-    const all = panesOn('111101111', [KETTLEBY], () => null);
+    const all = panesOn('1111011111', [KETTLEBY], () => null);
 
     expect(all.filter((pane) => pane.spread === null).map((pane) => pane.id)).toEqual([SETTINGS_PANE.id]);
     expect(TILES.flatMap((name) => panesIn(all, name)).map((pane) => pane.id)).not.toContain(
