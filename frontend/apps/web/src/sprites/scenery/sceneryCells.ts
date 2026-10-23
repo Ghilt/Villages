@@ -1,12 +1,11 @@
-import { TILE } from '../../geometry/world';
-import { classesOfTile, terrainPalette } from '../../geometry/terrainClasses';
-import type { TerrainPalette } from '../../geometry/terrainClasses';
-import { NO_STANDS, furnishCell } from '@villages/world';
-import type { RuinsMapFile, ScatteredPoint, SpriteMap, StandChunk } from '@villages/world';
+import type { RuinsMapFile, ScatteredPoint, SpriteMap } from '@villages/world';
 
+import { LAYER } from './cellCutting';
+import type { TileRecords } from './cellCutting';
 import { ruinTilesAround, tilesRead } from './cellTiles';
 import { MOST_CELLS } from './showing';
-import { RUINS_TILE, asScenery, ruinsAround, ruinsMap, withRuins } from './ruinsMap';
+import { RUINS_TILE, ruinsMap, withRuins } from './ruinsMap';
+import { cutInWorker, cuttingIn, forgetCutting } from './sceneryCutter';
 import { spriteMap } from './spriteMap';
 import {
   onStandsArrived,
@@ -44,10 +43,8 @@ import { Waiting } from './waiting';
  * and the eight cells about it, which it waits for and is cut again for as it does the scenery's.
  */
 
-/** The zoom the flat tiles are cut to, where one tile pixel is one world unit. */
+/** The zoom of the tiles a cell reads, of the terrain and of the stands, which is where a stand tile ends. */
 const FLAT = 7;
-/** How many world units a zoom 7 tile covers: 256 pixels, one to a unit. */
-const TILE_UNITS = TILE;
 
 /**
  * How many cells to keep.
@@ -58,9 +55,6 @@ const TILE_UNITS = TILE;
  * zoom 8 and a ring when the woods were built there.
  */
 const REMEMBER = MOST_CELLS;
-
-/** The layer of the sprite map the scenery is drawn from. Others will join it; see decision 0054. */
-const LAYER = 'biome';
 
 /** One cell's points, and enough about how they were cut to cut them again. */
 interface Cut {
@@ -78,7 +72,6 @@ const asking = new Set<string>();
 const forStands = new Waiting();
 /** Whoever last asked for a cell, to be told when a cell has gone stale and wants cutting again. */
 let asker: (() => void) | null = null;
-let palette: TerrainPalette | null = null;
 /** Null until asked, then the master's sprite map or null for ever if it has none. */
 let map: SpriteMap | null = null;
 let noMap = false;
@@ -114,7 +107,7 @@ export function forgetScenery(): void {
   held.clear();
   asking.clear();
   forStands.clear();
-  palette = null;
+  forgetCutting();
   map = null;
   noMap = false;
 }
@@ -132,8 +125,10 @@ export function hasNoSpriteMap(): boolean {
 export interface SceneryTally {
   /** Cells whose points are worked out and ready to draw. */
   held: number;
-  /** Cells being cut, whose terrain has not all arrived. */
+  /** Cells being cut, whose terrain has not all arrived or whose points have not come back from the worker. */
   waiting: number;
+  /** Where the cells are cut: in the scenery's worker, or on the page where there is none. */
+  cutIn: 'in the worker' | 'on the page';
   /** Cells waiting for the gateway to send the stands of a tile they read. */
   waitingOnStands: number;
   /** Points held across every cell, which is what the scattering costs in memory. */
@@ -185,6 +180,7 @@ export function sceneryTally(): SceneryTally {
   return {
     held: held.size,
     waiting: asking.size,
+    cutIn: cuttingIn(),
     waitingOnStands: forStands.cells,
     points,
     ...standsHeld(),
@@ -302,7 +298,11 @@ function remember(key: string, cut: Cut): void {
   held.set(key, cut);
 }
 
-/** Cuts a cell. False where a tile's stands had not come, and the cell waits on it instead. */
+/**
+ * Cuts a cell, in the scenery's worker where there is one (`sceneryCutter.ts`), from the records of the stands under it
+ * as they are now. False where a tile's stands had not come, and the cell waits on it instead. Stands that came while
+ * it was being cut leave it stale, to be cut again when next asked.
+ */
 async function cut(
   tilesRoot: string,
   cellX: number,
@@ -312,7 +312,6 @@ async function cut(
   key: string,
   whenReady: () => void,
 ): Promise<boolean> {
-  palette ??= await terrainPalette();
   if (map === null && !noMap) {
     map = await spriteMap(tilesRoot, LAYER);
     noMap = map === null;
@@ -324,72 +323,42 @@ async function cut(
     remember(key, { points: [], from: new Map(), stale: false });
     return true;
   }
-  const known = map;
-  const colours = palette;
-  const tiles = tilesRead(known, cellX, cellY, spacing);
+  const tiles = tilesRead(map, cellX, cellY, spacing);
   const ruinTiles = ruinsFile === null ? [] : ruinTilesAround(cellX, cellY);
 
-  // The ground under the cell and its spacing margin, and under every cell whose ruins could stand near it.
-  const classesOf = new Map<string, Uint8Array | null>();
-  await Promise.all(
-    [...new Map([...tiles, ...ruinTiles].map((one) => [`${one.x}/${one.y}`, one])).values()].map(
-      async ({ x, y }) => {
-        classesOf.set(`${x}/${y}`, await classesOfTile(tilesRoot, FLAT, x, y, colours));
-      },
-    ),
-  );
+  // A tile let go of since the cell was asked for leaves it waiting for it again.
+  const read = (
+    layer: 'biome' | 'ruins',
+    from: readonly { x: number; y: number }[],
+  ): TileRecords[] | null => {
+    const records: TileRecords[] = [];
+    for (const { x, y } of from) {
+      const sent = sentStandsOf(x, y, layer);
+      if (sent === null) return null;
+      records.push({ x, y, records: sent.records });
+    }
+    return records;
+  };
+  const stands = read('biome', tiles);
+  const ruins = read('ruins', ruinTiles);
+  if (stands === null || ruins === null) {
+    waitForStands(key, tiles, whenReady);
+    if (ruinsFile !== null) waitForStands(key, ruinTiles, whenReady, 'ruins');
+    return false;
+  }
+  const points = await cutInWorker({ tilesRoot, cellX, cellY, dial, spacing, stands, ruins });
 
-  // The stands are read once the terrain is in hand, so they are the latest the gateway sent. A tile let go of
-  // in the meantime leaves the cell waiting for it again.
-  const standsOf = new Map<string, StandChunk>();
   const from = new Map<number, string>();
-  for (const { x, y } of tiles) {
-    const sent = sentStandsOf(x, y);
-    if (sent === null) {
-      waitForStands(key, tiles, whenReady);
-      return false;
-    }
-    standsOf.set(`${x}/${y}`, sent.chunk);
-    if (y >= 0 && y < 2 ** FLAT) {
-      from.set(tileKey(x, y), sent.records);
-    }
-  }
-  const ruinsOf = new Map<string, StandChunk>();
-  for (const { x, y } of ruinTiles) {
-    const sent = sentStandsOf(x, y, 'ruins');
-    if (sent === null) {
-      waitForStands(key, ruinTiles, whenReady, 'ruins');
-      return false;
-    }
-    ruinsOf.set(`${x}/${y}`, sent.chunk);
-    if (y >= 0 && y < 2 ** FLAT) {
-      from.set(RUINS_TILE + tileKey(x, y), sent.records);
+  let stale = false;
+  for (const [layer, list] of [
+    ['biome', stands],
+    ['ruins', ruins],
+  ] as const) {
+    for (const { x, y, records } of list) {
+      if (y >= 0 && y < 2 ** FLAT) from.set((layer === 'ruins' ? RUINS_TILE : 0) + tileKey(x, y), records);
+      if (sentStandsOf(x, y, layer)?.records !== records) stale = true;
     }
   }
-
-  const tileOf = (world: number): number => Math.floor(world / TILE_UNITS);
-  // A tile that is not there is ocean, which is what the painter reads where a tile is missing. So a
-  // cell past the edge of the world is empty rather than absent, and is not asked for again.
-  const classAt = (worldX: number, worldY: number): number => {
-    const tileX = tileOf(worldX);
-    const tileY = tileOf(worldY);
-    const classes = classesOf.get(`${tileX}/${tileY}`);
-    if (classes === null || classes === undefined) {
-      return 0;
-    }
-    const intoX = Math.floor(worldX) - tileX * TILE_UNITS;
-    const intoY = Math.floor(worldY) - tileY * TILE_UNITS;
-    return classes[intoY * TILE + intoX] ?? 0;
-  };
-  const ground = {
-    classAt,
-    standsOf: (tileX: number, tileY: number): StandChunk => standsOf.get(`${tileX}/${tileY}`) ?? NO_STANDS,
-  };
-
-  const around = ruinsFile === null ? null : ruinsAround(ruinsFile, classAt, colours.classes, ruinsOf);
-  const furnished = furnishCell(cellX, cellY, dial, ground, known, around, spacing);
-  const points = [...furnished.trees, ...furnished.ruins.map((piece) => asScenery(known, piece))];
-  points.sort((one, other) => one.rank - other.rank);
-  remember(key, { points, from, stale: false });
+  remember(key, { points, from, stale });
   return true;
 }

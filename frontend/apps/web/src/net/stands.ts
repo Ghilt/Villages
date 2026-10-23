@@ -70,6 +70,15 @@ function bytesOf(records: string): Uint8Array {
 }
 
 /**
+ * A tile's stands decoded from the records it came in, at the tile the gateway sent them for, its column wrapped round
+ * the world: what the page keeps, and what the scenery's worker decodes again from the same records.
+ */
+export function standsOfRecords(records: string, tileX: number, tileY: number): StandChunk {
+  const wrapped = ((tileX % STAND_TILES) + STAND_TILES) % STAND_TILES;
+  return records === '' ? NO_STANDS : decodeStands(bytesOf(records), wrapped, tileY, TILE);
+}
+
+/**
  * One `stands` frame. Kept if a followed cell is over the tile, and said to whoever listens if it is new or has
  * changed; a frame for a tile nothing is followed over any more was sent before the gateway heard so, and it has
  * let the tile go too.
@@ -90,7 +99,7 @@ export function standsArrived(
       ? { chunk: NO_STANDS, records, roads: decodeRoads(bytesOf(records), tileX, tileY, TILE) }
       : layer === 'settlements'
         ? { chunk: NO_STANDS, records, settlements: decodeSettlements(bytesOf(records), tileX, tileY, TILE) }
-        : { chunk: decodeStands(bytesOf(records), tileX, tileY, TILE), records };
+        : { chunk: standsOfRecords(records, tileX, tileY), records };
   held.set(tile, stands);
   versions[layer] += 1;
   for (const told of arrivals) {

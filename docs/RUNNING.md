@@ -173,7 +173,9 @@ stage alone, with none of the debug panel in it (decision record 0079).
   and ruins sort in depth together; it waits for the ruins of the tiles under it and the eight cells about it, and is
   cut again when they change. The pieces are kinds of scenery after the sprite map's own, `ruin:<piece>-<culture>`,
   so the Scenery part says 48 kinds where the sprite map has 16, and its `ruins` row says how many ruined towns are
-  held. The dial thins them with the trees. See `docs/plans/ruined-cities.md`. Its `roads` row says how many pieces
+  held. The dial thins them with the trees. See `docs/plans/ruined-cities.md`. Its `cells` row says how many cells are
+  cut and where, `in the worker` as they should be or `on the page` where the worker failed, which the log says, and
+  how many are being cut. Its `roads` row says how many pieces
   of road the game server sent, the `roads` layer of the same stands, a straight piece a record, by the same rule of
   the fog: more as more ground is revealed (decision record 0115).
 - The scenery bends in the wind, from zoom 7.5 in, wherever it is drawn: every tree, bush, reed and tuft leans down

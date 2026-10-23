@@ -373,7 +373,10 @@ what changed. The page grows its scenery from those and nothing else: `net/stand
 keeps a tile exactly as long as the gateway thinks it was sent, by `standTilesUnder` at both ends against
 `contracts/fixtures/stand-tiles.json`, and a scatter cell waits for every tile it reads. A tile sent again
 differently makes every cell cut from its old records stale, and one already on the screen keeps its points
-until the new ones are cut, so nothing blinks while the fog moves.
+until the new ones are cut, so nothing blinks while the fog moves. A cell is cut off the page's thread, in the
+scenery's worker (`sprites/scenery/sceneryWorker.ts`): the page hands it the records of the tiles the cell reads, and
+the worker reads the terrain and the sprite map itself and decodes the records as the page does; where there is no
+worker, the page runs the very same cutting (`cellCutting.ts`, 0118).
 
 The sprite map has two layers of stands now, each a folder of its own under `world/stands/<master>/`: the
 scenery's, `biome`, and the towns of 1790 laid in ruins, `ruins`, a stand a town, which `world:ruins` writes (0103).

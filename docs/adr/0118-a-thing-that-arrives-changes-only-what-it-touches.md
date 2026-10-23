@@ -112,3 +112,19 @@ wear already was; and the pairs are found from a grid a reach across (`pairsWith
 |---|---|---|
 | Every structure inside a settlement is told which, the nearest middle's where two hold it | Its answer is kept for the list of settlements it was asked of, and asked again of a new list; the grid gives the answers a walk of them all gives, which a test holds | A moment after the settlements' tiles arrive: in the same render, before anything is drawn |
 | Every two buildings within the reach of each other have their path, walked over all the ground it needs once that ground is known | A pair new to the buildings is walked; a walk that met ground not known yet is walked again when more comes, one that did not is kept; the grid finds the pairs measuring every two finds; tests hold all three | A moment after the building or the ground's tile arrives |
+
+## Amendment, 2026-10-23: the scattering off the page's thread
+
+A cell of the scenery was cut on the page the moment its terrain came in: a busy wood's scattering is a few
+milliseconds, and dozens of cells arrive together when the camera stops over busy ground, outside any frame's budget,
+so the scatter's functions stood among the slowest frames. The cells are cut in a worker now
+(`sprites/scenery/sceneryWorker.ts`). The page hands it what a cell reads by the records the gateway sent, short text;
+the worker fetches the terrain under the cell, the sprite map and the ruins map itself, decodes the records with the
+page's own decoding, and hands back the points. The cutting is one function, `cutCell` in `cellCutting.ts`, run
+by the worker and, where there is no worker or it has failed, by the page. The panel's Scenery part says where the
+cells are cut.
+
+| Rule | What keeps it | When it holds |
+|---|---|---|
+| The woods are the same whether cut in the worker or on the page | Both run `createCutting` from `cellCutting.ts`; a test carries a request and its answer through a structured clone, as a message is, and compares them with `cutCell` over the stands the page decoded | Always |
+| A cell is cut from the stands the page holds now, though they changed while it was being cut | When its points come back, a cell whose tiles' records have moved since it read them is kept stale and cut again when next asked; a test sends a tile again mid-cut | A moment after the cut returns: before the cell is next asked for |

@@ -5,8 +5,10 @@ import type { Palette } from '@villages/world';
 import { encodeStands } from '@villages/world/build';
 import type { Stand } from '@villages/world/build';
 
+import { createCutting, cutCell, cuttingWorldOf } from './cellCutting';
+import { tilesRead } from './cellTiles';
 import { currentPointsOf, forgetScenery, pointsOf, sceneryTally } from './sceneryCells';
-import { followStandsUnder, forgetStands, standsArrived } from '../../net/stands';
+import { followStandsUnder, forgetStands, sentStandsOf, standsArrived } from '../../net/stands';
 
 /** Taiga everywhere, which the example biome grows a wood on, so only the stands decide anything. */
 const { TAIGA } = vi.hoisted(() => ({ TAIGA: 7 }));
@@ -131,6 +133,50 @@ describe('the scenery cut from the stands the gateway sent', () => {
     standsArrived(70, 37, recordsOf([THICK]));
     expect(ask()).toBe(wooded);
     expect(onScreen()).toBe(wooded);
+  });
+
+  it('is cut again when its tile is sent again while it is being cut', async () => {
+    standsArrived(70, 37, recordsOf([]));
+    ask();
+    await vi.waitFor(() => expect(ask()).not.toBeNull());
+    const open = ask()!;
+
+    standsArrived(70, 37, recordsOf([THICK]));
+    expect(ask()).toBeNull();
+    // Sent back as it was while the wooded records are being cut: the wood must not stay.
+    standsArrived(70, 37, recordsOf([]));
+    await vi.waitFor(() => expect(ask()).toEqual(open));
+  });
+
+  it('is cut in the worker as on the page: carried there and back, the trees the stands the page decoded grow', async () => {
+    standsArrived(70, 37, recordsOf([THICK]));
+    ask();
+    await vi.waitFor(() => expect(ask()).not.toBeNull());
+    const cut = ask()!;
+    expect(cut.length).toBeGreaterThan(0);
+
+    const world = (await cuttingWorldOf('/world/x'))!;
+    const tiles = tilesRead(world.map, CELL_X, CELL_Y, 1);
+    // As a message to the worker and its answer are carried: cloned, and nothing else.
+    const request = structuredClone({
+      id: 7,
+      tilesRoot: '/world/x',
+      cellX: CELL_X,
+      cellY: CELL_Y,
+      dial: 1,
+      spacing: 1,
+      stands: tiles.map(({ x, y }) => ({ x, y, records: sentStandsOf(x, y)!.records })),
+      ruins: [],
+    });
+    expect(structuredClone(await createCutting().answer(request))).toEqual({ id: 7, points: cut });
+
+    const taiga = new Uint8Array(256 * 256).fill(TAIGA);
+    const onThePage = cutCell(world, CELL_X, CELL_Y, 1, 1, {
+      classesOf: () => taiga,
+      standsOf: (x, y) => sentStandsOf(x, y)?.chunk,
+      ruinsOf: new Map(),
+    });
+    expect(onThePage).toEqual(cut);
   });
 
   it('waits again for a tile the gateway has let go of', async () => {

@@ -193,8 +193,9 @@ export function ScenerySection() {
         <div className="debug__row">
           <dt>cells</dt>
           <dd>
-            {drawn.cells} on screen, {drawn.held} cut, {drawn.points.toLocaleString()} points kept
-            {drawn.waiting > 0 && `, ${drawn.waiting} waiting on the ground`}
+            {drawn.cells} on screen, {drawn.held} cut {drawn.cutIn}, {drawn.points.toLocaleString()} points
+            kept
+            {drawn.waiting > 0 && `, ${drawn.waiting} being cut`}
             {drawn.waitingOnStands > 0 && `, ${drawn.waitingOnStands} waiting on the game server's stands`}
           </dd>
         </div>
