@@ -1,59 +1,16 @@
-import type {
-  ChoiceView,
-  CommandPayload,
-  OptionView,
-  Point,
-  ServerFrame,
-  StandLayer,
-} from '@villages/protocol';
+import type { ChoiceView, CommandPayload, OptionView, Point, ServerFrame } from '@villages/protocol';
 
 import { NOTHING_IN_FLIGHT, answered, goingOut } from './commands';
 import type { InFlight, Outgoing } from './commands';
 import { connect } from './connection';
-import type { Connection, SocketLike } from './connection';
+import type { Connection } from './connection';
 import { follower } from './follower';
-import type { Schedule } from './follower';
+import type { ConnectOptions, SessionListener, SessionPorts } from './sessionPorts';
 import { INITIAL_SESSION, endState, foldFrame } from './slices';
 import type { EndCause, FrameOf, FrameType, SessionState } from './slices';
 import { createStore } from './store';
 
-/**
- * What listens to the conversation without taking part in it: a log. It is told when the session connects and
- * when the connection closes, and of a problem with a frame; and of every frame once the state has taken it in,
- * with the state as it was before, but before whatever the frame makes the session do, and again once that is
- * done. A command's answer comes with the part of the log its asking was filed in.
- */
-export interface SessionListener {
-  connecting?(address: string): void;
-  closed?(): void;
-  problem?(problem: string): void;
-  heard?(frame: ServerFrame, was: SessionState, now: SessionState, answeredIn: string | null): void;
-  done?(frame: ServerFrame): void;
-}
-
-/** What the session needs from wherever it runs. */
-export interface SessionPorts {
-  schedule: Schedule;
-  /** A fresh UUID, for a command's id. See decision record 0035. */
-  newId(): string;
-  /** A layer of the stands for a tile, as far as the fog lets them through, and which cells are followed. See 0067. */
-  standsArrived(x: number, y: number, stands: string, layer: StandLayer): void;
-  followStands(cells: string[]): void;
-  /** Arrives anew, for a world that has been emptied: a reload, in a browser. See decision record 0036. */
-  arriveAnew(): void;
-  /** What the follower and the commands say, as `note(area, message)`. */
-  note(area: string, message: string): void;
-}
-
-export interface ConnectOptions {
-  /** A socket whose handshake carries the browser's sign-in, which is who it plays as. See decision record 0111. */
-  socket: SocketLike;
-  protocolVersion: number;
-  /** The master the page draws, said in hello so the gateway sends that world's stands. See 0067. */
-  master?: string;
-  /** Where it connects, for saying so. */
-  address: string;
-}
+export type { ConnectOptions, SessionListener, SessionPorts } from './sessionPorts';
 
 export interface Session {
   state(): SessionState;
