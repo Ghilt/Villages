@@ -16,6 +16,7 @@ import villages.domain.PlayerLostQuest
 import villages.domain.PlayerLostQuestNode
 import villages.domain.PlayerMetQuestObjective
 import villages.domain.PlayerOfferedQuest
+import villages.domain.PlayerResolvedChallenge
 import villages.domain.QuestId
 import villages.domain.QuestProgress
 import villages.domain.walk
@@ -69,6 +70,9 @@ class QuestsProjection(feed: EventFeed) : Follower(feed), QuestsByHouse {
 
             // What is lost the walk works out from the move before it, written in the same decision; nothing changes.
             is PlayerLostQuestNode -> return
+
+            // The challenge is the history's; the quest moves on by the move written right after it.
+            is PlayerResolvedChallenge -> return
 
             is PlayerCompletedQuest -> change(event.houseId, event.player) { rows ->
                 rows.changing(event.questId) { it.copy(ending = QuestEnding.Completed) }

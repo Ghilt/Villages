@@ -1,0 +1,10 @@
+{
+  "type": "command",
+  "commandId": "ee000000-0000-4000-8000-000000000071",
+  "command": {
+    "type": "acceptChallenge",
+    "questId": "ee000000-0000-4000-8000-00000000a002",
+    "nodeId": "square",
+    "slices": ["scholar", "almoner"]
+  }
+}

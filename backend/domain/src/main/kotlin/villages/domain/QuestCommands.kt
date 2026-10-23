@@ -1,5 +1,6 @@
 package villages.domain
 
+import villages.domain.challenge.ChallengeSlice
 import java.time.Instant
 
 /**
@@ -55,6 +56,26 @@ data class CollectReward(
     override val houseId: HouseId,
     val questId: QuestId,
     val nodeId: NodeId,
+    val worldTime: WorldTime,
+    val recordedAt: Instant,
+) : QuestCommand
+
+/**
+ * Accept the challenge the node a quest stands at puts to the house, bringing the starting slices [brought] by their
+ * ids, one to three and none twice: [fought] is it fought out on those terms, [starting] the starting slices in force
+ * to check them against, and [challengeId] the challenge's identity. Accepting, fighting, recording it and the quest
+ * moving on along the road its outcome names are one decision, so a challenge never waits to be started. [fought] is
+ * none when the application could not fight it - a node no challenge, slices not the house's - and the house then
+ * refuses saying why. See decision record 0107, amended.
+ */
+data class AcceptChallenge(
+    override val houseId: HouseId,
+    val questId: QuestId,
+    val nodeId: NodeId,
+    val brought: List<String>,
+    val starting: Map<String, ChallengeSlice>,
+    val challengeId: ChallengeId,
+    val fought: FoughtChallenge?,
     val worldTime: WorldTime,
     val recordedAt: Instant,
 ) : QuestCommand

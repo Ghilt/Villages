@@ -4,6 +4,7 @@ import villages.application.fate.FateCatalogue
 import villages.domain.StructureCatalogue
 import villages.domain.challenge.ChallengeBehaviours
 import villages.domain.challenge.ChallengeCatalogue
+import villages.domain.challenge.refusals
 
 /**
  * Every catalogue the game reads, read and checked: what the shelf holds in force, a field a catalogue. A new kind of
@@ -32,6 +33,8 @@ data class Catalogues(
         dialogues.forEach { (name, dialogue) -> dialogue.check(name) }
         quests.forEach { (name, quest) -> quest.check(name, dialogues, structures, challenges) }
         ChallengeBehaviours.unmatched(challenges).firstOrNull()?.let { throw CatalogueRefused(CHALLENGES, it) }
+        challenges.starting.flatMap { (id, slice) -> slice.refusals(challenges, "the starting slice $id") }.firstOrNull()
+            ?.let { throw CatalogueRefused(CHALLENGES, it) }
         return this
     }
 

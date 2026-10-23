@@ -53,6 +53,26 @@ describe("the challenge's content", () => {
     expect(challenges.kinds[0]).toMatchObject({ seconds: [30, 90], happenings: [3, 6], twoAspects: 20 });
     expect(challenges.kinds[0]!.weights).toMatchObject({ violence: 8, holy: 1, reason: 0 });
     expect(challenges.said.summons).toBe('Two summons.');
+    expect(challenges.startingSlices).toEqual([
+      {
+        id: 'chaplain',
+        aspect: 'holy',
+        power: 50,
+        integrity: 50,
+        summonCount: 3,
+        effects: ['holy.sanctuary'],
+        slotted: { 'holy.sanctuary': { kind: 'building', name: 'The chapel', level: 1 } },
+      },
+      {
+        id: 'scholar',
+        aspect: 'reason',
+        power: 50,
+        integrity: 46,
+        summonCount: 2,
+        effects: ['reason.counsel'],
+        slotted: {},
+      },
+    ]);
   });
 
   it('reads the real one, three or four effects to every aspect', () => {

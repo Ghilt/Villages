@@ -18,7 +18,8 @@ import villages.domain.challenge.SummonSpec
 /**
  * `world/catalogues/challenges.json` read into what the challenge's rules read: strict, so a field it cannot read
  * refuses the whole file, naming where, and a field beginning `$` is passed over. The names and the words are the
- * page's, and are only checked to be there. The shape is a contract, held by `contracts/fixtures/challenges.json`,
+ * page's, and are only checked to be there. Its `startingSlices`, the slices every house holds, each by its id and
+ * written as a slice is, may be left out, and then a house holds none. The shape is a contract, held by `contracts/fixtures/challenges.json`,
  * which the world package's `parseChallenges` reads too. See decision records 0097 and 0107.
  */
 object ChallengesFile {
@@ -42,7 +43,12 @@ object ChallengesFile {
         val buffs = section(root, "buffs").associate { (id, node) -> id to lastingOf("buffs.$id", node) }
         val debuffs = section(root, "debuffs").associate { (id, node) -> id to lastingOf("debuffs.$id", node) }
         val kinds = section(root, "kinds").associate { (id, node) -> id to kindOf(id, node) }
-        return checked("effects") { ChallengeCatalogue(effects, summons, kinds, buffs, debuffs) }
+        val starting = root["startingSlices"]?.let { slices ->
+            fields(slices.takeIf { it.isObject } ?: refuse("startingSlices")).associate { (id, node) ->
+                id to SliceText.sliceOf(node, "startingSlices.$id", ::refuse)
+            }
+        }.orEmpty()
+        return checked("effects") { ChallengeCatalogue(effects, summons, kinds, buffs, debuffs, starting) }
     }
 
     private fun effectOf(id: String, aspect: Aspect, node: JsonNode): ChallengeEffect {

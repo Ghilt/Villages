@@ -33,6 +33,7 @@ villages.player.lostQuestNode.v1
 villages.player.metQuestObjective.v1
 villages.player.offeredDialogue.v1
 villages.player.offeredQuest.v1
+villages.player.resolvedChallenge.v1
 villages.player.rolled.v1
 villages.player.tookAction.v1
 villages.structure.changedHands.v1

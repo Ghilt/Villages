@@ -89,8 +89,9 @@ export const questViewSchema = z.object({
 /**
  * The quest's commands, spread into the command union in `frames.ts`: Adam's lever, a sample quest by its name and
  * none of its words, because a client that could write a quest could write itself a reward; and the player's own,
- * meeting an objective of the node a quest stands at and collecting a reward, by the ids alone - what it costs and
- * for how long is the quest's to say, and whether the house can pay the house's. See decision record 0096.
+ * meeting an objective of the node a quest stands at, collecting a reward, and accepting a challenge with the starting
+ * slices brought, by the ids alone - what it costs and for how long is the quest's to say, whether the house can pay
+ * the house's, and the challenge's seed the server's. See decision records 0096 and 0107, amended.
  */
 export const questCommandSchemas = [
   z.object({ type: z.literal('offerQuest'), sample: z.string() }),
@@ -101,6 +102,12 @@ export const questCommandSchemas = [
     objectiveId: z.string(),
   }),
   z.object({ type: z.literal('collectReward'), questId: z.string(), nodeId: z.string() }),
+  z.object({
+    type: z.literal('acceptChallenge'),
+    questId: z.string(),
+    nodeId: z.string(),
+    slices: z.array(z.string()),
+  }),
 ] as const;
 
 export type ObjectiveView = z.infer<typeof objectiveViewSchema>;

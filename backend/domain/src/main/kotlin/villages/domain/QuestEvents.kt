@@ -1,5 +1,7 @@
 package villages.domain
 
+import villages.domain.challenge.ChallengeSetup
+import villages.domain.challenge.Outcome
 import java.time.Instant
 
 /**
@@ -87,6 +89,31 @@ data class PlayerLostQuest(
     val player: PlayerId,
     val questId: QuestId,
     val because: Requirement,
+    override val worldTime: WorldTime,
+    override val recordedAt: Instant,
+) : QuestEvent, PlayerEvent
+
+/**
+ * The player accepted the challenge a quest's node put to the house, bringing these starting slices, and it was fought
+ * out on the spot: what raised it, the quest and the node; the opponent; the kind, both sides' slices as fought and
+ * the progression, in [setup]; the [seed]; the [catalogue] and [engine] it was fought under; and the [outcome], which
+ * is the truth and never worked out again. Its moments are not kept: a replay fights it again from the rest. The quest
+ * moves on in the same decision, along the road the outcome names. See decision record 0107, amended.
+ */
+data class PlayerResolvedChallenge(
+    override val houseId: HouseId,
+    val player: PlayerId,
+    val challengeId: ChallengeId,
+    val questId: QuestId,
+    val nodeId: NodeId,
+    val kind: String,
+    val against: Opponent,
+    val brought: List<String>,
+    val setup: ChallengeSetup,
+    val seed: Long,
+    val catalogue: String,
+    val engine: Int,
+    val outcome: Outcome,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
 ) : QuestEvent, PlayerEvent

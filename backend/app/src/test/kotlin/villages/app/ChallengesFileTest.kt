@@ -43,6 +43,16 @@ class ChallengesFileTest {
         assertEquals(3..6, battle.happenings)
         assertEquals(20.0, battle.twoAspects)
         assertEquals(mapOf(Aspect.VIOLENCE to 8.0, Aspect.HOLY to 1.0), battle.weights)
+        assertEquals(
+            mapOf(
+                "chaplain" to villages.domain.challenge.ChallengeSlice(
+                    Aspect.HOLY, 50.0, 50.0, 3, listOf("holy.sanctuary"),
+                    mapOf("holy.sanctuary" to villages.domain.challenge.StandIn.Building("The chapel", 1)),
+                ),
+                "scholar" to villages.domain.challenge.ChallengeSlice(Aspect.REASON, 50.0, 46.0, 2, listOf("reason.counsel")),
+            ),
+            challenges.starting,
+        )
     }
 
     @Test
@@ -51,6 +61,7 @@ class ChallengesFileTest {
 
         assertEquals(Aspect.entries.associateWith { if (it in setOf(Aspect.REASON, Aspect.AUTHORITY)) 5 else 4 }, Aspect.entries.associateWith { challenges.effectsOf(it).size })
         assertEquals(setOf("battle", "debate", "tradeWar", "sermon", "even"), challenges.kinds.keys)
+        assertEquals(setOf("chaplain", "scholar", "envoy", "steward", "almoner", "foreman"), challenges.starting.keys)
         assertEquals(real, CatalogueText.format(real))
     }
 

@@ -26,6 +26,7 @@ invalidName
 invalidPledge
 invalidPortrait
 invalidQuest
+invalidSlices
 invalidStat
 invalidVision
 isARuin
@@ -44,8 +45,10 @@ noSuchSlot
 noSuchStructure
 noSuchType
 noSuchVision
+notAChallenge
 notAReward
 notARuin
+notAStartingSlice
 notEnoughFree
 notInSlot
 notOnTheMap

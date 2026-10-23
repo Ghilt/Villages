@@ -6,6 +6,9 @@
  * `contracts/fixtures/quest.json`. See decision records 0097 and 0107, amended.
  */
 
+import { parseSlice } from './slice.ts';
+import type { CatalogueSlice } from './slice.ts';
+
 export type QuestObjective =
   | { readonly id: string; readonly kind: 'delivers'; readonly resource: string; readonly amount: number }
   | {
@@ -24,26 +27,11 @@ export interface QuestLead {
   readonly verdict?: 'won' | 'lost';
 }
 
-/** What stands in a slot of a challenge's slice: a key figure lending a stat, or a building of a level. */
-export type QuestStandIn =
-  | { readonly kind: 'keyFigure'; readonly name: string; readonly stats: Readonly<Record<string, number>> }
-  | { readonly kind: 'building'; readonly name: string; readonly level: number };
-
-/** A slice as a catalogue writes it, the challenges page's draft: an opponent's in a quest, the starting slices. */
-export interface QuestSlice {
-  readonly aspect: string;
-  readonly power: number;
-  readonly integrity: number;
-  readonly summonCount: number;
-  readonly effects: readonly string[];
-  readonly slotted: Readonly<Record<string, QuestStandIn>>;
-}
-
 /** The terms of a challenge a quest puts to the house: its kind, who stands against it, and the slices they bring. */
 export interface QuestChallenge {
   readonly kind: string;
   readonly against: { readonly name: string; readonly colour: string };
-  readonly slices: readonly QuestSlice[];
+  readonly slices: readonly CatalogueSlice[];
 }
 
 export interface QuestNodeFile {
@@ -110,42 +98,6 @@ export function parseQuest(text: string): QuestFile {
     return refuse(`${at}.delivers, pledges or holds`);
   };
 
-  const number = (node: Node, field: string, at: string) =>
-    typeof node[field] === 'number' ? (node[field] as number) : refuse(`${at}.${field}`);
-
-  const standInOf = (node: unknown, at: string): QuestStandIn => {
-    if (!isObject(node)) return refuse(at);
-    const name = string(node, 'name', at);
-    if (node.kind === 'keyFigure') {
-      const { stats } = node;
-      if (!isObject(stats) || !Object.values(stats).every((one) => Number.isInteger(one)))
-        refuse(`${at}.stats`);
-      return { kind: 'keyFigure', name, stats: stats as Record<string, number> };
-    }
-    if (node.kind === 'building') return { kind: 'building', name, level: amount(node, 'level', at) };
-    return refuse(`${at}.kind`);
-  };
-
-  const sliceOf = (node: unknown, at: string): QuestSlice => {
-    if (!isObject(node)) return refuse(at);
-    const { effects, slotted } = node;
-    if (!Array.isArray(effects) || !effects.every((one) => typeof one === 'string')) refuse(`${at}.effects`);
-    if (slotted !== undefined && !isObject(slotted)) refuse(`${at}.slotted`);
-    return {
-      aspect: string(node, 'aspect', at),
-      power: number(node, 'power', at),
-      integrity: number(node, 'integrity', at),
-      summonCount: amount(node, 'summonCount', at),
-      effects: effects as string[],
-      slotted: Object.fromEntries(
-        Object.entries((slotted ?? {}) as Node).map(([effect, one]) => [
-          effect,
-          standInOf(one, `${at}.slotted.${effect}`),
-        ]),
-      ),
-    };
-  };
-
   const challengeOf = (node: unknown, at: string): QuestChallenge => {
     if (!isObject(node)) return refuse(at);
     const { against, slices } = node;
@@ -157,7 +109,7 @@ export function parseQuest(text: string): QuestFile {
         name: string(against, 'name', `${at}.against`),
         colour: string(against, 'colour', `${at}.against`),
       },
-      slices: slices.map((one, index) => sliceOf(one, `${at}.slices[${index}]`)),
+      slices: slices.map((one, index) => parseSlice(one, `${at}.slices[${index}]`, refuse)),
     };
   };
 

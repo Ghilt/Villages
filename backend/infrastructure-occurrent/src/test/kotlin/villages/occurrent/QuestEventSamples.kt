@@ -1,5 +1,6 @@
 package villages.occurrent
 
+import villages.domain.ChallengeId
 import villages.domain.ChallengeNode
 import villages.domain.CharacterId
 import villages.domain.Choice
@@ -28,6 +29,7 @@ import villages.domain.PlayerCompletedQuestNode
 import villages.domain.PlayerGivenChoice
 import villages.domain.PlayerMetQuestObjective
 import villages.domain.PlayerOfferedQuest
+import villages.domain.PlayerResolvedChallenge
 import villages.domain.PledgeId
 import villages.domain.Quest
 import villages.domain.QuestChallenge
@@ -44,7 +46,16 @@ import villages.domain.Verdict
 import villages.domain.Where
 import villages.domain.WorldTime
 import villages.domain.challenge.Aspect
+import villages.domain.challenge.ChallengeSetup
 import villages.domain.challenge.ChallengeSlice
+import villages.domain.challenge.Ending
+import villages.domain.challenge.Fits
+import villages.domain.challenge.Gain
+import villages.domain.challenge.Happening
+import villages.domain.challenge.Loss
+import villages.domain.challenge.Outcome
+import villages.domain.challenge.Progression
+import villages.domain.challenge.Side
 import villages.domain.challenge.StandIn
 import villages.domain.ofNode
 import java.time.Instant
@@ -217,6 +228,42 @@ internal object QuestEventSamples {
         recordedAt = noon,
     )
 
+    /**
+     * The debate won: the scholar and the almoner brought against Brother Anselm's two slices, fought over a progression
+     * of three happenings from its seed, a gain and a loss in what it came to. The quest moves on by the events after it.
+     */
+    val debateWon = PlayerResolvedChallenge(
+        houseId = house,
+        player = player,
+        challengeId = ChallengeId(UUID.fromString("c4000000-0000-4000-8000-0000000000d1")),
+        questId = theDebate.quest.id,
+        nodeId = NodeId("square"),
+        kind = "debate",
+        against = Opponent("Brother Anselm", "#a8452a"),
+        brought = listOf("scholar", "almoner"),
+        setup = ChallengeSetup(
+            a = listOf(
+                ChallengeSlice(Aspect.REASON, 50.0, 50.0, 3, listOf("reason.refutation", "reason.foresight")),
+                ChallengeSlice(Aspect.GENEROSITY, 50.0, 50.0, 3, listOf("generosity.alms", "generosity.tend")),
+            ),
+            b = (theDebate.quest.start() as ChallengeNode).challenge.slices,
+            progression = Progression(30, listOf(Happening(Aspect.REASON), Happening(Aspect.HOLY, Aspect.GENEROSITY), Happening(Aspect.REASON))),
+        ),
+        seed = 4242L,
+        catalogue = "3f1c2a",
+        engine = 2,
+        outcome = Outcome(
+            tug = 41.5,
+            ended = Ending.TIME_RAN_OUT,
+            second = 30,
+            wonBy = Side.A,
+            gains = listOf(Gain(Side.B, Resource.PIETY, 5.0, "holy.sanctuary")),
+            losses = listOf(Loss(Side.B, "the chapel", Fits.STRUCTURE, 10.0, "reason.refutation")),
+        ),
+        worldTime = day,
+        recordedAt = noon,
+    )
+
     val cases: Map<String, Event> = mapOf(
         "villages.player.givenChoice.v1.pledge" to askedForAGift,
         "villages.player.offeredQuest.v1.challenge" to theDebate,
@@ -229,5 +276,6 @@ internal object QuestEventSamples {
         "villages.player.lostQuestNode.v1" to giftLost,
         "villages.player.metQuestObjective.v1" to wealthDelivered,
         "villages.player.offeredQuest.v1" to theAbbot,
+        "villages.player.resolvedChallenge.v1" to debateWon,
     )
 }

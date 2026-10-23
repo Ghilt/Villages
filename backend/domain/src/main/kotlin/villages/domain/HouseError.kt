@@ -56,6 +56,15 @@ sealed class HouseError(message: String) : DomainError(message) {
     /** Collecting at a node that is not a reward. */
     data object NotAReward : HouseError("that node is not a reward")
 
+    /** Accepting a challenge at a node that puts none. */
+    data object NotAChallenge : HouseError("that node puts no challenge")
+
+    /** A challenge accepted with a slice the house does not hold: not one of the starting slices. */
+    data object NotAStartingSlice : HouseError("that is not a slice the house holds")
+
+    /** A challenge accepted bringing no slice, more than it may, or one twice. */
+    class InvalidSlices(reason: String) : HouseError("not the slices a challenge is fought with: $reason")
+
     /** A house is asked one thing at a time, and this one has not been answered. */
     data object ChoicePending : HouseError("this house already has a choice to make")
 

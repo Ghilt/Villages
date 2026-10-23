@@ -412,5 +412,50 @@
       "twoAspects": 20,
       "weights": { "violence": 1, "diplomacy": 1, "holy": 1, "reason": 1, "authority": 1, "freedom": 1, "greed": 1, "generosity": 1, "nature": 1, "industry": 1 }
     }
+  },
+  "startingSlices": {
+    "$comment": "The slices every house holds until houses come by their own, Adam's to change: by their ids, each written as the challenges page writes a slice. A house brings one to three of them to a challenge a quest puts to it, chosen as it accepts. Every number a placeholder, the balance's starting slice, power 50, integrity 50, three summons; their effects need nothing in a slot. Written on 2026-10-23. See decision record 0107, amended, and docs/plans/challenges-in-the-game.md.",
+    "chaplain": {
+      "aspect": "holy",
+      "power": 50,
+      "integrity": 50,
+      "summonCount": 3,
+      "effects": ["holy.rebuke", "holy.ordination"]
+    },
+    "scholar": {
+      "aspect": "reason",
+      "power": 50,
+      "integrity": 50,
+      "summonCount": 3,
+      "effects": ["reason.refutation", "reason.foresight"]
+    },
+    "envoy": {
+      "aspect": "diplomacy",
+      "power": 50,
+      "integrity": 50,
+      "summonCount": 3,
+      "effects": ["diplomacy.parley", "diplomacy.sweeterTerms"]
+    },
+    "steward": {
+      "aspect": "authority",
+      "power": 50,
+      "integrity": 50,
+      "summonCount": 3,
+      "effects": ["authority.watch", "authority.firmHand"]
+    },
+    "almoner": {
+      "aspect": "generosity",
+      "power": 50,
+      "integrity": 50,
+      "summonCount": 3,
+      "effects": ["generosity.alms", "generosity.tend"]
+    },
+    "foreman": {
+      "aspect": "industry",
+      "power": 50,
+      "integrity": 50,
+      "summonCount": 3,
+      "effects": ["industry.engines", "industry.wellOiled"]
+    }
   }
 }

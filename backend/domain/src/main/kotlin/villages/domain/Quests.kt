@@ -1,5 +1,7 @@
 package villages.domain
 
+import villages.domain.challenge.ChallengeSetup
+import villages.domain.challenge.Side
 import java.time.Instant
 
 /**
@@ -51,6 +53,18 @@ data class Quests(
             listOf(at.ticked(quest, objective)) + movingOnIfTicked(quest, objective, at, follow)
         }
 
+        // Accepting is fighting it and the move on, from one decision, so a challenge never waits to be started and is
+        // never fought without the quest taking its outcome. A draw is lost.
+        is AcceptChallenge -> {
+            val at = Moment(command.houseId, player, command.worldTime, command.recordedAt)
+            val quest = standingAt(command.questId, command.nodeId)
+            val node = quest.quest.node(command.nodeId) as? ChallengeNode ?: throw HouseError.NotAChallenge
+            val fought = fightingOn(node, command)
+            val won = fought.result.outcome.wonBy == Side.A
+            val road = node.edges.firstOrNull { it.verdict == if (won) Verdict.WON else Verdict.LOST } ?: node.edges.singleOrNull()
+            listOf(at.resolved(command, node, fought)) + movingOn(quest, node, road?.to, emptyList(), at, follow)
+        }
+
         // Collecting is the move past the reward, and what it gives follows the move, as what a line gives follows
         // its step.
         is CollectReward -> {
@@ -92,6 +106,26 @@ data class Quests(
         // move in it is refused as over rather than as unknown.
         is PlayerCompletedQuest -> copy(open = open.filterNot { it.quest.id == event.questId })
         is PlayerLostQuest -> copy(open = open.filterNot { it.quest.id == event.questId })
+        // The move past the challenge is its own event, written right after.
+        is PlayerResolvedChallenge -> this
+    }
+
+    /**
+     * The challenge as it was fought, or the refusal saying why it cannot be taken: one to three slices brought, none
+     * twice, every one of the starting slices; and fought on the node's terms - its kind and its opponent's slices -
+     * with exactly the slices brought, which the application owes the house.
+     */
+    private fun fightingOn(node: ChallengeNode, command: AcceptChallenge): FoughtChallenge {
+        val brought = command.brought
+        val most = ChallengeSetup.MOST_SLICES
+        if (brought.size !in 1..most) throw HouseError.InvalidSlices("a challenge is fought with 1 to $most slices, not ${brought.size}")
+        if (brought.distinct().size != brought.size) throw HouseError.InvalidSlices("a slice is brought once")
+        val ours = brought.map { command.starting[it] ?: throw HouseError.NotAStartingSlice }
+        val fought = command.fought ?: throw HouseError.InvalidSlices("it could not be fought with them")
+        require(fought.kind == node.challenge.kind && fought.setup.b == node.challenge.slices && fought.setup.a == ours) {
+            "a challenge is fought on the terms its node put, with the slices brought"
+        }
+        return fought
     }
 
     private fun progressed(id: QuestId, step: QuestProgress): Quests =
@@ -155,6 +189,11 @@ data class Quests(
 
 /** Whose decision it is and when: what every event a quest writes carries. */
 private data class Moment(val house: HouseId, val player: PlayerId, val worldTime: WorldTime, val recordedAt: Instant) {
+    fun resolved(command: AcceptChallenge, node: ChallengeNode, fought: FoughtChallenge) = PlayerResolvedChallenge(
+        house, player, command.challengeId, command.questId, command.nodeId, fought.kind, node.challenge.against, command.brought,
+        fought.setup, fought.result.seed, fought.catalogue, fought.engine, fought.result.outcome, worldTime, recordedAt,
+    )
+
     fun ticked(quest: OpenQuest, objective: Objective) =
         PlayerMetQuestObjective(house, player, quest.quest.id, quest.walk().at!!, objective.id, worldTime, recordedAt)
 

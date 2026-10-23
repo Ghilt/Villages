@@ -36,6 +36,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
     JsonSubTypes.Type(OfferQuestPayload::class, name = "offerQuest"),
     JsonSubTypes.Type(MeetObjectivePayload::class, name = "meetObjective"),
     JsonSubTypes.Type(CollectRewardPayload::class, name = "collectReward"),
+    JsonSubTypes.Type(AcceptChallengePayload::class, name = "acceptChallenge"),
     JsonSubTypes.Type(CompleteDialogueStepPayload::class, name = "completeDialogueStep"),
     JsonSubTypes.Type(RollPayload::class, name = "roll"),
     JsonSubTypes.Type(NextRarityPayload::class, name = "nextRarity"),
@@ -153,6 +154,13 @@ data class MeetObjectivePayload(val questId: String, val nodeId: String, val obj
 
 /** Collect the reward a quest stands at, by the ids. See decision record 0096. */
 data class CollectRewardPayload(val questId: String, val nodeId: String) : CommandPayload
+
+/**
+ * Accept the challenge a quest stands at, bringing these of the house's starting slices by their ids. Fighting it is
+ * the server's, from a seed of its own, so the client names the slices and nothing else. See decision record 0107,
+ * amended.
+ */
+data class AcceptChallengePayload(val questId: String, val nodeId: String, val slices: List<String>) : CommandPayload
 
 /**
  * Take a step through one of the house's dialogues: the line that is the step, by its id within the dialogue -

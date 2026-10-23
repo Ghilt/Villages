@@ -14,6 +14,11 @@ data class ChallengeCatalogue(
     val kinds: Map<String, ChallengeKind>,
     val buffs: Map<String, Lasting> = emptyMap(),
     val debuffs: Map<String, Lasting> = emptyMap(),
+    /**
+     * The slices every house holds until houses come by their own, by their ids: what a house chooses from to bring to
+     * a challenge a quest puts to it. See decision record 0107, amended.
+     */
+    val starting: Map<String, ChallengeSlice> = emptyMap(),
 ) {
     init {
         require(effects.map { it.id }.toSet().size == effects.size) { "an effect has an id of its own" }

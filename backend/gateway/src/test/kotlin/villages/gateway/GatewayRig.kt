@@ -1,6 +1,7 @@
 package villages.gateway
 
 import villages.application.Catalogues
+import villages.application.ChallengeService
 import villages.application.Antarctica
 import villages.application.QuestService
 import villages.application.StructureService
@@ -285,6 +286,9 @@ internal class Rig(
                     quests = questRows,
                 ) { Catalogues(RIG_CATALOGUE, RIG_BALANCE, RIG_FATE, RIG_NAMES, ABBOT_DIALOGUES + ("letter" to RIG_LETTER), mapOf("abbot" to ABBOT)) },
                 questRows,
+                ChallengeService(world, clock = { noon }, world = worldClock, quests = questRows, catalogues = {
+                    Catalogues(RIG_CATALOGUE, RIG_BALANCE, RIG_FATE, RIG_NAMES, ABBOT_DIALOGUES + ("letter" to RIG_LETTER), mapOf("abbot" to ABBOT))
+                }, seeds = { 7L }) { "rig" },
             ),
             challengesInTheRig(),
         ),

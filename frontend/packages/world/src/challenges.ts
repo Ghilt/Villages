@@ -1,9 +1,12 @@
 /**
  * The challenge's content, `world/catalogues/challenges.json`, as the inspect page reads it: the effects a slice
  * carries, three to an aspect, the summons they bring, and the kinds of challenge a progression is drawn from, each
- * with its name, its words and its numbers. Strict as the server's reader is: a field it cannot read refuses the
- * file, naming where. Held to the server's reader by `contracts/fixtures/challenges.json`. See decision record 0107.
+ * with its name, its words and its numbers, and the starting slices every house holds. Strict as the server's reader
+ * is: a field it cannot read refuses the file, naming where. Held to the server's reader by `contracts/fixtures/challenges.json`. See decision record 0107.
  */
+
+import { parseSlice } from './slice.ts';
+import type { CatalogueSlice } from './slice.ts';
 
 /** The ten aspects, in their pairs, each beside its anti-aspect. */
 export const ASPECTS = [
@@ -97,6 +100,8 @@ export interface Challenges {
   readonly buffs: readonly ChallengeLasting[];
   readonly debuffs: readonly ChallengeLasting[];
   readonly kinds: readonly ChallengeKind[];
+  /** The slices every house holds until houses come by their own, by their ids; none where the file leaves them out. */
+  readonly startingSlices: readonly (CatalogueSlice & { readonly id: string })[];
   /** What the file and each of its sections say of themselves, by `''`, `effects`, `summons`, `buffs`, `debuffs` and `kinds`. */
   readonly said: Readonly<Record<string, string>>;
 }
@@ -260,6 +265,15 @@ export function parseChallenges(text: string): Challenges {
     buffs: fieldsOf(buffs).map(([id, node]) => lastingOf('buffs', id, node)),
     debuffs: fieldsOf(debuffs).map(([id, node]) => lastingOf('debuffs', id, node)),
     kinds: fieldsOf(kinds).map(([id, node]) => kindOf(id, node)),
+    startingSlices:
+      file.startingSlices === undefined
+        ? []
+        : isObject(file.startingSlices)
+          ? fieldsOf(file.startingSlices).map(([id, node]) => ({
+              id,
+              ...parseSlice(node, `startingSlices.${id}`, refuse),
+            }))
+          : refuse('startingSlices'),
     said: {
       '': comment(file),
       effects: comment(effects),

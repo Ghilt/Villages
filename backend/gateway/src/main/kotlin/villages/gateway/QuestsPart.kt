@@ -1,6 +1,7 @@
 package villages.gateway
 
 import villages.application.Provenance
+import villages.application.ChallengeService
 import villages.application.QuestRow
 import villages.application.QuestService
 import villages.application.QuestsByHouse
@@ -9,6 +10,7 @@ import villages.domain.NodeId
 import villages.domain.ObjectiveId
 import villages.domain.PlayerId
 import villages.domain.QuestId
+import villages.protocol.AcceptChallengePayload
 import villages.protocol.CollectRewardPayload
 import villages.protocol.MeetObjectivePayload
 import villages.protocol.YourQuests
@@ -16,8 +18,8 @@ import java.util.UUID
 
 /**
  * A house's quests: they reach its player wherever they are looking, as its dialogues do, because what a house set
- * out to do is its own and needs no cell; and meeting an objective or collecting a reward is the player's own
- * command. Each window is sent what the walk draws of them, and nothing behind a question mark. Offering one is
+ * out to do is its own and needs no cell; and meeting an objective, collecting a reward or accepting a challenge is
+ * the player's own command. Each window is sent what the walk draws of them, and nothing behind a question mark. Offering one is
  * Adam's lever, registered here and refused with the rest of the instruments when they are closed (0076). See decision
  * records 0075 and 0096.
  */
@@ -26,6 +28,7 @@ internal class QuestsPart(
     private val open: Boolean,
     private val quests: QuestService,
     private val rows: QuestsByHouse,
+    private val challenges: ChallengeService,
 ) : Part {
     private val changed: AutoCloseable = rows.watch { change ->
         core.sessionOf(change.player)?.let { tell(it, change.quests) }
@@ -46,6 +49,16 @@ internal class QuestsPart(
                 quest = quest,
                 node = NodeId(payload.nodeId),
                 objective = ObjectiveId(payload.objectiveId),
+                provenance = Provenance(asking.commandId, storyOf(asking.who, quest) ?: asking.commandId),
+            )
+        }
+        commands.on<AcceptChallengePayload> { asking, payload ->
+            val quest = QuestId(asUuid(payload.questId, "a quest id"))
+            challenges.accept(
+                player = asking.who,
+                quest = quest,
+                node = NodeId(payload.nodeId),
+                brought = payload.slices,
                 provenance = Provenance(asking.commandId, storyOf(asking.who, quest) ?: asking.commandId),
             )
         }
@@ -75,6 +88,10 @@ internal class QuestsPart(
 }
 
 /** The quests' place in the gateway: told after what a house was told, and before what it is asked. */
-class QuestsMechanic(private val quests: QuestService, private val rows: QuestsByHouse) : GatewayMechanic(greeting = 700) {
-    override fun part(made: Made): Part = QuestsPart(made.core, made.open, quests, rows)
+class QuestsMechanic(
+    private val quests: QuestService,
+    private val rows: QuestsByHouse,
+    private val challenges: ChallengeService,
+) : GatewayMechanic(greeting = 700) {
+    override fun part(made: Made): Part = QuestsPart(made.core, made.open, quests, rows, challenges)
 }

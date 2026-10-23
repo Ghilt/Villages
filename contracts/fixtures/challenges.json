@@ -70,5 +70,17 @@
       "twoAspects": 20,
       "weights": { "violence": 8, "holy": 1 }
     }
+  },
+  "startingSlices": {
+    "$comment": "Two slices every house holds, one with a stand-in in its slot.",
+    "chaplain": {
+      "aspect": "holy",
+      "power": 50,
+      "integrity": 50,
+      "summonCount": 3,
+      "effects": ["holy.sanctuary"],
+      "slotted": { "holy.sanctuary": { "kind": "building", "name": "The chapel", "level": 1 } }
+    },
+    "scholar": { "aspect": "reason", "power": 50, "integrity": 46, "summonCount": 2, "effects": ["reason.counsel"] }
   }
 }
