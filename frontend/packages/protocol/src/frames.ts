@@ -27,6 +27,7 @@ import {
 } from './structureFrames';
 import { inspectAtFrameSchema, inspectedAtFrameSchema } from './placeFrames';
 import { catalogueClientFrames, catalogueServerFrames } from './catalogueFrames';
+import { yourChallengesSchema } from './challengeHistoryFrames';
 import { challengeClientFrames, challengeServerFrames } from './challengeFrames';
 import { playerClientFrames, playerServerFrames } from './playerFrames';
 import { saveClientFrames, saveServerFrames } from './saveFrames';
@@ -308,6 +309,8 @@ export const serverFrameSchema = z.discriminatedUnion('type', [
    * `yourDialogues` on hello and again whenever one changes, with only what each quest's walk draws. See 0096.
    */
   z.object({ type: z.literal('yourQuests'), quests: z.array(questViewSchema) }),
+  /** The player's challenges, every one the house fought, sent after `yourQuests`. See 0107, amended. */
+  yourChallengesSchema,
   /** Another window took this player over; this session is finished. */
   z.object({ type: z.literal('takenOver'), message: z.string() }),
   z.object({ type: z.literal('signedOut'), message: z.string() }),

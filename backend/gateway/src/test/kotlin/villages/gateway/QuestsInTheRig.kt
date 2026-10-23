@@ -9,13 +9,18 @@ import villages.domain.LineId
 import villages.domain.NodeId
 import villages.domain.Objective
 import villages.domain.ObjectiveId
+import villages.domain.Opponent
 import villages.domain.Quest
+import villages.domain.QuestChallenge
 import villages.domain.QuestId
 import villages.domain.Resource
 import villages.domain.RevealImpact
 import villages.domain.StructureType
 import villages.domain.Then
+import villages.domain.Verdict
 import villages.domain.Where
+import villages.domain.challenge.Aspect
+import villages.domain.challenge.ChallengeSlice
 
 /*
  * The rig's abbot of the isle: `world/catalogues/quests/abbot.json` and the dialogues it names as they were taken over
@@ -102,3 +107,27 @@ internal val ABBOT = QuestTemplate(
 
 /** The abbot's quest made, as the shelf makes it, under [id] for [house]. */
 internal fun abbotOfTheIsle(id: QuestId, house: HouseId): Quest = ABBOT.offered(id, house, ABBOT_DIALOGUES)
+
+/**
+ * *The reeve's skirmish*: the rig's quest that puts a challenge, a skirmish on the rig's own content against the reeve,
+ * won leading to the spoils and lost to a toll. Its own, as the abbot's is, so a change to `the-debate.json` moves no
+ * test.
+ */
+internal val SKIRMISH = QuestTemplate(
+    title = "The reeve's skirmish",
+    scene = null,
+    shownFromTheStart = false,
+    nodes = listOf(
+        QuestTemplate.ChallengeAt(
+            "field", "The reeve's men at the ford",
+            QuestChallenge(
+                "skirmish", Opponent("The reeve", "#556b2f"),
+                listOf(ChallengeSlice(Aspect.VIOLENCE, 50.0, 50.0, 1, listOf("violence.sellswords"))),
+            ),
+            listOf(Edge(NodeId("spoils"), verdict = Verdict.WON), Edge(NodeId("toll"), verdict = Verdict.LOST)),
+            hidden = false, shownAhead = false,
+        ),
+        QuestTemplate.RewardAt("spoils", "The spoils", listOf(Effect.Grant(Resource.WEALTH, 30)), emptyList(), hidden = false, shownAhead = true),
+        QuestTemplate.RewardAt("toll", "The toll", listOf(Effect.Grant(Resource.WEALTH, 5)), emptyList(), hidden = false, shownAhead = true),
+    ),
+)

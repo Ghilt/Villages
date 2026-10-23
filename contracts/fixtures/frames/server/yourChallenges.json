@@ -1,0 +1,25 @@
+{
+  "type": "yourChallenges",
+  "challenges": [
+    {
+      "id": "c4000000-0000-4000-8000-0000000000d1",
+      "revision": 2,
+      "title": "Brother Anselm's challenge",
+      "quest": "The debate in the square",
+      "kind": "debate",
+      "house": "Ravenscar",
+      "against": { "name": "Brother Anselm", "colour": "#a8452a" },
+      "brought": ["scholar", "almoner"],
+      "outcome": {
+        "tug": 41.5,
+        "ended": "timeRanOut",
+        "second": 30,
+        "wonBy": "a",
+        "gains": [{ "side": "b", "resource": "piety", "amount": 5.0, "effect": "holy.sanctuary" }],
+        "losses": [{ "side": "b", "name": "the chapel", "became": "damaged", "effectiveness": 10.0, "effect": "reason.refutation" }]
+      },
+      "foughtAt": "2026-09-04T12:00:00Z",
+      "then": "The brother's blessing"
+    }
+  ]
+}

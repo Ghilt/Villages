@@ -424,15 +424,20 @@ stage alone, with none of the debug panel in it (decision record 0079).
   has *Collect*. Each press is a line of the log under `quests`. *The debate in the square* stands at its challenge
   node from the start, drawn with the challenge's mark, two arrows pulling apart and a diamond between them; its
   card says *A debate against Brother Anselm.* and where each road leads, *Won: something not yet known* and
-  *Lost: A penance*, and nothing of his slices. While a quest stands at a challenge a third tab joins the column, the
-  **challenges**, its mark the same two arrows and diamond, and pressing the challenge node opens it on the choosing:
+  *Lost: A penance*, and nothing of his slices. While a quest stands at a challenge, and from the house's first challenge
+  fought on, a third tab joins the column, the **challenges**, its mark the same two arrows and diamond, and pressing the challenge node opens it on the choosing:
   the node's title, *Debate against Brother Anselm* with the kind's own words, and the house's six starting slices as
   chips, each saying its two effects, pressed to bring it or leave it, up to three; *Accept challenge*, in words, sends
   it, the server fights it out and the quest moves on along the road its outcome names in the same decision - won
   straight to the blessing, the penance crossed out; lost to the penance, whose *Deliver* pays forty wealth - and the
   column turns back to the quest. Nothing is kept while choosing: leave it, and the node waits as it was. The accepting
-  is a line of the log under `challenges`, and the challenge whole is at `/admin/inspect-events-log`. Watching it and the
-  history come with the next steps of `docs/plans/challenges-in-the-game.md`. A castle for the bad road must stand on land the
+  is a line of the log under `challenges`, and the challenge whole is at `/admin/inspect-events-log`. Away from a
+  choosing the tab is the house's history: a challenge waiting first, pressed to choose for it, then under *Fought*
+  every challenge the house fought, newest first, each a row with its title and a line saying who stood against whom,
+  the kind, who won and how it ended, and where its quest went on to - *Ravenscar against Brother Anselm, a debate, won
+  by Ravenscar: time ran out in second 30, 41.5 toward Ravenscar. The debate in the square went on to The brother's
+  blessing.* The history arrives on hello and again with every change, and each challenge fought and each road heard is
+  a line of the log under `challenges`. Watching it comes with the last step of `docs/plans/challenges-in-the-game.md`. A castle for the bad road must stand on land the
   server counts as an island on the master - the British island there is at 54.8, -1.0, and 54.0, -2.0 is shallow
   sea - which `?at=54.8,-1.0&zoom=8` and the Structures section's *raise here*, yours, do in a moment.
   See `docs/adr/0096` and `docs/plans/quests.md`.

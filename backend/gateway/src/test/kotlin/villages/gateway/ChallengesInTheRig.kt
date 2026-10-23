@@ -7,12 +7,16 @@ import villages.domain.challenge.Aspect
 import villages.domain.challenge.ChallengeCatalogue
 import villages.domain.challenge.ChallengeEffect
 import villages.domain.challenge.ChallengeKind
+import villages.domain.challenge.ChallengeSlice
 import villages.domain.challenge.ChallengeSlot
 import villages.domain.challenge.Fires
 import villages.domain.challenge.Fits
 import villages.domain.challenge.SummonSpec
 
-/** The rig's challenge content: Sellswords and its Mercenary, Trusted Envoy, and a skirmish. Its own, so a retune moves no test. */
+/**
+ * The rig's challenge content: Sellswords and its Mercenary, Trusted Envoy, a skirmish, and two starting slices, a hirer
+ * of sellswords and an envoy. Its own, so a retune moves no test.
+ */
 internal val RIG_CHALLENGES = ChallengeCatalogue(
     effects = listOf(
         ChallengeEffect("violence.sellswords", Aspect.VIOLENCE, Fires.TRIGGER, summons = "mercenary"),
@@ -20,6 +24,10 @@ internal val RIG_CHALLENGES = ChallengeCatalogue(
     ),
     summons = mapOf("mercenary" to SummonSpec(Aspect.VIOLENCE, mapOf("pulls" to 10.0))),
     kinds = mapOf("skirmish" to ChallengeKind(5..5, 1..1, 0.0, mapOf(Aspect.REASON to 1.0))),
+    starting = mapOf(
+        "hirer" to ChallengeSlice(Aspect.VIOLENCE, 50.0, 50.0, 1, listOf("violence.sellswords")),
+        "envoy" to ChallengeSlice(Aspect.DIPLOMACY, 50.0, 50.0, 1, emptyList()),
+    ),
 )
 
 /** The rig's challenge in the gateway: the engine on the rig's content, a seed of seven when none is given. */

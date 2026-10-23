@@ -1,4 +1,4 @@
-import type { QuestNodeView, QuestView } from '@villages/protocol';
+import type { ChallengeRowView, QuestNodeView, QuestView } from '@villages/protocol';
 import type { Challenges } from '@villages/world';
 
 import type { ChallengeAsked } from './toChoose';
@@ -47,4 +47,80 @@ export function effectsSaid(effects: readonly string[], content: Challenges): st
 export function bringing(brought: readonly string[], pressed: string): readonly string[] {
   if (brought.includes(pressed)) return brought.filter((one) => one !== pressed);
   return brought.length >= MOST_BROUGHT ? brought : [...brought, pressed];
+}
+
+/** The first challenge any open quest stands at, waiting to be accepted, or none. */
+export function firstWaiting(quests: readonly QuestView[]): ChallengeWaiting | null {
+  for (const quest of quests) {
+    if (quest.ending.kind !== 'open') continue;
+    const node = quest.nodes.find((one) => one.kind === 'challenge' && one.state === 'current');
+    if (node !== undefined) return { quest, node };
+  }
+  return null;
+}
+
+/** A challenge's kind in words, from its name in the challenge catalogue: `tradeWar` is a trade war. */
+export function kindSaid(kind: string): string {
+  return kind.replace(/([A-Z])/g, ' $1').toLowerCase();
+}
+
+/** A tug in words, toward whichever side it leans, as the spectacle says it: `41.5 toward Ravenscar`. */
+function towardSaid(tug: number, house: string, against: string): string {
+  if (tug === 0) return 'even';
+  return `${Math.round(Math.abs(tug) * 10) / 10} toward ${tug > 0 ? house : against}`;
+}
+
+/**
+ * A challenge fought, in a line of its history: who stood against whom, its kind, who won it, and how it ended -
+ * `Ravenscar against Brother Anselm, a debate, won by Ravenscar: time ran out in second 30, 41.5 toward Ravenscar`.
+ */
+export function historyLine(row: ChallengeRowView): string {
+  const { house, against, outcome } = row;
+  const kind = kindSaid(row.kind);
+  const won =
+    outcome.wonBy === 'a'
+      ? `won by ${house}`
+      : outcome.wonBy === 'b'
+        ? `won by ${against.name}`
+        : 'won by nobody';
+  const how =
+    outcome.ended === 'pulled'
+      ? `pulled to the end in second ${outcome.second}`
+      : `time ran out in second ${outcome.second}, ${towardSaid(outcome.tug, house, against.name)}`;
+  return `${house} against ${against.name}, ${/^[aeiou]/.test(kind) ? 'an' : 'a'} ${kind}, ${won}: ${how}`;
+}
+
+/** Where the challenge's quest went on to, in a line, once it is known. */
+export function thenSaid(row: ChallengeRowView): string | null {
+  return row.then === undefined ? null : `${row.quest} went on to ${row.then}.`;
+}
+
+/** A challenge's row in the history, said whole: its line, and where its quest went on to once that is known. */
+export function historySaid(row: ChallengeRowView): string {
+  const then = thenSaid(row);
+  return then === null ? `${historyLine(row)}.` : `${historyLine(row)}. ${then}`;
+}
+
+/** The history newest first, as a list of what was done reads. */
+export function newestFirst(rows: readonly ChallengeRowView[]): readonly ChallengeRowView[] {
+  return [...rows].reverse();
+}
+
+/**
+ * The log lines a new history is worth, against the one heard before it: the first said in a line, and after that
+ * each challenge newly fought said whole, and each whose quest's road was heard since said by where it went.
+ */
+export function whatChangedIn(
+  before: readonly ChallengeRowView[] | null,
+  after: readonly ChallengeRowView[],
+): string[] {
+  if (before === null) {
+    return [after.length === 0 ? 'no challenges fought yet' : `${after.length} challenges fought`];
+  }
+  return after.flatMap((row) => {
+    const was = before.find((one) => one.id === row.id);
+    if (was === undefined) return [`fought "${row.title}": ${historyLine(row)}`];
+    const then = thenSaid(row);
+    return was.revision !== row.revision && then !== null ? [then] : [];
+  });
 }

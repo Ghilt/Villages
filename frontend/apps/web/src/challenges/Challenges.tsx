@@ -13,8 +13,18 @@ import { PaneSizeControl } from '../stage/PaneSizeControl';
 import type { Room } from '../stage/panes';
 import { useStore } from '../store/useStore';
 import { TextButton } from '../ui/button/Button';
+import { List, ListRow } from '../ui/list/List';
+import { Mark } from '../ui/mark/Mark';
 import { SliceChip } from '../ui/slice/Slice';
-import { bringing, effectsSaid, MOST_BROUGHT, waitingAt } from './describe';
+import {
+  bringing,
+  effectsSaid,
+  firstWaiting,
+  historySaid,
+  MOST_BROUGHT,
+  newestFirst,
+  waitingAt,
+} from './describe';
 import type { ChallengeWaiting } from './describe';
 import { challengeAskedStore, chosenFor } from './toChoose';
 import type { ChallengeAsked } from './toChoose';
@@ -26,11 +36,14 @@ const isAspect = (name: string): name is Aspect => (ASPECTS as readonly string[]
  * beside the dialogues and the quests. Pressing a quest's challenge node opens it on its choosing: who stands against
  * the house and the kind of challenge, and the house's starting slices to bring, up to three, the opponent's slices
  * not shown; *Accept challenge* fights it out, and once the quest has moved on the column turns back to it. Nothing is
- * kept while choosing, so leaving it leaves nothing behind. See `MECHANICS.md`, Challenge, and decision record 0107,
+ * kept while choosing, so leaving it leaves nothing behind. Otherwise it is the history: a challenge waiting first,
+ * pressed to choose for it, then every challenge the house fought, newest first, each saying who stood against whom,
+ * the kind, who won and how, and where its quest went on to. See `MECHANICS.md`, Challenge, and decision record 0107,
  * amended.
  */
 export function Challenges({ room, toQuest }: { room: Room; toQuest: (questId: string) => void }) {
   const quests = useStore(sessionStore, (state) => state.yourQuests) ?? [];
+  const fought = useStore(sessionStore, (state) => state.yourChallenges) ?? [];
   const content = useChallenges();
   // A challenge node pressed asks for its choosing; once opened, the asking is done.
   const askedNow = useStore(challengeAskedStore, (state) => state.asked);
@@ -50,6 +63,7 @@ export function Challenges({ room, toQuest }: { room: Room; toQuest: (questId: s
     }
   }, [accepted, quests, toQuest]);
   const waiting = waitingAt(quests, asked);
+  const pending = firstWaiting(quests);
 
   if (room.size === 'strip') {
     return (
@@ -75,7 +89,36 @@ export function Challenges({ room, toQuest }: { room: Room; toQuest: (questId: s
             onAccepted={() => setAccepted({ questId: waiting.quest.id, nodeId: waiting.node.id })}
           />
         ) : (
-          <p className="challenges__none">No challenge waits. A quest that puts one opens it here.</p>
+          <>
+            {pending !== null && (
+              <List label="A challenge waiting">
+                <ListRow
+                  lead={<Mark name="challenge" size={20} />}
+                  title={pending.node.title ?? 'A challenge'}
+                  line={`Waits in ${pending.quest.title}: choose your slices`}
+                  onPress={() => setAsked({ questId: pending.quest.id, nodeId: pending.node.id })}
+                />
+              </List>
+            )}
+            {fought.length === 0 ? (
+              pending === null && <p className="challenges__none">No challenge has been fought yet.</p>
+            ) : (
+              <>
+                <h3 className="challenges__group">Fought</h3>
+                <List label="Challenges fought">
+                  {newestFirst(fought).map((row) => (
+                    <ListRow
+                      key={row.id}
+                      lead={<Mark name="challenge" size={20} />}
+                      title={row.title}
+                      line={historySaid(row)}
+                      whole
+                    />
+                  ))}
+                </List>
+              </>
+            )}
+          </>
         )}
       </div>
     </section>

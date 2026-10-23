@@ -50,6 +50,15 @@
   color: var(--ink-soft);
 }
 
+.challenges__group {
+  margin: 0.75rem 0 0.35rem;
+  font-size: 0.85rem;
+  font-weight: normal;
+  font-variant: small-caps;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+}
+
 .challenges__choosing {
   display: flex;
   flex-direction: column;

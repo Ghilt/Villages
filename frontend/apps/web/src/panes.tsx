@@ -46,7 +46,8 @@ import {
  * Each pane is declared by its feature, in its own folder, and named here once: the house status, the key
  * figures and the holdings, which share the corner; the choice roll while a question does, and at rest once there
  * is a house; character dialogue from the house's first dialogue on, the quests from the first quest on, and the
- * challenges while one waits to be chosen for, which take turns in the column down the right; Recent, last in the corner; and on a phone the settings, last of the
+ * challenges while one waits to be chosen for and from the first fought on, which take turns in the column down the
+ * right; Recent, last in the corner; and on a phone the settings, last of the
  * bottom bar, whose marks stand in this order, and in no tile of the spread. The map comes first, because it
  * is the floor, and its contents are App's, which holds the map; a window per subject open comes last,
  * newest first. A new mechanic's pane is a declaration in its folder and a line here. The stage is handed
@@ -107,9 +108,10 @@ const STANDING: readonly Standing[] = [
     draw: (room) => <Quests room={room} toChallenge={turnToChallenge} />,
   },
   {
-    // Beside the quests, while one stands at a challenge to be chosen for. See decision record 0107, amended.
+    // Beside the quests, while one stands at a challenge to be chosen for, and from the first challenge fought on,
+    // because the fought ones are kept to be looked back on. See decision record 0107, amended.
     pane: CHALLENGE_PANE,
-    stands: (session) => anyWaiting(session.yourQuests ?? []),
+    stands: (session) => anyWaiting(session.yourQuests ?? []) || (session.yourChallenges?.length ?? 0) > 0,
     draw: (room) => <Challenges room={room} toQuest={turnToQuest} />,
   },
   { pane: NAVIGATION_PANE, draw: (room) => <Navigating room={room} /> },

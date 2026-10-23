@@ -100,6 +100,13 @@ internal fun inspectAt(lat: Double, lon: Double) = """{"type":"inspectAt","at":{
 internal fun offering(sample: String, commandId: String) =
     """{"type":"command","commandId":"$commandId","command":{"type":"offerDialogue","sample":"$sample"}}"""
 
+internal fun offeringAQuest(sample: String, commandId: String) =
+    """{"type":"command","commandId":"$commandId","command":{"type":"offerQuest","sample":"$sample"}}"""
+
+internal fun acceptingChallenge(questId: String, nodeId: String, slices: List<String>, commandId: String) =
+    """{"type":"command","commandId":"$commandId","command":{"type":"acceptChallenge",""" +
+        """"questId":"$questId","nodeId":"$nodeId","slices":[${slices.joinToString { "\"$it\"" }}]}}"""
+
 internal fun stepping(dialogueId: String, lineId: String, commandId: String) =
     """{"type":"command","commandId":"$commandId",""" +
         """"command":{"type":"completeDialogueStep","dialogueId":"$dialogueId","lineId":"$lineId"}}"""

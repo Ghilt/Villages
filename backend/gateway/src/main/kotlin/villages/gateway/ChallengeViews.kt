@@ -8,6 +8,7 @@ import villages.domain.challenge.ChallengeSetup
 import villages.domain.challenge.ChallengeSlice
 import villages.domain.challenge.Fits
 import villages.domain.challenge.Happening
+import villages.domain.challenge.Outcome
 import villages.domain.challenge.Progression
 import villages.domain.challenge.Side
 import villages.domain.challenge.StandIn
@@ -63,16 +64,7 @@ internal fun Fought.toFrame(id: String, catalogue: String): ChallengeSimulated {
         seed = seed,
         catalogue = catalogue,
         progression = setup.progression.toView(),
-        outcome = OutcomeView(
-            tug = outcome.tug,
-            ended = outcome.ended.name.lowerCamel(),
-            second = outcome.second,
-            wonBy = outcome.wonBy?.toWire(),
-            gains = outcome.gains.map { GainView(it.side.toWire(), it.resource.toWire(), it.amount, it.effect) },
-            losses = outcome.losses.map {
-                LossView(it.side.toWire(), it.name, if (it.fits == Fits.STRUCTURE) "damaged" else "fatigued", it.effectiveness, it.effect)
-            },
-        ),
+        outcome = outcome.toView(),
         moments = moments.map {
             MomentView(
                 second = it.second,
@@ -94,6 +86,18 @@ internal fun Fought.toFrame(id: String, catalogue: String): ChallengeSimulated {
         batch = batch?.let { BatchView(it.runs, it.wonByA, it.wonByB, it.even, it.pulledByA, it.pulledByB, it.meanTug, it.tugEnds, it.spread, it.ends) },
     )
 }
+
+/** What a challenge came to, flat: the tug, how it ended, the second, who won, and its gains and losses. */
+internal fun Outcome.toView(): OutcomeView = OutcomeView(
+    tug = tug,
+    ended = ended.name.lowerCamel(),
+    second = second,
+    wonBy = wonBy?.toWire(),
+    gains = gains.map { GainView(it.side.toWire(), it.resource.toWire(), it.amount, it.effect) },
+    losses = losses.map {
+        LossView(it.side.toWire(), it.name, if (it.fits == Fits.STRUCTURE) "damaged" else "fatigued", it.effectiveness, it.effect)
+    },
+)
 
 private fun Side.toWire(): String = name.lowercase()
 

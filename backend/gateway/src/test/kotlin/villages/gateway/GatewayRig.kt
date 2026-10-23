@@ -35,6 +35,7 @@ import villages.application.Shelf
 import villages.domain.PlayerId
 import villages.domain.WorldTime
 import villages.projections.QuestsProjection
+import villages.projections.ChallengesProjection
 import villages.projections.StructuresProjection
 import villages.projections.CharactersProjection
 import villages.projections.ChoicesProjection
@@ -108,10 +109,17 @@ internal class Rig(
     val sights = SightProjection(world).started()
     val dialogueRows = DialoguesProjection(world).started()
     val questRows = QuestsProjection(world).started()
+    val challengeRows = ChallengesProjection(world).started()
     val lastRolls = LastRollsProjection(world).started()
     /** The world-day the rig's clock says, which a test may move on to see what a day passing does. */
     var day: WorldTime = today
     val worldClock = WorldClock { day }
+
+    /** What the rig's quests are offered and their challenges fought from: the abbot's, and the reeve's skirmish. */
+    private val questCatalogues = Catalogues(
+        RIG_CATALOGUE, RIG_BALANCE, RIG_FATE, RIG_NAMES, ABBOT_DIALOGUES + ("letter" to RIG_LETTER),
+        mapOf("abbot" to ABBOT, "skirmish" to SKIRMISH), RIG_CHALLENGES,
+    )
 
     /** The ground maps a roll reads where the page is looking, by master: none until a spec lays one down. */
     val grounds = mutableMapOf<String, GroundMap>()
@@ -284,12 +292,11 @@ internal class Rig(
                     calendar = thirtyDayMonths,
                     ids = { UUID.fromString("f1000000-0000-4000-8000-%012x".format(++minted)) },
                     quests = questRows,
-                ) { Catalogues(RIG_CATALOGUE, RIG_BALANCE, RIG_FATE, RIG_NAMES, ABBOT_DIALOGUES + ("letter" to RIG_LETTER), mapOf("abbot" to ABBOT)) },
+                ) { questCatalogues },
                 questRows,
-                ChallengeService(world, clock = { noon }, world = worldClock, quests = questRows, catalogues = {
-                    Catalogues(RIG_CATALOGUE, RIG_BALANCE, RIG_FATE, RIG_NAMES, ABBOT_DIALOGUES + ("letter" to RIG_LETTER), mapOf("abbot" to ABBOT))
-                }, seeds = { 7L }) { "rig" },
+                ChallengeService(world, clock = { noon }, world = worldClock, quests = questRows, catalogues = { questCatalogues }, seeds = { 7L }) { "rig" },
             ),
+            ChallengeHistoryMechanic(challengeRows),
             challengesInTheRig(),
         ),
     )
