@@ -449,7 +449,8 @@ stands in the middle of the foot, in gold where the options are in the parchment
   degrees and tipped forty-five, the pull turning and tipping the map's square from flat and square on the desk
   to a skewed diamond on a table standing on four legs, the floor a table's height below it, tiled the way the
   ground's diamonds run, in an imposing little room: its back and west walls rise five and a half metres, out of
-  view above the table, with a tall window in the one and a hearth in the other. It is flat colours and simple
+  view above the table, with a tall window in the one and a hearth in the other, a rug under the table, a chair
+  pushed back from it, a chest and a shelf of books. It is flat colours and simple
   shapes today, deliberately, so that the room's shape can be judged before anything is drawn properly. See
   experiment 0009 and decision record 0118.
 - Whether the parchment survives contact with a second mechanic, or turns out to be the choice roll's own.

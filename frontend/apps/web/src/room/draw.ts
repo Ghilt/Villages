@@ -5,7 +5,16 @@ import { SEA } from '../map/worldStyle';
 
 import { nearness, project, towards } from './camera';
 import type { Direction, RoomCamera } from './camera';
-import { ROOM_COLOURS, floorOf, tableBlocks, tableOf, tileLines, wallBlocks } from './model';
+import {
+  ROOM_COLOURS,
+  floorOf,
+  furnitureBlocks,
+  rugOf,
+  tableBlocks,
+  tableOf,
+  tileLines,
+  wallBlocks,
+} from './model';
 import type { Block, Mark, Spot } from './model';
 
 /**
@@ -57,7 +66,11 @@ export function roomMarkup(
   // three runs rather than sorted as one: what a box's middle says about its nearness is no use for a wall
   // five metres high beside a table.
   const walls = wallBlocks(desk);
-  const faces = drawn(walls.far) + drawn(tableBlocks(desk)) + drawn(walls.near);
+  const rug = rugOf(desk)
+    .map((shape) => polygon(shape.corners, shape.fill))
+    .join('');
+  const faces =
+    rug + drawn(walls.far) + drawn([...tableBlocks(desk), ...furnitureBlocks(desk)]) + drawn(walls.near);
 
   let top = '';
   if (sheet !== null) {

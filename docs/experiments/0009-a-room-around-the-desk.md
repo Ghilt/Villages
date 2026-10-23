@@ -255,6 +255,11 @@ walls' tops - so the room arrives with the table near the middle of the window a
 it, and a drag goes up them as far as their tops and no further. On a window wider than the turned room, as a 1600 by
 900 one is, the room stands in the middle with dark beyond its corners at either side.
 
+**What stands in the room.** A rug under the table, a chair pushed back from it, a chest against the west wall and a
+tall shelf of books against the back one, all crude boxes drawn with the table. The chair's back stops just under the
+table's height, so the table top stays the nearest thing wherever the two are drawn over each other, and everything
+in the room can stay in the one layer behind the desk.
+
 ## Result
 
 Open.

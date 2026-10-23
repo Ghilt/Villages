@@ -2,7 +2,17 @@ import { describe, expect, it } from 'vitest';
 
 import { project, towards } from './camera';
 import type { Point, RoomCamera } from './camera';
-import { TABLE_HIGH, WALL_HIGH, floorOf, metreOf, shellOf, tableBlocks, tableOf, wallBlocks } from './model';
+import {
+  TABLE_HIGH,
+  WALL_HIGH,
+  floorOf,
+  furnitureBlocks,
+  metreOf,
+  shellOf,
+  tableBlocks,
+  tableOf,
+  wallBlocks,
+} from './model';
 
 const DESK = { left: -300, top: -150, width: 1800, height: 1800 / 1.45 };
 
@@ -108,5 +118,30 @@ describe('the walls', () => {
   it("put the walls' tops among the corners the room is framed by", () => {
     const highest = Math.max(...shellOf(DESK).map((corner) => corner.up));
     expect(highest).toBeCloseTo(back?.high ?? 0);
+  });
+});
+
+describe('the furniture', () => {
+  const metre = metreOf(DESK);
+  const floor = floorOf(DESK);
+  const [chairSeat, chairBack] = furnitureBlocks(DESK);
+
+  it('stands on the floor, inside the walls', () => {
+    const west = Math.min(...floor.map((corner) => corner.x));
+    const east = Math.max(...floor.map((corner) => corner.x));
+    const north = Math.min(...floor.map((corner) => corner.y));
+    const south = Math.max(...floor.map((corner) => corner.y));
+    for (const block of furnitureBlocks(DESK)) {
+      expect(block.west).toBeGreaterThanOrEqual(west - 1e-6);
+      expect(block.east).toBeLessThanOrEqual(east + 1e-6);
+      expect(block.north).toBeGreaterThanOrEqual(north - 1e-6);
+      expect(block.south).toBeLessThanOrEqual(south + 1e-6);
+      expect(block.low).toBeGreaterThanOrEqual(-TABLE_HIGH * metre - 1e-6);
+    }
+  });
+
+  it('keeps the chair under the table top, so the top is the nearest thing wherever the two meet', () => {
+    expect(chairSeat?.high).toBeLessThan(0);
+    expect(chairBack?.high).toBeLessThan(0);
   });
 });

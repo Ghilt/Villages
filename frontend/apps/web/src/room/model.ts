@@ -58,6 +58,18 @@ export const ROOM_COLOURS = {
   firebox: '#1a120d',
   fire: '#e8873a',
   mantel: '#4a3624',
+  rug: '#7a3b35',
+  rugInner: '#8c4a3e',
+  chairTop: '#5f3f22',
+  chairFront: '#54381f',
+  chairSide: '#3f2917',
+  chestTop: '#6b4a2a',
+  chestFront: '#5b3f24',
+  chestSide: '#4d3520',
+  shelfTop: '#6e5130',
+  shelfFront: '#4d3720',
+  shelfSide: '#3a2a1a',
+  books: '#7a3b35',
 };
 
 /** A point of the model in the scene's own pixels, and how many of them it stands above the table top. */
@@ -298,4 +310,63 @@ export function shellOf(desk: DeskTop): Spot[] {
     { x: block.west, y: block.south, up: block.high },
   ]);
   return [...floorOf(desk), ...tops];
+}
+
+/** The rug the table stands on, lying a hair above the floor: its border, and its middle. */
+export function rugOf(desk: DeskTop): { corners: Spot[]; fill: string }[] {
+  const lying = (west: number, east: number, north: number, south: number): Spot[] => {
+    const up = aboveFloor(0.005);
+    return [
+      spotOf(desk, west, north, up),
+      spotOf(desk, east, north, up),
+      spotOf(desk, east, south, up),
+      spotOf(desk, west, south, up),
+    ];
+  };
+  return [
+    { corners: lying(-1.9, 1.9, -1.4, 1.45), fill: ROOM_COLOURS.rug },
+    { corners: lying(-1.6, 1.6, -1.15, 1.2), fill: ROOM_COLOURS.rugInner },
+  ];
+}
+
+/**
+ * What else stands in the room, crudely: a chair pushed back from the table, its back stopping just under the
+ * table's height so the table top stays the nearest thing over it; a chest against the west wall; and a tall shelf
+ * of books against the back wall.
+ */
+export function furnitureBlocks(desk: DeskTop): Block[] {
+  const at = (
+    metres: { west: number; east: number; north: number; south: number; low: number; high: number },
+    colours: { top: string | null; front: string; side: string; marks?: Mark[] },
+  ) => blockOf(desk, { ...metres, low: aboveFloor(metres.low), high: aboveFloor(metres.high) }, colours);
+  const chair = { top: ROOM_COLOURS.chairTop, front: ROOM_COLOURS.chairFront, side: ROOM_COLOURS.chairSide };
+  const books: Mark = {
+    face: 'south',
+    shapes: [0.5, 1.0, 1.5, 2.0].map((high) => ({
+      corners: [
+        spotOf(desk, 2.1, -3.19, aboveFloor(high - 0.35)),
+        spotOf(desk, 3.3, -3.19, aboveFloor(high - 0.35)),
+        spotOf(desk, 3.3, -3.19, aboveFloor(high - 0.05)),
+        spotOf(desk, 2.1, -3.19, aboveFloor(high - 0.05)),
+      ],
+      fill: ROOM_COLOURS.books,
+    })),
+  };
+  return [
+    at({ west: -0.25, east: 0.25, north: 1.15, south: 1.6, low: 0, high: 0.45 }, chair),
+    at({ west: -0.25, east: 0.25, north: 1.52, south: 1.6, low: 0.45, high: 0.78 }, chair),
+    at(
+      { west: FLOOR.west + 0.05, east: FLOOR.west + 0.6, north: 1.2, south: 2.2, low: 0, high: 0.6 },
+      { top: ROOM_COLOURS.chestTop, front: ROOM_COLOURS.chestFront, side: ROOM_COLOURS.chestSide },
+    ),
+    at(
+      { west: 2.0, east: 3.4, north: FLOOR.north, south: FLOOR.north + 0.4, low: 0, high: 2.2 },
+      {
+        top: ROOM_COLOURS.shelfTop,
+        front: ROOM_COLOURS.shelfFront,
+        side: ROOM_COLOURS.shelfSide,
+        marks: [books],
+      },
+    ),
+  ];
 }
