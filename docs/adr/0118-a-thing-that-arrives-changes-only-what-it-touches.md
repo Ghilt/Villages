@@ -93,3 +93,22 @@ first sent, rather than at the crossing.
 | Rule | What keeps it | When it holds |
 |---|---|---|
 | The roadside is the same whatever order its tiles came in | A tile is laid out against the pieces of the tiles about it, and again whenever one of theirs changes; a test lays the same tiles in two orders and when one goes | A moment after the tiles arrive: within the frames the layout's budget takes, before the real world is shown |
+
+## Amendment, 2026-10-23: the settlements keep their identity
+
+When the camera stopped over busy ground the page stalled for a few hundred milliseconds, and the pan measured it: the
+settlements held were worked out again at every step of the camera, though the tiles of their layer had not changed,
+and each time every structure on the map walked every settlement to find the one it stands in; every path between the
+buildings was walked again whenever one building came or any tile of ground came in for anybody, and the pairs a path
+joins were found by measuring every two buildings; and the ground under a diamond was looked up by a key of text. Now the settlements held are worked out again only when their layer's version moves, and the very
+same list is handed on while it holds the same settlements (`useSettlementsHeld`). A structure asks which settlement it
+stands in only when it is new or the list changed, and asks a grid of their circles rather than every one
+(`settlementFinder` in `sprites/settlements/settlementsHeld.ts`); and the map's sprites are the very same list while
+every one of them is. Each pair's course is remembered: walked again only when one of its two buildings comes, goes or
+changes, or when more ground comes in and that course waited on ground not known (`rememberingPaths`), as the roads'
+wear already was; and the pairs are found from a grid a reach across (`pairsWithin`).
+
+| Rule | What keeps it | When it holds |
+|---|---|---|
+| Every structure inside a settlement is told which, the nearest middle's where two hold it | Its answer is kept for the list of settlements it was asked of, and asked again of a new list; the grid gives the answers a walk of them all gives, which a test holds | A moment after the settlements' tiles arrive: in the same render, before anything is drawn |
+| Every two buildings within the reach of each other have their path, walked over all the ground it needs once that ground is known | A pair new to the buildings is walked; a walk that met ground not known yet is walked again when more comes, one that did not is kept; the grid finds the pairs measuring every two finds; tests hold all three | A moment after the building or the ground's tile arrives |

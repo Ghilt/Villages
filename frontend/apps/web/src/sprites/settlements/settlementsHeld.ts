@@ -69,6 +69,59 @@ export function settlementAt(
   return best;
 }
 
+/** Every field the same: a settlement grown a level, or moved, is a new one to lay out and draw. */
+export function sameSettlement(a: HeldSettlement, b: HeldSettlement): boolean {
+  return (
+    a.index === b.index &&
+    a.id === b.id &&
+    a.name === b.name &&
+    a.type === b.type &&
+    a.level === b.level &&
+    a.x === b.x &&
+    a.y === b.y &&
+    a.radius === b.radius
+  );
+}
+
+/** The grid a finder keeps the settlements in, in world units: about a village's circle across. */
+const FINDER_CELL = 32;
+const finders = new WeakMap<readonly HeldSettlement[], (x: number, y: number) => HeldSettlement | null>();
+
+/**
+ * `settlementAt` for one list of settlements, answered from a grid of their circles rather than a walk of them all, and
+ * made once a list: every structure on the map asks it, and walking every settlement for each of them was the most of
+ * the stall when the camera stopped over busy ground (decision record 0118). The same answers as `settlementAt`.
+ */
+export function settlementFinder(
+  settlements: readonly HeldSettlement[],
+): (x: number, y: number) => HeldSettlement | null {
+  const made = finders.get(settlements);
+  if (made !== undefined) return made;
+  const grid = new Map<number, HeldSettlement[]>();
+  const key = (cx: number, cy: number) => cy * 65536 + cx;
+  for (const one of settlements) {
+    for (
+      let cy = Math.floor((one.y - one.radius) / FINDER_CELL);
+      cy <= Math.floor((one.y + one.radius) / FINDER_CELL);
+      cy += 1
+    ) {
+      for (
+        let cx = Math.floor((one.x - one.radius) / FINDER_CELL);
+        cx <= Math.floor((one.x + one.radius) / FINDER_CELL);
+        cx += 1
+      ) {
+        const here = grid.get(key(cx, cy));
+        if (here === undefined) grid.set(key(cx, cy), [one]);
+        else here.push(one);
+      }
+    }
+  }
+  const find = (x: number, y: number) =>
+    settlementAt(grid.get(key(Math.floor(x / FINDER_CELL), Math.floor(y / FINDER_CELL))) ?? [], x, y);
+  finders.set(settlements, find);
+  return find;
+}
+
 const FRAME = frameOf(GROUND_LATTICE);
 
 /**

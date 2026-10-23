@@ -9,7 +9,7 @@ import { note } from '../../log/log';
 import { cultureOfPlace, useCultureMap } from '../../map/culture';
 import { createGroundTiles } from '../ground/groundTiles';
 import type { MapSprite } from '../SpriteRenderer';
-import { settlementAt } from './settlementsHeld';
+import { settlementFinder } from './settlementsHeld';
 import type { HeldSettlement } from './settlementsHeld';
 import { useSettlementsHeld } from './useSettlementsHeld';
 
@@ -38,7 +38,11 @@ export function useSettlements(given: readonly MapSprite[], tilesRoot: string): 
 
   const laid = useRef(new Map<string, LaidOut>());
   const made = useRef(new Map<string, MapSprite>());
-  const marked = useRef(new WeakMap<MapSprite, { partOf: string | null; sprite: MapSprite }>());
+  const marked = useRef(
+    new WeakMap<MapSprite, { held: readonly HeldSettlement[]; partOf: string | null; sprite: MapSprite }>(),
+  );
+  /** The sprites handed on last, handed on again when every one of them is the one it was. */
+  const last = useRef<readonly MapSprite[]>([]);
 
   const out = useMemo(() => {
     void known;
@@ -69,19 +73,30 @@ export function useSettlements(given: readonly MapSprite[], tilesRoot: string): 
     for (const key of [...made.current.keys()]) {
       if (!seen.has(key.split('|').slice(0, 4).join('|'))) made.current.delete(key);
     }
+    // Which settlement each structure stands in, asked again only of a structure that is new or when the settlements
+    // held change, and then of a grid of them rather than of every one.
+    const find = settlementFinder(held);
     const inside = given.map((sprite) => {
       if (sprite.kind !== 'structure') return sprite;
-      const at = toMercatorExact(sprite.at);
-      const one = settlementAt(held, at.x * WORLD_MASTER_WIDTH, at.y * WORLD_MASTER_WIDTH);
-      const partOf = one === null ? null : `${settlementSpriteId(one.index)}|${one.name}`;
       const was = marked.current.get(sprite);
-      if (was !== undefined && was.partOf === partOf) return was.sprite;
+      if (was !== undefined && was.held === held) return was.sprite;
+      const at = toMercatorExact(sprite.at);
+      const one = find(at.x * WORLD_MASTER_WIDTH, at.y * WORLD_MASTER_WIDTH);
+      const partOf = one === null ? null : `${settlementSpriteId(one.index)}|${one.name}`;
       const next =
-        one === null ? sprite : { ...sprite, partOf: { id: settlementSpriteId(one.index), name: one.name } };
-      marked.current.set(sprite, { partOf, sprite: next });
+        was !== undefined && was.partOf === partOf
+          ? was.sprite
+          : one === null
+            ? sprite
+            : { ...sprite, partOf: { id: settlementSpriteId(one.index), name: one.name } };
+      marked.current.set(sprite, { held, partOf, sprite: next });
       return next;
     });
-    return [...settlements, ...inside];
+    const now = [...settlements, ...inside];
+    const before = last.current;
+    if (now.length === before.length && now.every((one, at) => one === before[at])) return before;
+    last.current = now;
+    return now;
   }, [given, held, cultures, ground, known]);
 
   const said = useRef('');

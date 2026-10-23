@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { GROUND_LATTICE, frameOf, worldXOf, worldYOf } from '@villages/world';
 
-import { courseBetween, pairsWithin, pathsOf, wearPaths } from './paths';
+import { courseBetween, pairsWithin, pathsOf, rememberingPaths, wearPaths } from './paths';
 import type { Footing, GroundOf } from './paths';
 import { WORKED } from './worked';
 import { diamondKey, diamondOf, workedGround } from './workedGround';
@@ -43,6 +43,23 @@ describe('which buildings a path joins', () => {
     const pairs = pairsWithin([far, manor, mill], 15).map(([a, b]) => `${a.id}|${b.id}`);
     expect(pairs).toEqual(['structure:manor|structure:mill']);
     expect(pairsWithin([far, manor, mill], 0)).toEqual([]);
+  });
+
+  it('are the very pairs measuring every two of them finds, in the same order', () => {
+    let seed = 11;
+    const next = () => (seed = (seed * 48271) % 2147483647) / 2147483647;
+    const many = Array.from({ length: 300 }, (_, at) =>
+      yard(`structure:${(at * 7919) % 300}`, Math.round(next() * 400) - 200, Math.round(next() * 400) - 200),
+    );
+    const sorted = [...many].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+    const every: string[] = [];
+    sorted.forEach((a, i) =>
+      sorted.slice(i + 1).forEach((b) => {
+        if (Math.hypot(a.u - b.u, a.v - b.v) <= 15) every.push(`${a.id}|${b.id}`);
+      }),
+    );
+    expect(every.length).toBeGreaterThan(100);
+    expect(pairsWithin(many, 15).map(([a, b]) => `${a.id}|${b.id}`)).toEqual(every);
   });
 });
 
@@ -87,6 +104,34 @@ describe("a path's course", () => {
     expect(between(pathsOf([mill, manor, third], 15, land))).toEqual(
       between(pathsOf([mill, manor], 15, land)),
     );
+  });
+});
+
+describe('paths remembered', () => {
+  it('are walked again as more ground comes only when a course waited on ground not known', () => {
+    const walk = rememberingPaths();
+    const first = walk([mill, manor], 15, land, 0);
+    expect(walk([mill, manor], 15, land, 1)).toBe(first);
+
+    let known = false;
+    const coming: GroundOf = (u) => (u > 105 && !known ? null : 'land');
+    const waiting = walk([mill, manor], 15, coming, 1);
+    expect(walk([mill, manor], 15, coming, 1)).toBe(waiting);
+    known = true;
+    const walked = walk([mill, manor], 15, coming, 2);
+    expect(walked).not.toBe(waiting);
+    expect(walk([mill, manor], 15, coming, 3)).toBe(walked);
+    expect(walk([mill, far], 15, coming, 3)).not.toBe(walked);
+  });
+
+  it('walk only the pairs a building that comes or goes is one of', () => {
+    const walk = rememberingPaths();
+    const first = walk([mill, manor], 15, land, 0);
+    expect(walk([mill, manor, far], 15, land, 0)).toBe(first);
+    const third = yard('structure:barn', 106, 96);
+    const more = walk([mill, manor, far, third], 15, land, 0);
+    expect(more.length).toBeGreaterThan(first.length);
+    expect(more.find((path) => path.between === first[0]!.between)).toBe(first[0]);
   });
 });
 

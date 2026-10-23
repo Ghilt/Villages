@@ -66,18 +66,36 @@ function wander(seed: number, u: number, v: number): number {
   return top * (1 - sv) + bottom * sv;
 }
 
-/** Every two yards nearer each other than the reach, foot to foot, in the order of their ids. */
+/**
+ * Every two yards nearer each other than the reach, foot to foot, in the order of their ids. Each yard is set in a grid
+ * a reach across and measured only against the yards of the cells about it, not against every other yard there is.
+ */
 export function pairsWithin(yards: readonly Yard[], reach: number): [Yard, Yard][] {
   const sorted = [...yards].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  const cell = Math.max(reach, 1);
+  const key = (cu: number, cv: number) => (cv + 100_000) * 200_000 + cu + 100_000;
+  const grid = new Map<number, number[]>();
+  sorted.forEach((yard, at) => {
+    const here = key(Math.floor(yard.u / cell), Math.floor(yard.v / cell));
+    const list = grid.get(here);
+    if (list === undefined) grid.set(here, [at]);
+    else list.push(at);
+  });
   const pairs: [Yard, Yard][] = [];
   for (let i = 0; i < sorted.length; i += 1) {
-    for (let j = i + 1; j < sorted.length; j += 1) {
-      const a = sorted[i]!;
-      const b = sorted[j]!;
-      if (Math.hypot(a.u - b.u, a.v - b.v) <= reach) {
-        pairs.push([a, b]);
+    const a = sorted[i]!;
+    const cu = Math.floor(a.u / cell);
+    const cv = Math.floor(a.v / cell);
+    const near: number[] = [];
+    for (let dv = -1; dv <= 1; dv += 1) {
+      for (let du = -1; du <= 1; du += 1) {
+        for (const j of grid.get(key(cu + du, cv + dv)) ?? []) {
+          if (j > i && Math.hypot(a.u - sorted[j]!.u, a.v - sorted[j]!.v) <= reach) near.push(j);
+        }
       }
     }
+    near.sort((x, y) => x - y);
+    for (const j of near) pairs.push([a, sorted[j]!]);
   }
   return pairs;
 }
@@ -238,9 +256,11 @@ export function wearPaths(
 }
 
 /**
- * `pathsOf` that hands back the very paths it handed back last while the yards, the reach and the ground known are the
- * same, so a course is walked again only when a building comes, goes or changes, the reach is moved, or more of the
- * ground comes in (`version`), and not each time a person on the map takes a step.
+ * `pathsOf` that remembers each pair's course, so a course is walked again only when one of its two buildings comes,
+ * goes or changes, or more of the ground comes in (`version`) while that course waited on ground not known yet; and
+ * hands back the very paths it handed back last while every one of them is the same. Not each time a person on the map
+ * takes a step, a tile of ground comes in for somebody else, or one building more makes every path walked again
+ * (decision record 0118).
  */
 export function rememberingPaths(): (
   yards: readonly Yard[],
@@ -248,12 +268,49 @@ export function rememberingPaths(): (
   ground: GroundOf,
   version: number,
 ) => readonly Path[] {
-  let last: { key: string; ground: GroundOf; paths: Path[] } | null = null;
+  let last: {
+    yards: readonly Yard[];
+    ground: GroundOf;
+    reach: number;
+    version: number;
+    waiting: boolean;
+    paths: Path[];
+  } | null = null;
+  let walked = new Map<string, { version: number; path: Path | null | 'unknown' }>();
+  const yardKey = (yard: Yard) => `${yard.id} ${yard.u} ${yard.v} ${yard.side}`;
+  const sameYard = (a: Yard, b: Yard) => a.id === b.id && a.u === b.u && a.v === b.v && a.side === b.side;
   return (yards, reach, ground, version) => {
-    const key = `${reach} ${version} ${yards.map((yard) => `${yard.id} ${yard.u} ${yard.v} ${yard.side}`).join('|')}`;
-    if (last?.key !== key || last.ground !== ground) {
-      last = { key, ground, paths: pathsOf(yards, reach, ground) };
+    // The buildings handed in again on every step a person on the map takes: the very same yards ask nothing new.
+    if (
+      last?.ground === ground &&
+      last.reach === reach &&
+      (last.version === version || !last.waiting) &&
+      last.yards.length === yards.length &&
+      yards.every((yard, at) => sameYard(yard, last!.yards[at]!))
+    ) {
+      return last.paths;
     }
+    if (last !== null && (last.ground !== ground || last.reach !== reach)) walked = new Map();
+    const next = new Map<string, { version: number; path: Path | null | 'unknown' }>();
+    const paths: Path[] = [];
+    for (const [a, b] of pairsWithin(yards, reach)) {
+      const pair = `${yardKey(a)}|${yardKey(b)}`;
+      let was = walked.get(pair);
+      if (was === undefined || (was.path === 'unknown' && was.version !== version)) {
+        const course = courseBetween(a, b, ground);
+        was = {
+          version,
+          path: Array.isArray(course) ? { between: `${a.id}|${b.id}`, diamonds: course } : course,
+        };
+      }
+      next.set(pair, was);
+      if (was.path !== null && was.path !== 'unknown') paths.push(was.path);
+    }
+    walked = next;
+    const before = last?.paths;
+    const same = before?.length === paths.length && paths.every((path, at) => path === before[at]);
+    const waiting = [...next.values()].some((one) => one.path === 'unknown');
+    last = { yards, ground, reach, version, waiting, paths: same ? before! : paths };
     return last.paths;
   };
 }

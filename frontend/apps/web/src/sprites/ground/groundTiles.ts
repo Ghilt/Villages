@@ -16,11 +16,12 @@ const RIVER = 'river';
  * comes, when `changed` is called so the paths waiting on it are walked. A tile that is not there is open water.
  */
 export function createGroundTiles(root: string, changed: () => void): GroundOf {
-  const tiles = new Map<string, Uint8Array | null>();
-  const asked = new Set<string>();
+  // By `tileY * 65536 + tileX`, not by text: a key of text made for every diamond asked was much of a path's walk.
+  const tiles = new Map<number, Uint8Array | null>();
+  const asked = new Set<number>();
   let footings: Footing[] | null = null;
 
-  async function ask(key: string, x: number, y: number): Promise<void> {
+  async function ask(key: number, x: number, y: number): Promise<void> {
     const palette = await terrainPalette();
     footings ??= Array.from({ length: 256 }, (_, id) => {
       const name = palette.classes.find((one) => one.id === id)?.name;
@@ -35,7 +36,7 @@ export function createGroundTiles(root: string, changed: () => void): GroundOf {
     const y = worldYOf(FRAME, u + 0.5, v + 0.5);
     const tileX = Math.floor(x / TILE);
     const tileY = Math.floor(y / TILE);
-    const key = `${tileX}/${tileY}`;
+    const key = tileY * 65536 + tileX;
     const tile = tiles.get(key);
     if (tile === undefined || footings === null) {
       if (!asked.has(key)) {

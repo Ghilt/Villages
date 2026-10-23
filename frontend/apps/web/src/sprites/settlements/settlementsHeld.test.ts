@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest';
 
 import type { SettlementRecord, SettlementsMapFile } from '@villages/world';
 
-import { settlementAt, settlementOnItsSquare, settlementsHeld } from './settlementsHeld';
+import {
+  sameSettlement,
+  settlementAt,
+  settlementFinder,
+  settlementOnItsSquare,
+  settlementsHeld,
+} from './settlementsHeld';
 
 const map: SettlementsMapFile = {
   master: 'test',
@@ -38,6 +44,36 @@ describe('the settlements the page holds', () => {
     // Within both circles, nearer the fishing village's middle.
     expect(settlementAt(held, 108, 100)?.index).toBe(1);
     expect(settlementAt(held, 100, 130)).toBeNull();
+  });
+
+  it('are the same settlement only while every field is, so one grown a level is laid out again', () => {
+    const [one] = settlementsHeld(map, [[dantzic]]);
+    expect(sameSettlement(one!, settlementsHeld(map, [[dantzic]])[0]!)).toBe(true);
+    expect(sameSettlement(one!, settlementsHeld(map, [[{ ...dantzic, level: 4 }]])[0]!)).toBe(false);
+    expect(sameSettlement(one!, settlementsHeld(map, [[{ ...dantzic, x: 101 }]])[0]!)).toBe(false);
+  });
+
+  it('are found from a grid of their circles with the very answers a walk of them all gives', () => {
+    let seed = 7;
+    const next = () => (seed = (seed * 48271) % 2147483647) / 2147483647;
+    const records: SettlementRecord[] = Array.from({ length: 60 }, (_, index) => ({
+      x: next() * 400,
+      y: next() * 400,
+      radius: 3 + next() * 20,
+      type: 'village',
+      level: 1,
+      index,
+    }));
+    const named = {
+      ...map,
+      settlements: records.map((_, at) => ({ id: `site:${at}`, name: `village ${at}` })),
+    };
+    const held = settlementsHeld(named, [records]);
+    const find = settlementFinder(held);
+    expect(settlementFinder(held)).toBe(find);
+    for (let x = -10; x <= 410; x += 3.7) {
+      for (let y = -10; y <= 410; y += 3.7) expect(find(x, y)).toBe(settlementAt(held, x, y));
+    }
   });
 
   it('are opened by a click on their square of ground, as wide as their level, the nearer middle where two are', () => {
