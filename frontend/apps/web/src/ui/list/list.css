@@ -93,6 +93,18 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* Whole: its name and its line wrap rather than being cut short, its mark and its end kept to the top. */
+  .ui-row--whole {
+    align-items: flex-start;
+  }
+
+  .ui-row--whole .ui-row__title,
+  .ui-row--whole .ui-row__line,
+  .ui-row--whole .ui-row__press {
+    overflow: visible;
+    white-space: normal;
+  }
+
   .ui-row__press::after {
     content: '';
     position: absolute;

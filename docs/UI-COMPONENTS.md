@@ -410,8 +410,10 @@ A line each: what it is for, its variants, and where on the page it is.
   `title` and a `line` under it; a `trail` at its end, a figure or a button of its own, which stays a thing
   to press by itself. Given `onPress` the whole row is one button, its name stretched over it, as a card's
   is. Its states are a light of cream over it rather than a shade, because shade takes from the ink's
-  contrast on parchment; chosen is a bar down its start as well. A list too long for its room goes in a
-  `ScrollArea`. *Collections*.
+  contrast on parchment; chosen is a bar down its start as well. Its title and line are one line each, cut
+  short where its room ends; given `whole` they are said whole, wrapping, its lead and trail kept to the top, for
+  a row whose every word is the point, as a challenge in the house's history is. A list too long for its room goes
+  in a `ScrollArea`. *Collections*.
 - **`Socket`** and **`SlotRow`**, `ui/socket/Socket.tsx`: one place in a structure's slot, and the slot's row
   of them. A socket is upright, three by four as a portrait is, `size` pixels tall: **empty**, a frame in fine
   dashes of the words' own colour; a **portrait**, a person's picture covering it; an **item**, its picture or

@@ -190,6 +190,30 @@ export function CarouselsAndLists() {
             </div>
           </Specimen>
           <Specimen
+            name="ListRow, whole"
+            note={['said whole, wrapping, never cut short', 'a challenge in the history']}
+            wide
+          >
+            <div className="showcase__list-width">
+              <Container recipe="pane.plain">
+                <List label="Said whole">
+                  {(['At rest', 'Hovered', 'Chosen'] as const).map((name) => (
+                    <ListRow
+                      key={name}
+                      lead={<Mark name="challenge" size={20} />}
+                      title={`${name}: Brother Anselm's challenge`}
+                      line="Ravenscar against Brother Anselm, a debate, won by Ravenscar: time ran out in second 30, 41.5 toward Ravenscar. The debate in the square went on to The brother's blessing."
+                      onPress={() => undefined}
+                      whole
+                      {...(name === 'Hovered' ? { showing: 'hover' as const } : {})}
+                      chosen={name === 'Chosen'}
+                    />
+                  ))}
+                </List>
+              </Container>
+            </div>
+          </Specimen>
+          <Specimen
             name="List in a ScrollArea"
             note={['the key figures, a portrait at the start', 'and a button of its own at the end']}
             wide
