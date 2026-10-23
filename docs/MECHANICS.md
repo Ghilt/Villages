@@ -182,8 +182,10 @@ mechanic's one breakpoint asked the window rather than the stage and had never f
 since 0085.
 
 **The die is being built** from `docs/plans/choice-roll-podium.md`. It has been felt at the spike,
-`/admin/inspect-die`: picked up from its podium, dropped and thrown on the real map, its numbers on sliders. Until
-the plan's steps land, Take action is still a button and a roll still reads where the player is looking.
+`/admin/inspect-die`: picked up from its podium, dropped and thrown on the real map, its numbers on sliders. In the
+game, Take action is the die on its podium: a long press lifts it, let go it drops by its shadow onto the map, and
+once it rests the roll is read 25 km round where it landed and the die lies there until the hand is answered. A
+flick still drops it; the throw is the plan's next step.
 
 ---
 

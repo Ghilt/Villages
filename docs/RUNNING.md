@@ -448,11 +448,17 @@ stage alone, with none of the debug panel in it (decision record 0079).
   server counts as an island on the master - the British island there is at 54.8, -1.0, and 54.0, -2.0 is shallow
   sea - which `?at=54.8,-1.0&zoom=8` and the Structures section's *raise here*, yours, do in a moment.
   See `docs/adr/0096` and `docs/plans/quests.md`.
-- The choice roll, the player's own: **Take action**, in the bottom middle of the spread once there is a
-  house, put away at rest to a **chip** in the middle of the bottom row with what a roll costs beside it - a
-  press anywhere on the chip but the button opens the pane out - ten wealth, and a house is founded
-  with fifty. Greyed, saying why, while the house has less than that free or a command is waiting on its
-  answer. Pressed, it rolls: the pane opens out over everything, the rest of the stage dimmed under a **veil**
+- The choice roll, the player's own: **Take action**, the die on its podium in the bottom middle of the spread once
+  there is a house, put away at rest to a **chip** in the middle of the bottom row with what a roll costs beside it - a
+  press anywhere on the chip but the podium opens the pane out - ten wealth, and a house is founded with fifty.
+  Greyed, saying why, while the house has less than that free, a command is waiting on its answer, or the die has not
+  arrived yet: it is fetched once the game has started. **A long press lifts the die**, a ring of light filling round
+  its dish, and leaves its slot empty; it hangs under the pointer, or above a finger with its shadow above the
+  fingertip, the landing circle round its shadow. **Let go over the map, it drops** by its shadow, bounces and comes
+  to rest, and half a second later the roll is sent from where it landed; let go over its slot, it goes back and
+  nothing is paid; Enter on the podium drops it at the middle of the view. A flick drops it too, for now: the throw
+  is the next step of `docs/plans/choice-roll-podium.md`. The die lies where it fell, its ring breathing, while the
+  hand is open, and goes back to its podium once it is answered. Once it has rolled, the pane opens out over everything, the rest of the stage dimmed under a **veil**
   that puts it away when pressed, and plays the roll as
   a report card - the omens slam into a list a third of a second apart, and under a divider the hand of three
   options of one rarity pops in along the bottom, each a card edged and named in its rarity, saying what it

@@ -3,8 +3,8 @@ import type { Pane } from '../stage/panes';
 /**
  * **The choice roll**: what the world is asking, and the options it is offering.
  *
- * Always there once there is a house or a question: at rest it is **Take action**, the button that provokes a
- * roll, put away to its strip so that the map runs nearly to the bottom of the stage; a hand dealt, or a question
+ * Always there once there is a house or a question: at rest it is **Take action**, the die on its podium that provokes
+ * a roll, put away to its strip so that the map runs nearly to the bottom of the stage; a hand dealt, or a question
  * asked, opens it, and answering puts it back to its strip. Before the house is founded and with nothing asked,
  * it is not there at all. See decision record 0083.
  *

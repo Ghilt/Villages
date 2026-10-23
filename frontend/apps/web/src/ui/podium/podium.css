@@ -15,10 +15,12 @@
     gap: 4px;
   }
 
+  /* Small, in a strip or a chip as low as a pane put away: the dish beside its words rather than over them. */
   .ui-podium--small {
-    --ui-podium-dish: 44px;
-    --ui-podium-die: 18px;
-    gap: 2px;
+    --ui-podium-dish: 34px;
+    --ui-podium-die: 14px;
+    flex-direction: row;
+    gap: 0.5rem;
   }
 
   .ui-podium__slot {

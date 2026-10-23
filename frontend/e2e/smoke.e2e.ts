@@ -5,8 +5,8 @@ import { startGame, stopGame, testPorts } from './servers.ts';
 
 /**
  * The game end to end, as a player meets it: the map drawn, a house founded from the parchment, a second window
- * seeing the founding as it happens, an action taken with Take action - a roll paid for, a hand dealt, a card
- * played - and the house still the player's after the game server is stopped and started again. What it reads is
+ * seeing the founding as it happens, an action taken with Take action's die dropped on the map - a roll paid for, a
+ * hand dealt, a card played - and the house still the player's after the game server is stopped and started again. What it reads is
  * what Adam reads, the debug panel's log and the events log; what it presses is what a player presses.
  */
 /**
@@ -59,13 +59,23 @@ test('the map, a house founded, another window seeing it, an action taken, and a
     await expect(watcher.locator('.log__entry', { hasText: name }).first()).toBeAttached();
   });
 
-  await test.step('an action is taken: a roll deals a hand for its price, and the first card of it is played', async () => {
+  await test.step('an action is taken: the die dropped on the map rolls a hand for its price, and its first card is played', async () => {
     // What the other window had seen before, so the step counts what it adds whatever the world held already.
     const said = (what: string) => watcher.locator('.log__what').filter({ hasText: new RegExp(`^${what}$`) });
     const [rolled, spent, took] = await Promise.all(
       ['rolled', 'resource spent', 'took action'].map((what) => said(what).count()),
     );
-    await player.getByRole('button', { name: 'Take action', exact: true }).first().click();
+    // Take action is the die on its podium: once the die has arrived, after the game has started, it is held a moment
+    // to lift it, carried over the map and let go, and the roll goes once it has come to rest there (0118).
+    const podium = player.locator('.ui-podium').first();
+    await expect(podium).toHaveAttribute('data-disabled', 'false');
+    const slot = (await podium.locator('.ui-podium__slot').boundingBox())!;
+    const map = (await player.locator('.maplibregl-canvas').first().boundingBox())!;
+    await player.mouse.move(slot.x + slot.width / 2, slot.y + slot.height / 2);
+    await player.mouse.down();
+    await expect(podium).toHaveAttribute('data-out', 'true');
+    await player.mouse.move(map.x + map.width / 2, map.y + map.height / 3, { steps: 12 });
+    await player.mouse.up();
     await logSays(player, /hand of \d+, from \d+ omens/);
     // Dealt once the omens have landed, which is when a card can be pressed.
     await player.locator('button.ui-card__press').first().click();

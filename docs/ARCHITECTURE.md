@@ -400,7 +400,7 @@ fog shader's code for where a pixel lies and how far inside each edge is shared 
 slices with the structures standing among them between (`sprites/standing/`, 0110), the marks under
 the fog and over it (`MarksLayer.ts`), the fog with the haze's clock, the clouds over the fog with theirs, the
 selection ring (`RingLayer.ts`, a shader of its own, on the ground under the trees close in and with the signs far out), the colour taken out of the map on its own canvas, the wind the scenery bends
-in, which draws nothing of its own, the ground worn bare under the buildings over the land's motion (0105), and the critters, their shadows and what runs on the ground under the scenery and what flies over it. Each draws its part of a
+in, which draws nothing of its own, the ground worn bare under the buildings over the land's motion (0105), and the critters, their shadows and what runs on the ground under the scenery and what flies over it; and over everything, the choice roll's die (`sprites/die/dieLayer.ts`, 0118), the one layer fetched only once the game has started, which the choice roll's pane holds through `sprites/die/hand.ts` and which asks for frames only while the die is in the hand, in the air, or lying with its ring breathing. Each draws its part of a
 frame from the same camera and says how soon it wants the next - the next frame, a time, or never - and the
 renderer asks for the soonest. So the canvas draws when the map has drawn and has no clock of its own, except the
 haze's and the clouds': while the fog is drawn close in with unknown ground on the screen, it asks for a frame

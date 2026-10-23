@@ -35,7 +35,6 @@ import type { PaneDef } from './stage/panes';
 import { panesOn, standingIn } from './panes';
 import { subjectsStore } from './inspect/subjects';
 import { arrive } from './stage/arrive';
-import { lookThrough } from './looking';
 import { askFor, formNow } from './stage/bays';
 import { CHOICE_PANE } from './choice/pane';
 import { cultureOfPlace, useCultureMap } from './map/culture';
@@ -117,8 +116,6 @@ export function App({ master, devTools }: AppProps) {
   // drawn from, and what only you can see hangs off it.
   const yours = yourHouse?.house ?? null;
 
-  // Where a choice roll lands while Take action is still a button: the camera's centre. See `looking.ts`.
-  useEffect(() => lookThrough(map), [map]);
   // Your own holdings and key figures are drawn whether or not a held cell carries them, and however far back the
   // camera goes, because far out they are your marks: the gateway sends them to the session rather than to a cell.
   // No house is drawn: its structures are. See decision record 0096.

@@ -321,6 +321,16 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
       // since they arrive with the first frames - is given now, whole.
       apply(null, scene);
       void started.then(() => land.compileAhead());
+      // The choice roll's die, over everything and fetched only once the game has started, so it costs the start
+      // nothing (0118).
+      void started
+        .then(() => import('./die/dieLayer'))
+        .then(({ createDieLayer }) => {
+          if (disposed || layers === null) return;
+          const die = createDieLayer(container, drawSoon);
+          stage.addChild(die.view);
+          layers = { ...layers, drawn: [...layers.drawn, die] };
+        });
 
       // One clock. The map draws, then this draws, from the camera the map just used, into the same
       // browser frame. Drawing on an animation frame of its own read the camera at a different instant,
