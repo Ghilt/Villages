@@ -2,6 +2,7 @@ package villages.gateway
 
 import villages.application.QuestEnding
 import villages.application.QuestRow
+import villages.domain.ChallengeNode
 import villages.domain.DialogueNode
 import villages.domain.Effect
 import villages.domain.NodeState
@@ -16,6 +17,8 @@ import villages.domain.rows
 import villages.domain.walk
 import villages.protocol.EndingView
 import villages.protocol.ObjectiveView
+import villages.protocol.OpponentView
+import villages.protocol.QuestChallengeView
 import villages.protocol.QuestEdgeView
 import villages.protocol.QuestNodeView
 import villages.protocol.QuestView
@@ -40,6 +43,7 @@ internal fun QuestRow.toView(): QuestView {
                     from = from.id.value.takeIf { fromDrawn },
                     to = edge.to.value.takeIf { toDrawn },
                     state = walk.stateOf(from.id, edge).toWire(),
+                    verdict = edge.verdict?.name?.lowercase()?.takeIf { fromDrawn && !walk.isQuestionMark(from.id) },
                 )
             }
         }
@@ -70,6 +74,10 @@ private fun QuestNode.toView(walk: QuestWalk, row: Int): QuestNodeView {
             objectives = objectives.map { it.toView(met = (walk.at == id && it.id in walk.ticked) || walk.stateOf(id) == NodeState.DONE) },
         )
         is RewardNode -> base.copy(kind = "reward", gives = gives.map(Effect::toView))
+        is ChallengeNode -> base.copy(
+            kind = "challenge",
+            challenge = QuestChallengeView(challenge.kind, OpponentView(challenge.against.name, challenge.against.colour)),
+        )
     }
 }
 

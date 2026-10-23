@@ -1,8 +1,9 @@
 /**
  * A quest file, `world/catalogues/quests/<name>.json`, as the inspect page reads it: its nodes, the first the one it
- * starts at, each offering a dialogue of `dialogues/` by its name, holding objectives, or giving a reward; each hidden
- * or shown ahead; each leading on to nodes, after a dialogue by the endings that lead there. Strict as the server's
- * reader is. Held to it by `contracts/fixtures/quest.json`. See decision record 0097.
+ * starts at, each offering a dialogue of `dialogues/` by its name, holding objectives, giving a reward, or putting a
+ * challenge; each hidden or shown ahead; each leading on to nodes, after a dialogue by the endings that lead there and
+ * after a challenge by whether it is won or lost. Strict as the server's reader is. Held to it by
+ * `contracts/fixtures/quest.json`. See decision records 0097 and 0107, amended.
  */
 
 export type QuestObjective =
@@ -16,10 +17,33 @@ export type QuestObjective =
     }
   | { readonly id: string; readonly kind: 'holds'; readonly structure: string; readonly onAnIsland: boolean };
 
-/** Where a node leads: to a node, and after a dialogue by which of its endings. */
+/** Where a node leads: to a node, after a dialogue by which of its endings, after a challenge when won or when lost. */
 export interface QuestLead {
   readonly to: string;
   readonly endings: readonly string[];
+  readonly verdict?: 'won' | 'lost';
+}
+
+/** What stands in a slot of a challenge's slice: a key figure lending a stat, or a building of a level. */
+export type QuestStandIn =
+  | { readonly kind: 'keyFigure'; readonly name: string; readonly stats: Readonly<Record<string, number>> }
+  | { readonly kind: 'building'; readonly name: string; readonly level: number };
+
+/** A slice as a catalogue writes it, the challenges page's draft: an opponent's in a quest, the starting slices. */
+export interface QuestSlice {
+  readonly aspect: string;
+  readonly power: number;
+  readonly integrity: number;
+  readonly summonCount: number;
+  readonly effects: readonly string[];
+  readonly slotted: Readonly<Record<string, QuestStandIn>>;
+}
+
+/** The terms of a challenge a quest puts to the house: its kind, who stands against it, and the slices they bring. */
+export interface QuestChallenge {
+  readonly kind: string;
+  readonly against: { readonly name: string; readonly colour: string };
+  readonly slices: readonly QuestSlice[];
 }
 
 export interface QuestNodeFile {
@@ -31,7 +55,8 @@ export interface QuestNodeFile {
   readonly is:
     | { readonly kind: 'dialogue'; readonly dialogue: string }
     | { readonly kind: 'objectives'; readonly objectives: readonly QuestObjective[] }
-    | { readonly kind: 'reward'; readonly gives: Readonly<Record<string, number>> };
+    | { readonly kind: 'reward'; readonly gives: Readonly<Record<string, number>> }
+    | { readonly kind: 'challenge'; readonly challenge: QuestChallenge };
 }
 
 export interface QuestFile {
@@ -85,45 +110,105 @@ export function parseQuest(text: string): QuestFile {
     return refuse(`${at}.delivers, pledges or holds`);
   };
 
+  const number = (node: Node, field: string, at: string) =>
+    typeof node[field] === 'number' ? (node[field] as number) : refuse(`${at}.${field}`);
+
+  const standInOf = (node: unknown, at: string): QuestStandIn => {
+    if (!isObject(node)) return refuse(at);
+    const name = string(node, 'name', at);
+    if (node.kind === 'keyFigure') {
+      const { stats } = node;
+      if (!isObject(stats) || !Object.values(stats).every((one) => Number.isInteger(one)))
+        refuse(`${at}.stats`);
+      return { kind: 'keyFigure', name, stats: stats as Record<string, number> };
+    }
+    if (node.kind === 'building') return { kind: 'building', name, level: amount(node, 'level', at) };
+    return refuse(`${at}.kind`);
+  };
+
+  const sliceOf = (node: unknown, at: string): QuestSlice => {
+    if (!isObject(node)) return refuse(at);
+    const { effects, slotted } = node;
+    if (!Array.isArray(effects) || !effects.every((one) => typeof one === 'string')) refuse(`${at}.effects`);
+    if (slotted !== undefined && !isObject(slotted)) refuse(`${at}.slotted`);
+    return {
+      aspect: string(node, 'aspect', at),
+      power: number(node, 'power', at),
+      integrity: number(node, 'integrity', at),
+      summonCount: amount(node, 'summonCount', at),
+      effects: effects as string[],
+      slotted: Object.fromEntries(
+        Object.entries((slotted ?? {}) as Node).map(([effect, one]) => [
+          effect,
+          standInOf(one, `${at}.slotted.${effect}`),
+        ]),
+      ),
+    };
+  };
+
+  const challengeOf = (node: unknown, at: string): QuestChallenge => {
+    if (!isObject(node)) return refuse(at);
+    const { against, slices } = node;
+    if (!isObject(against)) return refuse(`${at}.against`);
+    if (!Array.isArray(slices)) return refuse(`${at}.slices`);
+    return {
+      kind: string(node, 'kind', at),
+      against: {
+        name: string(against, 'name', `${at}.against`),
+        colour: string(against, 'colour', `${at}.against`),
+      },
+      slices: slices.map((one, index) => sliceOf(one, `${at}.slices[${index}]`)),
+    };
+  };
+
   const nodes = Object.entries(file.nodes)
     .filter(([key]) => !key.startsWith('$'))
     .map(([id, node]): QuestNodeFile => {
       const at = `nodes.${id}`;
       if (!isObject(node)) return refuse(at);
       const { then } = node;
+      const has = ['dialogue', 'objectives', 'gives', 'challenge'].filter(
+        (field) => node[field] !== undefined,
+      );
+      if (has.length !== 1) refuse(`${at}.dialogue, objectives, gives or challenge, and only one,`);
+      const byVerdict = has[0] === 'challenge';
       const leads: QuestLead[] =
         then === undefined
           ? []
           : typeof then === 'string'
             ? [{ to: then, endings: [] }]
             : isObject(then)
-              ? Object.entries(then).map(([to, endings]) => {
+              ? Object.entries(then).map(([to, endings]): QuestLead => {
                   if (!Array.isArray(endings) || !endings.every((one) => typeof one === 'string'))
                     refuse(`${at}.then.${to}`);
-                  return { to, endings: endings as string[] };
+                  if (!byVerdict) return { to, endings: endings as string[] };
+                  const [verdict, ...more] = endings as string[];
+                  if ((verdict !== 'won' && verdict !== 'lost') || more.length > 0)
+                    refuse(`${at}.then.${to} won or lost`);
+                  return { to, endings: [], verdict: verdict as 'won' | 'lost' };
                 })
               : refuse(`${at}.then`);
-      const has = ['dialogue', 'objectives', 'gives'].filter((field) => node[field] !== undefined);
-      if (has.length !== 1) refuse(`${at}.dialogue, objectives or gives, and only one,`);
       const is: QuestNodeFile['is'] =
-        has[0] === 'dialogue'
-          ? { kind: 'dialogue', dialogue: string(node, 'dialogue', at) }
-          : has[0] === 'objectives'
-            ? {
-                kind: 'objectives',
-                objectives: isObject(node.objectives)
-                  ? Object.entries(node.objectives).map(([key, one]) =>
-                      objectiveOf(key, one, `${at}.objectives.${key}`),
-                    )
-                  : refuse(`${at}.objectives`),
-              }
-            : {
-                kind: 'reward',
-                gives:
-                  isObject(node.gives) && Object.values(node.gives).every((one) => Number.isInteger(one))
-                    ? (node.gives as Record<string, number>)
-                    : refuse(`${at}.gives`),
-              };
+        has[0] === 'challenge'
+          ? { kind: 'challenge', challenge: challengeOf(node.challenge, `${at}.challenge`) }
+          : has[0] === 'dialogue'
+            ? { kind: 'dialogue', dialogue: string(node, 'dialogue', at) }
+            : has[0] === 'objectives'
+              ? {
+                  kind: 'objectives',
+                  objectives: isObject(node.objectives)
+                    ? Object.entries(node.objectives).map(([key, one]) =>
+                        objectiveOf(key, one, `${at}.objectives.${key}`),
+                      )
+                    : refuse(`${at}.objectives`),
+                }
+              : {
+                  kind: 'reward',
+                  gives:
+                    isObject(node.gives) && Object.values(node.gives).every((one) => Number.isInteger(one))
+                      ? (node.gives as Record<string, number>)
+                      : refuse(`${at}.gives`),
+                };
       return {
         id,
         title: string(node, 'title', at),

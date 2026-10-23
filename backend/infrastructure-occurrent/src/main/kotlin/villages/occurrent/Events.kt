@@ -31,7 +31,9 @@ import villages.domain.QuestNode
 import villages.domain.Requirement
 import villages.domain.RevealImpact
 import villages.domain.Shows
+import villages.domain.Edge
 import villages.domain.Where
+import villages.domain.challenge.StandIn
 import villages.domain.StructureCatalogue
 import villages.domain.StructureCommand
 import villages.domain.StructureDecider
@@ -75,6 +77,8 @@ object Events {
         .addMixIn(QuestNode::class.java, QuestNodeJson::class.java)
         .addMixIn(Objective::class.java, ObjectiveJson::class.java)
         .addMixIn(Where::class.java, WhereJson::class.java)
+        .addMixIn(StandIn::class.java, StandInJson::class.java)
+        .addMixIn(Edge::class.java, EdgeJson::class.java)
         .build()
 
     /** The one converter every reader and writer of the store uses: today's types written, older ones upcast as read. */

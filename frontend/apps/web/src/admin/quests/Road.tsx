@@ -17,6 +17,8 @@ function sayKind(node: QuestNodeFile): string {
       return `${node.is.objectives.length} ${node.is.objectives.length === 1 ? 'objective' : 'objectives'}`;
     case 'reward':
       return 'reward';
+    case 'challenge':
+      return `a ${node.is.challenge.kind} against ${node.is.challenge.against.name}`;
   }
 }
 
@@ -58,7 +60,12 @@ export function Road({
       id: `${road.from}->${road.to}`,
       source: road.from,
       target: road.to,
-      label: road.endings.length === 0 ? undefined : `after ${road.endings.join(', ')}`,
+      label:
+        road.verdict !== undefined
+          ? `if ${road.verdict}`
+          : road.endings.length === 0
+            ? undefined
+            : `after ${road.endings.join(', ')}`,
       markerEnd: { type: MarkerType.ArrowClosed },
     }));
     return { nodes, edges };

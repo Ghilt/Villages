@@ -95,11 +95,12 @@ is read. Nothing is stored per house; the slices a challenge was fought with are
 "square": { "title": "The debate in the square",
             "challenge": { "kind": "debate", "against": { "name": "Brother Anselm", "colour": "#a8452a" },
                            "slices": [ "...the opponent's, written as the starting slices are..." ] },
-            "then": { "won": "blessing", "lost": "penance" } }
+            "then": { "blessing": ["won"], "penance": ["lost"] } }
 ```
 
-- **Domain:** `ChallengeNode` in `Quest.kt`, and an edge that carries an outcome where a dialogue node's carries
-  endings. Decision record 0096 foresaw this: "a new condition rather than a new shape".
+- **Domain:** `ChallengeNode` in `Quest.kt`, and an edge that carries a `Verdict`, won or lost, where a dialogue
+  node's carries endings. The file writes it the way a dialogue node's fork is written: each node by what leads there,
+  `won` or `lost`. Decision record 0096 foresaw this: "a new condition rather than a new shape".
 - **Soundness:** a challenge node forks on `won` and `lost` alone, both present. A draw, the tug exactly even, takes
   `lost`.
 - **The readers:** `QuestFile.kt`, `parseQuest`, `contracts/fixtures/quest.json`, and the stored quest's JSON with a

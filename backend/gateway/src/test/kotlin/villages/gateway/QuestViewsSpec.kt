@@ -4,17 +4,31 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import villages.application.QuestEnding
 import villages.application.QuestRow
+import villages.domain.ChallengeNode
 import villages.domain.CharacterId
 import villages.domain.DialogueNode
+import villages.domain.Edge
+import villages.domain.Effect
 import villages.domain.HouseId
 import villages.domain.NodeId
+import villages.domain.Objective
 import villages.domain.ObjectiveId
+import villages.domain.ObjectiveNode
+import villages.domain.Opponent
 import villages.domain.PlayerId
+import villages.domain.QuestChallenge
 import villages.domain.QuestId
 import villages.domain.QuestProgress
 import villages.domain.Requirement
+import villages.domain.Resource
+import villages.domain.RewardNode
+import villages.domain.Verdict
+import villages.domain.challenge.Aspect
+import villages.domain.challenge.ChallengeSlice
 import villages.protocol.EndingView
 import villages.protocol.ObjectiveView
+import villages.protocol.OpponentView
+import villages.protocol.QuestChallengeView
 import villages.protocol.QuestEdgeView
 import villages.protocol.RequirementView
 import java.util.UUID
@@ -27,6 +41,41 @@ class QuestViewsSpec : StringSpec({
 
     fun row(vararg progress: QuestProgress, ending: QuestEnding = QuestEnding.Open, quest: villages.domain.Quest = abbot) =
         QuestRow(house, player, quest, progress.toList(), ending, correlationId = "story", revision = 1).toView()
+
+    "a challenge node is sent with its kind and its opponent and never their slices, its roads saying won and lost" {
+        val debate = villages.domain.Quest(
+            id = QuestId(UUID.fromString("ee000000-0000-4000-8000-00000000a002")),
+            title = "The debate in the square",
+            scene = null,
+            nodes = listOf(
+                ChallengeNode(
+                    NodeId("square"),
+                    "Brother Anselm's challenge",
+                    QuestChallenge(
+                        "debate",
+                        Opponent("Brother Anselm", "#a8452a"),
+                        listOf(ChallengeSlice(Aspect.REASON, 50.0, 50.0, 3, listOf("reason.counsel", "reason.doubt"))),
+                    ),
+                    edges = listOf(Edge(NodeId("blessing"), verdict = Verdict.WON), Edge(NodeId("penance"), verdict = Verdict.LOST)),
+                ),
+                ObjectiveNode(
+                    NodeId("penance"),
+                    "A penance",
+                    listOf(Objective.Deliver(ObjectiveId("wealth"), Resource.WEALTH, 40)),
+                    edges = listOf(Edge(NodeId("blessing"))),
+                ),
+                RewardNode(NodeId("blessing"), "The brother's blessing", listOf(Effect.Grant(Resource.PIETY, 50))),
+            ),
+        )
+        val view = row(quest = debate)
+
+        val square = view.nodes.first()
+        square.kind shouldBe "challenge"
+        square.challenge shouldBe QuestChallengeView("debate", OpponentView("Brother Anselm", "#a8452a"))
+        villages.protocol.ProtocolJson.encode(villages.protocol.YourQuests(listOf(view))).contains("reason.counsel") shouldBe false
+        view.edges.filter { it.from == "square" }.map { it.to to it.verdict } shouldBe listOf("blessing" to "won", "penance" to "lost")
+        view.edges.single { it.from == "penance" }.verdict shouldBe null
+    }
 
     "at the start the abbot is shown, the three hidden nodes are question marks with nothing more, and the blessing is in view" {
         val view = row()

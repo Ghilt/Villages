@@ -8,7 +8,11 @@ function sayThen(node: QuestNodeFile): string {
   if (node.then.length === 0) return 'the end of the quest';
   return node.then
     .map((lead) =>
-      lead.endings.length === 0 ? `on to ${lead.to}` : `to ${lead.to} after ${lead.endings.join(', ')}`,
+      lead.verdict !== undefined
+        ? `to ${lead.to} if ${lead.verdict}`
+        : lead.endings.length === 0
+          ? `on to ${lead.to}`
+          : `to ${lead.to} after ${lead.endings.join(', ')}`,
     )
     .join('; ');
 }
@@ -79,6 +83,31 @@ export function NodeEditor({ editor, node }: { editor: CatalogueEditor<QuestFile
                 </tr>
               );
             })}
+          {node.is.kind === 'challenge' && (
+            <>
+              <tr>
+                <th scope="row">puts</th>
+                <td>
+                  a {node.is.challenge.kind} against {node.is.challenge.against.name}{' '}
+                  <span className="inspect-key" style={{ color: node.is.challenge.against.colour }}>
+                    {node.is.challenge.against.colour}
+                  </span>
+                </td>
+              </tr>
+              {node.is.challenge.slices.map((slice, index) => (
+                <tr key={index}>
+                  <th scope="row">their slice {index + 1}</th>
+                  <td>
+                    {slice.aspect}, power {slice.power}, integrity {slice.integrity}, {slice.summonCount}{' '}
+                    summons: {slice.effects.join(', ')}
+                    {Object.entries(slice.slotted).map(
+                      ([effect, standIn]) => ` (${standIn.name} in ${effect})`,
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </>
+          )}
           {node.is.kind === 'reward' &&
             Object.keys(node.is.gives).map((resource) => (
               <tr key={resource}>

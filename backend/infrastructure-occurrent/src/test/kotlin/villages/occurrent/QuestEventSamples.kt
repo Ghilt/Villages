@@ -1,5 +1,6 @@
 package villages.occurrent
 
+import villages.domain.ChallengeNode
 import villages.domain.CharacterId
 import villages.domain.Choice
 import villages.domain.ChoiceId
@@ -14,6 +15,7 @@ import villages.domain.Line
 import villages.domain.LineId
 import villages.domain.NodeId
 import villages.domain.Objective
+import villages.domain.Opponent
 import villages.domain.ObjectiveId
 import villages.domain.ObjectiveNode
 import villages.domain.Option
@@ -28,16 +30,22 @@ import villages.domain.PlayerMetQuestObjective
 import villages.domain.PlayerOfferedQuest
 import villages.domain.PledgeId
 import villages.domain.Quest
+import villages.domain.QuestChallenge
 import villages.domain.QuestId
 import villages.domain.Requirement
+import villages.domain.Stat
 import villages.domain.Resource
 import villages.domain.RewardNode
 import villages.domain.Speaker
 import villages.domain.SpeakerId
 import villages.domain.StructureType
 import villages.domain.Then
+import villages.domain.Verdict
 import villages.domain.Where
 import villages.domain.WorldTime
+import villages.domain.challenge.Aspect
+import villages.domain.challenge.ChallengeSlice
+import villages.domain.challenge.StandIn
 import villages.domain.ofNode
 import java.time.Instant
 import java.util.UUID
@@ -151,8 +159,67 @@ internal object QuestEventSamples {
         recordedAt = noon,
     )
 
+    /**
+     * A quest whose first node puts a challenge to the house, forking on its verdict: the challenge node, its terms, and
+     * both kinds of stand-in a slice can carry, which no other sample has. See decision record 0107, amended.
+     */
+    val theDebate = PlayerOfferedQuest(
+        houseId = house,
+        player = player,
+        quest = Quest(
+            id = QuestId(UUID.fromString("ee000000-0000-4000-8000-00000000a002")),
+            title = "The debate in the square",
+            scene = null,
+            nodes = listOf(
+                ChallengeNode(
+                    id = NodeId("square"),
+                    title = "Brother Anselm's challenge",
+                    challenge = QuestChallenge(
+                        kind = "debate",
+                        against = Opponent("Brother Anselm", "#a8452a"),
+                        slices = listOf(
+                            ChallengeSlice(
+                                Aspect.REASON, power = 50.0, integrity = 46.0, summonCount = 3,
+                                effects = listOf("reason.counsel", "reason.doubt"),
+                                slotted = mapOf(
+                                    "reason.counsel" to StandIn.KeyFigure(
+                                        "Master Oswin",
+                                        mapOf(Stat.PIETY to 8, Stat.REASON to 16, Stat.KINDNESS to 9, Stat.PHYSICAL to 7),
+                                    ),
+                                ),
+                            ),
+                            ChallengeSlice(
+                                Aspect.HOLY, power = 50.0, integrity = 50.0, summonCount = 3,
+                                effects = listOf("holy.ordination", "holy.sanctuary"),
+                                slotted = mapOf("holy.sanctuary" to StandIn.Building("the chapel", 1)),
+                            ),
+                        ),
+                    ),
+                    edges = listOf(
+                        Edge(NodeId("blessing"), verdict = Verdict.WON),
+                        Edge(NodeId("penance"), verdict = Verdict.LOST),
+                    ),
+                ),
+                ObjectiveNode(
+                    id = NodeId("penance"),
+                    title = "A penance",
+                    objectives = listOf(Objective.Deliver(ObjectiveId("wealth"), Resource.WEALTH, 40)),
+                    edges = listOf(Edge(NodeId("blessing"))),
+                ),
+                RewardNode(
+                    id = NodeId("blessing"),
+                    title = "The brother's blessing",
+                    gives = listOf(Effect.Grant(Resource.PIETY, 50)),
+                ),
+            ),
+        ),
+        worldTime = day,
+        recordedAt = noon,
+    )
+
     val cases: Map<String, Event> = mapOf(
         "villages.player.givenChoice.v1.pledge" to askedForAGift,
+        "villages.player.offeredQuest.v1.challenge" to theDebate,
     )
 
     val samples: Map<String, Event> = mapOf(

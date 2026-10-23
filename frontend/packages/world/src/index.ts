@@ -125,7 +125,15 @@ export type {
 export { parseCharacterNames } from './characterNames.ts';
 export { parseDialogue } from './dialogue.ts';
 export { parseQuest } from './quest.ts';
-export type { QuestFile, QuestLead, QuestNodeFile, QuestObjective } from './quest.ts';
+export type {
+  QuestChallenge,
+  QuestFile,
+  QuestLead,
+  QuestNodeFile,
+  QuestObjective,
+  QuestSlice,
+  QuestStandIn,
+} from './quest.ts';
 export type { Dialogue, DialogueLine, DialogueResources, DialogueSpeaker } from './dialogue.ts';
 export type { CharacterNames } from './characterNames.ts';
 export type { Fate, FateAction, FateDeals, FatePool, FateResource } from './fate.ts';

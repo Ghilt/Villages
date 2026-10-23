@@ -574,7 +574,8 @@ A line each: what it is for, its variants, and where on the page it is.
   one in a component. *The choice roll*, where a roll is played in each form in a room the size the game gives
   it, at each rarity, and every part on its own.
 - **`QuestNode`**, `ui/quest/QuestNode.tsx`: one node of a quest's map, a round seal of velvet in a gilt ring with
-  its kind's mark, or a seal of night with `unknown` while it is not shown for what it is, and its title under it,
+  its kind's mark - a dialogue's, a checklist's, a reward's, or a challenge's, two arrows pulling apart and a diamond
+  between them - or a seal of night with `unknown` while it is not shown for what it is, and its title under it,
   two lines at most. `state` is `current`, lit with a gilt glow, `ahead`, `done`, with a gilt tick on its shoulder,
   or `lost`, struck through and faded. Pressable with `onPress`, `chosen` while it is open. **`QuestMap`**, beside
   it, lays nodes out from the top down by the row and the column the caller gives each, spread evenly across its

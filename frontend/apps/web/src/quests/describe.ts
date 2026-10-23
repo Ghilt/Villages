@@ -96,3 +96,29 @@ export function objectiveWords(objective: ObjectiveView): string {
 function inWords(type: string): string {
   return type.replace(/[A-Z]/g, (letter) => ` ${letter.toLowerCase()}`);
 }
+
+/** A challenge's kind in words, from its name in the challenge catalogue: `tradeWar` is a trade war. */
+export function kindWords(kind: string): string {
+  return kind.replace(/([A-Z])/g, ' $1').toLowerCase();
+}
+
+/**
+ * A challenge node in the player's words: what it puts to the house and who stands against it, and where each road
+ * leads, the won road first - the node there by its title, or not yet known. Null for any other node. See decision
+ * record 0107, amended.
+ */
+export function challengeWords(
+  quest: QuestView,
+  node: QuestNodeView,
+): { readonly puts: string; readonly roads: readonly string[] } | null {
+  const { challenge } = node;
+  if (challenge === undefined) return null;
+  const titleOf = (id: string | undefined) =>
+    quest.nodes.find((one) => one.id === id)?.title ?? 'something not yet known';
+  const roads = quest.edges
+    .filter((edge) => edge.from === node.id && edge.verdict !== undefined)
+    .sort((one, other) => (one.verdict === other.verdict ? 0 : one.verdict === 'won' ? -1 : 1))
+    .map((edge) => `${edge.verdict === 'won' ? 'Won' : 'Lost'}: ${titleOf(edge.to)}`);
+  const kind = kindWords(challenge.kind);
+  return { puts: `${/^[aeiou]/.test(kind) ? 'An' : 'A'} ${kind} against ${challenge.against.name}.`, roads };
+}

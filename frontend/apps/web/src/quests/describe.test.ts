@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { QuestView } from '@villages/protocol';
 
-import { objectiveWords, standing, whatChangedIn } from './describe';
+import { challengeWords, kindWords, objectiveWords, standing, whatChangedIn } from './describe';
 
 const abbot: QuestView = {
   id: 'q1',
@@ -72,5 +72,51 @@ describe("an objective in the player's words", () => {
     expect(
       objectiveWords({ kind: 'hold', id: 'c', met: false, structureType: 'printingHouse', where: 'island' }),
     ).toBe('Hold a printing house on an island');
+  });
+});
+
+describe('a challenge node in words', () => {
+  const debate: QuestView = {
+    id: 'q2',
+    revision: 1,
+    title: 'The debate in the square',
+    nodes: [
+      {
+        id: 'square',
+        row: 0,
+        state: 'current',
+        kind: 'challenge',
+        title: "Brother Anselm's challenge",
+        challenge: { kind: 'debate', against: { name: 'Brother Anselm', colour: '#a8452a' } },
+      },
+      { id: 'penance', row: 1, state: 'ahead', kind: 'checklist', title: 'A penance', objectives: [] },
+      { id: 'blessing', row: 2, state: 'ahead' },
+    ],
+    edges: [
+      { from: 'square', to: 'penance', state: 'ahead', verdict: 'lost' },
+      { from: 'square', to: 'blessing', state: 'ahead', verdict: 'won' },
+    ],
+    ending: { kind: 'open' },
+  };
+
+  it('says what it puts to the house and who stands against it, and each road, the won road first', () => {
+    expect(challengeWords(debate, debate.nodes[0]!)).toEqual({
+      puts: 'A debate against Brother Anselm.',
+      roads: ['Won: something not yet known', 'Lost: A penance'],
+    });
+  });
+
+  it('is nothing for any other node', () => {
+    expect(challengeWords(debate, debate.nodes[1]!)).toBeNull();
+  });
+
+  it('says a kind in words, and an article that fits it', () => {
+    expect(kindWords('tradeWar')).toBe('trade war');
+    expect(
+      challengeWords(debate, {
+        ...debate.nodes[0]!,
+        challenge: { kind: 'even', against: { name: 'Fate', colour: '#000000' } },
+      })?.puts,
+    ).toBe('An even against Fate.');
   });
 });

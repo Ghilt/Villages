@@ -5,7 +5,7 @@ import { Mark } from '../mark/Mark';
 import type { MarkName } from '../mark/Mark';
 
 /** What a node is, when it is shown for what it is. */
-export type QuestNodeKind = 'dialogue' | 'checklist' | 'reward';
+export type QuestNodeKind = 'dialogue' | 'checklist' | 'reward' | 'challenge';
 
 /** What a node is to the quest now. */
 export type QuestNodeState = 'done' | 'current' | 'ahead' | 'lost';
@@ -14,6 +14,7 @@ const KIND_MARKS: Record<QuestNodeKind, MarkName> = {
   dialogue: 'talk',
   checklist: 'checklist',
   reward: 'reward',
+  challenge: 'challenge',
 };
 
 const STATE_WORDS: Record<QuestNodeState, string> = {

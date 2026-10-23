@@ -17,6 +17,7 @@ import villages.domain.RevealImpact
 import villages.domain.Shows
 import villages.domain.Then
 import villages.domain.Where
+import villages.domain.challenge.StandIn
 import java.io.File
 import java.time.Instant
 import kotlin.reflect.KClass
@@ -129,6 +130,7 @@ class EventFormatSpec : StringSpec({
             QuestNode::class to QuestNodeJson::class,
             Objective::class to ObjectiveJson::class,
             Where::class to WhereJson::class,
+            StandIn::class to StandInJson::class,
         )
         val named = mixIns.mapValues { (_, mixIn) -> mixIn.java.getAnnotation(JsonSubTypes::class.java).value.toList() }
 

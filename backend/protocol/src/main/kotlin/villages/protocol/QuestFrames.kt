@@ -30,8 +30,8 @@ data class QuestView(
 /**
  * One node drawn on the quest's map: its id, how far down it stands, and what it is to the quest now - `done`,
  * `current`, `ahead` or `lost`. A question mark carries nothing more; a node shown for what it is carries its kind -
- * `dialogue`, `checklist` or `reward` - and title, a dialogue node the dialogue it offers, a checklist its objectives
- * and a reward what it gives.
+ * `dialogue`, `checklist`, `reward` or `challenge` - and title, a dialogue node the dialogue it offers, a checklist its
+ * objectives, a reward what it gives, and a challenge node its terms as the player may know them before it starts.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class QuestNodeView(
@@ -43,14 +43,26 @@ data class QuestNodeView(
     val dialogueId: String? = null,
     val objectives: List<ObjectiveView>? = null,
     val gives: List<EffectView>? = null,
+    val challenge: QuestChallengeView? = null,
 )
 
 /**
+ * A challenge a quest's node puts to the house, as the player may know it before accepting: its kind, `debate`, and
+ * who stands against the house. Never the opponent's slices, which the player sees only in the run they watch. See
+ * decision record 0107, amended.
+ */
+data class QuestChallengeView(val kind: String, val against: OpponentView)
+
+/** Who stands against the house in a challenge: a name, and the colour their side is shown in, `#a8452a`. */
+data class OpponentView(val name: String, val colour: String)
+
+/**
  * An edge drawn on the map: `walked`, `ahead` or `lost`. Either end is absent where that node is not drawn, which is
- * a stub: the player sees that something is there, and not what.
+ * a stub: the player sees that something is there, and not what. Out of a challenge node shown for what it is, the
+ * `verdict` that leads along it, `won` or `lost`.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-data class QuestEdgeView(val from: String? = null, val to: String? = null, val state: String)
+data class QuestEdgeView(val from: String? = null, val to: String? = null, val state: String, val verdict: String? = null)
 
 /**
  * One objective of a checklist, and whether it is ticked. `kind` names the case: a `deliver` or a `pledge` the

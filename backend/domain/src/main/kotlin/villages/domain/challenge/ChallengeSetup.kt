@@ -63,13 +63,27 @@ data class ChallengeSetup(val a: List<ChallengeSlice>, val b: List<ChallengeSlic
         Side.entries.forEach { side ->
             val slices = side(side)
             if (slices.size !in 1..MOST_SLICES) add("side ${side.name} brings 1 to $MOST_SLICES slices, not ${slices.size}")
-            slices.forEachIndexed { at, slice -> addAll(sliceRefusals(catalogue, "${side.name.lowercase()}${at + 1}", slice)) }
+            slices.forEachIndexed { at, slice -> addAll(slice.refusals(catalogue, "${side.name.lowercase()}${at + 1}")) }
         }
     }
 
-    private fun sliceRefusals(catalogue: ChallengeCatalogue, label: String, slice: ChallengeSlice): List<String> = buildList {
+    companion object {
+        const val MOST_SECONDS = 600
+        const val MOST_SLICES = 3
+        const val MOST_EFFECTS = 2
+    }
+}
+
+/**
+ * Why this slice, called [label] in what is said, cannot be fought with [catalogue], a line a reason; none when it can:
+ * what a whole setup asks of each of its slices, and what a quest's opponent's slices and the starting slices are held
+ * to as the shelf is read.
+ */
+fun ChallengeSlice.refusals(catalogue: ChallengeCatalogue, label: String): List<String> {
+    val slice = this
+    return buildList {
         if (slice.power < 0.0 || slice.integrity < 0.0 || slice.summonCount < 0) add("$label starts at nothing or more")
-        if (slice.effects.size > MOST_EFFECTS) add("$label carries $MOST_EFFECTS effects at most")
+        if (slice.effects.size > ChallengeSetup.MOST_EFFECTS) add("$label carries ${ChallengeSetup.MOST_EFFECTS} effects at most")
         if (slice.effects.toSet().size != slice.effects.size) add("$label carries an effect once")
         slice.effects.forEach { id ->
             val effect = catalogue.effect(id)
@@ -85,11 +99,5 @@ data class ChallengeSetup(val a: List<ChallengeSlice>, val b: List<ChallengeSlic
                 !standIn.fits(slot.fits) -> add("$label's slot of $id does not fit ${standIn.name}")
             }
         }
-    }
-
-    companion object {
-        const val MOST_SECONDS = 600
-        const val MOST_SLICES = 3
-        const val MOST_EFFECTS = 2
     }
 }

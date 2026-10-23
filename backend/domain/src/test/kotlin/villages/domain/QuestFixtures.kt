@@ -93,3 +93,43 @@ internal object Abbot {
         nodes = listOf(gateNode, giftNode, lightNode, consecrationNode, blessingNode),
     )
 }
+
+/**
+ * The debate in the square, as a quest: its first node puts a challenge to the house, won leading straight to the
+ * blessing and lost to a penance first. What the challenge node's tests are told against. See decision record 0107,
+ * amended.
+ */
+object Debate {
+    val questId = QuestId(UUID.fromString("ee000000-0000-4000-8000-00000000a002"))
+
+    val square = NodeId("square")
+    val penance = NodeId("penance")
+    val blessing = NodeId("blessing")
+
+    val reason = villages.domain.challenge.ChallengeSlice(
+        villages.domain.challenge.Aspect.REASON, power = 50.0, integrity = 50.0, summonCount = 3,
+        effects = listOf("reason.counsel", "reason.doubt"),
+    )
+    val generosity = villages.domain.challenge.ChallengeSlice(
+        villages.domain.challenge.Aspect.GENEROSITY, power = 50.0, integrity = 50.0, summonCount = 3,
+        effects = listOf("generosity.alms", "generosity.tend"),
+    )
+
+    val terms = QuestChallenge("debate", Opponent("Brother Anselm", "#a8452a"), listOf(reason, generosity))
+
+    val squareNode = ChallengeNode(
+        square,
+        "Brother Anselm's challenge",
+        terms,
+        edges = listOf(Edge(blessing, verdict = Verdict.WON), Edge(penance, verdict = Verdict.LOST)),
+    )
+    val penanceNode = ObjectiveNode(
+        penance,
+        "A penance",
+        listOf(Objective.Deliver(ObjectiveId("wealth"), Resource.WEALTH, 40)),
+        edges = listOf(Edge(blessing)),
+    )
+    val blessingNode = RewardNode(blessing, "The brother's blessing", listOf(Effect.Grant(Resource.PIETY, 50)), shownAhead = true)
+
+    val quest = Quest(id = questId, title = "The debate in the square", scene = null, nodes = listOf(squareNode, penanceNode, blessingNode))
+}

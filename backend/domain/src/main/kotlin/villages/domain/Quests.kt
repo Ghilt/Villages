@@ -162,12 +162,12 @@ private data class Moment(val house: HouseId, val player: PlayerId, val worldTim
 }
 
 /**
- * What reaching a node does to the house, as effects: a dialogue node offers its dialogue, and an objective or a
- * reward node does nothing until it is met or collected.
+ * What reaching a node does to the house, as effects: a dialogue node offers its dialogue, and an objective, a reward
+ * or a challenge node does nothing until it is met, collected or fought.
  */
 internal fun arriving(node: QuestNode): List<Effect> = when (node) {
     is DialogueNode -> listOf(Effect.Converse(node.dialogue))
-    is ObjectiveNode, is RewardNode -> emptyList()
+    is ObjectiveNode, is RewardNode, is ChallengeNode -> emptyList()
 }
 
 /**

@@ -1,0 +1,43 @@
+{
+  "type": "yourQuests",
+  "quests": [
+    {
+      "id": "ee000000-0000-4000-8000-00000000a002",
+      "revision": 1,
+      "title": "The debate in the square",
+      "scene": "harbour",
+      "nodes": [
+        {
+          "id": "square",
+          "row": 0,
+          "state": "current",
+          "kind": "challenge",
+          "title": "Brother Anselm's challenge",
+          "challenge": { "kind": "debate", "against": { "name": "Brother Anselm", "colour": "#a8452a" } }
+        },
+        {
+          "id": "penance",
+          "row": 1,
+          "state": "ahead",
+          "kind": "checklist",
+          "title": "A penance",
+          "objectives": [{ "kind": "deliver", "id": "wealth", "met": false, "resource": "wealth", "amount": 40 }]
+        },
+        {
+          "id": "blessing",
+          "row": 2,
+          "state": "ahead",
+          "kind": "reward",
+          "title": "The brother's blessing",
+          "gives": [{ "kind": "grant", "resource": "piety", "amount": 50 }]
+        }
+      ],
+      "edges": [
+        { "from": "square", "to": "blessing", "state": "ahead", "verdict": "won" },
+        { "from": "square", "to": "penance", "state": "ahead", "verdict": "lost" },
+        { "from": "penance", "to": "blessing", "state": "ahead" }
+      ],
+      "ending": { "kind": "open" }
+    }
+  ]
+}

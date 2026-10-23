@@ -1,5 +1,5 @@
 {
-  "$comment": "A quest filed as world/catalogues/quests/<name>.json files one, written by hand, small, with every kind of node and objective once: the server's QuestFile and the world package's parseQuest both read it, and are held to it.",
+  "$comment": "A quest filed as world/catalogues/quests/<name>.json files one, written by hand, small, with every kind of node and objective once, and both kinds of stand-in a challenge's slice can carry: the server's QuestFile and the world package's parseQuest both read it, and are held to it.",
   "title": "A road to the sea",
   "scene": "harbour",
   "shownFromTheStart": true,
@@ -17,7 +17,35 @@
       "title": "Hold",
       "hidden": true,
       "objectives": { "mill": { "holds": "mill" }, "fort": { "holds": "castle", "on": "island" } },
-      "then": "prize"
+      "then": "dare"
+    },
+    "dare": {
+      "title": "A dare",
+      "challenge": {
+        "kind": "debate",
+        "against": { "name": "A rival", "colour": "#a8452a" },
+        "slices": [
+          {
+            "aspect": "reason",
+            "power": 50,
+            "integrity": 46,
+            "summonCount": 3,
+            "effects": ["reason.counsel", "reason.doubt"],
+            "slotted": {
+              "reason.counsel": { "kind": "keyFigure", "name": "A scholar", "stats": { "piety": 8, "reason": 16, "kindness": 9, "physical": 7 } }
+            }
+          },
+          {
+            "aspect": "holy",
+            "power": 50,
+            "integrity": 50,
+            "summonCount": 3,
+            "effects": ["holy.ordination", "holy.sanctuary"],
+            "slotted": { "holy.sanctuary": { "kind": "building", "name": "A chapel", "level": 1 } }
+          }
+        ]
+      },
+      "then": { "prize": ["won"], "give": ["lost"] }
     },
     "prize": { "title": "A prize", "shownAhead": true, "gives": { "reason": 7 } }
   }

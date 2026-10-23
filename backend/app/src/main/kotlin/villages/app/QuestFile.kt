@@ -3,6 +3,7 @@ package villages.app
 import tools.jackson.databind.JsonNode
 import tools.jackson.databind.json.JsonMapper
 import villages.application.QuestTemplate
+import villages.application.QuestTemplate.ChallengeAt
 import villages.application.QuestTemplate.DialogueAt
 import villages.application.QuestTemplate.NodeTemplate
 import villages.application.QuestTemplate.ObjectivesAt
@@ -13,22 +14,29 @@ import villages.domain.LineId
 import villages.domain.NodeId
 import villages.domain.Objective
 import villages.domain.ObjectiveId
+import villages.domain.Opponent
+import villages.domain.QuestChallenge
 import villages.domain.Resource
 import villages.domain.StructureType
+import villages.domain.Verdict
 import villages.domain.Where
 
 /**
  * A quest file, `world/catalogues/quests/<name>.json`, read into the template a quest is offered from: strict, so a
  * field it cannot read refuses the whole file, naming where. Nodes by their ids, the first the one it starts at: a
  * node offers a `dialogue` of `dialogues/` by its name, holds `objectives` - each `delivers` or `pledges` a resource,
- * by its name on the wire, or `holds` a type of structure, `on` an `island` or anywhere - or `gives` a reward; it may be
- * `hidden` or `shownAhead`; and it leads `then` to a node, or, after a dialogue, to each node by the endings that lead
- * there. The shape is a contract, held by `contracts/fixtures/quest.json`. See decision record 0097.
+ * by its name on the wire, or `holds` a type of structure, `on` an `island` or anywhere - `gives` a reward, or puts a
+ * `challenge`: its `kind`, who stands `against` the house, a `name` and a `colour`, and the `slices` they bring. It may
+ * be `hidden` or `shownAhead`; and it leads `then` to a node, or, after a dialogue, to each node by the endings that
+ * lead there, or after a challenge to each node by `won` or `lost`. The shape is a contract, held by
+ * `contracts/fixtures/quest.json`. See decision records 0097 and 0107, amended.
  */
 object QuestFile {
     private val json = JsonMapper.builder().build()
 
     private val RESOURCES = Resource.entries.associateBy { wireName(it.name) }
+
+    private val VERDICTS = Verdict.entries.associateBy { it.name.lowercase() }
 
     /** The quest [name] says, `abbot` for `quests/abbot.json`, for what a refusal names. */
     fun parse(text: String, name: String = "a quest"): QuestTemplate {
@@ -50,31 +58,24 @@ object QuestFile {
         val title = node["title"]?.takeIf { it.isString }?.asString() ?: refuse("$at.title")
         val hidden = flag(node, "hidden", "$at.hidden", refuse)
         val shownAhead = flag(node, "shownAhead", "$at.shownAhead", refuse)
-        val edges = when (val then = node["then"]) {
-            null -> emptyList()
-            else -> when {
-                then.isString -> listOf(Edge(NodeId(then.asString())))
-                then.isObject -> then.properties().map { (to, endings) ->
-                    if (!endings.isArray) refuse("$at.then.$to")
-                    Edge(NodeId(to), endings.values().map { LineId(it.takeIf { one -> one.isString }?.asString() ?: refuse("$at.then.$to")) }.toSet())
-                }
-                else -> refuse("$at.then")
-            }
-        }
         val dialogue = node["dialogue"]
         val objectives = node["objectives"]
         val gives = node["gives"]
+        val challenge = node["challenge"]
+        if (listOfNotNull(dialogue, objectives, gives, challenge).size != 1) refuse("$at.dialogue, objectives, gives or challenge, and only one,")
+        val edges = edgesOf(node["then"], at, byVerdict = challenge != null, refuse)
         return when {
-            dialogue != null && objectives == null && gives == null ->
+            dialogue != null ->
                 DialogueAt(id, title, dialogue.takeIf { it.isString }?.asString() ?: refuse("$at.dialogue"), edges, hidden, shownAhead)
-            objectives != null && dialogue == null && gives == null && objectives.isObject -> ObjectivesAt(
+            objectives != null -> ObjectivesAt(
                 id, title,
-                objectives.properties().filter { !it.key.startsWith("$") }.map { (key, objective) -> objectiveOf(key, objective, "$at.objectives.$key", refuse) },
+                (objectives.takeIf { it.isObject } ?: refuse("$at.objectives")).properties().filter { !it.key.startsWith("$") }
+                    .map { (key, objective) -> objectiveOf(key, objective, "$at.objectives.$key", refuse) },
                 edges, hidden, shownAhead,
             )
-            gives != null && dialogue == null && objectives == null && gives.isObject -> RewardAt(
+            gives != null -> RewardAt(
                 id, title,
-                gives.properties().map { (resource, amount) ->
+                (gives.takeIf { it.isObject } ?: refuse("$at.gives")).properties().map { (resource, amount) ->
                     Effect.Grant(
                         RESOURCES[resource] ?: refuse("$at.gives.$resource"),
                         amount.takeIf { it.isIntegralNumber }?.asLong() ?: refuse("$at.gives.$resource"),
@@ -82,8 +83,40 @@ object QuestFile {
                 },
                 edges, hidden, shownAhead,
             )
-            else -> refuse("$at.dialogue, objectives or gives, and only one,")
+            else -> ChallengeAt(id, title, challengeOf(challenge!!, "$at.challenge", refuse), edges, hidden, shownAhead)
         }
+    }
+
+    /**
+     * Where a node leads: to one node by its id, or to each node by what leads there - after a dialogue the lines that
+     * end it, after a challenge [byVerdict] `won` or `lost`.
+     */
+    private fun edgesOf(then: JsonNode?, at: String, byVerdict: Boolean, refuse: (String) -> Nothing): List<Edge> = when {
+        then == null -> emptyList()
+        then.isString -> listOf(Edge(NodeId(then.asString())))
+        then.isObject -> then.properties().map { (to, leading) ->
+            if (!leading.isArray) refuse("$at.then.$to")
+            val names = leading.values().map { it.takeIf { one -> one.isString }?.asString() ?: refuse("$at.then.$to") }
+            if (byVerdict) {
+                Edge(NodeId(to), verdict = names.singleOrNull()?.let(VERDICTS::get) ?: refuse("$at.then.$to won or lost"))
+            } else {
+                Edge(NodeId(to), names.map(::LineId).toSet())
+            }
+        }
+        else -> refuse("$at.then")
+    }
+
+    private fun challengeOf(node: JsonNode, at: String, refuse: (String) -> Nothing): QuestChallenge {
+        if (!node.isObject) refuse(at)
+        val against = node["against"]?.takeIf { it.isObject } ?: refuse("$at.against")
+        return QuestChallenge(
+            kind = node["kind"]?.takeIf { it.isString }?.asString() ?: refuse("$at.kind"),
+            against = Opponent(
+                against["name"]?.takeIf { it.isString }?.asString() ?: refuse("$at.against.name"),
+                against["colour"]?.takeIf { it.isString }?.asString() ?: refuse("$at.against.colour"),
+            ),
+            slices = SliceText.slicesOf(node["slices"], "$at.slices", refuse),
+        )
     }
 
     private fun objectiveOf(id: String, node: JsonNode, at: String, refuse: (String) -> Nothing): Objective {

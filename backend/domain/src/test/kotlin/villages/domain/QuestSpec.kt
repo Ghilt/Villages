@@ -58,12 +58,45 @@ class QuestSpec : StringSpec({
         refusal { made(reward("a"), reward("nobody")) } shouldContain "nothing leads to node nobody"
     }
 
-    "only a dialogue's ending can decide a fork" {
+    "only a dialogue's ending or a challenge's verdict can decide a fork" {
         refusal { made(reward("fork", "a", "b"), reward("a"), reward("b")) } shouldContain "a reward cannot decide"
         refusal { made(checklist("fork", deliver("d"), to = listOf(Edge(NodeId("a")), Edge(NodeId("b")))), reward("a"), reward("b")) } shouldContain
             "a checklist cannot decide"
         refusal { made(checklist("list", deliver("d"), to = listOf(Edge(NodeId("a"), setOf(Abbot.pleased)))), reward("a")) } shouldContain
             "has no dialogue"
+    }
+
+    "a challenge node forks on won and lost alone, an edge each, both leading on" {
+        fun square(vararg edges: Edge) =
+            made(Debate.squareNode.copy(edges = edges.toList()), Debate.penanceNode, Debate.blessingNode)
+        Debate.quest.start() shouldBe Debate.squareNode
+        refusal { square(Edge(Debate.blessing, verdict = Verdict.WON), Edge(Debate.penance, verdict = Verdict.WON)) } shouldContain
+            "one way when it is won and the other when it is lost"
+        refusal { square(Edge(Debate.blessing, verdict = Verdict.WON), Edge(Debate.penance)) } shouldContain "won and the other"
+        refusal { square(Edge(Debate.blessing, verdict = Verdict.WON)) } shouldContain "won and the other"
+        refusal { square(Edge(Debate.blessing, setOf(Abbot.pleased)), Edge(Debate.penance, verdict = Verdict.LOST)) } shouldContain
+            "names endings, and has no dialogue"
+    }
+
+    "a challenge node with one edge naming no verdict goes that way however it goes, and with none it ends the quest" {
+        made(Debate.squareNode.copy(edges = listOf(Edge(Debate.blessing))), Debate.blessingNode).nodes.size shouldBe 2
+        made(Debate.squareNode.copy(edges = emptyList())).nodes.size shouldBe 1
+    }
+
+    "a challenge node's terms hold together: a kind, an opponent with a name and a colour, one to three slices" {
+        fun terms(terms: QuestChallenge) = made(Debate.squareNode.copy(challenge = terms, edges = emptyList()))
+        refusal { terms(Debate.terms.copy(kind = " ")) } shouldContain "no kind"
+        refusal { terms(Debate.terms.copy(against = Opponent(" ", "#a8452a"))) } shouldContain "from nobody"
+        refusal { terms(Debate.terms.copy(against = Opponent("Brother Anselm", "red"))) } shouldContain "not a colour"
+        refusal { terms(Debate.terms.copy(slices = emptyList())) } shouldContain "brings 0 slices"
+        refusal { terms(Debate.terms.copy(slices = List(4) { Debate.reason })) } shouldContain "brings 4 slices"
+    }
+
+    "no node but a challenge names a verdict" {
+        refusal { made(reward("only").copy(edges = listOf(Edge(NodeId("next"), verdict = Verdict.WON))), reward("next")) } shouldContain
+            "names a verdict, and puts no challenge"
+        refusal { made(Abbot.gateNode.copy(edges = listOf(Edge(Abbot.gift, verdict = Verdict.LOST))), reward("gift")) } shouldContain
+            "names a verdict, and puts no challenge"
     }
 
     "where a dialogue node forks, every ending of its dialogue leads along exactly one edge" {

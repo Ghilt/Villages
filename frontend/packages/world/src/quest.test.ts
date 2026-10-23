@@ -16,7 +16,7 @@ describe('a quest file', () => {
 
     expect(quest.title).toBe('A road to the sea');
     expect(quest.shownFromTheStart).toBe(true);
-    const [talk, give, hold, prize] = quest.nodes;
+    const [talk, give, hold, dare, prize] = quest.nodes;
     expect(talk).toMatchObject({
       is: { kind: 'dialogue', dialogue: 'a-word' },
       then: [
@@ -31,7 +31,7 @@ describe('a quest file', () => {
         { id: 'oath', kind: 'pledges', resource: 'piety', amount: 3, months: 2 },
       ],
     });
-    expect(hold).toMatchObject({ hidden: true, then: [{ to: 'prize', endings: [] }] });
+    expect(hold).toMatchObject({ hidden: true, then: [{ to: 'dare', endings: [] }] });
     expect(hold!.is).toEqual({
       kind: 'objectives',
       objectives: [
@@ -39,7 +39,50 @@ describe('a quest file', () => {
         { id: 'fort', kind: 'holds', structure: 'castle', onAnIsland: true },
       ],
     });
+    expect(dare).toMatchObject({
+      then: [
+        { to: 'prize', endings: [], verdict: 'won' },
+        { to: 'give', endings: [], verdict: 'lost' },
+      ],
+    });
+    expect(dare!.is).toEqual({
+      kind: 'challenge',
+      challenge: {
+        kind: 'debate',
+        against: { name: 'A rival', colour: '#a8452a' },
+        slices: [
+          {
+            aspect: 'reason',
+            power: 50,
+            integrity: 46,
+            summonCount: 3,
+            effects: ['reason.counsel', 'reason.doubt'],
+            slotted: {
+              'reason.counsel': {
+                kind: 'keyFigure',
+                name: 'A scholar',
+                stats: { piety: 8, reason: 16, kindness: 9, physical: 7 },
+              },
+            },
+          },
+          {
+            aspect: 'holy',
+            power: 50,
+            integrity: 50,
+            summonCount: 3,
+            effects: ['holy.ordination', 'holy.sanctuary'],
+            slotted: { 'holy.sanctuary': { kind: 'building', name: 'A chapel', level: 1 } },
+          },
+        ],
+      },
+    });
     expect(prize).toMatchObject({ shownAhead: true, is: { kind: 'reward', gives: { reason: 7 } } });
+  });
+
+  it('refuses a challenge led on by anything but won or lost', () => {
+    expect(() => parseQuest(fixture.replace('"prize": ["won"]', '"prize": ["drawn"]'))).toThrow(
+      'world/catalogues/quests: no nodes.dare.then.prize won or lost the page can read',
+    );
   });
 
   it('reads the abbot', () => {
@@ -56,7 +99,7 @@ describe('a quest file', () => {
     expect(() =>
       parseQuest(fixture.replace('"gives": { "reason": 7 }', '"gives": { "reason": 7 }, "dialogue": "x"')),
     ).toThrow(
-      'world/catalogues/quests: no nodes.prize.dialogue, objectives or gives, and only one, the page can read',
+      'world/catalogues/quests: no nodes.prize.dialogue, objectives, gives or challenge, and only one, the page can read',
     );
   });
 });

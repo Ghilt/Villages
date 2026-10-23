@@ -1,10 +1,12 @@
 package villages.domain
 
+import villages.domain.challenge.ChallengeSetup
+import villages.domain.challenge.ChallengeSlice
 import java.util.UUID
 
 /**
  * A story with a goal, offered to a house whole: nodes joined by edges, read from the top down, and walked a
- * node at a time - a dialogue to finish, a checklist of objectives to tick, a reward to collect.
+ * node at a time - a dialogue to finish, a checklist of objectives to tick, a reward to collect, a challenge to fight.
  *
  * Recorded whole on the event that offers it, every dialogue inside it included, so the roads not taken are
  * history and every move can be checked against the house's own history alone. It checks itself when it is
@@ -57,13 +59,37 @@ data class Quest(
                 refuseUnlessOneRoad(node, "a reward")
                 if (node.gives.isEmpty()) refuse("$which gives nothing")
             }
+            is ChallengeNode -> refuseUnlessTheVerdictDecides(node)
         }
     }
 
-    /** Only a dialogue's ending can decide a fork, so any other node goes one way on, or none at the end. */
+    /** Only a dialogue's ending or a challenge's verdict can decide a fork, so any other node goes one way on, or none. */
     private fun refuseUnlessOneRoad(node: QuestNode, what: String) {
         if (node.edges.size > 1) refuse("node ${node.id.value} forks, and $what cannot decide which road is taken")
         if (node.edges.any { it.endings.isNotEmpty() }) refuse("node ${node.id.value} names endings, and has no dialogue")
+        if (node.edges.any { it.verdict != null }) refuse("node ${node.id.value} names a verdict, and puts no challenge")
+    }
+
+    /**
+     * A challenge node's terms hold together - a kind, an opponent with a name and a colour, one to three slices - and
+     * its edges name no endings. Where it forks it forks on won and lost, an edge each, so however the challenge goes
+     * the quest knows which way; its only edge naming no verdict is taken either way.
+     */
+    private fun refuseUnlessTheVerdictDecides(node: ChallengeNode) {
+        val which = "node ${node.id.value}"
+        val (kind, against, slices) = node.challenge
+        if (kind.isBlank()) refuse("$which puts a challenge of no kind")
+        if (against.name.isBlank()) refuse("$which puts a challenge from nobody")
+        if (!COLOUR.matches(against.colour)) refuse("$which's opponent is shown in ${against.colour}, not a colour like #a8452a")
+        if (slices.size !in 1..ChallengeSetup.MOST_SLICES) {
+            refuse("$which's opponent brings ${slices.size} slices, not 1 to ${ChallengeSetup.MOST_SLICES}")
+        }
+        if (node.edges.any { it.endings.isNotEmpty() }) refuse("$which names endings, and has no dialogue")
+        val verdicts = node.edges.mapNotNull { it.verdict }
+        if (verdicts.isEmpty() && node.edges.size < 2) return
+        if (node.edges.size != 2 || verdicts.toSet() != Verdict.entries.toSet()) {
+            refuse("$which forks, and a challenge leads one way when it is won and the other when it is lost")
+        }
     }
 
     /**
@@ -76,6 +102,7 @@ data class Quest(
         if (node.dialogue.id != DialogueId.ofNode(id, node.id)) {
             refuse("$which's dialogue is not under the id worked out from the quest and the node")
         }
+        if (node.edges.any { it.verdict != null }) refuse("$which names a verdict, and puts no challenge")
         val endings = node.dialogue.lines.filter { it.then == Then.End }.map { it.id }.toSet()
         node.edges.flatMap { it.endings }.firstOrNull { it !in endings }?.let {
             refuse("$which leads on after ${it.value}, which does not end its dialogue")
@@ -124,12 +151,15 @@ data class Quest(
     companion object {
         /** An id is a word to write a quest with, as a dialogue's are. */
         const val LONGEST_ID = Dialogue.LONGEST_ID
+
+        /** A colour a side is shown in, as the page writes one. */
+        private val COLOUR = Regex("#[0-9a-fA-F]{6}")
     }
 }
 
 /**
  * One place on a quest's road. Each is done in its own way - a dialogue finished, a checklist ticked, a reward
- * collected - and then the quest moves on along one of its edges, or ends when it has none.
+ * collected, a challenge fought - and then the quest moves on along one of its edges, or ends when it has none.
  */
 sealed interface QuestNode {
     val id: NodeId
@@ -143,7 +173,7 @@ sealed interface QuestNode {
     /** Drawn from the moment the quest is offered, however far down it stands, with its edges in and out. */
     val shownAhead: Boolean
 
-    /** The nodes it leads to. More than one is a fork, which only a dialogue node can decide. */
+    /** The nodes it leads to. More than one is a fork, which only a dialogue node or a challenge node can decide. */
     val edges: List<Edge>
 }
 
@@ -184,10 +214,38 @@ data class RewardNode(
 ) : QuestNode
 
 /**
- * The way from one node to the next. Out of a dialogue node it names the endings of the dialogue - the lines
- * that end it - which lead along it; none, on a node's only edge, is every ending.
+ * Puts a challenge to the house when the quest reaches it, on its own terms: done when the player accepts it with
+ * slices of the house's own, which fights it out in the same decision; whether the house won picks the edge, a draw
+ * counting as lost. Nothing is stored between: the challenge is no more than these terms until it is fought. See
+ * decision records 0096 and 0107, amended.
  */
-data class Edge(val to: NodeId, val endings: Set<LineId> = emptySet())
+data class ChallengeNode(
+    override val id: NodeId,
+    override val title: String,
+    val challenge: QuestChallenge,
+    override val edges: List<Edge> = emptyList(),
+    override val hidden: Boolean = false,
+    override val shownAhead: Boolean = false,
+) : QuestNode
+
+/**
+ * The terms of a challenge a quest puts to the house: its kind, by its name in the challenge catalogue, `debate`; who
+ * stands against the house; and the slices they bring, which the player does not see before it starts.
+ */
+data class QuestChallenge(val kind: String, val against: Opponent, val slices: List<ChallengeSlice>)
+
+/** Who stands against the house in a quest's challenge: a name, and the colour their side is shown in, `#a8452a`. */
+data class Opponent(val name: String, val colour: String)
+
+/** Which way a challenge went for the house, as an edge out of a challenge node names it. A draw is lost. */
+enum class Verdict { WON, LOST }
+
+/**
+ * The way from one node to the next. Out of a dialogue node it names the endings of the dialogue - the lines
+ * that end it - which lead along it; none, on a node's only edge, is every ending. Out of a challenge node it names
+ * the [verdict] that leads along it; none, on its only edge, is either.
+ */
+data class Edge(val to: NodeId, val endings: Set<LineId> = emptySet(), val verdict: Verdict? = null)
 
 /**
  * One row of a checklist: something the house must do before the node moves on. Met by the player, who presses

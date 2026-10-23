@@ -5,7 +5,7 @@
  */
 
 /** Sent on the handshake so that the gateway can refuse a client it cannot speak to. */
-export const PROTOCOL_VERSION = 69;
+export const PROTOCOL_VERSION = 70;
 
 export {
   MAX_ZOOM,
@@ -118,7 +118,14 @@ export type {
   ShowsView,
   SpeakerView,
 } from './dialogueFrames';
-export type { ObjectiveView, QuestEdgeView, QuestNodeState, QuestNodeView, QuestView } from './questFrames';
+export type {
+  ObjectiveView,
+  QuestChallengeView,
+  QuestEdgeView,
+  QuestNodeState,
+  QuestNodeView,
+  QuestView,
+} from './questFrames';
 export {
   structureArrivedSchema,
   structureChangedSchema,

@@ -102,6 +102,19 @@ export const CHALLENGE_MARKS = {
       <path d="M15.9 6.1 L10.8 11.2" className="ui-mark__line" />
     </>
   ),
+  /**
+   * A challenge: two arrows pulling apart, the tug of war, and between them the diamond a happening is shown as. What
+   * a quest's challenge node is drawn with, and the challenges' tab. A drawn placeholder; decision record 0107, amended.
+   */
+  challenge: (
+    <>
+      <path
+        d="M2.5 12 H8.5 M15.5 12 H21.5 M5.5 8.5 L2.5 12 L5.5 15.5 M18.5 8.5 L21.5 12 L18.5 15.5"
+        className="ui-mark__line"
+      />
+      <path d="M12 8 L15.5 12 L12 16 L8.5 12 Z" className="ui-mark__fill" />
+    </>
+  ),
   // The replay of a challenge, every control a mark on Adam's word of 2026-10-21: play and pause, to the end, the pace
   // it is played at - one, two or three chevrons over a line, so the slowest is not the carousel's step - and the
   // history it opens. Drawn placeholders until a picture is painted for each; decision record 0116.

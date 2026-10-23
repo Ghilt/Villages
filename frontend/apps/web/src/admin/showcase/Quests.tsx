@@ -10,7 +10,13 @@ import { QuestNode } from '../../ui/quest/QuestNode';
 import type { QuestNodeKind, QuestNodeState } from '../../ui/quest/QuestNode';
 import { Part, Specimen, Specimens } from './Specimen';
 
-const KINDS: readonly (QuestNodeKind | undefined)[] = ['dialogue', 'checklist', 'reward', undefined];
+const KINDS: readonly (QuestNodeKind | undefined)[] = [
+  'dialogue',
+  'checklist',
+  'reward',
+  'challenge',
+  undefined,
+];
 const STATES: readonly QuestNodeState[] = ['current', 'ahead', 'done', 'lost'];
 
 /** The abbot of the isle at its start: the abbot lit, two question marks one edge ahead, one shown half-way down. */

@@ -1,5 +1,6 @@
 package villages.application
 
+import villages.domain.ChallengeNode
 import villages.domain.DialogueId
 import villages.domain.DialogueNode
 import villages.domain.Edge
@@ -10,9 +11,12 @@ import villages.domain.NodeId
 import villages.domain.Objective
 import villages.domain.ObjectiveNode
 import villages.domain.Quest
+import villages.domain.QuestChallenge
 import villages.domain.QuestId
 import villages.domain.RewardNode
 import villages.domain.StructureCatalogue
+import villages.domain.challenge.ChallengeCatalogue
+import villages.domain.challenge.refusals
 import villages.domain.ofNode
 import java.util.UUID
 
@@ -65,6 +69,16 @@ data class QuestTemplate(
         override val shownAhead: Boolean,
     ) : NodeTemplate
 
+    /** A node that puts a challenge to the house, on the terms it writes whole. */
+    data class ChallengeAt(
+        override val id: String,
+        override val title: String,
+        val challenge: QuestChallenge,
+        override val edges: List<Edge>,
+        override val hidden: Boolean,
+        override val shownAhead: Boolean,
+    ) : NodeTemplate
+
     /**
      * This quest, offered to [house] under [id], each dialogue node's dialogue taken from [dialogues] and filled for the
      * house: the quest the domain checks when it is made, refusing it as `InvalidQuest` when it does not hold together.
@@ -88,6 +102,7 @@ data class QuestTemplate(
                 )
                 is ObjectivesAt -> ObjectiveNode(at, node.title, node.objectives, node.edges, node.hidden, node.shownAhead)
                 is RewardAt -> RewardNode(at, node.title, node.gives, node.edges, node.hidden, node.shownAhead)
+                is ChallengeAt -> ChallengeNode(at, node.title, node.challenge, node.edges, node.hidden, node.shownAhead)
             }
         },
     )
@@ -95,11 +110,23 @@ data class QuestTemplate(
     /**
      * Whether it holds together with the catalogues beside it, as the shelf asks before taking it on: every dialogue it
      * names is on the shelf and spoken by people of its own - a quest's dialogues are not spoken by the house's key
-     * figure yet - every type of structure it asks to be held is in the catalogue, and, offered to a stand-in house, the
-     * domain's own checks pass. Throws [CatalogueRefused] naming the file and why.
+     * figure yet - every type of structure it asks to be held is in the catalogue, every challenge it puts is of a kind
+     * the challenge catalogue has and its opponent's slices could be fought with it, and, offered to a stand-in house,
+     * the domain's own checks pass. Throws [CatalogueRefused] naming the file and why.
      */
-    fun check(name: String, dialogues: Map<String, DialogueTemplate>, structures: StructureCatalogue): QuestTemplate {
+    fun check(
+        name: String,
+        dialogues: Map<String, DialogueTemplate>,
+        structures: StructureCatalogue,
+        challenges: ChallengeCatalogue = ChallengeCatalogue.NONE,
+    ): QuestTemplate {
         fun refuse(why: String): Nothing = throw CatalogueRefused("${Catalogues.QUESTS}/$name", why)
+        for (node in nodes.filterIsInstance<ChallengeAt>()) {
+            val (kind, _, slices) = node.challenge
+            if (kind !in challenges.kinds) refuse("node ${node.id} puts a challenge of kind $kind, which the challenges do not have")
+            slices.flatMapIndexed { at, slice -> slice.refusals(challenges, "the opponent's slice ${at + 1}") }.firstOrNull()
+                ?.let { refuse("node ${node.id}: $it") }
+        }
         for (node in nodes.filterIsInstance<DialogueAt>()) {
             val dialogue = dialogues[node.dialogue] ?: refuse("node ${node.id} offers ${node.dialogue}, which is not in dialogues/")
             if (dialogue.needsKeyFigure) refuse("node ${node.id} offers ${node.dialogue}, which the house's key figure speaks, and a quest's cannot yet")

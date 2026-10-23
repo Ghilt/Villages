@@ -17,6 +17,8 @@ export interface Road {
   readonly from: string;
   readonly to: string;
   readonly endings: readonly string[];
+  /** Out of a challenge node, whether it is the road when it is won or when it is lost. */
+  readonly verdict?: 'won' | 'lost';
 }
 
 /**
@@ -29,7 +31,12 @@ export function layOutQuest(quest: QuestFile): { placed: PlacedNode[]; roads: Ro
   const roads = quest.nodes.flatMap((node) =>
     node.then
       .filter((lead) => ids.has(lead.to))
-      .map((lead) => ({ from: node.id, to: lead.to, endings: lead.endings })),
+      .map((lead) => ({
+        from: node.id,
+        to: lead.to,
+        endings: lead.endings,
+        ...(lead.verdict === undefined ? {} : { verdict: lead.verdict }),
+      })),
   );
 
   const graph = new dagre.graphlib.Graph();

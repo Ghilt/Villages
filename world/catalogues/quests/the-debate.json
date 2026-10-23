@@ -1,0 +1,44 @@
+{
+  "$comment": "A quest to try a challenge in the game with, Adam's to change: Brother Anselm challenges the house to a debate in the square. Won, the road goes straight to his blessing, the cheaper road; lost, the house first pays a penance in wealth. A challenge node puts a challenge to the house: its kind, one of the challenges' kinds; who stands against it, a name and the colour their side is shown in; and the slices they bring, written as the challenges page writes a slice, which the player does not see before it starts. It leads then to one node when it is won and another when it is lost, a draw counting as lost. The rest as the abbot's quest writes it. Every word and number a placeholder. Written on 2026-10-23; the debug panel's Quests section offers it, and /admin/inspect-quests shows and edits it. See decision records 0096 and 0107, amended, and docs/plans/challenges-in-the-game.md.",
+  "title": "The debate in the square",
+  "scene": "harbour",
+  "nodes": {
+    "square": {
+      "title": "Brother Anselm's challenge",
+      "challenge": {
+        "kind": "debate",
+        "against": { "name": "Brother Anselm", "colour": "#a8452a" },
+        "slices": [
+          {
+            "aspect": "reason",
+            "power": 50,
+            "integrity": 50,
+            "summonCount": 3,
+            "effects": ["reason.counsel", "reason.doubt"],
+            "slotted": {
+              "reason.counsel": {
+                "kind": "keyFigure",
+                "name": "Brother Anselm",
+                "stats": { "piety": 12, "reason": 16, "kindness": 9, "physical": 6 }
+              }
+            }
+          },
+          {
+            "aspect": "generosity",
+            "power": 50,
+            "integrity": 50,
+            "summonCount": 3,
+            "effects": ["generosity.alms", "generosity.tend"]
+          }
+        ]
+      },
+      "then": { "blessing": ["won"], "penance": ["lost"] }
+    },
+    "penance": {
+      "title": "A penance",
+      "objectives": { "wealth": { "delivers": "wealth", "amount": 40 } },
+      "then": "blessing"
+    },
+    "blessing": { "title": "The brother's blessing", "gives": { "piety": 50 }, "shownAhead": true }
+  }
+}

@@ -20,7 +20,7 @@ import type { MarkName } from '../ui/mark/Mark';
 import { ChecklistRow } from '../ui/quest/ChecklistRow';
 import { QuestMap } from '../ui/quest/QuestMap';
 import type { MapNode } from '../ui/quest/QuestMap';
-import { howMany, type ListedQuest, listOf, objectiveWords } from './describe';
+import { challengeWords, howMany, type ListedQuest, listOf, objectiveWords } from './describe';
 import { questOpened, questToOpenStore } from './toOpen';
 
 /**
@@ -178,6 +178,7 @@ function NodeCard({ quest, node }: { quest: QuestView; node: QuestNodeView }) {
   const resources = useStore(sessionStore, (state) => state.yourHouse?.resources ?? null);
   const acting = !useStore(sessionStore, canAct);
   const here = node.state === 'current';
+  const challenge = challengeWords(quest, node);
   const free = (resource: ResourceName): number =>
     resources === null ? 0 : Math.floor(freeNow(resources[resource], Date.now()));
   return (
@@ -189,6 +190,16 @@ function NodeCard({ quest, node }: { quest: QuestView; node: QuestNodeView }) {
         )}
         {node.kind === undefined && node.state !== 'lost' && (
           <p className="quests__card-line">What waits here is shown when the quest reaches it.</p>
+        )}
+        {challenge !== null && (
+          <>
+            <p className="quests__card-line">{challenge.puts}</p>
+            {challenge.roads.map((road) => (
+              <p key={road} className="quests__card-line">
+                {road}
+              </p>
+            ))}
+          </>
         )}
         {(node.objectives ?? []).map((objective) => {
           const words = objectiveWords(objective);

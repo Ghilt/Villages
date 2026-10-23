@@ -18,7 +18,7 @@ data class Catalogues(
     val dialogues: Map<String, DialogueTemplate> = emptyMap(),
     /** Every quest there is to offer, by its name in `quests/`: `abbot` for `quests/abbot.json`. */
     val quests: Map<String, QuestTemplate> = emptyMap(),
-    /** The challenge's effects, summons and kinds: the simulator's content, not in the game yet. */
+    /** The challenge's effects, summons and kinds: the simulator's content, and what a quest's challenge is fought by. */
     val challenges: ChallengeCatalogue = ChallengeCatalogue.NONE,
 ) {
     /**
@@ -30,7 +30,7 @@ data class Catalogues(
         fate.check()
         characterNames.check()
         dialogues.forEach { (name, dialogue) -> dialogue.check(name) }
-        quests.forEach { (name, quest) -> quest.check(name, dialogues, structures) }
+        quests.forEach { (name, quest) -> quest.check(name, dialogues, structures, challenges) }
         ChallengeBehaviours.unmatched(challenges).firstOrNull()?.let { throw CatalogueRefused(CHALLENGES, it) }
         return this
     }

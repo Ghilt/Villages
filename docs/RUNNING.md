@@ -392,14 +392,16 @@ stage alone, with none of the debug panel in it (decision record 0079).
   `docs/adr/0071`, `0069` and `0070`, and `docs/plans/character-dialogue.md`.
 - Quests, in the same panel: the **Quests** section, below Dialogues. `offer a quest` offers the house the
   quest chosen beside it, by its name in `world/catalogues/quests/`, a file each naming the dialogues of
-  `dialogues/` it offers; the first is *the abbot of the isle*. It is off, saying why on hover, while there is no
-  house. The game server reads a quest and its dialogues as it is offered, so what was saved, by hand or from
+  `dialogues/` it offers; the first is *the abbot of the isle*, and *the debate in the square*, `the-debate`, is the one
+  to try a challenge with. It is off, saying why on hover, while there is no house. The game server reads a quest and its dialogues as it is offered, so what was saved, by hand or from
   **`/admin/inspect-quests`**, is the next offer's, and one offered already keeps its road; it refuses, as it takes
-  the files on, a quest naming a dialogue or a type of structure there is not. The page names every quest across
+  the files on, a quest naming a dialogue or a type of structure there is not, or putting a challenge of a kind the
+  challenges do not have or with slices that could not be fought. The page names every quest across
   its top, each an address of its own, `/admin/inspect-quests/abbot`, and draws the chosen one as its road - a card a
   node, a dialogue's cool, a reward's warm, a question mark's dashed, one shown ahead ringed, a fork's roads named by
-  the endings that take them - beside the node chosen on it: its title, its two marks, and its objectives' and
-  reward's numbers changed in place, a dialogue node linking to the dialogue's own page. It opens with a
+  the endings that take them, a challenge's by *if won* and *if lost* - beside the node chosen on it: its title, its two marks, and its objectives' and
+  reward's numbers changed in place, a dialogue node linking to the dialogue's own page, and a challenge node saying
+  its kind, its opponent in their colour and each of their slices. It opens with a
   dialogue at the gate, which arrives in the **dialogues** pane as any dialogue does and opens it: the abbot asks
   what the house holds dearest, and *its faith* takes the road of a pledge of thirty piety, *its coffers* the road of
   a castle held on an island and sixty wealth delivered, the other road lost. **That one lever is all the debug
@@ -419,7 +421,11 @@ stage alone, with none of the debug panel in it (decision record 0079).
   dialogues' tab, which ends, once finished, in a button with the quest's name and the needle that turns back to its
   map; the gift's or the light's card under the map has *Pledge* or *Deliver*, a mark each, greyed with
   what the house has free while it cannot pay, which the Resources section's *give* mends; and the blessing's card
-  has *Collect*. Each press is a line of the log under `quests`. A castle for the bad road must stand on land the
+  has *Collect*. Each press is a line of the log under `quests`. *The debate in the square* stands at its challenge
+  node from the start, drawn with the challenge's mark, two arrows pulling apart and a diamond between them; its
+  card says *A debate against Brother Anselm.* and where each road leads, *Won: something not yet known* and
+  *Lost: A penance*, and nothing of his slices. It cannot be taken up yet: accepting comes with the next steps of
+  `docs/plans/challenges-in-the-game.md`. A castle for the bad road must stand on land the
   server counts as an island on the master - the British island there is at 54.8, -1.0, and 54.0, -2.0 is shallow
   sea - which `?at=54.8,-1.0&zoom=8` and the Structures section's *raise here*, yours, do in a moment.
   See `docs/adr/0096` and `docs/plans/quests.md`.

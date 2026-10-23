@@ -1,0 +1,79 @@
+{
+  "type": "villages.player.offeredQuest.v1",
+  "source": "urn:villages",
+  "subject": "6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a",
+  "time": "2026-09-04T12:00:00Z",
+  "data": {
+    "houseId": "6d5b0a2e-1c3f-4d7e-9a8b-0f1e2d3c4b5a",
+    "player": "0b7a2c9d-4e6f-4a1b-8c2d-3e4f5a6b7c8d",
+    "quest": {
+      "id": "ee000000-0000-4000-8000-00000000a002",
+      "title": "The debate in the square",
+      "scene": null,
+      "nodes": [
+        {
+          "kind": "challenge",
+          "id": "square",
+          "title": "Brother Anselm's challenge",
+          "challenge": {
+            "kind": "debate",
+            "against": { "name": "Brother Anselm", "colour": "#a8452a" },
+            "slices": [
+              {
+                "aspect": "REASON",
+                "power": 50.0,
+                "integrity": 46.0,
+                "summonCount": 3,
+                "effects": ["reason.counsel", "reason.doubt"],
+                "slotted": {
+                  "reason.counsel": {
+                    "kind": "keyFigure",
+                    "name": "Master Oswin",
+                    "stats": { "PIETY": 8, "REASON": 16, "KINDNESS": 9, "PHYSICAL": 7 }
+                  }
+                }
+              },
+              {
+                "aspect": "HOLY",
+                "power": 50.0,
+                "integrity": 50.0,
+                "summonCount": 3,
+                "effects": ["holy.ordination", "holy.sanctuary"],
+                "slotted": {
+                  "holy.sanctuary": { "kind": "building", "name": "the chapel", "level": 1 }
+                }
+              }
+            ]
+          },
+          "edges": [
+            { "to": "blessing", "endings": [], "verdict": "WON" },
+            { "to": "penance", "endings": [], "verdict": "LOST" }
+          ],
+          "hidden": false,
+          "shownAhead": false
+        },
+        {
+          "kind": "checklist",
+          "id": "penance",
+          "title": "A penance",
+          "objectives": [{ "kind": "deliver", "id": "wealth", "resource": "WEALTH", "amount": 40 }],
+          "edges": [{ "to": "blessing", "endings": [] }],
+          "hidden": false,
+          "shownAhead": false
+        },
+        {
+          "kind": "reward",
+          "id": "blessing",
+          "title": "The brother's blessing",
+          "gives": [{ "kind": "grant", "resource": "PIETY", "amount": 50 }],
+          "edges": [],
+          "hidden": false,
+          "shownAhead": false
+        }
+      ],
+      "shownFromTheStart": false
+    },
+    "worldTime": 454901,
+    "recordedAt": "2026-09-04T12:00:00Z"
+  }
+}
