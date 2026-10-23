@@ -36,6 +36,7 @@ object BalanceFile {
             omens = Balance.Omens(
                 weakForDays = whole(omens, "omens.weakForDays"),
                 piousAt = whole(omens, "omens.piousAt"),
+                landingCircleKm = number(omens, "omens.landingCircleKm"),
                 groundPresent = number(omens, "omens.groundPresent"),
                 riversWithinKm = number(omens, "omens.riversWithinKm"),
                 housesWithinKm = number(omens, "omens.housesWithinKm"),

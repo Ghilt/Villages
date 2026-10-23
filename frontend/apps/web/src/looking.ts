@@ -7,11 +7,14 @@ import { isWaterKind, subjectsStore } from './inspect/subjects';
 import { watersStore } from './inspect/waters';
 
 /**
- * What the page is looking at as the player presses Take action, gathered from the surfaces that know: where the
- * camera is centred and how close, the houses and characters with inspect windows open on them, where each window on
- * water was opened, the dialogue being read, and the key figure open. Nothing it could work out for itself - no terrain, no names - because every field
- * is a claim the server checks and the omens are the server's to work out. Gathered here at the root, which may
- * read every surface, and handed down to the choice roll. See decision records 0083 and 0084.
+ * What the page is looking at as the player presses Take action, gathered from the surfaces that know: where its die
+ * landed, the houses and characters with inspect windows open on them, where each window on water was opened, the
+ * dialogue being read, and the key figure open. Nothing it could work out for itself - no terrain, no names - because
+ * every field is a claim the server checks and the omens are the server's to work out. Gathered here at the root,
+ * which may read every surface, and handed down to the choice roll. See decision records 0083, 0084 and 0118.
+ *
+ * Until the die is on the map (`docs/plans/choice-roll-podium.md`, step 7), Take action lands it at the camera's
+ * centre, which is exactly what a die dropped there would do.
  */
 let camera: maplibregl.Map | null = null;
 
@@ -24,9 +27,7 @@ export function lookingNow(): Looking {
   const open = subjectsStore.get().open;
   const centre = camera?.getCenter().wrap();
   return {
-    ...(centre === undefined || camera === null
-      ? {}
-      : { centre: { lat: centre.lat, lon: centre.lng }, zoom: camera.getZoom() }),
+    ...(centre === undefined ? {} : { landing: { lat: centre.lat, lon: centre.lng } }),
     inspectingHouses: open.filter((one) => one.kind === 'house').map((one) => one.id),
     inspectingCharacters: open.filter((one) => one.kind === 'character').map((one) => one.id),
     // Where, and never what: the server reads the place again for the water there (0087).

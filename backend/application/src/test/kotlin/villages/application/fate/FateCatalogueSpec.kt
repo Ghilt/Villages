@@ -46,7 +46,7 @@ class FateCatalogueSpec : StringSpec({
         Banner(Tincture.SABLE, Division.PLAIN, null, Charge.STAG, Tincture.ARGENT),
         resources = foundingStocks(noon), pledges = emptyList(), since = founded, until = null, version = 1,
     )
-    val bare = Moment(house, Looking.NOTHING, founded, noon)
+    val bare = Moment(house, Looking.NOTHING, founded, noon, 25.0)
 
     fun grant(id: String, rarity: Rarity, vararg pools: String = arrayOf("Hearth", "Coin")) =
         ActionSpec(id, rarity, pools.toList(), "Collect $id", "Paid.", Deals.Grant(Resource.WEALTH))

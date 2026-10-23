@@ -55,7 +55,7 @@ internal class ChoicesPart(
     }
 
     private val asked: AutoCloseable = choices.watch { player, row ->
-        core.sessionOf(player)?.let { tell(it, row?.choice?.toView(row.omens)) }
+        core.sessionOf(player)?.let { tell(it, row?.let { pending -> pending.choice.toView(pending.omens, pending.landing, pending.circleKm) }) }
     }
 
     /**
@@ -88,7 +88,10 @@ internal class ChoicesPart(
             null
         }
         given?.let { connection.keptBy(this) { Told() }.stories[it.choice.id] = it.story }
-        tell(connection, given?.choice?.toView() ?: choices.pendingOf(who)?.let { it.choice.toView(it.omens) })
+        tell(
+            connection,
+            given?.choice?.toView() ?: choices.pendingOf(who)?.let { pending -> pending.choice.toView(pending.omens, pending.landing, pending.circleKm) },
+        )
     }
 
     override fun register(commands: Commands, frames: Frames) {
@@ -101,7 +104,7 @@ internal class ChoicesPart(
             val rolled = rolls.roll(asking.who, payload.toLooking().copy(master = master), asking.startingAStory)
             core.sessionOf(asking.who)?.let {
                 it.keptBy(this) { Told() }.stories[rolled.hand.id] = asking.startingAStory.correlationId
-                tell(it, rolled.hand.toView(rolled.omens))
+                tell(it, rolled.hand.toView(rolled.omens, rolled.landing, rolled.circleKm))
             }
         }
         commands.on<TakeActionPayload> { asking, payload ->
@@ -123,8 +126,7 @@ internal class ChoicesPart(
     }
 
     private fun RollPayload.toLooking() = Looking(
-        centre = centre?.let { Location(it.lat, it.lon) },
-        zoom = zoom,
+        landing = landing?.let { Location(it.lat, it.lon) },
         inspectingHouses = inspectingHouses.map { HouseId(asUuid(it, "a house id")) },
         inspectingCharacters = inspectingCharacters.map { CharacterId(asUuid(it, "a character id")) },
         // A place off the Earth is no water, and is dropped as the fog drops what the house may not see.

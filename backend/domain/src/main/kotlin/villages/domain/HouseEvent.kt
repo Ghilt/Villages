@@ -177,6 +177,10 @@ data class PlayerGivenChoice(
  * never seen without its roll nor a roll without its price. The omens are history: the next roll's changes are
  * worked out against what the house had at this one, and they answer why a hand was what it was. See decision
  * record 0083.
+ *
+ * Where the roll's die landed, and how many kilometres round it the map's omens were read, so a retune of the circle
+ * never rewrites what a roll read and a reloaded page draws the die where it fell. Absent on a roll made before the
+ * die, or with no place at all. See decision record 0118.
  */
 data class PlayerRolled(
     override val houseId: HouseId,
@@ -184,6 +188,8 @@ data class PlayerRolled(
     val rollId: RollId,
     val omens: List<Omen>,
     val rarity: Rarity,
+    val landing: Location? = null,
+    val circleKm: Double? = null,
     override val worldTime: WorldTime,
     override val recordedAt: Instant,
 ) : ChoiceEvent, PlayerEvent

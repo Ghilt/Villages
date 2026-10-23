@@ -97,7 +97,7 @@ class BalanceFileTest {
         assertEquals(4, balance.roll.hand)
         assertEquals(listOf(60, 30, 9, 1), villages.domain.Rarity.entries.map { balance.roll.odds.getValue(it) })
         assertEquals(listOf(20L, 50L, 150L, 500L), villages.domain.Rarity.entries.map { balance.roll.grants.getValue(it) })
-        assertEquals(villages.application.Balance.Omens(365, 80, 0.2, 300.0, 120.0, 2, 100.0, 1), balance.omens)
+        assertEquals(villages.application.Balance.Omens(365, 80, 20.0, 0.2, 300.0, 120.0, 2, 100.0, 1), balance.omens)
         assertEquals(3_500_000.0, balance.islands.smallerThanKm2)
         assertEquals(16..60, balance.newcomers.ages)
         assertEquals(

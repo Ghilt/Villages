@@ -2,6 +2,7 @@ package villages.gateway
 
 import villages.domain.Choice
 import villages.domain.Effect
+import villages.domain.Location
 import villages.domain.Omen
 import villages.domain.OmenKind
 import villages.domain.Rarity
@@ -17,10 +18,14 @@ import villages.protocol.Point
 import villages.protocol.SpendView
 
 /**
- * A choice as the parchment shows it, with the omens of the roll that dealt it when a roll did. What the interface
- * renders and the whole of what it knows.
+ * A choice as the parchment shows it, with the omens of the roll that dealt it when a roll did, and where its die
+ * landed and how wide its circle was. What the interface renders and the whole of what it knows.
  */
-internal fun Choice.toView(omens: List<Omen> = emptyList()): ChoiceView = ChoiceView(
+internal fun Choice.toView(
+    omens: List<Omen> = emptyList(),
+    landing: Location? = null,
+    circleKm: Double? = null,
+): ChoiceView = ChoiceView(
     id = id.value.toString(),
     prompt = prompt,
     options = options.map { option ->
@@ -34,6 +39,8 @@ internal fun Choice.toView(omens: List<Omen> = emptyList()): ChoiceView = Choice
         )
     },
     omens = omens.map { OmenView(it.key.value, it.kind.toWire(), it.words, it.value) },
+    landing = landing?.let { Point(it.lat, it.lon) },
+    circleKm = circleKm,
 )
 
 /** A rarity's name on the wire, which is its name in lower case. */

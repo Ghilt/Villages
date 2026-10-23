@@ -5,6 +5,7 @@ import villages.domain.Event
 import villages.domain.HouseFounded
 import villages.domain.HouseGainedVision
 import villages.domain.Location
+import villages.domain.PlayerRolled
 import villages.domain.StructureRaised
 
 /**
@@ -39,5 +40,7 @@ fun placeOf(event: Event): Location? = when (event) {
     is HouseGainedVision -> event.place
     is CharacterMoved -> event.place
     is StructureRaised -> event.place
+    // A roll happened where its die landed (0118); one made before the die, nowhere.
+    is PlayerRolled -> event.landing
     else -> null
 }

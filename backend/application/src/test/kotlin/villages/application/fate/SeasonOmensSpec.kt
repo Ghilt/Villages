@@ -29,6 +29,7 @@ class SeasonOmensSpec : StringSpec({
         Looking.NOTHING,
         WorldTime(1),
         Instant.EPOCH,
+        25.0,
     )
 
     fun seasonIn(month: Int, lat: Double) = SeasonOmens { month }.read(seatedAt(lat)).single().words

@@ -25,6 +25,7 @@ val TEST_BALANCE = Balance(
     omens = Balance.Omens(
         weakForDays = 730,
         piousAt = 100,
+        landingCircleKm = 25.0,
         groundPresent = 0.15,
         riversWithinKm = 400.0,
         housesWithinKm = 150.0,

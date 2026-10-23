@@ -5,6 +5,7 @@ import villages.application.Dice
 import villages.application.FreshIds
 import villages.domain.Choice
 import villages.domain.ChoiceId
+import villages.domain.Location
 import villages.domain.Omen
 import villages.domain.OmenKey
 import villages.domain.Option
@@ -21,6 +22,9 @@ data class Considered(val action: String, val weight: Int)
 data class Rolled(
     val omens: List<Omen>,
     val rarity: Rarity,
+    /** Where the roll's die landed, and how wide its circle was, when it landed anywhere. See 0118. */
+    val landing: Location?,
+    val circleKm: Double?,
     val hand: Choice,
     val opened: List<String>,
     val considered: List<Considered>,
@@ -77,7 +81,16 @@ class FateEngine(
                 )
             },
         )
-        return Rolled(omens, at, hand, opened.map(Pool::name), draw.map { (action, _) -> Considered(action.id, weightOf(action, opened)) })
+        val landing = moment.looking.landing
+        return Rolled(
+            omens = omens,
+            rarity = at,
+            landing = landing,
+            circleKm = landing?.let { moment.circleKm },
+            hand = hand,
+            opened = opened.map(Pool::name),
+            considered = draw.map { (action, _) -> Considered(action.id, weightOf(action, opened)) },
+        )
     }
 
     private fun drawable(actions: List<Action>, rarity: Rarity, moment: Moment, omens: List<Omen>, opened: List<Pool>): List<Pair<Action, Dealt>> =

@@ -10,7 +10,6 @@ import villages.domain.WorldTime
 import kotlin.math.ceil
 import kotlin.math.cos
 import kotlin.math.max
-import kotlin.math.pow
 import kotlin.math.sqrt
 
 /** The houses standing within some kilometres of a place on a day, for the map's omens. */
@@ -19,11 +18,11 @@ fun interface HousesNear {
 }
 
 /**
- * Where the player is looking, as omens, worked out by the server from the centre of their view and how close it
- * is, and never taken from the page: the **looking circle** about the centre, as wide as an ordinary window shows
- * at that zoom, read against the master's ground map and the house's fog. Only revealed ground counts, so a circle
- * of nothing but fog is the one omen *Unknown*. Zoomed out the circle is wide and its omens broad - coast,
- * mountains; zoomed in it is narrow and the houses standing in it are omens by name. See decision record 0084.
+ * Where the roll's die landed, as omens, worked out by the server from the landing and never taken from the page: the
+ * **landing circle** about it, the moment's width round it at every zoom, read against the master's ground map and the
+ * house's fog. Only revealed ground counts, so a circle of nothing but fog is the one omen *Unknown*. A circle as
+ * narrow as it is to begin with names the river and the houses and towns standing in it. See decision records 0084,
+ * which made the server read the ground, and 0118, which aimed the circle by the die.
  *
  * Where the master's real names have been carried, the ground says whether and the names say what: the river is
  * the Vistula and the open sea the Baltic, under the same keys as a river and the open sea with no name, so a pool
@@ -39,11 +38,10 @@ class MapOmens(
     private val balance: () -> Balance,
 ) : OmenSource {
     override fun read(moment: Moment): List<Omen> {
-        val centre = moment.looking.centre ?: return emptyList()
-        val zoom = moment.looking.zoom ?: return emptyList()
+        val centre = moment.looking.landing ?: return emptyList()
         val ground = moment.looking.master?.let(grounds::of) ?: return emptyList()
         val named = moment.looking.master?.let(names::of)
-        val radius = radiusAt(zoom, centre.lat)
+        val radius = moment.circleKm
         val numbers = balance().omens
         val sight = sights.of(moment.house.id)
 
@@ -119,15 +117,6 @@ class MapOmens(
     }
 
     companion object {
-        /** How many pixels from the middle of an ordinary window to its side: what the looking circle is as wide as. */
-        const val LOOK_PX = 640.0
-
-        /** The ground a web map's pixel covers at zoom nought on the equator, in kilometres. */
-        const val KM_A_PIXEL_AT_NOUGHT = 156.543
-
-        /** Never narrower than this, so that the closest look still has a little ground about it. */
-        const val LEAST_KM = 5.0
-
         private const val KM_A_DEGREE = 111.32
 
         /**
@@ -158,9 +147,5 @@ class MapOmens(
 
         /** A name as it starts an omen: the Vistula, the Baltic Sea. */
         fun the(name: String): String = if (name.startsWith("The ")) name else "The $name"
-
-        /** How far the looking circle reaches at a zoom, at a latitude, in kilometres. */
-        fun radiusAt(zoom: Double, lat: Double): Double =
-            max(LEAST_KM, LOOK_PX * KM_A_PIXEL_AT_NOUGHT / 2.0.pow(zoom) * cos(Math.toRadians(lat)))
     }
 }

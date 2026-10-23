@@ -119,12 +119,16 @@ class ChoicesProjectionSpec : StringSpec({
         val feed = ChoicesFed()
         val choices = ChoicesProjection(feed).started()
         val river = Omen(OmenKey("map.river"), OmenKind.MAP, "River")
-        val roll = PlayerRolled(house, adam, RollId(UUID.randomUUID()), listOf(river), Rarity.COMMON, onDay, atNoon)
+        val roll = PlayerRolled(
+            house, adam, RollId(UUID.randomUUID()), listOf(river), Rarity.COMMON, Location(52.23, 21.01), 25.0, onDay, atNoon,
+        )
 
         feed.deliver(roll, "a-roll")
         feed.deliver(given().first, "a-roll", version = 3)
 
         choices.pendingOf(adam)?.omens shouldBe listOf(river)
+        choices.pendingOf(adam)?.landing shouldBe Location(52.23, 21.01)
+        choices.pendingOf(adam)?.circleKm shouldBe 25.0
 
         feed.deliver(tookAction(), version = 4)
         feed.deliver(roll, "another-roll", version = 5)

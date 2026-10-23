@@ -7,7 +7,7 @@
     "odds": { "common": 60, "uncommon": 30, "rare": 9, "legendary": 1 },
     "grants": { "common": 20, "uncommon": 50, "rare": 150, "legendary": 500 }
   },
-  "omens": { "weakForDays": 365, "piousAt": 80, "groundPresent": 0.2, "riversWithinKm": 300, "housesWithinKm": 120, "mostHouses": 2, "townsWithinKm": 100, "mostTowns": 1 },
+  "omens": { "weakForDays": 365, "piousAt": 80, "landingCircleKm": 20, "groundPresent": 0.2, "riversWithinKm": 300, "housesWithinKm": 120, "mostHouses": 2, "townsWithinKm": 100, "mostTowns": 1 },
   "islands": { "smallerThanKm2": 3500000 },
   "newcomers": { "youngest": 16, "oldest": 60 },
   "challenge": {

@@ -51,6 +51,11 @@
         "words": "Pious",
         "value": 104
       }
-    ]
+    ],
+    "landing": {
+      "lat": 59.33,
+      "lon": 18.07
+    },
+    "circleKm": 25.0
   }
 }

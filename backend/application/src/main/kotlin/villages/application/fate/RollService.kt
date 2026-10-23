@@ -46,7 +46,8 @@ class RollService(
         val house = houses.ofPlayer(player) ?: throw HouseError.NoSuchHouse
         val today = world.today()
         val rarity = forced[player]
-        val rolled = engine.roll(Moment(house, looking, today, clock.now()), rarity)
+        val circleKm = balance().omens.landingCircleKm
+        val rolled = engine.roll(Moment(house, looking, today, clock.now(), circleKm), rarity)
         executor.execute(
             Roll(
                 houseId = HouseId.of(player),
@@ -54,6 +55,8 @@ class RollService(
                 rollId = RollId(ids.fresh()),
                 omens = rolled.omens,
                 rarity = rolled.rarity,
+                landing = rolled.landing,
+                circleKm = rolled.circleKm,
                 price = Effect.Spend(Resource.WEALTH, balance().roll.price),
                 hand = rolled.hand,
                 worldTime = today,

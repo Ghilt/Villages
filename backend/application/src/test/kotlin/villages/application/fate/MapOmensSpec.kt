@@ -4,7 +4,6 @@ import villages.application.TEST_BALANCE
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldNotContain
-import io.kotest.matchers.doubles.plusOrMinus
 import io.kotest.matchers.shouldBe
 import villages.application.HouseRow
 import villages.application.Sight
@@ -67,10 +66,11 @@ class MapOmensSpec : StringSpec({
             override fun watch(listener: (SightChange) -> Unit) = AutoCloseable {}
         }
     }
-    fun omensOf(centre: Location, zoom: Double, seenKm: Double = 2000.0, named: PlaceNames? = null) =
+    fun omensOf(landing: Location, circleKm: Double, seenKm: Double = 2000.0, named: PlaceNames? = null) =
         MapOmens({ map }, sightOf(seenKm), houses = { _, _, _ -> listOf(ours, neighbour) }, names = { named }) { TEST_BALANCE }
-            .read(Moment(ours, Looking(centre = centre, zoom = zoom, master = "terrain"), today, Instant.EPOCH))
-    fun omens(centre: Location, zoom: Double, seenKm: Double = 2000.0) = omensOf(centre, zoom, seenKm).map { it.words }
+            .read(Moment(ours, Looking(landing = landing, master = "terrain"), today, Instant.EPOCH, circleKm))
+    fun omens(landing: Location, circleKm: Double, seenKm: Double = 2000.0) =
+        omensOf(landing, circleKm, seenKm).map { it.words }
 
     // The names: a river down the painted one's column, a town of 1790 beside the seat and one far off in the
     // fog, and every square of the map by one named sea.
@@ -89,14 +89,13 @@ class MapOmensSpec : StringSpec({
         ShortArray(squares * 2).also { it.fill(1, squares, squares * 2) },
     )
 
-    "the looking circle is as wide as a window shows at the zoom, and narrower towards the poles" {
-        MapOmens.radiusAt(5.0, 0.0) shouldBe (640 * 156.543 / 32).plusOrMinus(0.01)
-        MapOmens.radiusAt(5.0, 60.0) shouldBe (640 * 156.543 / 32 / 2).plusOrMinus(0.01)
-        MapOmens.radiusAt(20.0, 0.0) shouldBe MapOmens.LEAST_KM
+    "the circle round the landing is as wide as the moment says, whatever the page was zoomed to" {
+        omens(Location(10.5, 21.0), 100.0) shouldContain "House Varga"
+        omens(Location(10.5, 21.0), 1500.0) shouldNotContain "House Varga"
     }
 
-    "zoomed out over the forest, the circle reads the coast and the forest, and no river and no house by name" {
-        val read = omens(Location(12.0, 23.0), 4.0)
+    "a wide circle over the forest reads the coast and the forest, and no river and no house by name" {
+        val read = omens(Location(12.0, 23.0), 6000.0)
 
         read shouldContain "Coast"
         read shouldContain "Forest"
@@ -104,47 +103,49 @@ class MapOmensSpec : StringSpec({
         read shouldNotContain "House Varga"
     }
 
-    "closer in, a river running through the circle is an omen" {
-        omens(Location(12.0, 25.0), 8.0) shouldContain "River"
+    "in a narrower circle, a river running through it is an omen" {
+        omens(Location(12.0, 25.0), 380.0) shouldContain "River"
     }
 
-    "zoomed in beside the seat, a house standing in the circle is an omen by name, and its own is not" {
-        val read = omens(Location(10.5, 21.0), 10.0)
+    "landed beside the seat, a house standing in the circle is an omen by name, and its own is not" {
+        val read = omens(Location(10.5, 21.0), 100.0)
 
         read shouldContain "House Varga"
         read shouldNotContain "House Ravenscar"
     }
 
     "out over nothing but sea, it is the open sea" {
-        omens(Location(10.0, -30.0), 7.0, seenKm = 8000.0) shouldBe listOf("Open sea")
+        omens(Location(10.0, -30.0), 750.0, seenKm = 8000.0) shouldBe listOf("Open sea")
     }
 
     "where the house has revealed nothing, it is Unknown and nothing else" {
-        omens(Location(-40.0, 120.0), 7.0, seenKm = 50.0) shouldBe listOf("Unknown")
+        omens(Location(-40.0, 120.0), 750.0, seenKm = 50.0) shouldBe listOf("Unknown")
     }
 
-    "a page with no master, or no view, reads nothing of the map" {
+    "a page with no master, or a roll that landed nowhere, reads nothing of the map" {
         MapOmens({ null }, sightOf(2000.0), houses = { _, _, _ -> emptyList() }) { TEST_BALANCE }
-            .read(Moment(ours, Looking(centre = seat, zoom = 6.0, master = "none"), today, Instant.EPOCH)) shouldBe emptyList()
+            .read(Moment(ours, Looking(landing = seat, master = "none"), today, Instant.EPOCH, 25.0)) shouldBe emptyList()
+        MapOmens({ map }, sightOf(2000.0), houses = { _, _, _ -> emptyList() }) { TEST_BALANCE }
+            .read(Moment(ours, Looking(master = "terrain"), today, Instant.EPOCH, 25.0)) shouldBe emptyList()
     }
 
     "a river the names know is the omen by its name, under a river's own key, so it opens what a river opens" {
-        omensOf(Location(12.0, 25.0), 8.0, named = named).single { it.key == OmenKeys.RIVER }.words shouldBe "The Ister"
+        omensOf(Location(12.0, 25.0), 380.0, named = named).single { it.key == OmenKeys.RIVER }.words shouldBe "The Ister"
     }
 
     "out over the open sea, the sea is the omen by its name, under the open sea's own key" {
-        omensOf(Location(10.0, -30.0), 7.0, seenKm = 8000.0, named = named).map { it.key to it.words } shouldBe
+        omensOf(Location(10.0, -30.0), 750.0, seenKm = 8000.0, named = named).map { it.key to it.words } shouldBe
             listOf(OmenKeys.OPEN_SEA to "The Euxine Sea")
     }
 
-    "zoomed in, a town of 1790 in the revealed circle is an omen by its name and its own key" {
-        omensOf(Location(10.5, 21.0), 10.0, named = named).single { it.key == OmenKeys.town("Q2") }.words shouldBe
+    "landed close, a town of 1790 in the revealed circle is an omen by its name and its own key" {
+        omensOf(Location(10.5, 21.0), 100.0, named = named).single { it.key == OmenKeys.town("Q2") }.words shouldBe
             "Near Tomis"
     }
 
     "a town the house has not revealed is no omen, and nor is one when the circle is wider than the houses'" {
-        omensOf(Location(10.5, 21.0), 10.0, seenKm = 10.0, named = named).map { it.key } shouldNotContain
+        omensOf(Location(10.5, 21.0), 100.0, seenKm = 10.0, named = named).map { it.key } shouldNotContain
             OmenKeys.town("Q2")
-        omensOf(Location(10.5, 21.0), 6.0, named = named).map { it.key } shouldNotContain OmenKeys.town("Q2")
+        omensOf(Location(10.5, 21.0), 1500.0, named = named).map { it.key } shouldNotContain OmenKeys.town("Q2")
     }
 })

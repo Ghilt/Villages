@@ -472,14 +472,17 @@ stage alone, with none of the debug panel in it (decision record 0079).
   roll** section of the debug panel, below Dialogues, looks into it: the hand's omens - the house's holdings,
   *Weak house*, *Pious*, what rose since the last roll, *Missing wealth* when an open dialogue waits on a cost
   the house cannot pay, the windows open on houses it has revealed and on people it sees or holds, and on water
-  it has revealed, *Inspecting the Vistula*, *Inspecting Lake Maeler*, the dialogue being read, the key figure open, where the view is centred - *Coast*, *River* within 400 km, *Forest*,
+  it has revealed, *Inspecting the Vistula*, *Inspecting Lake Maeler*, the dialogue being read, the key figure open, the
+  ground round where the roll landed, which until the die is on the map is the view's centre, in a circle the balance's
+  `omens.landingCircleKm` round it, 25 km at every zoom (0118) - *Coast*, *River* within 400 km, *Forest*,
   *Mountains*, *Fields*, *Grassland*, *Desert*, *Marsh* or *Ice* where it is a sixth of the revealed land or
   more, *Open sea*, *House &lt;name&gt;* for houses standing in a circle of 150 km or less, and *Unknown* where the
   fog covers it all, read by the game server off the ground map of the master the page draws; where its names
   are carried, the river and the open sea by name, *The Vistula*, *The Baltic Sea*, and *Near &lt;town&gt;* for
   the towns of 1790 in a circle of 150 km or less, at most two, on revealed ground - and the season -
   with their kind and,
-  on hover, their key; what the last roll drew from, which the player never sees - the pools it opened and
+  on hover, their key; where the pending hand's roll landed and how many kilometres round it the map was read; what
+  the last roll drew from, which the player never sees - the pools it opened and
   every action that could have been dealt, with its weight - and whether the throw or the lever chose its
   rarity; the odds, 70, 22, 7 and 1 in a hundred. Its one lever, `next roll`, makes the next roll `common`,
   `uncommon`, `rare` or `legendary` whatever the throw, or `the throw` again: it stands in for the world's

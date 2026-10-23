@@ -20,6 +20,7 @@ describe('the balance', () => {
     expect(balance.omens).toEqual({
       weakForDays: 365,
       piousAt: 80,
+      landingCircleKm: 20,
       groundPresent: 0.2,
       riversWithinKm: 300,
       housesWithinKm: 120,

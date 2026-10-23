@@ -11,13 +11,13 @@ import java.time.Instant
 
 /**
  * What the page says it is looking at when the player presses Take action, and nothing it could work out for
- * itself: where the view is centred and how close, which inspect windows are open, which dialogue, which key
- * figure. Every field is a claim, which the omen source that reads it checks against the house's own and the
- * fog. See decision record 0084.
+ * itself: where its die landed, which inspect windows are open, which dialogue, which key figure. Every field is a
+ * claim, which the omen source that reads it checks against the house's own and the fog. See decision records 0084
+ * and 0118.
  */
 data class Looking(
-    val centre: Location? = null,
-    val zoom: Double? = null,
+    /** Where the roll's die came to rest: the middle of the landing circle the map's omens are read in. */
+    val landing: Location? = null,
     val inspectingHouses: List<HouseId> = emptyList(),
     val inspectingCharacters: List<CharacterId> = emptyList(),
     /** Where each window open on water was opened: the places, which the server reads for the water again. */
@@ -34,13 +34,15 @@ data class Looking(
 
 /**
  * The moment a roll is made at: whose house, as the map's read model holds it, what the page is looking at, the day,
- * and the instant, which a stock running at a rate is read at.
+ * the instant, which a stock running at a rate is read at, and how many kilometres round the landing the map's omens
+ * are read, the balance's at this moment, so the width read and the width recorded are one number. See 0118.
  */
 data class Moment(
     val house: HouseRow,
     val looking: Looking,
     val today: WorldTime,
     val now: Instant,
+    val circleKm: Double,
 )
 
 /**

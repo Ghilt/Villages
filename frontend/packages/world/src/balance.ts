@@ -20,6 +20,8 @@ export interface Balance {
   readonly omens: {
     readonly weakForDays: number;
     readonly piousAt: number;
+    /** How far round where the roll's die landed the map's omens are read, in kilometres, at every zoom. */
+    readonly landingCircleKm: number;
     readonly groundPresent: number;
     readonly riversWithinKm: number;
     readonly housesWithinKm: number;
@@ -97,6 +99,7 @@ export function parseBalance(text: string): Balance {
     omens: {
       weakForDays: number(omens, 'omens.weakForDays', true),
       piousAt: number(omens, 'omens.piousAt', true),
+      landingCircleKm: number(omens, 'omens.landingCircleKm'),
       groundPresent: number(omens, 'omens.groundPresent'),
       riversWithinKm: number(omens, 'omens.riversWithinKm'),
       housesWithinKm: number(omens, 'omens.housesWithinKm'),

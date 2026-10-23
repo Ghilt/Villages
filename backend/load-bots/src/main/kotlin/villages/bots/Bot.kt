@@ -98,7 +98,8 @@ class Bot(
             nextPan = at + wait(pace.panEvery)
         }
         if (at >= nextRoll) {
-            command(RollPayload(centre = seat, zoom = Neighbourhood.ZOOM.toDouble()))
+            // Its die dropped on its own seat, where it looked before the die. See 0118.
+            command(RollPayload(landing = seat))
             nextRoll = at + wait(pace.rollEvery)
         }
     }

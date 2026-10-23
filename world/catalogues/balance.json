@@ -8,9 +8,10 @@
     "grants": { "common": 15, "uncommon": 40, "rare": 120, "legendary": 400 }
   },
   "omens": {
-    "$comment": "When an omen is read at a roll. A house is weak for so many world-days after its founding (730 is two world-years, about twenty-four real days) and pious from so much piety. A kind of ground is an omen when it is this share of the revealed land in the circle the player is looking at; a river only when that circle is this many kilometres across or less, because from further out every land has one; the nearest few houses and towns by name only when it is this close.",
+    "$comment": "When an omen is read at a roll. A house is weak for so many world-days after its founding (730 is two world-years, about twenty-four real days) and pious from so much piety. The map's omens are read in a circle this many kilometres round where the roll's die landed, the same at every zoom (decision record 0118). A kind of ground is an omen when it is this share of the revealed land in that circle; a river only when that circle is this many kilometres across or less, because from further out every land has one; the nearest few houses and towns by name only when it is this close.",
     "weakForDays": 730,
     "piousAt": 100,
+    "landingCircleKm": 25,
     "groundPresent": 0.15,
     "riversWithinKm": 400,
     "housesWithinKm": 150,

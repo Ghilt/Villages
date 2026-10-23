@@ -16,6 +16,9 @@ import villages.domain.HouseId
 import villages.domain.HouseName
 import villages.domain.Location
 import villages.domain.PlayerId
+import villages.domain.PlayerRolled
+import villages.domain.Rarity
+import villages.domain.RollId
 import villages.domain.Significance
 import villages.domain.StructureId
 import villages.domain.StructureRaised
@@ -68,6 +71,10 @@ class RoutingKeysSpec : StringSpec({
             StructureRaised(
                 StructureId(UUID.randomUUID()), StructureType("castle"), "the castle at Stockholm", stockholm,
                 Significance(20.0), 1, house, day, noon,
+            ),
+            PlayerRolled(
+                house, PlayerId(UUID.randomUUID()), RollId(UUID.randomUUID()), emptyList(), Rarity.COMMON, stockholm, 25.0,
+                day, noon,
             ),
         )
         atStockholm.forEach { placeOf(it) shouldBe stockholm }

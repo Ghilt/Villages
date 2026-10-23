@@ -8,9 +8,11 @@ import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldMatch
 import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 import villages.domain.Content
 import villages.domain.Effect
 import villages.domain.Objective
+import villages.domain.PlayerRolled
 import villages.domain.QuestNode
 import villages.domain.Requirement
 import villages.domain.RevealImpact
@@ -79,6 +81,17 @@ class EventFormatSpec : StringSpec({
                 Events.json.readValue(bytes, event.javaClass) shouldBe event
             }
         }
+    }
+
+    "a roll stored before the die, with no landing and no circle, reads as one that landed nowhere" {
+        val before = (fixture("villages.player.rolled.v1")["data"].deepCopy() as ObjectNode).apply {
+            remove("landing")
+            remove("circleKm")
+        }
+
+        Events.json.readValue(Events.json.writeValueAsBytes(before), PlayerRolled::class.java) shouldBe
+            EventSamples.samples.getValue("villages.player.rolled.v1").let { it as PlayerRolled }
+                .copy(landing = null, circleKm = null)
     }
 
     "and every other case of a sealed field is stored as its own fixture says, and reads back" {

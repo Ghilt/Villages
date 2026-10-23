@@ -30,13 +30,15 @@ data class Balance(
 
     /**
      * When the omens are read: a house is weak for [weakForDays] world-days after its founding and pious from
-     * [piousAt] piety; a kind of ground is an omen when it is [groundPresent] of the revealed land in the looking
-     * circle; a river when the circle is [riversWithinKm] or less; the nearest [mostHouses] houses and [mostTowns]
-     * towns by name when it is [housesWithinKm] and [townsWithinKm] or less.
+     * [piousAt] piety; the map's omens are read [landingCircleKm] round where the roll's die landed, at every zoom
+     * (0118); a kind of ground is an omen when it is [groundPresent] of the revealed land in that circle; a river when
+     * the circle is [riversWithinKm] or less; the nearest [mostHouses] houses and [mostTowns] towns by name when it is
+     * [housesWithinKm] and [townsWithinKm] or less.
      */
     data class Omens(
         val weakForDays: Long,
         val piousAt: Long,
+        val landingCircleKm: Double,
         val groundPresent: Double,
         val riversWithinKm: Double,
         val housesWithinKm: Double,
@@ -80,6 +82,7 @@ data class Balance(
         if (omens.mostHouses < 0 || omens.mostTowns < 0 || omens.groundPresent !in 0.0..1.0) {
             refuse("omens", "count from nothing, and ground is present as a share of one")
         }
+        if (omens.landingCircleKm <= 0) refuse("omens.landingCircleKm", "is more than nothing")
         if (islands.smallerThanKm2 <= 0) refuse("islands.smallerThanKm2", "is more than nothing")
         if (newcomers.youngest < 0 || newcomers.youngest > newcomers.oldest) {
             refuse("newcomers", "are no younger than nothing, and the youngest no older than the oldest")

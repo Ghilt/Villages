@@ -36,11 +36,20 @@ class HouseRollsSpec : StringSpec({
         rollId = RollId(UUID.fromString("dd000000-0000-4000-8000-0000000a0001")),
         omens = listOf(pious, river),
         rarity = rarity,
+        landing = Location(52.2, 21.0),
+        circleKm = 25.0,
         price = Effect.Spend(Resource.WEALTH, price),
         hand = choice,
         worldTime = day,
         recordedAt = noon,
     )
+
+    "a roll records where its die landed and how wide a circle round it the map was read in" {
+        val rolled = HouseDecider.decide(rolling(), founded()).filterIsInstance<PlayerRolled>().single()
+
+        rolled.landing shouldBe Location(52.2, 21.0)
+        rolled.circleKm shouldBe 25.0
+    }
 
     "a roll records itself, then its price, then its hand, from one decision" {
         val events = HouseDecider.decide(rolling(), founded())

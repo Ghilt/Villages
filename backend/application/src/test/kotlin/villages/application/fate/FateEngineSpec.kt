@@ -44,7 +44,7 @@ class FateEngineSpec : StringSpec({
         Banner(Tincture.SABLE, Division.PLAIN, null, Charge.STAG, Tincture.ARGENT),
         resources = foundingStocks(noon), pledges = emptyList(), since = today, until = null, version = 1,
     )
-    val moment = Moment(house, Looking.NOTHING, today, noon)
+    val moment = Moment(house, Looking.NOTHING, today, noon, 25.0)
 
     val river = Omen(OmenKey("map.river"), OmenKind.MAP, "River")
     val pious = Omen(OmenKey("house.pious"), OmenKind.HOUSE, "Pious", 104)

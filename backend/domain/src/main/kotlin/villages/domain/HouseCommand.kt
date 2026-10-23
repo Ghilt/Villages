@@ -155,9 +155,9 @@ data class TakeAction(
 
 /**
  * Roll for this house: the player pressed Take action. Everything the fate engine worked out comes with it - the
- * omens it read, the rarity it rolled, the price, and the hand it dealt - because the luck is the application's
- * and `decide` only checks and records. Refused before founding, while a choice is pending, and when the price
- * is not free. See decision record 0083.
+ * omens it read, the rarity it rolled, where its die landed and how wide a circle round it the map was read in, the
+ * price, and the hand it dealt - because the luck is the application's and `decide` only checks and records. Refused
+ * before founding, while a choice is pending, and when the price is not free. See decision records 0083 and 0118.
  */
 data class Roll(
     override val houseId: HouseId,
@@ -165,6 +165,8 @@ data class Roll(
     val rollId: RollId,
     val omens: List<Omen>,
     val rarity: Rarity,
+    val landing: Location?,
+    val circleKm: Double?,
     val price: Effect.Spend,
     val hand: Choice,
     val worldTime: WorldTime,

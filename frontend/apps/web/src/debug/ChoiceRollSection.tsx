@@ -11,9 +11,9 @@ const ODDS = 'common 70, uncommon 22, rare 7, legendary 1';
 const RARITIES: readonly Rarity[] = ['common', 'uncommon', 'rare', 'legendary'];
 
 /**
- * The choice roll, looked into: the last roll's omens, which the player sees too, and what it drew from, which the
- * player never does - the pools it opened and every action that could have been dealt with its weight - and the
- * one lever, the next roll's rarity.
+ * The choice roll, looked into: the last roll's omens, which the player sees too, where its die landed and how many
+ * kilometres round it the map was read (0118), and what it drew from, which the player never does - the pools it
+ * opened and every action that could have been dealt with its weight - and the one lever, the next roll's rarity.
  *
  * **The lever stands in for the world's luck, and for nothing a player does.** Take action is the player's, in the
  * pane; this only says what the next throw comes up, so a legendary can be seen without a few hundred rolls. See
@@ -23,6 +23,8 @@ export function ChoiceRollSection() {
   const connection = useStore(sessionStore, (state) => state.connection);
   const yourHouse = useStore(sessionStore, (state) => state.yourHouse);
   const omens = useStore(sessionStore, (state) => state.yourChoice?.omens ?? null);
+  const landing = useStore(sessionStore, (state) => state.yourChoice?.landing ?? null);
+  const circleKm = useStore(sessionStore, (state) => state.yourChoice?.circleKm ?? null);
   const drawn = useStore(sessionStore, (state) => state.rollDrawn);
   const off = connection !== 'open' || yourHouse === null;
 
@@ -60,6 +62,12 @@ export function ChoiceRollSection() {
         </button>
       </div>
       <p className="debug__quiet">odds out of a hundred: {ODDS}</p>
+      {landing !== null && (
+        <p className="debug__quiet">
+          landed at {landing.lat.toFixed(4)}, {landing.lon.toFixed(4)}
+          {circleKm === null ? '' : `, the map read ${circleKm} km round it`}
+        </p>
+      )}
       {omens === null || omens.length === 0 ? (
         <p className="debug__quiet">no hand pending; the omens of a roll are shown while its hand is</p>
       ) : (

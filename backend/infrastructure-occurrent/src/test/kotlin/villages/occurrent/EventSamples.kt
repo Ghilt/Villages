@@ -165,6 +165,8 @@ internal object EventSamples {
             Omen(OmenKey("map.river"), OmenKind.MAP, "River"),
         ),
         rarity = Rarity.RARE,
+        landing = Location(52.23, 21.01),
+        circleKm = 25.0,
         worldTime = day,
         recordedAt = noon,
     )

@@ -59,17 +59,23 @@ export const choiceViewSchema = z.object({
   options: z.array(optionViewSchema),
   /** The omens of the roll that dealt it, in the order the report card shows them. Absent for any other choice. */
   omens: z.array(omenViewSchema).optional(),
+  /**
+   * Where the die of the roll that dealt it landed, and how many kilometres round it the map was read, so the page
+   * draws the die where it fell. Absent for any other choice, and for a roll that landed nowhere. See 0118.
+   */
+  landing: pointSchema.optional(),
+  circleKm: z.number().positive().optional(),
 });
 
 /**
- * Take action: roll for this player's house. What the page is looking at and nothing it could work out for itself,
- * every field a claim the server checks - a window on water by the place it was opened at, which the server reads
- * again - and the price, the omens and the hand are all the server's. See 0083, 0084 and 0087.
+ * Take action: roll for this player's house. Where its die landed and what the page is looking at, and nothing it
+ * could work out for itself, every field a claim the server checks - a window on water by the place it was opened at,
+ * which the server reads again - and how wide a circle round the landing is read, the price, the omens and the hand
+ * are all the server's. See 0083, 0084, 0087 and 0118.
  */
 export const rollPayloadSchema = z.object({
   type: z.literal('roll'),
-  centre: pointSchema.optional(),
-  zoom: z.number().optional(),
+  landing: pointSchema.optional(),
   inspectingHouses: z.array(z.string()).optional(),
   inspectingCharacters: z.array(z.string()).optional(),
   inspectingWaters: z.array(pointSchema).optional(),

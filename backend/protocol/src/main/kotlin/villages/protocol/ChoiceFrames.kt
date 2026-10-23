@@ -17,6 +17,14 @@ data class ChoiceView(
     /** The omens of the roll that dealt it, in the order the report card shows them; left out for any other choice. */
     @get:JsonInclude(JsonInclude.Include.NON_EMPTY)
     val omens: List<OmenView> = emptyList(),
+    /**
+     * Where the die of the roll that dealt it landed, and how many kilometres round it the map was read, so a page
+     * draws the die where it fell; left out for any other choice, and for a roll that landed nowhere. See 0118.
+     */
+    @get:JsonInclude(JsonInclude.Include.NON_NULL)
+    val landing: Point? = null,
+    @get:JsonInclude(JsonInclude.Include.NON_NULL)
+    val circleKm: Double? = null,
 )
 
 /** One option. A rolled one says its `rarity`, by its lower-case name, and the keys of the omens that brought it. */
@@ -72,16 +80,16 @@ data class ConverseView(val title: String) : EffectView
 data class PledgeEffectView(val resource: String, val amount: Long, val until: Long) : EffectView
 
 /**
- * Take action: roll for this player's house. It says what the page is looking at and nothing it could work out for
- * itself - where the view is centred and how close, the houses and characters it has inspect windows open on, the
- * places it opened windows on water at, the dialogue it has open, and the key figure it has focused - and every field
- * is a claim the server checks: a place is read again for the water there, never named by the page. The price, the
- * omens and the hand are all the server's. See decision records 0083, 0084 and 0087.
+ * Take action: roll for this player's house. It says where the roll's die landed and what the page is looking at, and
+ * nothing it could work out for itself - the houses and characters it has inspect windows open on, the places it
+ * opened windows on water at, the dialogue it has open, and the key figure it has focused - and every field is a claim
+ * the server checks: a place is read again for the water there, never named by the page, and how wide a circle round
+ * the landing is read is the server's. The price, the omens and the hand are all the server's. See decision records
+ * 0083, 0084, 0087 and 0118.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class RollPayload(
-    val centre: Point? = null,
-    val zoom: Double? = null,
+    val landing: Point? = null,
     @get:JsonInclude(JsonInclude.Include.NON_EMPTY)
     val inspectingHouses: List<String> = emptyList(),
     @get:JsonInclude(JsonInclude.Include.NON_EMPTY)

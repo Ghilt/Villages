@@ -33,6 +33,8 @@ internal object Choices {
                     rollId = command.rollId,
                     omens = command.omens,
                     rarity = command.rarity,
+                    landing = command.landing,
+                    circleKm = command.circleKm,
                     worldTime = command.worldTime,
                     recordedAt = command.recordedAt,
                 ),

@@ -9,6 +9,7 @@ import villages.application.fate.GroundMap
 import villages.domain.FOUNDING_WEALTH
 import villages.protocol.CommandAccepted
 import villages.protocol.CommandRejected
+import villages.protocol.Point
 import villages.protocol.RollDrawn
 import villages.protocol.YourChoice
 import villages.protocol.YourDialogues
@@ -21,7 +22,7 @@ import java.util.UUID
 /** Take action through the gateway: a roll paid for and answered with its hand, and Adam's lever on its luck. See 0083. */
 class GatewayRollsSpec : StringSpec({
     fun rolling(commandId: String) =
-        """{"type":"command","commandId":"$commandId","command":{"type":"roll","centre":{"lat":59.33,"lon":18.07},"zoom":8}}"""
+        """{"type":"command","commandId":"$commandId","command":{"type":"roll","landing":{"lat":59.33,"lon":18.07}}}"""
 
     fun nextRarity(rarity: String, commandId: String) =
         """{"type":"command","commandId":"$commandId","command":{"type":"nextRarity","rarity":"$rarity"}}"""
@@ -139,11 +140,12 @@ class GatewayRollsSpec : StringSpec({
         second.omens.single { it.words == "Piety risen" }.value shouldBe 30L
     }
 
-    "the map is read on the ground of the world the page said it draws, where its view is centred" {
+    "the map is read on the ground of the world the page said it draws, round where its die landed" {
         val rig = Rig()
-        // A world of forest, a degree a cell, and the page saying at hello that it draws it.
+        // A world of forest, cut as the masters are, a cell every sixth of a degree or so, so the landing circle holds
+        // some; and the page saying at hello that it draws it.
         rig.grounds["woods"] = GroundMap(
-            360, 180, mapOf(10 to "broadleaf-forest"), ByteArray(360 * 180 * 2) { at -> if (at % 2 == 0) 10 else 0 },
+            2048, 1024, mapOf(10 to "broadleaf-forest"), ByteArray(2048 * 1024 * 2) { at -> if (at % 2 == 0) 10 else 0 },
         )
         val (player, sent) = rig.introduced(master = "woods")
         player.receive(founding())
@@ -151,7 +153,11 @@ class GatewayRollsSpec : StringSpec({
 
         player.receive(rolling(COMMAND_TWO))
 
-        sent.filterIsInstance<YourChoice>().last().choice!!.omens.map { it.words } shouldContain "Forest"
+        val hand = sent.filterIsInstance<YourChoice>().last().choice!!
+        hand.omens.map { it.words } shouldContain "Forest"
+        // Where it landed, and how wide a circle round it was read: the balance's, so the page can draw the die.
+        hand.landing shouldBe Point(59.33, 18.07)
+        hand.circleKm shouldBe 25.0
     }
 
     "with the instruments closed the lever is refused, and nothing of a draw is sent" {
