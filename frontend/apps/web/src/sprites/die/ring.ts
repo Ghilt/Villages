@@ -4,9 +4,9 @@ import { fromMercator, worldSize } from '../../geometry/cameraMath';
 import type { CameraView, MercatorPoint, ScreenPoint } from '../../geometry/cameraMath';
 
 /**
- * The landing circle as the spike draws it: a ring on the ground round the die, `km` wide, breathing, and flaring by
- * `flash` as the die comes to rest. The game draws it with the selection ring's own shader, a later step of
- * `docs/plans/choice-roll-podium.md`; this is a few strokes standing in for it.
+ * The landing circle: a ring of light on the ground round the die, `km` round it, breathing, and flaring by `flash` as
+ * the die comes to rest - a few strokes standing in for the selection ring's own shader, whose line and glow grow with
+ * its radius and would be a hundred pixels thick round a ring of 25 km close in. See `docs/plans/choice-roll-podium.md`.
  */
 
 const EARTH_KM = 40075.016686;

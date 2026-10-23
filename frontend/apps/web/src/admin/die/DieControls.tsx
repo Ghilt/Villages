@@ -1,9 +1,8 @@
 import { useState } from 'react';
 
-import { FLIGHT } from '../../sprites/die/flight';
 import type { FlightFeel } from '../../sprites/die/flight';
-import { FEEL } from '../../sprites/die/physics';
 import type { DieFeel } from '../../sprites/die/physics';
+import { DIE_SETTINGS } from '../../sprites/die/throwing';
 
 import type { DieSettings, Rested } from './dieStage';
 
@@ -13,16 +12,8 @@ import type { DieSettings, Rested } from './dieStage';
  * written into the game as it was found.
  */
 
-export const FIRST_DRAFT: DieSettings = {
-  feel: FEEL,
-  flight: FLIGHT,
-  look: { size: 44, landedWide: 2, hang: 56, ownAngle: 35 },
-  juice: true,
-  striking: false,
-  showing: 6,
-  circleKm: 25,
-  throwsFrom: 300,
-};
+/** The spike starts as the game's die, showing a six every time, to prove the game chooses the number. */
+export const FIRST_DRAFT: DieSettings = { ...DIE_SETTINGS, showing: 6 };
 
 interface Slider<Key extends string> {
   readonly key: Key;
