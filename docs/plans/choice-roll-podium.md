@@ -502,7 +502,11 @@ fall, it should be a continuous arc. just scaled up, as with a flick from near t
   the time and stops within a die width or two. Without it, light friction let one throw in four far out skate on for
   four seconds and 400 pixels. Measured on the spike's defaults, at zoom 6.5 a throw of 600 pixels or more bounces about
   38 and 15 pixels high and goes on about 130 pixels, 240 at the most, and a meek one of 250 about 33 and 19, going on
-  about 85; at zoom 9 about 24 and 10, going on about 100.
+  about 85. Close in, where it lands as a die, those pixels were a pin's: just past zoom 7.5 the die is six to sixteen
+  pixels wide, and a hard throw hopped three and a half of its widths and slid fourteen, and Adam saw it: "at high zooms
+  now -> it bounces too much again". So a die's strike and the speed it goes on are held to its own widths too, as
+  though from three of them at most and four a second, and it is no harder for the height it fell from: at zooms 8 to
+  10 a hard throw hops about two thirds of the die and slides two or three of it, at 11 a third and a half.
 
 All of it is worked out the moment it is let go:
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { FLIGHT, flightOf, flownAt, flyingLift, flyingSize, landingOf } from './flight';
+import { FLIGHT, asADie, flightOf, flownAt, flyingLift, flyingSize, landingOf } from './flight';
 import { FEEL, STILL, about, throwDie } from './physics';
 
 const HAND = 44;
@@ -134,6 +134,17 @@ describe('a die in flight', () => {
       const turn = about({ x: 1, y: 2, z: 3 }, i * 0.9);
       const path = throwDie({ at: { x: 0, y: 0, z: 0.55 }, velocity, spin, turn }, { ...FEEL, gravity });
       expect(path.frames[path.frames.length - 1]!.at.x).toBeGreaterThan(1);
+    }
+  });
+
+  it('close in, lands as a die does, a few of its own widths at most however small it is drawn', () => {
+    for (const die of [8, 16, 64]) {
+      const feel = asADie(FLIGHT, die);
+      const flight = flightOf(1500, 0, die, STILL, feel);
+      const { velocity, gravity } = landingOf(flight, feel, FEEL, HANG, die, HAND / die);
+      // As though dropped from this many of its widths, and going on at this many a second.
+      expect(velocity.z ** 2 / (2 * gravity)).toBeLessThanOrEqual(FLIGHT.dieStrikesAtMost + 1e-9);
+      expect(velocity.x).toBeLessThanOrEqual(FLIGHT.dieRollsAtMost + 1e-9);
     }
   });
 

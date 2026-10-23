@@ -61,6 +61,13 @@ export interface FlightFeel {
    * one close in, where it lands nearly as big as it was held, bounces as a die on a table does.
    */
   readonly fromHigh: number;
+  /**
+   * Close in, where it lands as a die rather than a pin, the highest it strikes as though from and the fastest it goes
+   * on along the ground, in its own widths and its own widths a second: the pixels above are a pin's far out, and a die
+   * a few pixels wide just past the zoom it becomes a die at hopped three of its widths on them and slid fourteen.
+   */
+  readonly dieStrikesAtMost: number;
+  readonly dieRollsAtMost: number;
   /** How fast it falls faster on the ground, in pixels a second every second: as floaty as its flight looks. */
   readonly pulls: number;
 }
@@ -80,6 +87,8 @@ export const FLIGHT: FlightFeel = {
   strikesFrom: 0.3,
   strikesAtMost: 50,
   fromHigh: 0.5,
+  dieStrikesAtMost: 3,
+  dieRollsAtMost: 4,
   pulls: 400,
 };
 
@@ -178,6 +187,20 @@ export function flyingLift(flown: number, hang: number, pixels: number, feel: Fl
   const highest = 1 / (1 + feel.landsFlat);
   const peak = highest * (1 - highest) ** feel.landsFlat;
   return (1 - flown) ** feel.landsFlat * (hang + (rise * flown) / peak);
+}
+
+/**
+ * The feel of a throw that lands as a die, close in, `diePixels` wide where it lies: its strike and the speed it goes on
+ * with held to so many of its own widths, so a die bounces as a die does and not as far as a mark far out, and no
+ * harder for the height it fell from. Adam's word at the spike: "at high zooms now -> it bounces too much again".
+ */
+export function asADie(feel: FlightFeel, diePixels: number): FlightFeel {
+  return {
+    ...feel,
+    strikesAtMost: Math.min(feel.strikesAtMost, feel.dieStrikesAtMost * diePixels),
+    rollsAtMost: Math.min(feel.rollsAtMost, feel.dieRollsAtMost * diePixels),
+    fromHigh: 0,
+  };
 }
 
 /** How the die starts on the ground as it strikes it at the end of its flight: what the physics takes on. */

@@ -47,6 +47,20 @@ const FLIGHT_SLIDERS: readonly Slider<keyof FlightFeel>[] = [
   { key: 'strikesFrom', label: 'strikes as from, share of its arc', min: 0, max: 1, step: 0.01 },
   { key: 'strikesAtMost', label: 'strikes as from at most, px', min: 5, max: 300, step: 5 },
   { key: 'fromHigh', label: 'harder from high, a halving of its size', min: 0, max: 2, step: 0.05 },
+  {
+    key: 'dieStrikesAtMost',
+    label: 'as a die, strikes as from at most, its widths',
+    min: 0.5,
+    max: 10,
+    step: 0.1,
+  },
+  {
+    key: 'dieRollsAtMost',
+    label: 'as a die, rolls on at most, its widths a second',
+    min: 0.5,
+    max: 15,
+    step: 0.25,
+  },
   { key: 'pulls', label: 'pulls on the ground, px a second²', min: 50, max: 1500, step: 10 },
 ];
 

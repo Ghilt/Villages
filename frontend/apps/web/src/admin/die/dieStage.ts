@@ -21,7 +21,7 @@ import {
   seenAt,
 } from '../../sprites/die/dieDrawing';
 import type { DieLook } from '../../sprites/die/dieDrawing';
-import { flightOf, flownAt, flyingLift, flyingSize, landingOf } from '../../sprites/die/flight';
+import { asADie, flightOf, flownAt, flyingLift, flyingSize, landingOf } from '../../sprites/die/flight';
 import type { Flight, FlightFeel } from '../../sprites/die/flight';
 import { isThrow, kept, speedAtRelease } from '../../sprites/die/gesture';
 import type { Sample } from '../../sprites/die/gesture';
@@ -289,7 +289,10 @@ export async function startDieStage(
     const thrown = isThrow(speed, chosen.throwsFrom);
     const across = untiltGround(speed.x, speed.y, groundTilt(view));
     const distance = thrown ? Math.hypot(across.east, across.south) * chosen.flight.carries : 0;
-    const flight = flightOf(distance, Math.atan2(across.south, across.east), landed, turn, chosen.flight);
+    // A pin far out lands by the screen's pixels, and a die close in by its own widths: the flight's last stretch too,
+    // so it strikes going as fast as it goes on.
+    const feel = asAPin(landed, view.zoom) ? chosen.flight : asADie(chosen.flight, landed);
+    const flight = flightOf(distance, Math.atan2(across.south, across.east), landed, turn, feel);
     const end = flownAt(flight, flight.seconds);
     // Where the arc ends, and the ground's unit there: as wide as the die is drawn, a pin's width far out.
     const struck = { x: anchor.x + end.x * perDie, y: anchor.y + end.y * perDie };
@@ -297,7 +300,7 @@ export async function startDieStage(
     const perUnit = unit / worldSize(view.zoom);
     // How far it fell, as how many times smaller it lies on the ground than it was in the hand: a mark far out fell far.
     const shrank = chosen.look.size / landed;
-    const landing = landingOf(flight, chosen.flight, chosen.feel, chosen.look.hang, unit, shrank);
+    const landing = landingOf(flight, feel, chosen.feel, chosen.look.hang, unit, shrank);
     const obstacles: Obstacle[] = chosen.striking
       ? standInsInDieWidths(planted, struck, unit / pixelsPerWorldUnit(view.zoom))
       : [];
