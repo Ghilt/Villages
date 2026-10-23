@@ -237,6 +237,15 @@ The desk had been cut off at the window's edge all along: `.desk` clipped its ch
 drew them back, so in the room it showed as a piece of itself the shape of the window. It is drawn whole now; the room
 clips at the window after the pull, which is the clip that was wanted.
 
+**The table in crude 3D.** The map lies on a table now: the desk is its top, 2.4 by 1.66 metres, with an edge 8
+centimetres thick and four square legs, and the floor is 0.8 metres below the map, so it drops away from the table as
+the room tips and lies right under it seen from straight above. Everything of the model is below the table top, and
+the camera looks down, so wherever the top and something under it are drawn over each other the top is the nearer:
+the room is drawn behind the desk the page draws, and the desk hides the back legs as a table top does, with no layer
+in front of it. The camera sorts the faces it can see farthest first, and turned twenty-six degrees it sees the south
+and east sides of a box and not the others. Inside the castle there is no desk, so the drawing there carries the table
+top and a plain square for the map on it.
+
 ## Result
 
 Open.

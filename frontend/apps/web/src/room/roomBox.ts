@@ -7,6 +7,7 @@ import { worldSize } from '../geometry/cameraMath';
 import { boxOf, lookBy, offsetOf, project } from './camera';
 import type { Point, RoomCamera } from './camera';
 import { floorOf } from './model';
+import type { Spot } from './model';
 
 /**
  * The room the desk stands in, and the arithmetic of pulling back into it.
@@ -91,9 +92,9 @@ export function tipAt(amount: number, most: number): number {
  * side come down to `ROOM_FILLS` of the window's. Worked out rather than declared, because the room's size
  * follows the window and a declared number would be wrong on the first stage nobody tried.
  */
-export function turnsAt(floor: readonly Point[], viewport: Viewport, most: Most): number {
+export function turnsAt(floor: readonly Spot[], viewport: Viewport, most: Most): number {
   const spent: RoomCamera = { scale: 1, about: middleOf(viewport), turn: most.turn, tip: most.tip };
-  const box = boxOf(floor.map((corner) => project(spent, corner)));
+  const box = boxOf(floor.map((corner) => project(spent, corner, corner.up)));
   const wanted = (ROOM_FILLS * Math.min(viewport.width, viewport.height)) / Math.min(box.width, box.height);
   return 2 ** -clamp(-Math.log2(wanted), LEAST_SPAN, MOST_SPAN);
 }
@@ -116,9 +117,9 @@ export function middleOf(viewport: Viewport): Point {
  * far as the floor's edge and no further, and along one where it is narrower it is put in the middle. The
  * slide is worked back into a point through the camera, and at no pull there is nothing to slide.
  */
-export function aboutWithin(floor: readonly Point[], viewport: Viewport, camera: RoomCamera): Point {
+export function aboutWithin(floor: readonly Spot[], viewport: Viewport, camera: RoomCamera): Point {
   const fixed: RoomCamera = { ...camera, about: { x: 0, y: 0 } };
-  const box = boxOf(floor.map((corner) => project(fixed, corner)));
+  const box = boxOf(floor.map((corner) => project(fixed, corner, corner.up)));
   const now = offsetOf(camera);
   const wanted = {
     x: alongWithin(box.left, box.width, viewport.width, now.x),
@@ -138,7 +139,7 @@ function alongWithin(start: number, length: number, window: number, offset: numb
 /** The pull as it is drawn: the desk and the floor in the scene's own pixels, and the camera they are seen by. */
 export interface PulledBack {
   desk: DeskTop;
-  floor: Point[];
+  floor: Spot[];
   camera: RoomCamera;
 }
 
@@ -165,8 +166,12 @@ export function pulledBack(
   return { desk, floor, camera: { ...camera, about: aboutWithin(floor, viewport, camera) } };
 }
 
-/** The room once the pull is spent: the desk it is laid round, the camera, and the box the floor is drawn in. */
+/**
+ * The room once the pull is spent: the map's sheet and the desk it is laid round, the camera, and the box the
+ * floor is drawn in.
+ */
 export interface RoomAtTurn {
+  sheet: Sheet;
   desk: DeskTop;
   camera: RoomCamera;
   box: DeskTop;
@@ -178,8 +183,8 @@ export interface RoomAtTurn {
  */
 export function roomAtTurn(sheet: Sheet, viewport: Viewport, about: Point | null, most: Most): RoomAtTurn {
   const spent = pulledBack(sheet, viewport, 1, about, most);
-  const box = boxOf(spent.floor.map((corner) => project(spent.camera, corner)));
-  return { desk: spent.desk, camera: spent.camera, box };
+  const box = boxOf(spent.floor.map((corner) => project(spent.camera, corner, corner.up)));
+  return { sheet, desk: spent.desk, camera: spent.camera, box };
 }
 
 /**

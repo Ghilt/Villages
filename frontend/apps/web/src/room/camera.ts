@@ -57,6 +57,32 @@ export function liftOf(camera: RoomCamera): number {
   return camera.scale * Math.sin(radians(camera.tip));
 }
 
+/** A direction in the model: east, south and up. */
+export interface Direction {
+  east: number;
+  south: number;
+  up: number;
+}
+
+/**
+ * How directly a direction points at the camera: above nothing it points away. The camera stands to the south
+ * of the turned room and above it, so a face is seen when its outward side points that way.
+ */
+export function towards(camera: RoomCamera, direction: Direction): number {
+  const turn = radians(camera.turn);
+  const tip = radians(camera.tip);
+  const south = direction.east * Math.sin(turn) + direction.south * Math.cos(turn);
+  return south * Math.sin(tip) + direction.up * Math.cos(tip);
+}
+
+/**
+ * How near the camera a point of the model is, `up` pixels above the table top: the larger, the nearer. What is
+ * nearer is drawn over what is farther, which is all the ordering a few boxes need.
+ */
+export function nearness(camera: RoomCamera, point: Point, up = 0): number {
+  return towards(camera, { east: point.x, south: point.y, up });
+}
+
 /** Where a point of the table top, or `up` pixels above it, is drawn on the window. */
 export function project(camera: RoomCamera, point: Point, up = 0): Point {
   const plane = planeOf(camera);

@@ -131,7 +131,7 @@ export function Room({ map, seat, strip, children }: RoomProps) {
         stillFor.current = shot;
         const box = drawnAt(shot.box, shot.pitch);
         stillPicture.setAttribute('viewBox', `${box.left} ${box.top} ${box.width} ${box.height}`);
-        stillPicture.innerHTML = roomMarkup(shot.desk, shot.camera, shot.pitch, 'still');
+        stillPicture.innerHTML = roomMarkup(shot.desk, shot.camera, shot.pitch, 'still', shot.sheet);
       }
       return;
     }

@@ -36,7 +36,7 @@ const floorFor = (viewport: Viewport) => floorOf(deskOnScreen(sheetAtFloor(viewp
 
 /** The box the floor is drawn in by a pull. */
 const drawnFloor = (pulled: ReturnType<typeof pulledBack>) =>
-  boxOf(pulled.floor.map((corner) => project(pulled.camera, corner)));
+  boxOf(pulled.floor.map((corner) => project(pulled.camera, corner, corner.up)));
 
 describe('the sheet at the floor', () => {
   it('is where the sheet actually is once the camera is put at the floor over the world centre', () => {

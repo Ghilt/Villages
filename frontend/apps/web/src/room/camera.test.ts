@@ -5,7 +5,19 @@ import { GROUND_LATTICE, frameOf, worldXOf, worldYOf } from '@villages/world';
 import { groundTilt, tiltGround } from '../geometry/cameraMath';
 import { drawnPoint } from '../map/sheet';
 
-import { boxOf, coversWindow, cssOf, liftOf, lookBy, offsetOf, planeOf, project, unproject } from './camera';
+import {
+  boxOf,
+  coversWindow,
+  cssOf,
+  liftOf,
+  lookBy,
+  nearness,
+  offsetOf,
+  planeOf,
+  project,
+  towards,
+  unproject,
+} from './camera';
 import type { RoomCamera } from './camera';
 
 /** The camera spent, as the room is seen: drawn back to a quarter, turned 26 and tipped 45, off the middle. */
@@ -126,5 +138,33 @@ describe('a shape over the window', () => {
 
   it('has a box round it', () => {
     expect(boxOf(SOME)).toEqual({ left: -400, top: 0, width: 1488, height: 1200 });
+  });
+});
+
+describe('which faces the camera sees', () => {
+  const UP = { east: 0, south: 0, up: 1 };
+  const SOUTH = { east: 0, south: 1, up: 0 };
+  const NORTH = { east: 0, south: -1, up: 0 };
+  const EAST = { east: 1, south: 0, up: 0 };
+  const WEST = { east: -1, south: 0, up: 0 };
+
+  it('sees only what faces up when it looks straight down', () => {
+    expect(towards(AT_REST, UP)).toBeGreaterThan(0);
+    for (const side of [SOUTH, NORTH, EAST, WEST]) {
+      expect(towards(AT_REST, side)).toBeCloseTo(0);
+    }
+  });
+
+  it('sees the south and east sides of a box in the turned room, and not the north and west', () => {
+    expect(towards(SPENT, SOUTH)).toBeGreaterThan(0);
+    expect(towards(SPENT, EAST)).toBeGreaterThan(0);
+    expect(towards(SPENT, NORTH)).toBeLessThan(0);
+    expect(towards(SPENT, WEST)).toBeLessThan(0);
+  });
+
+  it('counts what is further south, and what stands higher, as nearer', () => {
+    const here = { x: 100, y: 100 };
+    expect(nearness(SPENT, { x: 100, y: 140 })).toBeGreaterThan(nearness(SPENT, here));
+    expect(nearness(SPENT, here, 30)).toBeGreaterThan(nearness(SPENT, here));
   });
 });

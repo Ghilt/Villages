@@ -447,7 +447,7 @@ stands in the middle of the foot, in gold where the options are in the parchment
 - What the **room** the desk stands in is made of, and whether it is a place with anything in it or only
   the far end of a zoom. It is a model seen the way the map's ground is at the closest zoom, turned twenty-six
   degrees and tipped forty-five, the pull turning and tipping the map's square from flat and square on the desk
-  to a skewed diamond on the table, on a floor of tiles that run the way the ground's diamonds do. It is flat
-  colours and simple shapes today, deliberately, so that the room's shape can be judged before anything is drawn
-  properly. See experiment 0009 and decision record 0118.
+  to a skewed diamond on a table standing on four legs, the floor a table's height below it, tiled the way the
+  ground's diamonds run. It is flat colours and simple shapes today, deliberately, so that the room's shape can be
+  judged before anything is drawn properly. See experiment 0009 and decision record 0118.
 - Whether the parchment survives contact with a second mechanic, or turns out to be the choice roll's own.

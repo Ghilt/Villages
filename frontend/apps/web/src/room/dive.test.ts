@@ -89,15 +89,12 @@ describe('the passage', () => {
     }
   });
 
-  it('brings the castle to the middle of the room it lands in, near the middle of the window', () => {
+  it('brings the castle to the middle of the room it lands in', () => {
     for (const viewport of STAGES) {
-      const flat = flatWindow(viewport, TIP);
       const dive = diveIn(viewport);
       const there = keepAt(dive, 1);
       expect(there.x).toBeCloseTo(dive.end.left + dive.end.width / 2);
       expect(there.y).toBeCloseTo(dive.end.top + dive.end.height / 2);
-      expect(Math.abs(there.x - flat.width / 2)).toBeLessThan(flat.width * 0.05);
-      expect(Math.abs(there.y - flat.height / 2)).toBeLessThan(flat.height * 0.05);
     }
   });
 
@@ -118,7 +115,7 @@ describe('the passage', () => {
   it('ends in the box the pull draws the room in, turned and tipped, so the camera moves under the same room', () => {
     for (const viewport of STAGES) {
       const spent = pulledBack(sheetAtFloor(viewport), viewport, 1, null, MOST);
-      const room = boxOf(spent.floor.map((corner) => project(spent.camera, corner)));
+      const room = boxOf(spent.floor.map((corner) => project(spent.camera, corner, corner.up)));
       const inTheCastle = drawnAt(roomAt(diveIn(viewport), 1), TIP);
       expect(inTheCastle.left).toBeCloseTo(room.left);
       expect(inTheCastle.top).toBeCloseTo(room.top);
