@@ -457,10 +457,11 @@ stage alone, with none of the debug panel in it (decision record 0079).
   arrived yet: it is fetched once the game has started. **A long press lifts the die**, a ring of light filling round
   its dish, and leaves its slot empty; it hangs under the pointer, or above a finger with its shadow above the
   fingertip, the landing circle round its shadow. **Let go over the map, it drops** by its shadow, bounces and comes
-  to rest, and half a second later the roll is sent from where it landed; **let go with a flick, it is thrown** the
-  way the hand went, flying one arc as at `/admin/inspect-die`, and the roll is sent from where it comes to rest; let
-  go over its slot, it goes back and nothing is paid; Enter on the podium drops it at the middle of the view. The
-  number on top is painted on as the throw is worked out, one the page chooses for now. The die lies where it fell,
+  to rest; **let go with a flick, it is thrown** the way the hand went, flying one arc as at `/admin/inspect-die`.
+  Either way the roll is sent from where it will rest as it leaves the hand, and the hand that answers is shown half
+  a second after it rests; let go over its slot, it goes back and nothing is paid; Enter on the podium drops it at the
+  middle of the view. The number on top is the roll's rarity, painted on as the answer comes: 6 legendary, 5 rare,
+  3 or 4 uncommon, 1 or 2 common. The die lies where it fell,
   after a reload too, drawn from where the waiting hand says its roll landed,, its ring breathing, while the
   hand is open, and goes back to its podium once it is answered. Once it has rolled, the pane opens out over everything, the rest of the stage dimmed under a **veil**
   that puts it away when pressed, and plays the roll as

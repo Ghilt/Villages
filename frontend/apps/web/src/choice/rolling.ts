@@ -1,3 +1,5 @@
+import type { Rarity } from '@villages/protocol';
+
 import type { Along } from '../stage/panes';
 
 /**
@@ -18,6 +20,23 @@ export function handExpected(): boolean {
   const was = awaiting;
   awaiting = false;
   return was;
+}
+
+/**
+ * The number on top of a die thrown for a roll that drew `rarity`: 6 legendary, 5 rare, 3 or 4 uncommon and 1 or 2
+ * common, the one or the other by `chance`, a number from nought to one. Adam's word of 2026-10-24.
+ */
+export function numberOf(rarity: Rarity, chance: number = Math.random()): number {
+  switch (rarity) {
+    case 'legendary':
+      return 6;
+    case 'rare':
+      return 5;
+    case 'uncommon':
+      return chance < 0.5 ? 3 : 4;
+    case 'common':
+      return chance < 0.5 ? 1 : 2;
+  }
 }
 
 /**

@@ -31,8 +31,10 @@ Every term was put to him as a question and settled the same day, and the die wa
    finger, the same on a phone as on a desktop, its shadow on the ground under it, and the map is moved before it is
    picked up. Let go still, it **drops** by its shadow; let go with a flick, it is **thrown**, flies one arc, bounces and
    rolls; let go over its empty slot, it goes back and nothing happens. Enter drops it at the view's centre.
-2. **A roll is paid when its die comes to rest**, in the decision that records it, as today. A die put back sends
-   nothing and costs nothing.
+2. **A roll is paid when its die is let go**, in the decision that records it. The page works out the whole throw
+   then, so it knows where the die will rest, and sends the roll at once; the hand that answers it is held back until
+   the die has rested and been seen resting. A die put back sends nothing and costs nothing. *Amended 2026-10-24*: it
+   was paid when the die came to rest, until the die had to show the roll's rarity as it landed (point 6).
 3. **The page sends the landing**, a latitude and a longitude, and no longer the view's centre or its zoom. It is a
    claim like every other: a place that is not on Earth is refused, `invalidLocation`, and nothing else about it is the
    page's word. It needs no reach rule, because the page can show any part of the world, and nothing is gained by lying
@@ -44,8 +46,10 @@ Every term was put to him as a question and settled the same day, and the die wa
    read, so a circle narrower than a cell still reads the ground under the die. A die in the fog is a valid roll.
 5. **The die changes nothing else about a roll.** It has no omen and no option of its own, the odds are untouched, and
    the windows, the dialogue and the key figure the page has open stay omens.
-6. **The pips are the game's.** The page works out the whole throw the moment the die is let go, so it knows which face
-   will come up, and paints on it the number the game wants. The player alone decides where the die lands.
+6. **The pips are the game's, and say the roll's rarity.** The page works out the whole throw the moment the die is
+   let go, so it knows which face will come up, and paints on it the number the roll drew as its answer comes back,
+   while the die is still in the air: 6 legendary, 5 rare, 3 or 4 uncommon, 1 or 2 common. Adam's word of 2026-10-24.
+   An answer slower than the throw paints the face where the die lies. The player alone decides where the die lands.
 7. **The throw is the page's flourish and nothing more.** It is worked out by a rigid cube of our own in
    `apps/web/src/sprites/die/`, a few hundred lines, and drawn on the sprite canvas the map already has, fetched only
    after the game has started. The server neither seeds a throw nor replays one, because the physics decides nothing the

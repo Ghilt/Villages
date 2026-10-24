@@ -26,9 +26,10 @@ something.
 ### What it is
 
 The player takes action: they lift the **die** from its little podium and drop it or throw it on the map, and
-pay for it once it comes to rest. The game shows them every **omen** it took into account - how the house
+pay for it as it leaves the hand. The game shows them every **omen** it took into account - how the house
 stands, what they have open, the ground round where the die landed, the season, what changed since the last
-roll - and rolls a **rarity**, then deals a hand of three **actions** of that rarity. The player takes one.
+roll - and rolls a **rarity**, which the die shows as it lands: 6 legendary, 5 rare, 3 or 4 uncommon, 1 or 2
+common. Then it deals a hand of three **actions** of that rarity. The player takes one.
 The rolling is done by the **fate engine**; see `ARCHITECTURE.md`. How it was built, step by step, is
 `docs/plans/choice-roll.md`, and how the die came to aim it is `docs/plans/choice-roll-podium.md` and decision
 record 0118.
@@ -158,8 +159,6 @@ and answering leaves it there, back to Take action. See decision records 0044, 0
   always-open pool and the omens only tilting the draw. The first content is the second kind.
 - **Hints on Take action.** Settled as none for now; the old idea of a flourish when something new is among
   the omens is kept here rather than forgotten.
-- **What the number on the die means.** The rarity is said by the options alone, so the first die shows a
-  number the page chooses.
 - **Whether the die strikes what is drawn on the map.** A die that would come to rest on a structure's picture is
   blown off it by a pulse from the middle of the structure's base while it still moves, a few times at most; the trees
   it passes through. Adam decides by feel whether that stays (0118).

@@ -13,6 +13,7 @@ import { holdTheDie } from './hand';
 import type { DieHand, HandAt, Landing } from './hand';
 import { heldTurn } from './playback';
 import { pulsesAround } from './structuresStruck';
+import { layoutShowing } from './pips';
 import { DIE_SETTINGS, drawHeld, drawLying, drawThrown, heldGround, letGo } from './throwing';
 import type { DieParts, DieSettings, Thrown } from './throwing';
 
@@ -50,7 +51,7 @@ type Now =
   | {
       readonly kind: 'flying';
       readonly thrown: Thrown;
-      readonly rested: (landing: Landing) => void;
+      readonly rested: () => void;
     }
   /** At rest where its throw left it, and since when. */
   | { readonly kind: 'resting'; readonly thrown: Thrown; readonly since: number }
@@ -105,12 +106,13 @@ export function createDieLayer(
     ground: ScreenPoint,
     speed: { x: number; y: number },
     turnedSince: number,
-    rested: (landing: Landing) => void,
+    told: (landing: Landing) => void,
+    rested: () => void,
   ) => {
     if (camera === null) return;
     const t = performance.now();
     const tilt = groundTilt(camera);
-    // The number the game wants on top, painted on the face the throw leaves there: the page's own for now (0118).
+    // Any number on top until the roll it was thrown for has drawn its rarity, which `show` paints on (0118).
     const showing = 1 + Math.floor(Math.random() * 6);
     const thrown = letGo(
       ground,
@@ -130,6 +132,7 @@ export function createDieLayer(
     }
     knocked = 0;
     now = { kind: 'flying', thrown, rested };
+    told({ lat: thrown.rested.lat, lon: thrown.rested.lon });
     repaint();
   };
 
@@ -148,19 +151,26 @@ export function createDieLayer(
       now.at = onTheMap(last);
       repaint();
     },
-    letGo(at, rested) {
+    letGo(at, told, rested) {
       if (now.kind !== 'held' || camera === null) return;
       const ground = heldGround(onTheMap(at), now.byTouch, settings, camera.pitch ?? 0);
-      fall(ground, speedAtRelease(now.samples, at.at), now.since, rested);
+      fall(ground, speedAtRelease(now.samples, at.at), now.since, told, rested);
     },
     putBack() {
       now = { kind: 'idle' };
       repaint();
     },
-    dropAtCentre(circleKm, rested) {
+    dropAtCentre(circleKm, told, rested) {
       if (camera === null) return;
       settings = { ...DIE_SETTINGS, circleKm };
-      fall({ x: camera.width / 2, y: camera.height / 2 }, { x: 0, y: 0 }, performance.now(), rested);
+      fall({ x: camera.width / 2, y: camera.height / 2 }, { x: 0, y: 0 }, performance.now(), told, rested);
+    },
+    show(number) {
+      if (now.kind !== 'flying' && now.kind !== 'resting') return;
+      const { thrown } = now;
+      const numbers = layoutShowing(thrown.path.up, number);
+      now = { ...now, thrown: { ...thrown, numbers, rested: { ...thrown.rested, came: number } } };
+      repaint();
     },
     lieAt(landing, circleKm) {
       if (now.kind !== 'idle') return;
@@ -205,7 +215,7 @@ export function createDieLayer(
         const drawn = drawThrown(parts, now.thrown, cameraView, settings, t, knocked);
         knocked = drawn.knocked;
         if (drawn.done) {
-          now.rested({ lat: now.thrown.rested.lat, lon: now.thrown.rested.lon });
+          now.rested();
           now = { kind: 'resting', thrown: now.thrown, since: t };
         }
         wants = 0;

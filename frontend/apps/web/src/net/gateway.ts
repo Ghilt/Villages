@@ -8,6 +8,7 @@ import { becomePlayer, startOver } from './auth';
 import { followStandsUnder, standsArrived } from './stands';
 import { GATEWAY_URL } from './address';
 import { browserSocket } from './browserSocket';
+import { heldBack } from './handHold';
 
 /**
  * The one connection to the gateway, in the browser: the client core's session - what the page knows of the
@@ -44,8 +45,14 @@ const session = createSession({
   note,
 });
 
-/** What the page knows of the world, for whatever draws it: read in a component through `useStore`. */
-export const sessionStore: Readable<SessionState> = { get: session.state, watch: session.watch };
+/** What the page knows of the world, as it is: read only by the die, which is told a hand before the page shows it. */
+export const sessionAsItIs: Readable<SessionState> = { get: session.state, watch: session.watch };
+
+/**
+ * What the page knows of the world, for whatever draws it: read in a component through `useStore`. A hand held back
+ * while the die its roll was thrown with is in the air is not in it yet, `handHold.ts`.
+ */
+export const sessionStore: Readable<SessionState> = heldBack(sessionAsItIs);
 
 let connection: Connection | null = null;
 

@@ -26,12 +26,17 @@ export interface DieHand {
   pickUp(at: HandAt, byTouch: boolean, circleKm: number): void;
   /** The hand holding it went through these places. */
   move(path: readonly HandAt[]): void;
-  /** It was let go here: it falls, bounces and comes to rest, and `rested` is told where. */
-  letGo(at: HandAt, rested: (landing: Landing) => void): void;
+  /**
+   * It was let go here: it falls, bounces and comes to rest. Where it will rest is worked out as it is let go, and
+   * `thrown` is told that at once; `rested` is told when it has come to rest there.
+   */
+  letGo(at: HandAt, thrown: (landing: Landing) => void, rested: () => void): void;
   /** It goes back to its podium, from the hand or the map. */
   putBack(): void;
   /** Dropped at once at the middle of the view, with no hand: Enter on the podium. */
-  dropAtCentre(circleKm: number, rested: (landing: Landing) => void): void;
+  dropAtCentre(circleKm: number, thrown: (landing: Landing) => void, rested: () => void): void;
+  /** Paints `number` on the face a die let go comes to rest on: what the roll it was thrown for drew. */
+  show(number: number): void;
   /**
    * Lying where a roll's die fell, its ring `circleKm` round it: as a page that reloads with a hand open draws it.
    * Nothing, when the die is already in the hand, in the air or lying.

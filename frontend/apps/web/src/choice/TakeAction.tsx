@@ -6,22 +6,23 @@ import type { OptionView } from '@villages/protocol';
 
 import { RESOURCE_WORDS } from '../house/describe';
 import { useBalance } from '../net/balance';
-import { sessionStore, takeAction } from '../net/gateway';
+import { sessionAsItIs, sessionStore, takeAction } from '../net/gateway';
+import { holdTheHand, showTheHand } from '../net/handHold';
 import { dieStore } from '../sprites/die/hand';
 import type { Landing } from '../sprites/die/hand';
 import { PaneSizeControl } from '../stage/PaneSizeControl';
 import type { Along, Room } from '../stage/panes';
 import { useStore } from '../store/useStore';
 import { Podium } from '../ui/podium/Podium';
-import { expectHand, overOf } from './rolling';
+import { expectHand, numberOf, overOf } from './rolling';
 
-/** How long a die lies where it rested before its roll is sent, so the player sees where. */
+/** How long a die lies where it rested before the hand its roll drew is shown, so the player sees where. */
 const SEEN_MS = 500;
 
 /**
  * **Take action**: the choice roll at rest, the die on its podium, over the words, Adam's call. A long press lifts
  * it onto the map, where it hangs under the pointer or above the finger with the landing circle round its shadow; let
- * go still, it drops by its shadow, and with a flick it is thrown; once it rests the roll is sent from where it landed, with what else the page is
+ * go still, it drops by its shadow, and with a flick it is thrown; the roll is sent from where it will land as it is let go, with what else the page is
  * looking at, `looking` handed down from the root, and the hand that comes back takes the pane over while the die lies
  * where it fell. Let go over its slot, it goes back and nothing is paid. Enter drops it at the middle of the view.
  * Greyed while the house cannot pay or a command of the player's is waiting on its answer, and saying which. Put away
@@ -34,6 +35,8 @@ export function TakeAction({ room, along, looking }: { room: Room; along: Along;
     return wealth === undefined ? null : freeNow(wealth, Date.now());
   });
   const ready = useStore(sessionStore, canAct);
+  // The rarity of the hand this page's roll was answered with, told the die while the hand is still held back.
+  const rolled = useStore(sessionAsItIs, (state) => state.yourChoice?.options[0]?.rarity);
   // What a roll costs, as the page says it before pressing: the balance's, the file the game server reads, so the
   // button can say why it is greyed rather than be pressed to find out. A roll the house cannot pay is refused by the
   // server whatever this says. See decision records 0083 and 0097.
@@ -50,10 +53,17 @@ export function TakeAction({ room, along, looking }: { room: Room; along: Along;
     if (waiting.current === 'sent' && !ready) waiting.current = 'answering';
     else if (waiting.current === 'answering' && ready) {
       waiting.current = 'not';
+      if (rolled !== undefined) return;
+      showTheHand();
       die?.putBack();
       setOut(false);
     }
-  }, [ready, die]);
+  }, [ready, die, rolled]);
+
+  // The hand is in while the die is still out: the number it drew goes on the die's top face.
+  useEffect(() => {
+    if (rolled !== undefined && out) die?.show(numberOf(rolled));
+  }, [rolled, die, out]);
 
   const whyNot =
     free === null
@@ -67,13 +77,16 @@ export function TakeAction({ room, along, looking }: { room: Room; along: Along;
             : null;
   const price = `${cost === null ? '' : `${cost} `}${RESOURCE_WORDS.wealth.toLowerCase()}`;
 
-  // Once it rests and has been seen resting, the roll is sent from where it landed.
-  const landed = (landing: Landing) => {
-    window.setTimeout(() => {
-      waiting.current = 'sent';
-      expectHand();
-      takeAction({ ...looking(), landing });
-    }, SEEN_MS);
+  // The roll is sent as the die is let go, from where it will land, which the throw has worked out already; the hand
+  // that answers it is held back until the die rests and has been seen resting. See decision record 0118.
+  const thrown = (landing: Landing) => {
+    waiting.current = 'sent';
+    holdTheHand(sessionAsItIs.get().yourChoice);
+    expectHand();
+    takeAction({ ...looking(), landing });
+  };
+  const rested = () => {
+    window.setTimeout(showTheHand, SEEN_MS);
   };
   const podium = (aside?: string) => (
     <Podium
@@ -87,14 +100,14 @@ export function TakeAction({ room, along, looking }: { room: Room; along: Along;
         die?.pickUp(lifted, lifted.byTouch, circleKm ?? 0);
       }}
       onMove={(path) => die?.move(path)}
-      onLetGo={(at) => die?.letGo(at, landed)}
+      onLetGo={(at) => die?.letGo(at, thrown, rested)}
       onPutBack={() => {
         die?.putBack();
         setOut(false);
       }}
       onDrop={() => {
         setOut(true);
-        die?.dropAtCentre(circleKm ?? 0, landed);
+        die?.dropAtCentre(circleKm ?? 0, thrown, rested);
       }}
     />
   );
