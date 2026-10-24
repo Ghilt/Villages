@@ -579,7 +579,8 @@ A line each: what it is for, its variants, and where on the page it is.
   the options' to say, by their tag and their glow, and nothing here says it. **`RolledHand`**, beside them, lays
   a hand out in one of two forms: `full`, the list, a divider and the options in a row along the bottom;
   `stacked`, a phone's, everything one under another for whatever holds it
-  to scroll. On a desktop its options never scroll: they are written to fit. `ui-pop` is the class an option
+  to scroll. While the omens land a press anywhere on it is `onHurry`, not only on the list, which is no taller than
+  the omens in so far. On a desktop its options never scroll: they are written to fit. `ui-pop` is the class an option
   pops in by. **`playOf`** in `ui/report/timing.ts` is how a roll plays over time - omens a third of a second
   apart, a beat, the options a seventh apart - and how a hurry lands the rest of the omens; **`usePlay`** plays
   one in a component. *The choice roll*, where a roll is played in each form in a room the size the game gives

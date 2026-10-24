@@ -31,7 +31,7 @@ export function RolledHand({
   /** Where the roll stands: how many omens have landed and how many options are in. */
   play: Play;
   options: readonly ReactNode[];
-  /** Lands the omens still to come at once. */
+  /** Lands the omens still to come at once: a press anywhere on the hand while they land. */
   onHurry?: () => void;
 }) {
   const playing = play.phase !== 'settled';
@@ -52,13 +52,10 @@ export function RolledHand({
   );
 
   return (
-    <div className={`ui-hand ui-hand--${form}`}>
+    // Anywhere on it, not only on the list, which is as tall as its omens so far: Adam's word of 2026-10-24.
+    <div className={`ui-hand ui-hand--${form}`} onClick={playing ? onHurry : undefined}>
       <div className="ui-hand__report">
-        <ReportCard
-          omens={omens}
-          landed={landed}
-          {...(playing && onHurry !== undefined ? { onHurry } : {})}
-        />
+        <ReportCard omens={omens} landed={landed} />
       </div>
       <Divider />
       {hand}
