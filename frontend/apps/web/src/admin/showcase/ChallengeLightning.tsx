@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 
 import { MarkButton } from '../../ui/button/Button';
@@ -114,6 +114,77 @@ function Struck({ look, glow, at, again = 0 }: { look: Look; glow: Glow; at?: nu
   );
 }
 
+/** How long the pane in `Opening` waits before it opens, so the bolt comes down on it as it starts to. */
+const OPENS_AFTER = 250;
+
+/**
+ * A strike on a pane opening out from a chip, as the choice roll's die strikes the hand it drew: the strike follows
+ * the pane's box every frame, so the bolt lands on it and the crackle runs round its edges as they grow.
+ */
+function Opening() {
+  const box = useRef<HTMLDivElement>(null);
+  const pane = useRef<HTMLDivElement>(null);
+  const [again, setAgain] = useState(0);
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    setOpen(false);
+    const opening = window.setTimeout(() => setOpen(true), OPENS_AFTER);
+    return () => window.clearTimeout(opening);
+  }, [again]);
+  // One strike a press, which reads where the pane is each frame.
+  const strikes = useMemo((): readonly Strike[] => {
+    const follow = () => {
+      const frame = box.current?.getBoundingClientRect();
+      const rect = pane.current?.getBoundingClientRect();
+      if (frame === undefined || rect === undefined) return null;
+      return { x: rect.left - frame.left, y: rect.top - frame.top, width: rect.width, height: rect.height };
+    };
+    return [
+      {
+        key: `opening-${again}`,
+        from: SOURCE,
+        to: { x: 520, y: 250, width: 100, height: 30 },
+        colour: GOLD,
+        follow,
+      },
+    ];
+  }, [again]);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div ref={box} style={BOX}>
+        <div style={{ position: 'absolute', inset: 0 }}>
+          <LatticeGround
+            scene={SIZE}
+            lattice={GROUND}
+            id="strike-opening"
+            fill="#3b3326"
+            joint="rgba(0,0,0,0.35)"
+          />
+        </div>
+        <Source />
+        <div
+          ref={pane}
+          style={{
+            position: 'absolute',
+            right: 20,
+            bottom: 20,
+            width: open ? 300 : 100,
+            height: open ? 230 : 30,
+            background: '#2a2219',
+            border: '2px solid #8a7246',
+            borderRadius: 4,
+            transition: 'width 160ms ease-out, height 160ms ease-out',
+          }}
+        />
+        <Lightning strikes={strikes} look="leader" glow="shader" />
+      </div>
+      <div>
+        <MarkButton label="Strike again" mark="play" onClick={() => setAgain(again + 1)} />
+      </div>
+    </div>
+  );
+}
+
 /** A strike to watch again and again, in any look and either way of drawing it. */
 function Live() {
   const [look, setLook] = useState<Look>('leader');
@@ -184,6 +255,13 @@ export function ChallengeLightning() {
         </Specimen>
         <Specimen name="Lightning, struck" note="press to strike again; choose its look and its drawing" wide>
           <Live />
+        </Specimen>
+        <Specimen
+          name="Lightning, a strike that follows its box"
+          note="the pane opens out as the bolt reaches it, and the crackle runs round its edges as they grow; press to strike again"
+          wide
+        >
+          <Opening />
         </Specimen>
       </Specimens>
     </Part>

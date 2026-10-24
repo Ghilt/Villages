@@ -512,8 +512,10 @@ A line each: what it is for, its variants, and where on the page it is.
   box - a receptacle to a slice's chip - and crackling round the box's edge, for a second, again whenever its key
   changes; nothing ticks while none runs. Three looks: `forked` leaps the whole way and forks, `leader` feels its way
   in jerks and strikes back along the same channel, `tendrils` writhes as from a coil; each drawn as `strokes` on a
-  canvas or by a `shader`, WebGL 2 lighting every pixel by how near it is to the bolt. `at` holds every strike at a
-  moment, for this page. `bolt.ts` is the shapes, from a seed - the arc, midpoint displacement along it, forks, the
+  canvas or by a `shader`, WebGL 2 lighting every pixel by how near it is to the bolt. A strike given `follow` asks
+  where its box is every frame, so a box that moves or grows as it is struck - a pane opening out - is followed, the
+  crackle running round its edges as they go, and a bigger box crackles along more of its edge. `at` holds every
+  strike at a moment, for this page. `bolt.ts` is the shapes, from a seed - the arc, midpoint displacement along it, forks, the
   crackle, a stepped leader's growth - `strike.ts` what a moment of each look is, and `paintStrokes.ts` and
   `paintShader.ts` the two ways of drawing one. A `SliceChip` given a `jolt` with a `delay` flashes as a strike reaches
   it; give it a `ref` to measure where it is. Drawn. *Challenges*.

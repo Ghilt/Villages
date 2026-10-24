@@ -23,6 +23,11 @@ export interface Strike {
   readonly to: Box;
   /** Any CSS colour, a custom property's among them. */
   readonly colour: string;
+  /**
+   * Where its box is now, asked every frame, for a box that moves or grows as it is struck - a pane opening out: the
+   * bolt comes down on it and the crackle runs round its edges as they go. `to` when absent, or when it says null.
+   */
+  readonly follow?: () => Box | null;
 }
 
 /** A line of light: its points, its colour, how bright from 0 to about 1, and its core's thickness in pixels. */
@@ -75,7 +80,9 @@ const flare = (t: number, start: number, rise: number, end: number, fall: number
 function crackling(strike: Strike, seed: number, t: number, from: number): Light[] {
   const bright = flare(t, from, 30, from + 600, 450);
   if (bright <= 0) return [];
-  return crackleOn(strike.to, seed + Math.floor(t / 45), 4).map((points) => ({
+  // More round a bigger box, so a pane's long edges crackle along their length as a slice's short ones do.
+  const count = Math.max(4, Math.round((strike.to.width + strike.to.height) / 60));
+  return crackleOn(strike.to, seed + Math.floor(t / 45), count).map((points) => ({
     points,
     colour: strike.colour,
     bright: bright * 0.9,

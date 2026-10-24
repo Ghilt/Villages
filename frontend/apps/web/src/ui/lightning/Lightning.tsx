@@ -9,6 +9,7 @@ import type { Rgb } from './paintStrokes';
 import { LIFE, momentOf } from './strike';
 import type { Look, Strike } from './strike';
 
+export type { Box } from './bolt';
 export type { Look, Strike } from './strike';
 
 /** How lightning is drawn: as strokes on a canvas, or by a shader lighting every pixel by how near it is to a bolt. */
@@ -37,9 +38,15 @@ function colourReader(element: HTMLElement): (colour: string) => Rgb {
   };
 }
 
+/** A strike where its box is now: where it follows it to, if it follows one. */
+function placed(strike: Strike): Strike {
+  const to = strike.follow?.() ?? null;
+  return to === null ? strike : { ...strike, to };
+}
+
 /**
  * Lightning over whatever box it is laid in: each strike arching through the air from its source to its box and
- * crackling round it, in its look, drawn as strokes or by a shader. A strike runs once when it first comes, and again
+ * crackling round it, in its look, drawn as strokes or by a shader; a box that moves or grows is followed. A strike runs once when it first comes, and again
  * whenever its key changes, for a second; while none is running nothing is drawn and nothing ticks. Given `at`, every
  * strike is held at that many milliseconds, for the components page. Places are in the box's own pixels. Lets the
  * pointer through. See docs/UI-COMPONENTS.md and decision record 0116.
@@ -113,7 +120,7 @@ function LightningCanvas({
       }
       const now = performance.now();
       const since = (strike: Strike) => at ?? now - (begins.get(strike.key) ?? now);
-      const moments = strikes.map((strike) => momentOf(look, strike, since(strike)));
+      const moments = strikes.map((strike) => momentOf(look, placed(strike), since(strike)));
       if (paint.context !== null) paintStrokes(paint.context, moments, paint.colourOf, paint.fineness);
       paint.shader?.paint(moments, paint.colourOf, paint.fineness);
       const running = at === undefined && strikes.some((strike) => since(strike) < LIFE);
