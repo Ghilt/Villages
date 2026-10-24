@@ -1,3 +1,5 @@
+import { createStore } from '@villages/client-core';
+import type { Readable } from '@villages/client-core';
 import type { Rarity } from '@villages/protocol';
 
 import type { Along } from '../stage/panes';
@@ -51,6 +53,23 @@ export function glowOf(
   if (rarity === 'common') return null;
   const colour = read(`--ui-rarity-${rarity}`).trim();
   return colour === '' ? null : colour;
+}
+
+/** A bolt from a die at rest to the hand its roll drew: from where it lies, in the window's pixels, in a colour. */
+export interface RollStrike {
+  readonly key: string;
+  readonly from: { readonly x: number; readonly y: number };
+  readonly colour: string;
+}
+
+const striking = createStore<{ strike: RollStrike | null }>({ strike: null });
+
+/** The latest bolt, for the lightning laid over the stage, `RollLightning`. */
+export const rollStrike: Readable<{ strike: RollStrike | null }> = striking;
+
+/** A die at rest strikes the hand its roll drew. */
+export function strikeTheHand(strike: RollStrike): void {
+  striking.set({ strike });
 }
 
 /**

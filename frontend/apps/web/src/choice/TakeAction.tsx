@@ -14,12 +14,14 @@ import { PaneSizeControl } from '../stage/PaneSizeControl';
 import type { Along, Room } from '../stage/panes';
 import { useStore } from '../store/useStore';
 import { Podium } from '../ui/podium/Podium';
-import { expectHand, glowOf, numberOf, overOf } from './rolling';
+import { expectHand, glowOf, numberOf, overOf, strikeTheHand } from './rolling';
 
 /** How long a die lies where it rested before the hand its roll drew is shown, so the player sees where. */
 const SEEN_MS = 500;
 /** How long one glowing in its roll's rarity lies there, so the glow is seen rising before the hand opens. */
 const GLOWS_MS = 900;
+/** How long before the hand opens a glowing die strikes it, so the bolt comes down on its pane as it opens out. */
+const STRIKES_BEFORE_MS = 250;
 
 /**
  * **Take action**: the choice roll at rest, the die on its podium, over the words, Adam's call. A long press lifts
@@ -89,8 +91,18 @@ export function TakeAction({ room, along, looking }: { room: Room; along: Along;
     expectHand();
     takeAction({ ...looking(), landing });
   };
+  // A die that glows strikes the hand with lightning in its rarity's colour as the hand opens out; a common one does not.
   const rested = () => {
-    const glowing = drew.current !== undefined && drew.current !== 'common';
+    const rarity = drew.current;
+    const glowing = rarity !== undefined && rarity !== 'common';
+    if (glowing) {
+      window.setTimeout(() => {
+        const from = die?.lying() ?? null;
+        if (from !== null) {
+          strikeTheHand({ key: `${performance.now()}`, from, colour: `var(--ui-rarity-${rarity})` });
+        }
+      }, GLOWS_MS - STRIKES_BEFORE_MS);
+    }
     window.setTimeout(showTheHand, glowing ? GLOWS_MS : SEEN_MS);
   };
   const podium = (aside?: string) => (

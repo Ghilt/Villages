@@ -40,6 +40,8 @@ export interface DieHand {
    * `glow`, any CSS colour, once it is at rest: none when null.
    */
   show(number: number, glow: string | null): void;
+  /** Where the middle of a die let go lies now, in the window's pixels: null while none lies anywhere. */
+  lying(): { x: number; y: number } | null;
   /**
    * Lying where a roll's die fell, its ring `circleKm` round it: as a page that reloads with a hand open draws it.
    * Nothing, when the die is already in the hand, in the air or lying.

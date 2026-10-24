@@ -37,6 +37,7 @@ import { subjectsStore } from './inspect/subjects';
 import { arrive } from './stage/arrive';
 import { askFor, formNow } from './stage/bays';
 import { CHOICE_PANE } from './choice/pane';
+import { RollLightning } from './choice/RollLightning';
 import { cultureOfPlace, useCultureMap } from './map/culture';
 import { worldRootOf } from './map/masters';
 import { cameraStore } from './map/camera';
@@ -355,6 +356,7 @@ export function App({ master, devTools }: AppProps) {
         corner={<Settings />}
         overlays={
           <>
+            <RollLightning />
             <StoodDown />
             <SignedOut />
             <StartupScreen />

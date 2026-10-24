@@ -29,7 +29,7 @@ The player takes action: they lift the **die** from its little podium and drop i
 pay for it as it leaves the hand. The game shows them every **omen** it took into account - how the house
 stands, what they have open, the ground round where the die landed, the season, what changed since the last
 roll - and rolls a **rarity**, which the die shows as it lands: 6 legendary, 5 rare, 3 or 4 uncommon, 1 or 2
-common, and glows in at rest, but for common. Then it deals a hand of three **actions** of that rarity. The player takes one.
+common, and glows in at rest, striking the hand with lightning in that colour as it opens, but for common. Then it deals a hand of three **actions** of that rarity. The player takes one.
 The rolling is done by the **fate engine**; see `ARCHITECTURE.md`. How it was built, step by step, is
 `docs/plans/choice-roll.md`, and how the die came to aim it is `docs/plans/choice-roll-podium.md` and decision
 record 0118.

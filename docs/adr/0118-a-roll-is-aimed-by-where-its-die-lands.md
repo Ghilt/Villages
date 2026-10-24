@@ -51,8 +51,10 @@ Every term was put to him as a question and settled the same day, and the die wa
    while the die is still in the air: 6 legendary, 5 rare, 3 or 4 uncommon, 1 or 2 common. Adam's word of 2026-10-24.
    An answer slower than the throw paints the face where the die lies. Once it rests, a die of an uncommon, rare or
    legendary roll glows in its rarity's colour, the cards' own, over everything so the grey out of sight never takes
-   it, and the hand waits 0.9 s rather than 0.5 for the glow to be seen; a common roll's is drab, with no glow. The
-   player alone decides where the die lands.
+   it, and the hand waits 0.9 s rather than 0.5 for the glow to be seen; a quarter of a second before it opens, the
+   die strikes it with lightning in that colour, the challenges' look, the bolt following the hand's pane as it opens
+   out and crackling round its edges. A common roll's die is drab: no glow and no lightning. The player alone decides
+   where the die lands.
 7. **The throw is the page's flourish and nothing more.** It is worked out by a rigid cube of our own in
    `apps/web/src/sprites/die/`, a few hundred lines, and drawn on the sprite canvas the map already has, fetched only
    after the game has started. The server neither seeds a throw nor replays one, because the physics decides nothing the

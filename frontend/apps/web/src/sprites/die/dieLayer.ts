@@ -185,6 +185,15 @@ export function createDieLayer(
       now = { ...now, thrown: { ...thrown, numbers, rested: { ...thrown.rested, came: number } } };
       repaint();
     },
+    lying() {
+      if (now.kind !== 'resting' || camera === null) return null;
+      const place = toMercatorExact({ lng: now.thrown.rested.lon, lat: now.thrown.rested.lat });
+      const ground = screenOf(place, camera);
+      const edges = box.getBoundingClientRect();
+      // Its body's middle, a little above its ground point.
+      const lift = now.thrown.perUnit * worldSize(camera.zoom) * 0.35;
+      return { x: ground.x + edges.left, y: ground.y + edges.top - lift };
+    },
     lieAt(landing, circleKm) {
       if (now.kind !== 'idle') return;
       settings = { ...DIE_SETTINGS, circleKm };

@@ -265,3 +265,14 @@
   flex-direction: column;
   gap: 0.15em;
 }
+
+/*
+ * The lightning of a choice roll, from a die at rest to the hand it drew: over the whole stage and every pane in it,
+ * under the notices that stop a window, and taking no press. See `RollLightning.tsx`.
+ */
+.choice-lightning {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+}
