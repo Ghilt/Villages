@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
+import { toMercatorExact } from '../../geometry/cameraMath';
 import type { CameraView } from '../../geometry/cameraMath';
+import { WORLD_MASTER_WIDTH } from '../../geometry/world';
 import { STILL } from './physics';
+import { pulsesAround } from './structuresStruck';
 import { DIE_SETTINGS, letGo } from './throwing';
 
 /** Over Bohemia at zoom 8.5, looking straight down, as the game opens on a house founded there. */
@@ -42,5 +45,37 @@ describe('a die let go', () => {
 
     expect(thrown.how).toBe('thrown');
     expect(thrown.lon).toBeGreaterThan(15.18 + 0.5);
+  });
+
+  it('dropped on a structure, is blown off it before it comes to rest', () => {
+    const middle = { x: VIEW.width / 2, y: VIEW.height / 2 };
+    const under = toMercatorExact({ lng: VIEW.center.lng, lat: VIEW.center.lat });
+    // A castle's picture eight world units wide and tall, standing a little south of where the die falls.
+    const castle = {
+      place: { x: under.x * WORLD_MASTER_WIDTH, y: under.y * WORLD_MASTER_WIDTH + 2 },
+      anchor: 0.5,
+      wide: 8,
+      tall: 8,
+      shown: true,
+    };
+    const flat = { cos: 1, sin: 0, lean: 1 };
+    const striking = { ...DIE_SETTINGS, striking: true };
+    const { rested } = letGo(
+      middle,
+      { x: 0, y: 0 },
+      STILL,
+      VIEW,
+      striking,
+      () => [],
+      0,
+      (struck, wide, gravity) => pulsesAround([castle], struck, wide, flat, gravity),
+    );
+    const lies = toMercatorExact({ lng: rested.lon, lat: rested.lat });
+    const x = lies.x * WORLD_MASTER_WIDTH - castle.place.x;
+    const y = lies.y * WORLD_MASTER_WIDTH - castle.place.y;
+    const onIt = Math.abs(x) < castle.wide / 2 && y > -castle.tall && y < 0;
+
+    expect(rested.pulsed).toBeGreaterThan(0);
+    expect(onIt).toBe(false);
   });
 });

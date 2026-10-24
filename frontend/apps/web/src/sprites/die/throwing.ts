@@ -20,6 +20,7 @@ import type { DieFeel, Obstacle, Quat, ThrowPath } from './physics';
 import { LAYOUT, layoutShowing } from './pips';
 import { between, heldTurn, squashAt } from './playback';
 import { drawLandingCircle } from './ring';
+import type { Pulses } from './structuresStruck';
 
 /**
  * The die held, let go and played back, on any canvas over the map: the spike's page draws it on one of its own and
@@ -66,6 +67,9 @@ export interface Rested {
   readonly workedOutMs: number;
   readonly came: number;
   readonly settled: boolean;
+  /** How many structures it might have come to rest on, and how many pulses blew it off them. */
+  readonly near: number;
+  readonly pulsed: number;
 }
 
 /** A die let go: its flight, its path on the ground, and where both are pinned. */
@@ -175,7 +179,8 @@ export function drawLying(
 
 /**
  * Lets go of a die whose shadow lies at `ground`, the hand moving at `speed` pixels a second and the die turned
- * `turn`: a drop when the hand was all but still, a throw when it was not. The whole of it is worked out here.
+ * `turn`: a drop when the hand was all but still, a throw when it was not. The whole of it is worked out here, with
+ * what it strikes and the pulses that blow it off a structure, when `chosen` strikes things.
  */
 export function letGo(
   ground: ScreenPoint,
@@ -185,6 +190,7 @@ export function letGo(
   chosen: DieSettings,
   obstaclesAt: (struck: MercatorPoint, dieWide: number) => Obstacle[],
   t: number,
+  pulsesAt?: (struck: MercatorPoint, dieWide: number, gravity: number) => Pulses,
 ): Thrown {
   // The die's physics is in die widths, and a die width is its width lying on the ground: a world-sized thing, so a
   // throw rolls over the same ground at every zoom, and its flight carries as far on the screen as the flick was hard.
@@ -206,12 +212,15 @@ export function letGo(
   // How far it fell, as how many times smaller it lies on the ground than it was in the hand: a mark far out fell far.
   const shrank = chosen.look.size / landed;
   const landing = landingOf(flight, feel, chosen.feel, chosen.look.hang, unit, shrank);
-  const obstacles = chosen.striking ? obstaclesAt(struck, unit / pixelsPerWorldUnit(view.zoom)) : [];
+  const dieWide = unit / pixelsPerWorldUnit(view.zoom);
+  const obstacles = chosen.striking ? obstaclesAt(struck, dieWide) : [];
+  const pulses = chosen.striking ? (pulsesAt?.(struck, dieWide, landing.gravity) ?? null) : null;
   const begun = performance.now();
   const path = throwDie(
     { at: { x: 0, y: 0, z: 0.55 }, velocity: landing.velocity, spin: landing.spin, turn: end.turn },
     { ...chosen.feel, gravity: landing.gravity },
     obstacles,
+    pulses?.nudge,
   );
   const workedOutMs = performance.now() - begun;
   const numbers = chosen.showing === null ? LAYOUT : layoutShowing(path.up, chosen.showing);
@@ -240,6 +249,8 @@ export function letGo(
       workedOutMs,
       came: numbers[path.up]!,
       settled: path.settled,
+      near: pulses?.near ?? 0,
+      pulsed: pulses?.fired() ?? 0,
     },
   };
 }

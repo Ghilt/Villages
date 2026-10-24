@@ -1,7 +1,8 @@
 import { Container, Graphics } from 'pixi.js';
 
-import { toMercatorExact } from '../../geometry/cameraMath';
+import { groundTilt, toMercatorExact } from '../../geometry/cameraMath';
 import type { CameraView, MercatorPoint, ScreenPoint } from '../../geometry/cameraMath';
+import { note } from '../../log/log';
 import type { Layer } from '../layer';
 import { createDieDrawing, createDust } from './dieDrawing';
 import { kept, speedAtRelease } from './gesture';
@@ -9,6 +10,8 @@ import type { Sample } from './gesture';
 import { holdTheDie } from './hand';
 import type { DieHand, HandAt, Landing } from './hand';
 import { heldTurn } from './playback';
+import { pulsesAround } from './structuresStruck';
+import type { Pictured } from './structuresStruck';
 import { DIE_SETTINGS, drawHeld, drawLying, drawThrown, heldGround, letGo } from './throwing';
 import type { DieSettings, Thrown } from './throwing';
 
@@ -49,8 +52,15 @@ export interface DieLayer extends Layer {
   readonly view: Container;
 }
 
-/** A die layer drawing over the map in `box`, asking for a frame through `repaint` when a hand moves it. */
-export function createDieLayer(box: HTMLElement, repaint: () => void): DieLayer {
+/**
+ * A die layer drawing over the map in `box`, asking for a frame through `repaint` when a hand moves it, its die blown off
+ * the structures of `standing` it would come to rest on.
+ */
+export function createDieLayer(
+  box: HTMLElement,
+  repaint: () => void,
+  standing: () => readonly Pictured[],
+): DieLayer {
   const view = new Container();
   const parts = { die: createDieDrawing(), dust: createDust(), ring: new Graphics() };
   view.addChild(parts.ring, parts.die.shadow, parts.dust.graphics, parts.die.body, parts.die.pin);
@@ -74,6 +84,7 @@ export function createDieLayer(box: HTMLElement, repaint: () => void): DieLayer 
   ) => {
     if (camera === null) return;
     const t = performance.now();
+    const tilt = groundTilt(camera);
     // The number the game wants on top, painted on the face the throw leaves there: the page's own for now (0118).
     const showing = 1 + Math.floor(Math.random() * 6);
     const thrown = letGo(
@@ -81,10 +92,17 @@ export function createDieLayer(box: HTMLElement, repaint: () => void): DieLayer 
       speed,
       heldTurn(turnedSince, t),
       camera,
-      { ...settings, showing },
+      { ...settings, showing, striking: true },
       () => [],
       t,
+      (struck, unitWide, gravity) => pulsesAround(standing(), struck, unitWide, tilt, gravity),
     );
+    const { near, pulsed } = thrown.rested;
+    if (near > 0) {
+      const blown =
+        pulsed === 0 ? 'it came to rest clear' : `${pulsed} pulse${pulsed === 1 ? '' : 's'} blew it off`;
+      note('die', `the die came down near ${near} structure${near === 1 ? '' : 's'}: ${blown}`);
+    }
     knocked = 0;
     now = { kind: 'flying', thrown, rested };
     repaint();

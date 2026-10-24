@@ -58,6 +58,14 @@ Every term was put to him as a question and settled the same day, and the die wa
 9. **The die and its ring are the info layer** (0096), drawn at every zoom over the fog and the clouds, Adam's *"info
    layer sounds good, make it a bit radiant of a flash. like the selection ring under castles"*. The ring breathes, as
    the selection ring under a castle does.
+10. **A die is blown off the structures and passes through the trees.** A die low over the ground a structure's
+    picture covers, or touching it, is struck by a pulse from the middle of the structure's base, as a little explosion
+    would, and sent gently away from it, with a small hop, while it still moves: again if it is still on one a moment
+    after, six times at most. Adam's choice of 2026-10-24, of the ways put to him to keep the die off what is drawn,
+    and his *"much smaller force"* of the first try. Tried first and dropped: rolling a die off a structure after it rested, *"not nice"*; boxes for the
+    physics to strike, which lay behind most of the picture or let the die rest on its top; upright walls that moved the
+    die out of them, which snapped it; and a cone lying on the ground that it landed on and slid off, which looked
+    strange.
 
 How the die flies and lands was found by feel at the spike, on 2026-10-22: one continuous arc, a flick near the ground
 scaled up; the die growing as it rises to the top of the arc and shrinking as it falls; out where the map draws only
@@ -94,7 +102,8 @@ within a few of its own widths. The numbers are `FLIGHT` and `FEEL` in `sprites/
   Dice that strike each other would be where an engine first earns its keep.
 - **The server seeding and replaying the throw.** It would make the resting place luck, a gamble on where the die
   ends, which is not the design: the drop exists to give control. And no candidate engine runs on the JVM.
-- **The die striking what is drawn on the map**, the trees, the bushes and the buildings. Cheap to run and moderate to
-  write, and tried at the spike on a switch with stand-ins. A throw into a wood would bounce from tree to tree and stop
-  short, which may be fun or may take away the aim the die exists to give, and trees still arriving as the ground is
-  drawn would be missed. Not in the game's first die; Adam decides by feel.
+- **The die striking the trees and the bushes too.** A throw into a wood would bounce from tree to tree and stop
+  short, which may take away the aim the die exists to give, and trees still arriving as the ground is drawn would be
+  missed. Only the structures strike (point 10).
+- **A die that comes to rest on a structure rolling off it afterwards.** Built and tried, and Adam found it not nice:
+  the die settles and then slides away of itself.

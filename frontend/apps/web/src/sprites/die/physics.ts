@@ -333,7 +333,14 @@ function solve(body: Body, contacts: Contact[], friction: number, bounce: number
 }
 
 /** Works the whole throw out, from the moment it is let go until it lies still on a face. */
-export function throwDie(start: Start, feel: DieFeel, obstacles: readonly Obstacle[] = []): ThrowPath {
+/** A push from outside, asked every step: the velocity the die goes on with, tumbling that way, or null for none. */
+export type Nudge = (at: Vec3, velocity: Vec3, seconds: number) => Vec3 | null;
+export function throwDie(
+  start: Start,
+  feel: DieFeel,
+  obstacles: readonly Obstacle[] = [],
+  nudge?: Nudge,
+): ThrowPath {
   const dt = 1 / RATE;
   const body: Body = { p: start.at, v: start.velocity, w: start.spin, q: normalised(start.turn) };
   const frames: DieState[] = [{ at: body.p, turn: body.q }];
@@ -351,6 +358,12 @@ export function throwDie(start: Start, feel: DieFeel, obstacles: readonly Obstac
       knocks.push({ time: steps * dt, at: add(body.p, first.r), speed: hardest });
     }
     solve(body, contacts, feel.friction, feel.bounce);
+    const pushed = nudge?.(body.p, body.v, steps * dt) ?? null;
+    if (pushed !== null) {
+      body.v = pushed;
+      body.w = { x: -pushed.y * feel.spin * 2, y: pushed.x * feel.spin * 2, z: body.w.z };
+      knocks.push({ time: steps * dt, at: { ...body.p, z: 0 }, speed: length(pushed) });
+    }
     // Out of whatever it sank into, by most of the way, along each way out.
     const deepest = new Map<string, { normal: Vec3; depth: number }>();
     for (const c of contacts) {

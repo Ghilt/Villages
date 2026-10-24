@@ -67,6 +67,8 @@ export interface StandingLayer extends Layer, TreeParticles {
    * draws, kept beside what the others handed over.
    */
   stand(things: readonly StandingThing[], from?: string): void;
+  /** Everything standing, structures and bridges, and no tree: what the choice roll's die strikes. */
+  everything(): readonly StandingThing[];
   /** What the pointer is over, by its id, or null: the trees standing in its way fade out of it. */
   hover(id: string | null): void;
 }
@@ -222,6 +224,9 @@ export function createStandingLayer(
     stand(next: readonly StandingThing[], from = 'marks'): void {
       bySource.set(from, next);
       things = bySource.size === 1 ? next : [...bySource.values()].flat();
+    },
+    everything(): readonly StandingThing[] {
+      return things;
     },
     hover(id: string | null): void {
       hovered = id;

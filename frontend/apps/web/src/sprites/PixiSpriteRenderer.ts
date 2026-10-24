@@ -331,7 +331,7 @@ export function createPixiSpriteRenderer(camera: CameraSource): SpriteRenderer {
         .then(() => import('./die/dieLayer'))
         .then(({ createDieLayer }) => {
           if (disposed || layers === null) return;
-          const die = createDieLayer(container, drawSoon);
+          const die = createDieLayer(container, drawSoon, () => scenery?.standing.everything() ?? []);
           stage.addChild(die.view);
           layers = { ...layers, drawn: [...layers.drawn, die] };
         });

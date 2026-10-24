@@ -160,8 +160,9 @@ and answering leaves it there, back to Take action. See decision records 0044, 0
   the omens is kept here rather than forgotten.
 - **What the number on the die means.** The rarity is said by the options alone, so the first die shows a
   number the page chooses.
-- **Whether the die strikes what is drawn on the map**, the trees and the buildings. Tried at the spike on a
-  switch; Adam decides by feel.
+- **Whether the die strikes what is drawn on the map.** A die that would come to rest on a structure's picture is
+  blown off it by a pulse from the middle of the structure's base while it still moves, a few times at most; the trees
+  it passes through. Adam decides by feel whether that stays (0118).
 - **Whether the landing circle grows** with the house's progression. One width for now, to experiment with.
 
 ### Where it stands
