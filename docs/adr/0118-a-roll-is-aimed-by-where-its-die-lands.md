@@ -57,7 +57,10 @@ Every term was put to him as a question and settled the same day, and the die wa
    reloaded page draws the die where it fell.
 9. **The die and its ring are the info layer** (0096), drawn at every zoom over the fog and the clouds, Adam's *"info
    layer sounds good, make it a bit radiant of a flash. like the selection ring under castles"*. The ring breathes, as
-   the selection ring under a castle does.
+   the selection ring under a castle does. Once it comes to rest, though, the die sinks in among the trees and the
+   structures standing, the one over everything fading out over 0.4 s, so it can lie behind a tree or a building; its
+   ring stays over everything. Adam's word of 2026-10-24, everywhere, though a die at rest goes under the fog and the grey out of sight
+   with them and only its ring then shows where it lies.
 10. **A die is blown off the structures and passes through the trees.** A die low over the ground a structure's
     picture covers, or touching it, is struck by a pulse from the middle of the structure's base, as a little explosion
     would, and sent gently away from it, with a small hop, while it still moves: again if it is still on one a moment

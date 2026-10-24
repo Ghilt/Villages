@@ -1,5 +1,5 @@
 import { Container, ParticleContainer } from 'pixi.js';
-import type { Matrix, Particle, ParticleContainerOptions, Sprite, Texture } from 'pixi.js';
+import type { Matrix, Particle, ParticleContainerOptions, Texture } from 'pixi.js';
 
 import { groundTilt, tiltGround } from '../../geometry/cameraMath';
 import type { CameraView } from '../../geometry/cameraMath';
@@ -25,7 +25,7 @@ import { createVeil } from './veil';
 export interface StandingThing {
   id: string;
   /** Its pictures, each drawn over the one before where it stands: the thing, then the pennant flown over it. */
-  sprites: readonly Sprite[];
+  sprites: readonly Container[];
   place: GroundPoint;
   /** How far across its picture it stands, as a fraction of its width: the front corner of its base. */
   anchor: number;
