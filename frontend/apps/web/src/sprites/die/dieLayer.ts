@@ -1,6 +1,6 @@
 import { Container, Graphics } from 'pixi.js';
 
-import { groundTilt, toMercatorExact } from '../../geometry/cameraMath';
+import { groundTilt, toMercatorExact, worldSize } from '../../geometry/cameraMath';
 import type { CameraView, MercatorPoint, ScreenPoint } from '../../geometry/cameraMath';
 import { WORLD_MASTER_WIDTH } from '../../geometry/world';
 import { note } from '../../log/log';
@@ -8,9 +8,11 @@ import type { Layer } from '../layer';
 import type { StandingLayer, StandingThing } from '../standing/StandingLayer';
 import { createDieDrawing, createDust } from './dieDrawing';
 import { kept, speedAtRelease } from './gesture';
+import { RISES_MS, drawGlow } from './glow';
 import type { Sample } from './gesture';
 import { holdTheDie } from './hand';
 import type { DieHand, HandAt, Landing } from './hand';
+import { screenOf } from './onTheGround';
 import { heldTurn } from './playback';
 import { pulsesAround } from './structuresStruck';
 import { layoutShowing } from './pips';
@@ -74,7 +76,10 @@ export function createDieLayer(
 ): DieLayer {
   const view = new Container();
   const parts = { die: createDieDrawing(), dust: createDust(), ring: new Graphics() };
-  view.addChild(parts.ring, parts.die.shadow, parts.dust.graphics, parts.die.body, parts.die.pin);
+  // The light round a die at rest in its roll's rarity: over everything, so the grey out of sight never takes its
+  // colour, and a ring with its middle clear, so it never tints the die lying among the trees under it.
+  const glow = new Graphics();
+  view.addChild(parts.ring, glow, parts.die.shadow, parts.dust.graphics, parts.die.body, parts.die.pin);
   parts.die.hide();
   // The die at rest among the trees: drawn as the one over everything is, its own dust and ring never shown.
   const among: DieParts = { die: createDieDrawing(), dust: createDust(), ring: new Graphics() };
@@ -85,6 +90,8 @@ export function createDieLayer(
   let settings: DieSettings = DIE_SETTINGS;
   let now: Now = { kind: 'idle' };
   let knocked = 0;
+  /** What the die let go glows in once it rests, the rarity its roll drew: none until that is known, or for common. */
+  let glowing: string | null = null;
   /** The camera of the last frame drawn, which a die let go between frames is let go under. */
   let camera: CameraView | null = null;
 
@@ -131,6 +138,7 @@ export function createDieLayer(
       note('die', `the die came down near ${near} structure${near === 1 ? '' : 's'}: ${blown}`);
     }
     knocked = 0;
+    glowing = null;
     now = { kind: 'flying', thrown, rested };
     told({ lat: thrown.rested.lat, lon: thrown.rested.lon });
     repaint();
@@ -165,8 +173,13 @@ export function createDieLayer(
       settings = { ...DIE_SETTINGS, circleKm };
       fall({ x: camera.width / 2, y: camera.height / 2 }, { x: 0, y: 0 }, performance.now(), told, rested);
     },
-    show(number) {
+    show(number, glow) {
       if (now.kind !== 'flying' && now.kind !== 'resting') return;
+      note(
+        'die',
+        `the die shows ${number} as it ${now.kind === 'flying' ? 'flies' : 'lies'}, ${glow === null ? 'with no glow' : `glowing ${glow}`}`,
+      );
+      glowing = glow;
       const { thrown } = now;
       const numbers = layoutShowing(thrown.path.up, number);
       now = { ...now, thrown: { ...thrown, numbers, rested: { ...thrown.rested, came: number } } };
@@ -191,6 +204,7 @@ export function createDieLayer(
       camera = cameraView;
       const pitch = cameraView.pitch ?? 0;
       let wants: number | null = null;
+      if (now.kind !== 'resting') glow.clear();
       if (now.kind === 'idle') {
         standAt(null, 0, t);
         parts.die.hide();
@@ -209,12 +223,19 @@ export function createDieLayer(
         const sinking = standAt(place, now.since, t);
         drawThrown(parts, now.thrown, cameraView, settings, t, knocked);
         drawThrown(among, now.thrown, cameraView, { ...settings, juice: false }, t, knocked);
-        wants = sinking ? 0 : BREATHES_MS;
+        if (glowing === null) glow.clear();
+        else {
+          const unit = now.thrown.perUnit * worldSize(cameraView.zoom);
+          drawGlow(glow, screenOf(place, cameraView), unit, glowing, now.since, t);
+        }
+        const rising = glowing !== null && t - now.since < RISES_MS;
+        wants = sinking || rising ? 0 : BREATHES_MS;
       } else {
         standAt(null, 0, t);
         const drawn = drawThrown(parts, now.thrown, cameraView, settings, t, knocked);
         knocked = drawn.knocked;
         if (drawn.done) {
+          note('die', `the die is at rest, ${glowing === null ? 'with no glow' : `glowing ${glowing}`}`);
           now.rested();
           now = { kind: 'resting', thrown: now.thrown, since: t };
         }
@@ -226,6 +247,7 @@ export function createDieLayer(
     destroy() {
       holdTheDie(null);
       standing()?.stand([], DIE);
+      glow.destroy();
       among.die.destroy();
       among.dust.destroy();
       among.ring.destroy();

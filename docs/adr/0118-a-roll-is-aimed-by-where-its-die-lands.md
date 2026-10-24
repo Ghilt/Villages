@@ -49,7 +49,10 @@ Every term was put to him as a question and settled the same day, and the die wa
 6. **The pips are the game's, and say the roll's rarity.** The page works out the whole throw the moment the die is
    let go, so it knows which face will come up, and paints on it the number the roll drew as its answer comes back,
    while the die is still in the air: 6 legendary, 5 rare, 3 or 4 uncommon, 1 or 2 common. Adam's word of 2026-10-24.
-   An answer slower than the throw paints the face where the die lies. The player alone decides where the die lands.
+   An answer slower than the throw paints the face where the die lies. Once it rests, a die of an uncommon, rare or
+   legendary roll glows in its rarity's colour, the cards' own, over everything so the grey out of sight never takes
+   it, and the hand waits 0.9 s rather than 0.5 for the glow to be seen; a common roll's is drab, with no glow. The
+   player alone decides where the die lands.
 7. **The throw is the page's flourish and nothing more.** It is worked out by a rigid cube of our own in
    `apps/web/src/sprites/die/`, a few hundred lines, and drawn on the sprite canvas the map already has, fetched only
    after the game has started. The server neither seeds a throw nor replays one, because the physics decides nothing the

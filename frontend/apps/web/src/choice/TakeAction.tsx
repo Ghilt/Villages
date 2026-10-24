@@ -14,10 +14,12 @@ import { PaneSizeControl } from '../stage/PaneSizeControl';
 import type { Along, Room } from '../stage/panes';
 import { useStore } from '../store/useStore';
 import { Podium } from '../ui/podium/Podium';
-import { expectHand, numberOf, overOf } from './rolling';
+import { expectHand, glowOf, numberOf, overOf } from './rolling';
 
 /** How long a die lies where it rested before the hand its roll drew is shown, so the player sees where. */
 const SEEN_MS = 500;
+/** How long one glowing in its roll's rarity lies there, so the glow is seen rising before the hand opens. */
+const GLOWS_MS = 900;
 
 /**
  * **Take action**: the choice roll at rest, the die on its podium, over the words, Adam's call. A long press lifts
@@ -60,10 +62,12 @@ export function TakeAction({ room, along, looking }: { room: Room; along: Along;
     }
   }, [ready, die, rolled]);
 
-  // The hand is in while the die is still out: the number it drew goes on the die's top face.
+  // The hand is in while the die is still out: the number it drew goes on the die's top face, and its rarity's glow.
   useEffect(() => {
-    if (rolled !== undefined && out) die?.show(numberOf(rolled));
+    if (rolled !== undefined && out) die?.show(numberOf(rolled), glowOf(rolled));
   }, [rolled, die, out]);
+  const drew = useRef(rolled);
+  drew.current = rolled;
 
   const whyNot =
     free === null
@@ -86,7 +90,8 @@ export function TakeAction({ room, along, looking }: { room: Room; along: Along;
     takeAction({ ...looking(), landing });
   };
   const rested = () => {
-    window.setTimeout(showTheHand, SEEN_MS);
+    const glowing = drew.current !== undefined && drew.current !== 'common';
+    window.setTimeout(showTheHand, glowing ? GLOWS_MS : SEEN_MS);
   };
   const podium = (aside?: string) => (
     <Podium

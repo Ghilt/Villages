@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { numberOf } from './rolling';
+import { glowOf, numberOf } from './rolling';
 
 describe('the number on top of a die thrown for a roll', () => {
   it('is six for a legendary roll and five for a rare one', () => {
@@ -11,5 +11,13 @@ describe('the number on top of a die thrown for a roll', () => {
   it('is three or four for an uncommon roll, and one or two for a common one', () => {
     expect([numberOf('uncommon', 0.1), numberOf('uncommon', 0.9)]).toEqual([3, 4]);
     expect([numberOf('common', 0.1), numberOf('common', 0.9)]).toEqual([1, 2]);
+  });
+});
+
+describe('the glow of a die thrown for a roll', () => {
+  it('is its rarity colour, and none for a common roll', () => {
+    const read = (token: string) => (token === '--ui-rarity-rare' ? ' #4f7fb6' : '');
+    expect(glowOf('rare', read)).toBe('#4f7fb6');
+    expect(glowOf('common', read)).toBeNull();
   });
 });

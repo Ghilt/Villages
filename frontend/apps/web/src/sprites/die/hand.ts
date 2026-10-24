@@ -35,8 +35,11 @@ export interface DieHand {
   putBack(): void;
   /** Dropped at once at the middle of the view, with no hand: Enter on the podium. */
   dropAtCentre(circleKm: number, thrown: (landing: Landing) => void, rested: () => void): void;
-  /** Paints `number` on the face a die let go comes to rest on: what the roll it was thrown for drew. */
-  show(number: number): void;
+  /**
+   * Paints `number` on the face a die let go comes to rest on, what the roll it was thrown for drew, and has it glow in
+   * `glow`, any CSS colour, once it is at rest: none when null.
+   */
+  show(number: number, glow: string | null): void;
   /**
    * Lying where a roll's die fell, its ring `circleKm` round it: as a page that reloads with a hand open draws it.
    * Nothing, when the die is already in the hand, in the air or lying.

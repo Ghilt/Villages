@@ -461,7 +461,8 @@ stage alone, with none of the debug panel in it (decision record 0079).
   Either way the roll is sent from where it will rest as it leaves the hand, and the hand that answers is shown half
   a second after it rests; let go over its slot, it goes back and nothing is paid; Enter on the podium drops it at the
   middle of the view. The number on top is the roll's rarity, painted on as the answer comes: 6 legendary, 5 rare,
-  3 or 4 uncommon, 1 or 2 common. The die lies where it fell,
+  3 or 4 uncommon, 1 or 2 common; at rest it glows in that rarity's colour, but for common. The log says what the die
+  was told to show and when it came to rest. The die lies where it fell,
   after a reload too, drawn from where the waiting hand says its roll landed,, its ring breathing, while the
   hand is open, and goes back to its podium once it is answered. Once it has rolled, the pane opens out over everything, the rest of the stage dimmed under a **veil**
   that puts it away when pressed, and plays the roll as

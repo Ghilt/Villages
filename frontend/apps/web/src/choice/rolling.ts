@@ -40,6 +40,20 @@ export function numberOf(rarity: Rarity, chance: number = Math.random()): number
 }
 
 /**
+ * What a die thrown for a roll that drew `rarity` glows in once it rests, its rarity's colour as `read` reads a token
+ * off the page: none for a common roll, drab on Adam's word of 2026-10-24.
+ */
+export function glowOf(
+  rarity: Rarity,
+  read: (token: string) => string = (token) =>
+    getComputedStyle(document.documentElement).getPropertyValue(token),
+): string | null {
+  if (rarity === 'common') return null;
+  const colour = read(`--ui-rarity-${rarity}`).trim();
+  return colour === '' ? null : colour;
+}
+
+/**
  * The class the letter takes opened out on a desktop, lying over everything: what it says fades in once its box
  * has grown there, the cards' details a beat after their titles. See `choice.css` and decision record 0086.
  */
