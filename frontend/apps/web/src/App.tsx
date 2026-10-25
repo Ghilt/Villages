@@ -48,7 +48,7 @@ import { SpriteOverlay } from './sprites/SpriteOverlay';
 import { CritterClicks } from './sprites/critters/CritterClicks';
 import { placeWater } from './water/WaterLayer';
 import { setFlowView, waterStore } from './water/waterMode';
-import { candidatesOf, toCharacterSprite, toStructureSprite } from './mapSprites';
+import { candidatesOf, rememberingMapSprites } from './mapSprites';
 import { useStructureCatalogue } from './net/structureCatalogue';
 import { useStore } from './store/useStore';
 
@@ -138,21 +138,20 @@ export function App({ master, devTools }: AppProps) {
     ],
     [standing, keyFigures],
   );
-  // Structures first, so that a person standing in front of one is drawn over it.
+  // Structures first, so that a person standing in front of one is drawn over it; each the object it was while
+  // nothing about it changed, and the list the list it was.
+  const [mapSprites] = useState(rememberingMapSprites);
   const sprites = useMemo(
-    () => [
-      ...drawn.map((structure) =>
-        toStructureSprite(
-          structure,
-          catalogue,
-          cultureOfPlace(cultures, structure.place),
-          structure.holder !== undefined && structure.holder.id === yours?.id,
-        ),
+    () =>
+      mapSprites(
+        drawn,
+        people.map((one) => ({ ...one, yours: yours !== null && one.keyFigureOf[0]?.id === yours.id })),
+        catalogue,
+        (structure) => cultureOfPlace(cultures, structure.place),
+        yours?.id ?? null,
+        candidatesOf(yourChoice),
       ),
-      ...people.map((one) => toCharacterSprite(one, one.keyFigureOf[0]?.id === yours?.id && yours !== null)),
-      ...candidatesOf(yourChoice),
-    ],
-    [drawn, catalogue, cultures, people, yours, yourChoice],
+    [mapSprites, drawn, catalogue, cultures, people, yours, yourChoice],
   );
 
   // The one connection to the gateway, opened as the app mounts, once the browser is signed in: the socket's

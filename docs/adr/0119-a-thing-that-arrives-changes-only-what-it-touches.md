@@ -128,3 +128,15 @@ cells are cut.
 |---|---|---|
 | The woods are the same whether cut in the worker or on the page | Both run `createCutting` from `cellCutting.ts`; a test carries a request and its answer through a structured clone, as a message is, and compares them with `cutCell` over the stands the page decoded | Always |
 | A cell is cut from the stands the page holds now, though they changed while it was being cut | When its points come back, a cell whose tiles' records have moved since it read them is kept stale and cut again when next asked; a test sends a tile again mid-cut | A moment after the cut returns: before the cell is next asked for |
+
+## Amendment, 2026-10-24: the map's sprites keep their identity
+
+Every snapshot of a cell hands over every structure in view again, and the page made a new sprite for each, so every
+reader after it - which settlement a structure stands in, its yard, its mark - found nothing it remembered and worked
+them all out again. The sprites are made through `rememberingMapSprites` in `mapSprites.ts` now: a structure's the
+very object it was while its stamp, which the server moves with every change to it, its culture, who holds it and the
+catalogue are the same, a person's while they stand where they stood, and the list the very list while every one is.
+
+| Rule | What keeps it | When it holds |
+|---|---|---|
+| A structure that changed is drawn as it now is | Its sprite is made again when its stamp, culture, holder or the catalogue moved; a test grows one and gives it a holder | In the same render |

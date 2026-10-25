@@ -105,3 +105,59 @@ export function candidatesOf(choice: ChoiceView | null): MapSprite[] {
       : [],
   );
 }
+
+/**
+ * The map's sprites made from what the session holds, each structure's and each person's the very object it was last
+ * time while nothing about it changed - a structure by its stamp, which the server moves with every change to it - and
+ * the very list while every one of them is. Every snapshot of a cell hands over every structure in view again, and a
+ * new object for each made everything after it work them all out again: where each stands in a settlement, its yard,
+ * its mark (decision record 0119).
+ */
+export function rememberingMapSprites(): (
+  structures: readonly StructureView[],
+  people: readonly (Pick<CharacterOnMapView, 'id' | 'givenName' | 'place' | 'keyFigureOf'> & {
+    readonly yours: boolean;
+  })[],
+  catalogue: StructureCatalogue | null,
+  cultureOf: (structure: StructureView) => Culture | null,
+  yoursId: string | null,
+  offered: readonly MapSprite[],
+) => readonly MapSprite[] {
+  let built = new Map<string, { key: string; sprite: MapSprite }>();
+  let lastCatalogue: StructureCatalogue | null = null;
+  let last: readonly MapSprite[] = [];
+  return (structures, people, catalogue, cultureOf, yoursId, offered) => {
+    if (catalogue !== lastCatalogue) built = new Map();
+    lastCatalogue = catalogue;
+    const next = new Map<string, { key: string; sprite: MapSprite }>();
+    const kept = (id: string, key: string, make: () => MapSprite): MapSprite => {
+      const was = built.get(id);
+      const one = was?.key === key ? was : { key, sprite: make() };
+      next.set(id, one);
+      return one.sprite;
+    };
+    const sprites = [
+      ...structures.map((structure) => {
+        const culture = cultureOf(structure);
+        const yours = structure.holder !== undefined && structure.holder.id === yoursId;
+        return kept(
+          `s${structure.id}`,
+          `${structure.stamp}|${culture}|${yours}|${structure.holder?.banner.field}`,
+          () => toStructureSprite(structure, catalogue, culture, yours),
+        );
+      }),
+      ...people.map((one) =>
+        kept(
+          `c${one.id}`,
+          `${one.place.lat}|${one.place.lon}|${one.givenName}|${one.keyFigureOf[0]?.banner.field}|${one.yours}`,
+          () => toCharacterSprite(one, one.yours),
+        ),
+      ),
+      ...offered,
+    ];
+    built = next;
+    if (sprites.length === last.length && sprites.every((one, at) => one === last[at])) return last;
+    last = sprites;
+    return sprites;
+  };
+}

@@ -4,7 +4,7 @@ import type { StructureView } from '@villages/protocol';
 import type { StructureCatalogue, StructureTypeSpec } from '@villages/world';
 
 import { onACorner } from './geometry/footing';
-import { toStructureSprite } from './mapSprites';
+import { rememberingMapSprites, toStructureSprite } from './mapSprites';
 import { tinctureColour } from './sprites/tinctures';
 
 /** A type as the catalogue would read it, by the heights it stands at, a level at a time. */
@@ -110,5 +110,52 @@ describe('a ruin', () => {
       ruin: true,
     });
     expect(drawn).not.toHaveProperty('pennant');
+  });
+});
+
+describe('the map’s sprites, remembered', () => {
+  const noCulture = () => null;
+
+  it('are the very objects, and the very list, while a snapshot hands over the same structures anew', () => {
+    const sprites = rememberingMapSprites();
+    const first = sprites([structure('castle', 1)], [], CATALOGUE, noCulture, null, []);
+    const again = sprites([structure('castle', 1)], [], CATALOGUE, noCulture, null, []);
+    expect(again).toBe(first);
+    const more = sprites(
+      [structure('castle', 1), { ...structure('mill', 1), id: 'b' }],
+      [],
+      CATALOGUE,
+      noCulture,
+      null,
+      [],
+    );
+    expect(more[0]).toBe(first[0]);
+  });
+
+  it('are made again for a structure whose stamp moved, or who holds it, or the catalogue', () => {
+    const sprites = rememberingMapSprites();
+    const [first] = sprites([structure('castle', 1)], [], CATALOGUE, noCulture, null, []);
+    const [grown] = sprites([{ ...structure('castle', 2), stamp: 4 }], [], CATALOGUE, noCulture, null, []);
+    expect(grown).not.toBe(first);
+    expect(grown!.structure?.groundHeight).toBe(4.5);
+    const [held] = sprites(
+      [{ ...structure('castle', 2, RAVENSCAR), stamp: 4 }],
+      [],
+      CATALOGUE,
+      noCulture,
+      'h',
+      [],
+    );
+    expect(held).not.toBe(grown);
+    expect(held!.yours).toBe(true);
+    const [read] = sprites(
+      [{ ...structure('castle', 2, RAVENSCAR), stamp: 4 }],
+      [],
+      { ...CATALOGUE },
+      noCulture,
+      'h',
+      [],
+    );
+    expect(read).not.toBe(held);
   });
 });
