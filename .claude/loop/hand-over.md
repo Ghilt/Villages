@@ -74,8 +74,9 @@ kept: the logs and the `.json` in `.logs/perf/` are the evidence, and only a lan
   tool, and in it the agent is another player. What the agent made as that player is on Adam's map only with the fog
   lifted, or once Adam makes it again with a lever; say which, and how.
 - **A place on the map is a link that opens the game there**,
-  `http://localhost:<port>/?at=<lat>,<lon>&zoom=<z>`, with what Adam will find there in plain words. Never a geographic
-  name Adam is assumed to know: "the Sahel line" meant nothing (2026-10-11).
+  `http://localhost:<port>/?at=<lat>,<lon>&zoom=<z>`, standing alone above the requests in the shared skill's compact
+  form, so the requests need not say where. Never a geographic name Adam is assumed to know: "the Sahel line" meant
+  nothing (2026-10-11).
 - **A step that adds or changes a UI component** points its requests at `/admin/inspect-ui-components`
   (`docs/UI-COMPONENTS.md`), says which pictures in `world/ui/` it reads, the size to paint each at, and which are still
   placeholders.

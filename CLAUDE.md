@@ -15,7 +15,10 @@ main. Everything about commits is the agent's, and he does not want to be asked 
   once is the whole of it: do not ask again or restate the change set.
 - **Inside a long run he picked**, the `continue-for-some-time` skill, the agent commits each step itself
   once its checks are green, and Adam verifies at the checkpoints the run named before it began. That is
-  the only time a commit lands before he has looked at it.
+  one of the two times a commit lands before he has looked at it.
+- **Inside a plan he called detailed**, at the `loop:plan` skill's first question, the agent commits each step
+  itself once its checks are green, and Adam verifies only at the steps that show something new of what he asked
+  for, never a document. That is the other time. Questions that are his are still asked.
 - **How the work is cut into commits is the agent's**, done by best practice and never put to Adam: one
   coherent change per commit, Conventional Commits with these scopes: `domain`, `application`, `occurrent`,
   `rabbit`, `projections`, `gateway`, `accounts`, `protocol`, `web`, `client-core`, `docs`, `infra`, `build`, and the
