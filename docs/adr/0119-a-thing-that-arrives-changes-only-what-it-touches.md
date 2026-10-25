@@ -140,3 +140,16 @@ catalogue are the same, a person's while they stand where they stood, and the li
 | Rule | What keeps it | When it holds |
 |---|---|---|
 | A structure that changed is drawn as it now is | Its sprite is made again when its stamp, culture, holder or the catalogue moved; a test grows one and gives it a holder | In the same render |
+
+## Amendment, 2026-10-25: only the map's part watches the map's contents
+
+App watched what the map holds, so a cell's contents arriving, a building going up or a person taking a step drew the
+whole page again, and with it every pane, none of which had changed: the largest thing in the frames after the camera
+stopped. Now the parts of the map's pane that show it watch it themselves (`MapContents.tsx`): `MapSprites`, which
+hands the sprites to the canvas, and `MarkedZone`, which draws the marked structure's reach. What they draw is read
+through selectors that hand back the very same list while what it is made from is the same (`onTheMapDrawn.ts`), so
+App, and every pane, draws again only for what it reads itself.
+
+| Rule | What keeps it | When it holds |
+|---|---|---|
+| What the map draws is what the session holds | The two parts read the session's map, holdings and key figures directly, and work their lists out again whenever one of those changes; a test holds the selectors to it | In the same render as the change |

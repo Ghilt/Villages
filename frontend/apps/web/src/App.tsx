@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type * as maplibregl from 'maplibre-gl';
 
-import { charactersInView, structuresInView } from '@villages/client-core';
 import type { Readable } from '@villages/client-core';
 
 import { AreaOverlay } from './areas/AreaOverlay';
@@ -10,6 +9,7 @@ import { openOnArrival as openQuestOnArrival, questDialogues } from './quests/op
 import type * as DevToolsModule from './debug/devTools';
 import type { StageArrangement } from './debug/stage';
 import { Desk } from './desk/Desk';
+import { MapSprites, MarkedZone } from './MapContents';
 import { panelWants, stageBox } from './stage/stageBox';
 import { note } from './log/log';
 import { inspect } from './inspect/opening';
@@ -22,7 +22,6 @@ import { sessionStore, gateway } from './net/gateway';
 import { followMap } from './net/followMap';
 import { FOUNDING_ZOOM, arriving } from './house/arrival';
 import { startAtIn } from './net/startAt';
-import { InfluenceZone } from './areas/InfluenceZone';
 import { StoodDown } from './net/StoodDown';
 import { StartupScreen } from './startup/StartupScreen';
 import { startupStore, watchStartup } from './startup/startup';
@@ -38,18 +37,14 @@ import { arrive } from './stage/arrive';
 import { askFor, formNow } from './stage/bays';
 import { CHOICE_PANE } from './choice/pane';
 import { RollLightning } from './choice/RollLightning';
-import { cultureOfPlace, useCultureMap } from './map/culture';
 import { worldRootOf } from './map/masters';
 import { cameraStore } from './map/camera';
 import { placeRelief } from './map/relief';
 import { DEFAULT_RENDERER, RENDERERS, applyRenderer } from './map/renderers';
 import { watchInfoMap } from './map/infoMap';
-import { SpriteOverlay } from './sprites/SpriteOverlay';
 import { CritterClicks } from './sprites/critters/CritterClicks';
 import { placeWater } from './water/WaterLayer';
 import { setFlowView, waterStore } from './water/waterMode';
-import { candidatesOf, rememberingMapSprites } from './mapSprites';
-import { useStructureCatalogue } from './net/structureCatalogue';
 import { useStore } from './store/useStore';
 
 /** What a development build adds to the page: the debug panel, its grips, and how the two are arranged. */
@@ -93,10 +88,7 @@ export function App({ master, devTools }: AppProps) {
   const [renderer, setRenderer] = useState(DEFAULT_RENDERER);
   // The lattice the ground is painted on, which is Adam's lever rather than a player's. See 0008.
   const camera = useStore(cameraStore);
-  const onTheMap = useStore(sessionStore, (state) => state.onTheMap);
   const yourHouse = useStore(sessionStore, (state) => state.yourHouse);
-  const holdings = useStore(sessionStore, (state) => state.yourHoldings);
-  const keyFigures = useStore(sessionStore, (state) => state.yourKeyFigures);
   const yourChoice = useStore(sessionStore, (state) => state.yourChoice);
   const yourDialogues = useStore(sessionStore, (state) => state.yourDialogues);
   const arrangement = devTools?.stageStore ?? NO_PANEL;
@@ -108,51 +100,9 @@ export function App({ master, devTools }: AppProps) {
   const window = useWindow();
   const wants = panelWants(shut, log);
   const box = useMemo(() => stageBox(window, mode, wants), [window, mode, wants]);
-  const standing = useMemo(() => charactersInView(onTheMap), [onTheMap]);
-  const raised = useMemo(() => structuresInView(onTheMap), [onTheMap]);
-  const catalogue = useStructureCatalogue();
-  // The culture each structure stands in, read off the culture map of the master drawn, so its picture is drawn in it.
-  const cultures = useCultureMap(master);
   // The public half of your own house: what the map draws is the same view everyone else's house is
   // drawn from, and what only you can see hangs off it.
   const yours = yourHouse?.house ?? null;
-
-  // Your own holdings and key figures are drawn whether or not a held cell carries them, and however far back the
-  // camera goes, because far out they are your marks: the gateway sends them to the session rather than to a cell.
-  // No house is drawn: its structures are. See decision record 0096.
-  const drawn = useMemo(
-    () =>
-      holdings === null
-        ? raised
-        : [...raised, ...holdings.filter((one) => !raised.some((r) => r.id === one.id))],
-    [raised, holdings],
-  );
-  const people = useMemo(
-    () => [
-      ...standing,
-      ...(keyFigures ?? []).flatMap((one) =>
-        one.place === undefined || standing.some((there) => there.id === one.id)
-          ? []
-          : [{ ...one, place: one.place }],
-      ),
-    ],
-    [standing, keyFigures],
-  );
-  // Structures first, so that a person standing in front of one is drawn over it; each the object it was while
-  // nothing about it changed, and the list the list it was.
-  const [mapSprites] = useState(rememberingMapSprites);
-  const sprites = useMemo(
-    () =>
-      mapSprites(
-        drawn,
-        people.map((one) => ({ ...one, yours: yours !== null && one.keyFigureOf[0]?.id === yours.id })),
-        catalogue,
-        (structure) => cultureOfPlace(cultures, structure.place),
-        yours?.id ?? null,
-        candidatesOf(yourChoice),
-      ),
-    [mapSprites, drawn, catalogue, cultures, people, yours, yourChoice],
-  );
 
   // The one connection to the gateway, opened as the app mounts, once the browser is signed in: the socket's
   // handshake is what carries the sign-in to the game. See `net/auth.ts` and decision record 0111.
@@ -269,20 +219,6 @@ export function App({ master, devTools }: AppProps) {
   const up = useStore(sessionStore, standingIn);
   // What is open, the newest first: the windows on the stage, and what the map marks.
   const open = useStore(subjectsStore, (subjects) => subjects.open);
-  // What the map marks: the newest thing opened, and for a house its seat, which is where a house is on the map.
-  const marked = useMemo(() => {
-    const top = open[0];
-    const seat = top?.kind === 'house' ? drawn.find((one) => one.seatOf?.id === top.id) : undefined;
-    return seat === undefined ? top : { kind: 'structure' as const, id: seat.id };
-  }, [open, drawn]);
-  // The ground the marked structure reaches, drawn while it is marked, for a type the catalogue gives a zone.
-  const zone = useMemo(() => {
-    const structure = marked?.kind === 'structure' ? drawn.find((one) => one.id === marked.id) : undefined;
-    const reach = catalogue?.types.find((one) => one.type === structure?.structureType)?.zone?.reach;
-    return structure === undefined || reach === undefined
-      ? null
-      : { id: structure.id, at: structure.place, reach };
-  }, [marked, drawn, catalogue]);
 
   // The map's own pane, App's because App holds the map; every other pane is drawn by its feature, and which
   // stand and in what order is `panes.tsx`'s.
@@ -295,16 +231,7 @@ export function App({ master, devTools }: AppProps) {
         <Room map={map} seat={yours?.seat ?? null} strip={along !== null && room.size === 'strip'}>
           <Desk map={map} />
           <MapView worldRoot={worldRoot} onReady={setMap} />
-          {map !== null && (
-            <SpriteOverlay
-              map={map}
-              sprites={sprites}
-              worldRoot={worldRoot}
-              picked={marked}
-              onPick={inspect}
-              started={started}
-            />
-          )}
+          {map !== null && <MapSprites map={map} master={master} worldRoot={worldRoot} started={started} />}
         </Room>
         {/* Before the areas' and the water's, so that a click putting a critter down is only that. */}
         <CritterClicks map={map} />
@@ -318,13 +245,13 @@ export function App({ master, devTools }: AppProps) {
         {/* After the marks' and the areas', so that a click neither took opens a settlement or asks what water is there. */}
         <GroundClicks map={map} worldRoot={worldRoot} onPick={inspect} />
         <RippleAlongWater map={map} worldRoot={worldRoot} />
-        <InfluenceZone map={map} zone={zone} turn={camera.latticeTurn} />
+        <MarkedZone map={map} turn={camera.latticeTurn} />
         {/* On a phone, the size control in the map's corner over a little fade, and nothing else. Never in
               the spread, where the map is the floor and has no size. See `MapSize`. */}
         {along !== null && <MapSize room={room} />}
       </>
     ),
-    [map, yours, worldRoot, sprites, camera.latticeTurn, open, marked, zone, started],
+    [map, yours, master, worldRoot, camera.latticeTurn, open, started],
   );
   const panes = useMemo(() => panesOn(up, open, drawMap), [up, open, drawMap]);
 
