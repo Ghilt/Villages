@@ -2,6 +2,8 @@ import { useState } from 'react';
 
 import type { FlightFeel } from '../../sprites/die/flight';
 import type { DieFeel } from '../../sprites/die/physics';
+import { SPLASHES } from '../../sprites/die/splash';
+import type { Splash } from '../../sprites/die/splash';
 import { DIE_SETTINGS } from '../../sprites/die/throwing';
 
 import type { DieSettings, Rested } from './dieStage';
@@ -260,6 +262,19 @@ export function DieControls({
             onChange={(e) => onChange({ ...settings, striking: e.target.checked })}
           />
           striking a wood and three houses, stand-ins at the map&apos;s own sizes
+        </label>
+        <label className="die-controls__check">
+          the ground, what it throws up as it strikes:{' '}
+          <select
+            value={settings.ground ?? 'dust'}
+            onChange={(e) => onChange({ ...settings, ground: e.target.value as Splash })}
+          >
+            {SPLASHES.map((splash) => (
+              <option key={splash} value={splash}>
+                {splash}
+              </option>
+            ))}
+          </select>
         </label>
         <button type="button" className="die-controls__button" onClick={onPlant}>
           stand them round the middle of the view

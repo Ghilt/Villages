@@ -2,7 +2,8 @@ import { Application, Graphics } from 'pixi.js';
 import type * as maplibregl from 'maplibre-gl';
 
 import type { ScreenPoint } from '../../geometry/cameraMath';
-import { createDieDrawing, createDust, seenAt } from '../../sprites/die/dieDrawing';
+import { createDieDrawing, seenAt } from '../../sprites/die/dieDrawing';
+import { createDust } from '../../sprites/die/dust';
 import { kept, speedAtRelease } from '../../sprites/die/gesture';
 import type { Sample } from '../../sprites/die/gesture';
 import { mercatorOf } from '../../sprites/die/onTheGround';

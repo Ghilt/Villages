@@ -10,16 +10,18 @@ import {
 import type { CameraView, MercatorPoint, ScreenPoint } from '../../geometry/cameraMath';
 import { WORLD_MASTER_WIDTH } from '../../geometry/world';
 import { aMarkInTheAir, asAPin, asItLies, inTheHandLift, onTheGroundLift, seenAt } from './dieDrawing';
-import type { DieDrawing, DieLook, Dust } from './dieDrawing';
+import type { DieDrawing, DieLook } from './dieDrawing';
+import type { Dust } from './dust';
 import { FLIGHT, asADie, flightOf, flownAt, flyingLift, flyingSize, landingOf } from './flight';
 import type { Flight, FlightFeel } from './flight';
 import { isThrow } from './gesture';
 import { mercatorOf, screenOf } from './onTheGround';
 import { FEEL, STILL, throwDie } from './physics';
-import type { DieFeel, Obstacle, Quat, ThrowPath } from './physics';
+import type { DieFeel, Knock, Obstacle, Quat, ThrowPath } from './physics';
 import { LAYOUT, layoutShowing } from './pips';
 import { between, heldTurn, squashAt } from './playback';
 import { drawLandingCircle } from './ring';
+import type { Splash } from './splash';
 import type { Pulses } from './structuresStruck';
 
 /**
@@ -40,6 +42,8 @@ export interface DieSettings {
   readonly circleKm: number;
   /** How fast a hand must be moving as it lets go to throw the die rather than drop it, in pixels a second. */
   readonly throwsFrom: number;
+  /** What the ground throws up where nothing reads what it is: the spike's choice, dust when absent. */
+  readonly ground?: Splash;
 }
 
 /** The die as Adam settled it at the spike, on 2026-10-22 and 23. */
@@ -92,6 +96,8 @@ export interface Thrown {
 export interface DieParts {
   readonly die: DieDrawing;
   readonly dust: Dust;
+  /** What the die throws up where it strikes a place, by the ground there: dust when absent. */
+  readonly splashAt?: (place: MercatorPoint) => Splash;
   readonly ring: Graphics;
 }
 
@@ -255,6 +261,21 @@ export function letGo(
   };
 }
 
+/** Whether a knock is hard enough, and near enough the ground, to throw something up. */
+function raisesDust(knock: Knock): boolean {
+  return knock.speed > 6 && knock.at.z < 0.2;
+}
+
+/** What `read` says of each place a die let go strikes hard enough to throw something up, in order. */
+export function struckPlaces<T>(thrown: Thrown, read: (place: MercatorPoint) => T): T[] {
+  return thrown.path.knocks.filter(raisesDust).map((knock) =>
+    read({
+      x: thrown.struck.x + knock.at.x * thrown.perUnit,
+      y: thrown.struck.y + knock.at.y * thrown.perUnit,
+    }),
+  );
+}
+
 /**
  * Draws a die that has been let go, at `t`: in its flight, or on the ground once it has struck it, raising dust at
  * each knock after `knocked` and saying how many it has raised. Whether it has come to rest, too.
@@ -310,12 +331,14 @@ export function drawThrown(
     while (raised < thrown.path.knocks.length && thrown.path.knocks[raised]!.time <= onGround) {
       const knock = thrown.path.knocks[raised]!;
       raised += 1;
-      if (knock.speed > 6 && knock.at.z < 0.2) {
-        // As big as the die is where it strikes, so a far-off die raises a little dust.
+      if (raisesDust(knock)) {
+        // As big as the die is where it strikes, so a far-off die raises a little, and of the ground there.
+        const struck = bounced(knock.at.x, knock.at.y);
         dust.burst(
-          screenOf(bounced(knock.at.x, knock.at.y), view),
+          screenOf(struck, view),
           (knock.speed / 30) * Math.min(1, unit / 32),
           t,
+          parts.splashAt?.(struck) ?? chosen.ground ?? 'dust',
         );
       }
     }

@@ -462,8 +462,10 @@ stage alone, with none of the debug panel in it (decision record 0079).
   a second after it rests; let go over its slot, it goes back and nothing is paid; Enter on the podium drops it at the
   middle of the view. The number on top is the roll's rarity, painted on as the answer comes: 6 legendary, 5 rare,
   3 or 4 uncommon, 1 or 2 common; at rest it glows in that rarity's colour and strikes the hand with lightning as
-  it opens, `RollLightning` laid over the stage, but for common. The log says what the die
-  was told to show and when it came to rest. The die lies where it fell,
+  it opens, `RollLightning` laid over the stage, but for common. Where it strikes the ground hard it throws up what
+  the ground is, read as the critters read it: a splash on water, leaves in a wood or under a tree, sand on sand,
+  grit on rock, snow on ice and snow, dust anywhere else. The log says what the die was told to show, when it came to
+  rest, and what it struck and threw up at each bounce. The die lies where it fell,
   after a reload too, drawn from where the waiting hand says its roll landed,, its ring breathing, while the
   hand is open, and goes back to its podium once it is answered. Once it has rolled, the pane opens out over everything, the rest of the stage dimmed under a **veil**
   that puts it away when pressed, and plays the roll as
@@ -1174,6 +1176,7 @@ and `-- --drop` takes them off; by hand only.
   finger with its shadow above the fingertip. Let go with the hand still and it drops by its shadow; with a flick and
   it is thrown; over its empty slot and it goes back. Enter on the podium drops it at the middle. A throw flies one
   arc, further and higher the harder the flick, growing a little as it rises and shrinking in a long, steady fall,
+  throwing up as it strikes whatever the ground chosen in the controls throws up, dust to leaves,
   slowing over the ground but never to a stop; where the arc ends it strikes the ground still going, bounces, bigger
   the higher it was thrown from but no bigger for a harder flick than a meek one, and as a die close in a few of its
   own widths at most, and rolls, and lies there the size of a tree, growing and shrinking with the zoom as the trees

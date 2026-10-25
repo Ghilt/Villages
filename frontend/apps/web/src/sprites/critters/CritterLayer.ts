@@ -60,6 +60,8 @@ export interface CritterLayer extends Layer {
   ground: Container;
   /** What flies, to go over it. */
   flying: Container;
+  /** The ground the critters read, for anything else that wants to know what is where: the die's splashes. */
+  world: Ground;
 }
 
 const ramp = (from: number, to: number, value: number): number =>
@@ -175,6 +177,7 @@ export function createCritterLayer(
   return {
     ground,
     flying,
+    world,
 
     draw(view: camera.CameraView): number | null {
       const level = drawnAt(critterStore.get().level);

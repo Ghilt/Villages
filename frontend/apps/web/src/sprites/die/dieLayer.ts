@@ -6,9 +6,12 @@ import { WORLD_MASTER_WIDTH } from '../../geometry/world';
 import { note } from '../../log/log';
 import type { Layer } from '../layer';
 import type { StandingLayer, StandingThing } from '../standing/StandingLayer';
-import { createDieDrawing, createDust } from './dieDrawing';
+import type { Ground } from '../critters/types';
+import { createDieDrawing } from './dieDrawing';
+import { createDust } from './dust';
 import { kept, speedAtRelease } from './gesture';
 import { RISES_MS, drawGlow } from './glow';
+import { splashAt } from './splash';
 import type { Sample } from './gesture';
 import { holdTheDie } from './hand';
 import type { DieHand, HandAt, Landing } from './hand';
@@ -16,7 +19,7 @@ import { screenOf } from './onTheGround';
 import { heldTurn } from './playback';
 import { pulsesAround } from './structuresStruck';
 import { layoutShowing } from './pips';
-import { DIE_SETTINGS, drawHeld, drawLying, drawThrown, heldGround, letGo } from './throwing';
+import { DIE_SETTINGS, drawHeld, drawLying, drawThrown, heldGround, letGo, struckPlaces } from './throwing';
 import type { DieParts, DieSettings, Thrown } from './throwing';
 
 /**
@@ -67,15 +70,25 @@ export interface DieLayer extends Layer {
 
 /**
  * A die layer drawing over the map in `box`, asking for a frame through `repaint` when a hand moves it, its die blown off
- * the structures of `standing` it would come to rest on, and lying among them once it has.
+ * the structures of `standing` it would come to rest on, and lying among them once it has; what it throws up where it
+ * strikes is of the ground `land` says is there, dust without it.
  */
 export function createDieLayer(
   box: HTMLElement,
   repaint: () => void,
   standing: () => StandingLayer | null,
+  land: Ground | null = null,
 ): DieLayer {
   const view = new Container();
-  const parts = { die: createDieDrawing(), dust: createDust(), ring: new Graphics() };
+  // What it throws up where it strikes, by the ground there, as the critters read it.
+  const splashOfPlace = (place: MercatorPoint) =>
+    land === null ? 'dust' : splashAt(land, place.x * WORLD_MASTER_WIDTH, place.y * WORLD_MASTER_WIDTH);
+  const parts: DieParts = {
+    die: createDieDrawing(),
+    dust: createDust(),
+    ring: new Graphics(),
+    splashAt: splashOfPlace,
+  };
   // The light round a die at rest in its roll's rarity: over everything, so the grey out of sight never takes its
   // colour, and a ring with its middle clear, so it never tints the die lying among the trees under it.
   const glow = new Graphics();
@@ -244,6 +257,12 @@ export function createDieLayer(
         const drawn = drawThrown(parts, now.thrown, cameraView, settings, t, knocked);
         knocked = drawn.knocked;
         if (drawn.done) {
+          // What it struck, the ground and what it threw up there, read as it struck.
+          const struck = struckPlaces(now.thrown, (place) => {
+            const terrain = land?.classAt(place.x * WORLD_MASTER_WIDTH, place.y * WORLD_MASTER_WIDTH) ?? null;
+            return `${terrain ?? 'ground not known'}, ${splashOfPlace(place)}`;
+          });
+          if (struck.length > 0) note('die', `the die struck ${struck.join('; ')}`);
           note('die', `the die is at rest, ${glowing === null ? 'with no glow' : `glowing ${glowing}`}`);
           now.rested();
           now = { kind: 'resting', thrown: now.thrown, since: t };
