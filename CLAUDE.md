@@ -215,6 +215,11 @@ reasoning; the directory is gitignored on purpose. From a worktree, write the no
 guard refuses its file tools outside the worktree to keep the main checkout safe, and a note in an ignored folder
 cannot harm it. Adam's word of 2026-10-07.
 
+Beside it, the repository is collaborified: `.claude/collab.json` makes every session that has the `collab` plugin of
+the `ghilt-workflow` marketplace report itself to the space `E:\Code\GhiltCollab`, behind the scenes, and hear where
+its work meets another's. The session is told at its start how to say what it is doing; `/collab:status` and
+`/collab:overview` show the space. The `.sessions/` note stays until Adam decides otherwise.
+
 Definition of done for a step: it compiles, the checks are green, the documents that describe it are updated,
 glossary terms are used verbatim, no layer rule is violated, everything the change made stale has been
 regenerated, the program is running on the thing that changed, and whatever it makes the program do can be seen
